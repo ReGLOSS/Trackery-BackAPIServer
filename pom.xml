@@ -177,6 +177,7 @@
 				<configuration>
 					<excludes>
 						<exclude>**/TrackeryBackApiServerApplication.class</exclude>
+						<exclude>**/config/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
