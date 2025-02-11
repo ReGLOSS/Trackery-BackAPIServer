@@ -54,6 +54,10 @@ jobs:
           docker build -t backend-api-server:latest .
           docker save -o backend-api-server.tar backend-api-server:latest
 
+      - name: Docker image exist check
+        run: |
+          ls -l backend-api-server.tar || echo "File not found"
+
       - name: Transfer Docker Image to Server
         uses: appleboy/scp-action@v0.1.7
         with:
