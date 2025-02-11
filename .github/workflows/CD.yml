@@ -58,6 +58,11 @@ jobs:
         run: |
           ls -l backend-api-server.tar || echo "File not found"
 
+      - name: Fix image file permissions
+        run: |
+          sudo chmod 644 backend-api-server.tar
+          ls -l backend-api-server.tar
+
       - name: Transfer Docker Image to Server
         uses: appleboy/scp-action@v0.1.7
         with:
@@ -67,3 +72,4 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           source: backend-api-server.tar
           target: /home/${{ secrets.SSH_USER }}/backend-application/
+          overwrite: true
