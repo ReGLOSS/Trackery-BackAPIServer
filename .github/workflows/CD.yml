@@ -14,11 +14,11 @@ jobs:
         with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
 
-      - name: Set up JDK 21
+      - name: Set up JDK 22
         uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'zulu'
+          java-version: '22'
+          distribution: 'temurin'
 
       - name: Cache SonarQube packages
         uses: actions/cache@v4
@@ -51,18 +51,15 @@ jobs:
 
       - name: Build Docker Image and Save as Tar
         run: |
-          pwd
-          ls -lh
           docker build -t backend-api-server:latest .
           docker save -o backend-api-server.tar backend-api-server:latest
 
-      - name: Set up SSH Key
-        run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "${{ secrets.SSH_HOST }}" >> ~/.ssh/known_hosts
-
       - name: Transfer Docker Image to Server
-        run: |
-          scp -i ~/.ssh/id_rsa backend-api-server.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/backend-application/backend-api-server.tar
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          source: backend-api-server.tar
+          target: /home/${{ secrets.SSH_USER }}/backend-application/
