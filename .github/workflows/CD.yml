@@ -51,7 +51,7 @@ jobs:
 
       - name: Build Docker Image and Save as Tar
         run: |
-          docker build -t backend-api-server:latest .
+          docker buildx build --platform linux/amd64,linux/arm64 -t backend-api-server:latest .
           docker save -o backend-api-server.tar backend-api-server:latest
 
       - name: Docker image exist check
