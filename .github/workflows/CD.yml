@@ -73,3 +73,14 @@ jobs:
           source: backend-api-server.tar
           target: /home/${{ secrets.SSH_USER }}/backend-application/
           overwrite: true
+
+      - name: Connect to server and run deploy bash
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/${{ secrets.SSH_USER }}/backend-application
+            ./deploy.sh
