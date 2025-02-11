@@ -64,4 +64,4 @@ jobs:
 
       - name: Transfer Docker Image to Server
         run: |
-          scp -i ~/.ssh/id_rsa backend-api-server.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/backend_application/backend-api-server.tar
+          scp -i ~/.ssh/id_rsa backend-api-server.tar ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:/home/${{ secrets.SSH_USER }}/backend-application/backend-api-server.tar
