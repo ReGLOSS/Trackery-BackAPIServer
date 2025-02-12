@@ -12,9 +12,10 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 @Service
 public class UserService {
 	private final UserMapper userMapper;
-	 public UserService(UserMapper userMapper) {
-		 this.userMapper = userMapper;
-	 }
+
+	public UserService(UserMapper userMapper) {
+		this.userMapper = userMapper;
+	}
 
 	public void registerUser(UserDto userDto) {
 		User user = User.of(
@@ -26,7 +27,7 @@ public class UserService {
 			1,
 			Timestamp.valueOf(LocalDateTime.now()),
 			userDto.getUserProfile()
-			);
+		);
 
 		userMapper.insertUser(user);
 	}

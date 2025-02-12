@@ -1,6 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.user.entity;
 
-
 import java.sql.Timestamp;
 
 import lombok.AccessLevel;
@@ -20,7 +19,8 @@ public class User {
 	private Timestamp lastLogin;
 	private String userProfile;
 
-	public static User of(String email, String userName, String nickname, String password, Timestamp startDate, Integer status, Timestamp lastLogin, String userProfile) {
+	public static User of(String email, String userName, String nickname, String password, Timestamp startDate,
+		Integer status, Timestamp lastLogin, String userProfile) {
 		User user = new User();
 		user.email = email;
 		user.userName = userName;
