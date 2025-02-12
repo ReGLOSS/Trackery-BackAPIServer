@@ -19,7 +19,7 @@ public class SecurityConfig {
 				.anyRequest().authenticated()
 			)
 			.csrf(AbstractHttpConfigurer::disable)
-			.formLogin(AbstractHttpConfigurer::disable
-			).build();
+			.formLogin(AbstractHttpConfigurer::disable)
+			.build();
 	}
 }
