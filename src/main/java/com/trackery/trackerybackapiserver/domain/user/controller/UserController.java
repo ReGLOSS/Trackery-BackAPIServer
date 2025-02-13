@@ -12,6 +12,8 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCo
 import com.trackery.trackerybackapiserver.domain.user.dto.UserDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -22,7 +24,7 @@ public class UserController {
 	}
 
 	@PostMapping("/register")
-	public ResponseEntity<ApiResponse<String>> registerUser(@RequestBody UserDto userDto) {
+	public ResponseEntity<ApiResponse<String>> registerUser(@Valid @RequestBody UserDto userDto) {
 		userService.registerUser(userDto);
 		return ResponseEntity
 			.status(HttpStatus.CREATED)
