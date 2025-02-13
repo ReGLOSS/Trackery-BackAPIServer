@@ -15,7 +15,10 @@ public enum ErrorCode {
 
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Internal Server Error"),
 	NOT_IMPLEMENTED(HttpStatus.NOT_IMPLEMENTED, 501, "Not Implemented"),
-	BAD_GATEWAY(HttpStatus.BAD_GATEWAY, 502, "Bad Gateway");
+	BAD_GATEWAY(HttpStatus.BAD_GATEWAY, 502, "Bad Gateway"),
+
+	BAD_REQUEST_VALIDATION_FAILED(HttpStatus.BAD_REQUEST, 400, "Validation 실패"),
+	BAD_REQUEST_INVALID_REQUEST_BODY(HttpStatus.BAD_REQUEST, 400, "잘못된 Request Body");
 
 	private final HttpStatus status;
 	private final int code;
