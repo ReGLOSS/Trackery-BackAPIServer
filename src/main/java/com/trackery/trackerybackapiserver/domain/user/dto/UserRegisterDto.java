@@ -19,8 +19,8 @@ public class UserRegisterDto {
 	@NotBlank(message = "닉네임은 공백일 수 없습니다.")
 	private String nickname;
 	@Pattern(
-		regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{16,}$",
-		message = "비밀번호는 최소 16자리이며, 대문자, 소문자, 숫자, 특수문자를 포함해야 합니다."
+		regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^\\w\\s])^\\S{16,}$",
+		message = "비밀번호는 최소 16자리이며, 대문자, 소문자, 숫자, 밑줄(_)을 제외한 특수문자를 포함해야 합니다."
 	)
 	private String password;
 	private String userProfile;
