@@ -15,8 +15,6 @@ import org.springframework.web.cors.CorsConfiguration;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-	@Value("${BASE_PATH}")
-	private String basePath;
 	@Value("${PROJECT_DOMAIN}")
 	private String projectDomain;
 	@Value("${LOCAL_DOMAIN}")
@@ -36,7 +34,7 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/error").permitAll()
-				.requestMatchers(basePath + "/users/register", "/api/users/exists/username").permitAll()
+				.requestMatchers("/api/users/register", "/api/users/exists/username").permitAll()
 				.anyRequest().authenticated());
 		return http.build();
 	}
