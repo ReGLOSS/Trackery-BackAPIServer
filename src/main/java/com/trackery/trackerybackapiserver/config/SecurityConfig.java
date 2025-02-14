@@ -25,7 +25,7 @@ public class SecurityConfig {
 		http
 			.cors(cors -> cors.configurationSource(request -> {
 				CorsConfiguration config = new CorsConfiguration();
-				config.setAllowedOrigins(List.of(projectDomain));
+				config.setAllowedOrigins(List.of("http://localhost:8080",projectDomain));
 				config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
 				config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 				return config;
@@ -38,4 +38,3 @@ public class SecurityConfig {
 		return http.build();
 	}
 }
-

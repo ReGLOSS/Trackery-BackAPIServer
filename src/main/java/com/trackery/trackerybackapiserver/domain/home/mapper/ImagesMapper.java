@@ -2,8 +2,6 @@ package com.trackery.trackerybackapiserver.domain.home.mapper;
 
 import java.util.List;
 
-import javax.management.MXBean;
-
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -22,7 +20,7 @@ public interface ImagesMapper {
 
 	/**
 	 * 공개되어있고 삭제되지 않은 이미지 주소를 가져옵니다.
-	 * @return
+	 * @return 이미지 목록
 	 */
 	List<String> selectPublicImageFiles();
 }

@@ -17,11 +17,13 @@
         <result property="imageRegDate" column="image_reg_date"/>
     </resultMap>
 
-    <!-- 랜딩페이지에서 쓸 공개되어있고 삭제되지 않은 이미지 주소를 가져오는 쿼리 -->
+    <!-- 랜딩페이지에서 쓸 공개되어있고 삭제되지 않은 이미지 주소를 무작위로 30개 가져오는 쿼리 -->
     <select id="selectPublicImageFiles" resultMap="string">
         SELECT image_file
         FROM image
         WHERE is_deleted = 0
         AND is_public = 1
+        ORDER BY RAND()
+        LIMIT 30
     </select>
 </mapper>
