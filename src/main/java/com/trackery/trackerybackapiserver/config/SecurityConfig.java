@@ -19,13 +19,15 @@ public class SecurityConfig {
 	private String basePath;
 	@Value("${PROJECT_DOMAIN}")
 	private String projectDomain;
+	@Value("${LOCAL_DOMAIN}")
+	private String localDomain;
 
 	@Bean
 	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
 			.cors(cors -> cors.configurationSource(request -> {
 				CorsConfiguration config = new CorsConfiguration();
-				config.setAllowedOrigins(List.of(projectDomain));
+				config.setAllowedOrigins(List.of(projectDomain, localDomain));
 				config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH"));
 				config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
 				return config;
@@ -34,7 +36,7 @@ public class SecurityConfig {
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/error").permitAll()
-				.requestMatchers(basePath + "/users/register").permitAll()
+				.requestMatchers(basePath + "/users/register", "/api/users/exists/username").permitAll()
 				.anyRequest().authenticated());
 		return http.build();
 	}
