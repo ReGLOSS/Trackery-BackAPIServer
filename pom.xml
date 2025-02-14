@@ -185,6 +185,9 @@
 					<excludes>
 						<exclude>**/TrackeryBackApiServerApplication.class</exclude>
 						<exclude>**/config/**</exclude>
+						<exclude>**/domain/**/dto/**</exclude>
+						<exclude>**/domain/**/entity/**</exclude>
+						<exclude>**/domain/**/mapper/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
