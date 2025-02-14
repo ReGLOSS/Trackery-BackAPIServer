@@ -29,7 +29,7 @@ public class PasswordUtil {
 	private static final int HASH_ITERATIONS = 10000;
 
 	/**
-	 * 16바이트 난수를 Base64로 인코딩해서 salt 생성하는 메서드
+	 * 16바이트 난수를 생성하고 BASE64로 인코딩한 salt 생성하는 메서드
 	 *
 	 * @return 생성된 salt
 	 */
