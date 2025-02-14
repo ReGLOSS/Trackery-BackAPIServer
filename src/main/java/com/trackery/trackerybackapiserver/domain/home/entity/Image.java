@@ -13,7 +13,7 @@ import lombok.Setter;
  * fileName       : Image
  * author         : inari
  * date           : 25. 2. 14.
- * description    :
+ * description    : 이미지의 기본 정보를 나타내는 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -47,12 +47,12 @@ public class Image {
 	private String imageFile;
 
 	/**
-	 * 이미지의 공개여부입니다.
+	 * 이미지의 공개여부입니다. (1: 공개, 0: 비공개)
 	 */
 	private Integer isPublic;
 
 	/**
-	 * 이미지의 삭제여부입니다.
+	 * 이미지의 삭제여부입니다. (true: 공개, false: 비공개)
 	 */
 	private Boolean isDeleted;
 
