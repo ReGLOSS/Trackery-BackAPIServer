@@ -15,18 +15,20 @@ public class User {
 	private String userName;
 	private String nickname;
 	private String password;
+	private String salt;
 	private Timestamp startDate;
 	private Integer status;
 	private Timestamp lastLogin;
 	private String userProfile;
 
 	@Builder
-	public User(String email, String userName, String nickname, String password, Timestamp startDate, Integer status,
+	public User(String email, String userName, String nickname, String password, String salt, Timestamp startDate, Integer status,
 		Timestamp lastLogin, String userProfile) {
 		this.email = email;
 		this.userName = userName;
 		this.nickname = nickname;
 		this.password = password;
+		this.salt = salt;
 		this.startDate = startDate;
 		this.status = status;
 		this.lastLogin = lastLogin;

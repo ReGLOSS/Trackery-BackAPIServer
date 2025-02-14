@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.common.response;
 
+import java.security.NoSuchAlgorithmException;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -13,7 +15,8 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 public class ApiExceptionHandler {
 
 	/**
-	 * 서비스 로직 중 던져진 ApiException 처리하는 핸들러
+	 * 서비스 로직 중 던져진 예외를 처리하는 핸들러
+	 *
 	 * @param ex : 개발자가 던진 ApiException
 	 * @return : 실패 코드, 메시지를 담은 응답 포맷 반환
 	 */
@@ -25,7 +28,8 @@ public class ApiExceptionHandler {
 	}
 
 	/**
-	 * Validation 실패 시 발생하는 MethodArgumentNotValidException 처리하는 핸들러
+	 * Validation 실패 시 발생하는 예외를 처리하는 핸들러
+	 *
 	 * @param ex : Validation 실패 시 발생하는 예외 MethodArgumentNotValidException
 	 * @return : 실패 코드, 메시지를 담은 응답 포맷 반환
 	 */
@@ -40,7 +44,8 @@ public class ApiExceptionHandler {
 	}
 
 	/**
-	 * Request Body 잘못되었을 때 발생하는 HttpMessageNotReadableException 처리하는 핸들러
+	 * Request Body 잘못되었을 때 발생하는 예외를 처리하는 핸들러
+	 *
 	 * @param ex Request Body 잘못되었을 때 발생하는 HttpMessageNotReadableException
 	 * @return 실패 코드, 메시지를 담은 응답 포맷 반환
 	 */

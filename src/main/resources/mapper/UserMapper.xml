@@ -5,8 +5,8 @@
 <mapper namespace="com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper">
 
     <insert id="insertUser" parameterType="com.trackery.trackerybackapiserver.domain.user.entity.User" useGeneratedKeys="true" keyProperty="userId">
-        INSERT INTO user (email, user_name, nickname, password, start_date, status, last_login, user_profile)
-        VALUES (#{email}, #{userName}, #{nickname}, #{password}, #{startDate}, #{status}, #{lastLogin}, #{userProfile});
+        INSERT INTO user (email, username, nickname, password, salt, start_date, status, last_login, user_profile)
+        VALUES (#{email}, #{userName}, #{nickname}, #{password}, #{salt}, #{startDate}, #{status}, #{lastLogin}, #{userProfile});
     </insert>
 
     <select id="checkUsernameAvailability" resultType="int" parameterType="String">

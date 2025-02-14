@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
+import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
@@ -22,11 +23,15 @@ public class UserService {
 	 * @param userRegisterDto : 회원 가입 정보를 담은 DTO
 	 */
 	public void registerUser(UserRegisterDto userRegisterDto) {
+		String salt = PasswordUtil.generateSalt();
+		String hashedPassword = PasswordUtil.hashPassword(userRegisterDto.getPassword(), salt);
+
 		User user = User.builder()
 			.email(userRegisterDto.getEmail())
 			.userName(userRegisterDto.getUserName())
 			.nickname(userRegisterDto.getNickname())
-			.password(userRegisterDto.getPassword())
+			.password(hashedPassword)
+			.salt(salt)
 			.startDate(Timestamp.valueOf(LocalDateTime.now()))
 			.status(1)
 			.lastLogin(Timestamp.valueOf(LocalDateTime.now()))
