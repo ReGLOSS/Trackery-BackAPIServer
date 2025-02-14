@@ -1,7 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.common.response;
 
-import java.security.NoSuchAlgorithmException;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -50,7 +48,8 @@ public class ApiExceptionHandler {
 	 * @return 실패 코드, 메시지를 담은 응답 포맷 반환
 	 */
 	@ExceptionHandler(HttpMessageNotReadableException.class)
-	public ResponseEntity<ApiResponse<String>> handleHttpMessageNotReadableException(HttpMessageNotReadableException ex) {
+	public ResponseEntity<ApiResponse<String>> handleHttpMessageNotReadableException(
+		HttpMessageNotReadableException ex) {
 		return ResponseEntity
 			.status(400)
 			.body(ApiResponse.error(ErrorCode.BAD_REQUEST_INVALID_REQUEST_BODY, ex.getMessage()));

@@ -22,7 +22,8 @@ public class User {
 	private String userProfile;
 
 	@Builder
-	public User(String email, String userName, String nickname, String password, String salt, Timestamp startDate, Integer status,
+	public User(String email, String userName, String nickname, String password, String salt, Timestamp startDate,
+		Integer status,
 		Timestamp lastLogin, String userProfile) {
 		this.email = email;
 		this.userName = userName;
