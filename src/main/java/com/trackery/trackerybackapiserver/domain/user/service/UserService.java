@@ -28,7 +28,7 @@ public class UserService {
 
 		User user = User.builder()
 			.email(userRegisterDto.getEmail())
-			.userName(userRegisterDto.getUserName())
+			.userName(userRegisterDto.getUsername())
 			.nickname(userRegisterDto.getNickname())
 			.password(hashedPassword)
 			.salt(salt)
