@@ -9,4 +9,8 @@
         VALUES (#{email}, #{userName}, #{nickname}, #{password}, #{startDate}, #{status}, #{lastLogin}, #{userProfile});
     </insert>
 
+    <select id="checkUsernameAvailability" resultType="int" parameterType="String">
+        SELECT COUNT(*) FROM user WHERE username = #{username}
+    </select>
+
 </mapper>
