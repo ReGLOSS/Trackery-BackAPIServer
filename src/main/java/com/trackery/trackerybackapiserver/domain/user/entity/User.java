@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.user.entity;
 import java.sql.Timestamp;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -19,17 +20,16 @@ public class User {
 	private Timestamp lastLogin;
 	private String userProfile;
 
-	public static User of(String email, String userName, String nickname, String password, Timestamp startDate,
-		Integer status, Timestamp lastLogin, String userProfile) {
-		User user = new User();
-		user.email = email;
-		user.userName = userName;
-		user.nickname = nickname;
-		user.password = password;
-		user.startDate = startDate;
-		user.status = status;
-		user.lastLogin = lastLogin;
-		user.userProfile = userProfile;
-		return user;
+	@Builder
+	public User(String email, String userName, String nickname, String password, Timestamp startDate, Integer status,
+		Timestamp lastLogin, String userProfile) {
+		this.email = email;
+		this.userName = userName;
+		this.nickname = nickname;
+		this.password = password;
+		this.startDate = startDate;
+		this.status = status;
+		this.lastLogin = lastLogin;
+		this.userProfile = userProfile;
 	}
 }
