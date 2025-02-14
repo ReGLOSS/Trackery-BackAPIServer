@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.home.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -40,7 +41,15 @@ public class ImageService {
 	@Transactional(readOnly = true)
 	public List<String> getPublicImageUrls() {
 		log.info("공개된 이미지의 주소들을 가져옵니다.");
-		return imagesMapper.selectPublicImageFiles();
+		// return imagesMapper.selectPublicImageFiles();
+		List<String> images = imagesMapper.selectPublicImageFiles();
+
+		// 이미지가 없는 경우 빈 리스트 반환
+		if (images == null) {
+			return new ArrayList<>();
+		}
+
+		return images;
 	}
 
 	/**

@@ -33,7 +33,7 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.csrf(AbstractHttpConfigurer::disable)
 			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/error").permitAll()
+				.requestMatchers("/error", "/api/images").permitAll()
 				.anyRequest().authenticated());
 		return http.build();
 	}
