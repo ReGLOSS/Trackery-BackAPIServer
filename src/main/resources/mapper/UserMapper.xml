@@ -9,8 +9,8 @@
         VALUES (#{email}, #{username}, #{nickname}, #{password}, #{salt}, #{startDate}, #{status}, #{lastLogin}, #{userProfile});
     </insert>
 
-    <select id="checkUsernameAvailability" resultType="int" parameterType="String">
-        SELECT COUNT(*) FROM user WHERE username = #{username}
+    <select id="checkUsernameAvailability" resultType="boolean" parameterType="String">
+        SELECT EXISTS (SELECT 1 FROM user WHERE username = #{username})
     </select>
 
 </mapper>

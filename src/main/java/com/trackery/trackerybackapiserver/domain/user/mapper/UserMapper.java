@@ -8,5 +8,5 @@ import com.trackery.trackerybackapiserver.domain.user.entity.User;
 public interface UserMapper {
 	void insertUser(User user);
 
-	int checkUsernameAvailability(String username);
+	boolean checkUsernameAvailability(String username);
 }
