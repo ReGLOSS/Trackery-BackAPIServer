@@ -11,5 +11,4 @@ public class TrackeryBackApiServerApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(TrackeryBackApiServerApplication.class, args);
 	}
-
 }
