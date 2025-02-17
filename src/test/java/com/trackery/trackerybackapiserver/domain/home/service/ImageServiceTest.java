@@ -57,6 +57,22 @@ class ImageServiceTest {
 	}
 
 	@Test
+	@DisplayName("이미지가 없을 경우 빈 리스트를 반환하는지 테스트")
+	void getPublicImageUrls_ShouldReturnEmptyList_WhenNoImages() {
+		// Given
+		when(imagesMapper.selectPublicImageFiles()).thenReturn(null);
+
+		// When
+		List<String> actualUrls = imageService.getPublicImageUrls();
+
+		// Then
+		assertThat(actualUrls)
+			.isNotNull()
+			.isEmpty();
+		verify(imagesMapper).selectPublicImageFiles();
+	}
+
+	@Test
 	@DisplayName("캐시가 정상적으로 초기화되는지 테스트")
 	void evictImageCache_ShouldClearCache() {
 		// Given
