@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
  fileName       : PasswordUtilTest
  author         : durururuk
  date           : 25. 2. 14.
- description    :
+ description    : PasswordUtil 테스트코드
  ===========================================================
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------

@@ -23,7 +23,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
  fileName       : UserServiceTest
  author         : durururuk
  date           : 25. 2. 14.
- description    :
+ description    : UserService 테스트코드
  ===========================================================
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------

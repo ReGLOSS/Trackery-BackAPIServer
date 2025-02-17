@@ -15,7 +15,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
  fileName       : PasswordUtil
  author         : durururuk
  date           : 25. 2. 14.
- description    :
+ description    : 비밀번호 생성에 필요한 salt 생성기와 해싱을 담당하는 유틸리티 클래스
  ===========================================================
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------

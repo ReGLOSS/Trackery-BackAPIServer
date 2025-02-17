@@ -27,7 +27,7 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
  fileName       : UserControllerTest
  author         : durururuk
  date           : 25. 2. 14.
- description    :
+ description    : UserController 테스트코드
  ===========================================================
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------

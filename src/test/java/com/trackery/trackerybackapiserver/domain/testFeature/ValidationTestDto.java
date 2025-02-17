@@ -11,7 +11,7 @@ import lombok.Setter;
  fileName       : ValidationTestDto
  author         : durururuk
  date           : 25. 2. 17.
- description    :
+ description    : 예외 발생 테스트용 DTO
  ===========================================================
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
