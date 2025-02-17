@@ -58,12 +58,10 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<ApiResponse<String>> handleHttpMessageNotReadableException(
 		HttpMessageNotReadableException ex) {
-		ErrorCode errorCode = ErrorCode.BAD_REQUEST_INVALID_REQUEST_BODY;
-
-		log.error(errorCode.getMessage());
+		log.error(ex.getMessage(), ex);
 
 		return ResponseEntity
 			.status(400)
-			.body(ApiResponse.error(errorCode));
+			.body(ApiResponse.error(ErrorCode.BAD_REQUEST_INVALID_REQUEST_BODY));
 	}
 }
