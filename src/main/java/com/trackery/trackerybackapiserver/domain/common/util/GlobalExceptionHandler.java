@@ -10,6 +10,9 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -21,6 +24,8 @@ public class GlobalExceptionHandler {
 	 */
 	@ExceptionHandler(ApiException.class)
 	public ResponseEntity<ApiResponse<Void>> handleApiException(ApiException ex) {
+		log.error(ex.getMessage(), ex);
+
 		return ResponseEntity
 			.status(ex.getErrorCode().getCode())
 			.body(ApiResponse.error(ex.getErrorCode()));
@@ -36,6 +41,8 @@ public class GlobalExceptionHandler {
 		MethodArgumentNotValidException.class
 	})
 	public ResponseEntity<ApiResponse<String>> handleValidationException(MethodArgumentNotValidException ex) {
+		log.error(ex.getMessage(), ex);
+
 		return ResponseEntity
 			.status(400)
 			.body(ApiResponse.error(ErrorCode.BAD_REQUEST_VALIDATION_FAILED,
@@ -51,8 +58,12 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<ApiResponse<String>> handleHttpMessageNotReadableException(
 		HttpMessageNotReadableException ex) {
+		ErrorCode errorCode = ErrorCode.BAD_REQUEST_INVALID_REQUEST_BODY;
+
+		log.error(errorCode.getMessage());
+
 		return ResponseEntity
 			.status(400)
-			.body(ApiResponse.error(ErrorCode.BAD_REQUEST_INVALID_REQUEST_BODY, ex.getMessage()));
+			.body(ApiResponse.error(errorCode));
 	}
 }
