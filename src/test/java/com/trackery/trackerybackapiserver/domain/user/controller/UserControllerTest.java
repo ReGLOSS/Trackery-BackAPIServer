@@ -51,7 +51,7 @@ class UserControllerTest {
 	@WithMockUser
 	void 회원가입_성공() throws Exception {
 		ReflectionTestUtils.setField(dto, "email", "a@a.com");
-		ReflectionTestUtils.setField(dto, "username", "abcdefg");
+		ReflectionTestUtils.setField(dto, "userName", "abcdefg");
 		ReflectionTestUtils.setField(dto, "nickname", "김커피");
 		ReflectionTestUtils.setField(dto, "password", "Qwerasdf1234!!asdf");
 

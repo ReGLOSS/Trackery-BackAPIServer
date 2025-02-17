@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 public class User {
 	private Long userId;
 	private String email;
-	private String username;
+	private String userName;
 	private String nickname;
 	private String password;
 	private String salt;
@@ -22,11 +22,11 @@ public class User {
 	private String userProfile;
 
 	@Builder
-	public User(String email, String username, String nickname, String password, String salt, Timestamp startDate,
+	public User(String email, String userName, String nickname, String password, String salt, Timestamp startDate,
 		Integer status,
 		Timestamp lastLogin, String userProfile) {
 		this.email = email;
-		this.username = username;
+		this.userName = userName;
 		this.nickname = nickname;
 		this.password = password;
 		this.salt = salt;

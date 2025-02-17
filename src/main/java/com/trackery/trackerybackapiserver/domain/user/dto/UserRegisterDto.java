@@ -15,7 +15,7 @@ public class UserRegisterDto {
 	private String email;
 	@NotBlank(message = "사용자명은 공백일 수 없습니다.")
 	@Pattern(regexp = "^\\w{4,15}$", message = "유저명은 4~15자 길이에 영문 대소문자,숫자,밑줄(_)만 허용됩니다.")
-	private String username;
+	private String userName;
 	@NotBlank(message = "닉네임은 공백일 수 없습니다.")
 	private String nickname;
 	@Pattern(
