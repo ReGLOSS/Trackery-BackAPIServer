@@ -188,6 +188,7 @@
 						<exclude>**/domain/**/dto/**</exclude>
 						<exclude>**/domain/**/entity/**</exclude>
 						<exclude>**/domain/**/mapper/**</exclude>
+						<exclude>**/domain/common/response/**</exclude>
 					</excludes>
 				</configuration>
 				<executions>
