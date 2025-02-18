@@ -45,7 +45,7 @@ public class ImageService {
 		List<String> images = imagesMapper.selectPublicImageFiles();
 
 		// 이미지가 없는 경우 빈 리스트 반환
-		if (images == null) {
+		if (images == null || images.isEmpty()) {
 			return new ArrayList<>();
 		}
 

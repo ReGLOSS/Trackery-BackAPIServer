@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 2. 14.        inari       최초 생성
  */
 @RestController
-@RequestMapping("/api/images")
+@RequestMapping("/api/home")
 @RequiredArgsConstructor
 public class LandingImagesController {
 
@@ -33,7 +33,7 @@ public class LandingImagesController {
 	 * 랜딩 페이지에 표시할 공개 이미지 URL 목록을 반환합니다.
 	 * @return 공개된 이미지 URL 목록
 	 */
-	@GetMapping
+	@GetMapping("/images")
 	public ApiResponse<LandingImagesResponse> getPublicImages() {
 		return ApiResponse.success(
 			SuccessCode.OK,
