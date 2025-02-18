@@ -10,6 +10,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -18,6 +19,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trackery.trackerybackapiserver.config.CacheConfig;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.user.controller.UserController;
@@ -35,21 +37,18 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
  25. 2. 15.        durururuk       최초 생성*/
-@WebMvcTest
+@WebMvcTest(GlobalExceptionHandler.class)
+@Import(CacheConfig.class)
 class GlobalExceptionHandlerTest {
-	@MockitoBean
-	private UserController userController;
-
-	@Mock
-	private UserService userService;
-
+	private final ObjectMapper objectMapper = new ObjectMapper();
 	@Spy
 	UserRegisterDto userRegisterDto;
-
+	@MockitoBean
+	private UserController userController;
+	@Mock
+	private UserService userService;
 	@Autowired
 	private MockMvc mockMvc;
-
-	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
 	@WithMockUser
