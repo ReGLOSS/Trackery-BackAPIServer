@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.home.controller;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,13 +33,15 @@ public class LandingImagesController {
 
 	/**
 	 * 랜딩 페이지에 표시할 공개 이미지 URL 목록을 반환합니다.
-	 * @return 공개된 이미지 URL 목록
+	 *
+	 * @return 공개된 이미지 URL 목록, 없으면 빈 배열
 	 */
 	@GetMapping("/images")
-	public ApiResponse<LandingImagesResponse> getPublicImages() {
-		return ApiResponse.success(
-			SuccessCode.OK,
-			new LandingImagesResponse(imageService.getPublicImageUrls())
-		);
+	public ResponseEntity<ApiResponse<LandingImagesResponse>> getPublicImages() {
+		LandingImagesResponse landingImagesResponse = new LandingImagesResponse(imageService.getPublicImageUrls());
+
+		return ResponseEntity
+			.status(HttpStatus.OK)
+			.body(ApiResponse.success(SuccessCode.OK, landingImagesResponse));
 	}
 }
