@@ -1,7 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.common.util;
 
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -35,14 +33,15 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class JwtUtil {
 
-	private final String PROJECT_DOMAIN;
 	//만료시간 10분(600초)
-	private final long EXPIRATION_TIME = 600;
+	private static final long EXPIRATION_TIME = 600;
+
+	private final String projectDomain;
 	private final Algorithm algorithm;
 
-	public JwtUtil(@Value("${JWT_SECRET_KEY}") String jwtSecretKey, @Value("${PROJECT_DOMAIN}") String PROJECT_DOMAIN) {
+	public JwtUtil(@Value("${JWT_SECRET_KEY}") String jwtSecretKey, @Value("${PROJECT_DOMAIN}") String projectDomain) {
 		this.algorithm = Algorithm.HMAC256(jwtSecretKey);
-		this.PROJECT_DOMAIN = PROJECT_DOMAIN;
+		this.projectDomain = projectDomain;
 	}
 
 	//TODO 유저 권한 추가 필요
@@ -57,7 +56,7 @@ public class JwtUtil {
 	public String generateJwt(Long userId, String userName) {
 		try {
 			return JWT.create()
-				.withIssuer(PROJECT_DOMAIN)
+				.withIssuer(projectDomain)
 				.withSubject(userId.toString())
 				.withClaim("username", userName)
 				.withNotBefore(Instant.now())
@@ -74,7 +73,7 @@ public class JwtUtil {
 	public DecodedJWT verifyJwt(String token) {
 		try {
 			JWTVerifier verifier = JWT.require(algorithm)
-				.withIssuer(PROJECT_DOMAIN)
+				.withIssuer(projectDomain)
 				.build();
 
 			return verifier.verify(token);

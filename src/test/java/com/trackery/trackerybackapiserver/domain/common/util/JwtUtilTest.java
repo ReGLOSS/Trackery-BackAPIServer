@@ -2,19 +2,8 @@ package com.trackery.trackerybackapiserver.domain.common.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.security.interfaces.ECPrivateKey;
-import java.security.interfaces.ECPublicKey;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.util.ReflectionTestUtils;
-
-import com.auth0.jwt.algorithms.Algorithm;
 
 import lombok.extern.slf4j.Slf4j;
 
