@@ -17,4 +17,9 @@
         SELECT * FROM users WHERE user_id = #{userId}
     </select>
 
+    <insert id="insertUserRole" parameterType="com.trackery.trackerybackapiserver.domain.user.entity.UserRole" useGeneratedKeys="true" keyProperty="userRoleId" >
+        INSERT INTO user_role (user_id, role_id)
+        VALUES (#{userId}, #{roleId})
+    </insert>
+
 </mapper>

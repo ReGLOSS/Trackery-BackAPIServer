@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
+import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -18,7 +19,8 @@ public class UserService {
 	private final UserMapper userMapper;
 
 	/**
-	 * 회원가입 정보를 담아서 db에 인서트하는 메서드
+	 * 회원가입 정보를 담아서 db에 인서트하는 메서드입니다.
+	 * 회원가입 후 유저 역할 (1L) 을 같이 인서트합니다.
 	 *
 	 * @param userRegisterDto : 회원 가입 정보를 담은 DTO
 	 */
@@ -39,6 +41,13 @@ public class UserService {
 			.build();
 
 		userMapper.insertUser(user);
+
+		UserRole userRole = UserRole.builder()
+			.userId(user.getUserId())
+			.roleId(1L)
+			.build();
+
+		userMapper.insertUserRole(userRole);
 	}
 
 	/**

@@ -1,6 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.user.entity;
 
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -22,4 +23,10 @@ public class UserRole {
 	private Long userRoleId;
 	private Long userId;
 	private Long roleId;
+
+	@Builder
+	public UserRole(Long userId, Long roleId) {
+		this.userId = userId;
+		this.roleId = roleId;
+	}
 }

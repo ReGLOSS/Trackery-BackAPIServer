@@ -15,6 +15,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
+import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
 /**
@@ -47,10 +48,17 @@ class UserServiceTest {
 			ReflectionTestUtils.setField(dto, "nickname", "김커피");
 			ReflectionTestUtils.setField(dto, "password", "Qwerasdf1234!!asdf");
 
-			doNothing().when(userMapper).insertUser(any(User.class));
+			doAnswer(invocation -> {
+				User user = invocation.getArgument(0);
+				ReflectionTestUtils.setField(user, "userId", 1L);
+				return null;
+			}).when(userMapper).insertUser(any(User.class));
+			doNothing().when(userMapper).insertUserRole(any(UserRole.class));
+
 			userService.registerUser(dto);
 
 			verify(userMapper, times(1)).insertUser(any(User.class));
+			verify(userMapper, times(1)).insertUserRole(any(UserRole.class));
 
 			mockedStatic.verify(() -> PasswordUtil.hashPassword(anyString(), nullable(String.class)), times(1));
 			mockedStatic.verify(PasswordUtil::generateSalt, times(1));
