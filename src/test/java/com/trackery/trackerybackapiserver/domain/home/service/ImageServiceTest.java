@@ -11,6 +11,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.cache.CacheManager;
 
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.home.mapper.ImagesMapper;
 
 /**
@@ -57,18 +59,16 @@ class ImageServiceTest {
 	}
 
 	@Test
-	@DisplayName("이미지가 없을 경우 빈 리스트를 반환하는지 테스트")
+	@DisplayName("이미지가 없을 경우 NOT_FOUND_IMAGE를 반환하는지 테스트")
 	void getPublicImageUrls_ShouldReturnEmptyList_WhenNoImages() {
 		// Given
 		when(imagesMapper.selectPublicImageFiles()).thenReturn(null);
 
-		// When
-		List<String> actualUrls = imageService.getPublicImageUrls();
+		// When & Then
+		assertThatThrownBy(() -> imageService.getPublicImageUrls())
+		.isInstanceOf(ApiException.class)
+			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_IMAGE);
 
-		// Then
-		assertThat(actualUrls)
-			.isNotNull()
-			.isEmpty();
 		verify(imagesMapper).selectPublicImageFiles();
 	}
 
