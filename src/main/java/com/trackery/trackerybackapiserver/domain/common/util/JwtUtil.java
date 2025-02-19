@@ -9,8 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.auth0.jwt.JWT;
+import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 
@@ -32,12 +35,14 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class JwtUtil {
 
+	private final String PROJECT_DOMAIN;
 	//만료시간 10분(600초)
-	private static final long EXPIRATION_TIME = 600;
+	private final long EXPIRATION_TIME = 600;
 	private final Algorithm algorithm;
 
-	public JwtUtil(@Value("${JWT_SECRET_KEY}") String jwtSecretKey) {
+	public JwtUtil(@Value("${JWT_SECRET_KEY}") String jwtSecretKey, @Value("${PROJECT_DOMAIN}") String PROJECT_DOMAIN) {
 		this.algorithm = Algorithm.HMAC256(jwtSecretKey);
+		this.PROJECT_DOMAIN = PROJECT_DOMAIN;
 	}
 
 	//TODO 유저 권한 추가 필요
@@ -52,7 +57,7 @@ public class JwtUtil {
 	public String generateJwt(Long userId, String userName) {
 		try {
 			return JWT.create()
-				.withIssuer("trackery.bokkurin.com")
+				.withIssuer(PROJECT_DOMAIN)
 				.withSubject(userId.toString())
 				.withClaim("username", userName)
 				.withNotBefore(Instant.now())
@@ -63,6 +68,19 @@ public class JwtUtil {
 		} catch (JWTCreationException e) {
 			log.error(e.getMessage());
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR_FAILED_TO_GENERATE_JWT);
+		}
+	}
+
+	public DecodedJWT verifyJwt(String token) {
+		try {
+			JWTVerifier verifier = JWT.require(algorithm)
+				.withIssuer(PROJECT_DOMAIN)
+				.build();
+
+			return verifier.verify(token);
+		} catch (JWTVerificationException e) {
+			log.error(e.getMessage());
+			throw new ApiException(ErrorCode.UNAUTHORIZED_JWT_VERIFY_FAILED);
 		}
 	}
 }
