@@ -2,11 +2,10 @@ package com.trackery.trackerybackapiserver.domain.home.entity;
 
 import java.time.LocalDateTime;
 
-import lombok.AllArgsConstructor;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.home.entity
@@ -18,12 +17,10 @@ import lombok.Setter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 14.        inari       최초 생성
+ * 25. 2. 19		 inari		 imageId 빌더에서 제외
  */
 @Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Image {
 
 	/**
@@ -75,4 +72,18 @@ public class Image {
 	 * 이미지가 등록된 업로드일입니다.
 	 */
 	private LocalDateTime imageRegDate;
+
+	@Builder
+	public Image(Long coordPointId, String imageName, String imageFile, Integer isPublic, Boolean isDeleted,
+		String imageType, String imageContent, LocalDateTime imageDate, LocalDateTime imageRegDate) {
+		this.coordPointId = coordPointId;
+		this.imageName = imageName;
+		this.imageFile = imageFile;
+		this.isPublic = isPublic;
+		this.isDeleted = isDeleted;
+		this.imageType = imageType;
+		this.imageContent = imageContent;
+		this.imageDate = imageDate;
+		this.imageRegDate = imageRegDate;
+	}
 }

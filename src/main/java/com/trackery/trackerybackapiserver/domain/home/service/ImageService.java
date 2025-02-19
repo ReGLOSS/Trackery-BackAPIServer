@@ -1,6 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.home.service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -8,13 +7,15 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.home.mapper.ImagesMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- *packageName    : com.trackery.trackerybackapiserver.domain.home.service
+ * packageName    : com.trackery.trackerybackapiserver.domain.home.service
  * fileName       : ImageService
  * author         : inari
  * date           : 25. 2. 14.
@@ -23,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 14.        inari       최초 생성
+ * 25. 2. 19.        inari       이미지를 불러오지 못했을시 예외 처리
  */
 @Slf4j
 @Service
@@ -34,17 +36,17 @@ public class ImageService {
 	/**
 	 * 공개된 이미지 URL 목록을 조회합니다.
 	 * 결과는 하루동안 캐시됩니다.
+	 *
 	 * @return 공개된 이미지 URL 목록
 	 */
 	@Cacheable(value = "publicImageUrls")
 	public List<String> getPublicImageUrls() {
 		log.info("공개된 이미지의 주소들을 가져옵니다.");
-		// return imagesMapper.selectPublicImageFiles();
+
 		List<String> images = imagesMapper.selectPublicImageFiles();
 
-		// 이미지가 없는 경우 빈 리스트 반환
 		if (images == null || images.isEmpty()) {
-			return new ArrayList<>();
+			throw new ApiException(ErrorCode.NOT_FOUND_IMAGE);
 		}
 
 		return images;
