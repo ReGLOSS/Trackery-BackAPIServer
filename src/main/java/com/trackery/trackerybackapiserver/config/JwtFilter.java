@@ -14,7 +14,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
-import com.trackery.trackerybackapiserver.domain.user.service.CustomUserDetailsService;
+import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -38,14 +38,11 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 @Component
 public class JwtFilter extends OncePerRequestFilter {
-
 	private final JwtUtil jwtUtil;
-	private final CustomUserDetailsService customUserDetailsService;
 
 	private boolean isPublicUri(String uri) {
-		return uri.startsWith("/error")
-			|| uri.startsWith("/api/users/register")
-			|| uri.startsWith("/api/users/exists/username");
+		return uri.startsWith("/error") || uri.startsWith("/api/users/register") || uri.startsWith(
+			"/api/users/exists/username");
 	}
 
 	@Override
@@ -59,19 +56,19 @@ public class JwtFilter extends OncePerRequestFilter {
 
 		String authHeader = Optional.ofNullable(request.getHeader("Authorization"))
 			.filter(header -> header.startsWith("Bearer "))
-			.orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED));
+			.orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED_MISSING_AUTH_HEADER));
 
 		String token = authHeader.substring(7);
 		DecodedJWT jwt = jwtUtil.verifyJwt(token);
 
-		UserDetails userDetails = customUserDetailsService.returnUserDetailsByUserId(
-			jwt.getClaim("userId").asLong());
+		Long userId = jwt.getClaim("userId").asLong();
+		Long roleId = jwt.getClaim("roleId").asLong();
 
-		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-			userDetails, null, userDetails.getAuthorities()
-		);
+		UserDetails userDetails = CustomUserDetails.builder().userId(userId).roleId(roleId).build();
 
-		SecurityContextHolder.clearContext();
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails,
+			null, userDetails.getAuthorities());
+
 		SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
 		filterChain.doFilter(request, response);

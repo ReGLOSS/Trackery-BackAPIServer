@@ -11,7 +11,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trackery.trackerybackapiserver.config.SecurityConfig;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
-import com.trackery.trackerybackapiserver.domain.user.service.CustomUserDetailsService;
 
 /**
  *packageName    : com.trackery.trackerybackapiserver.domain
@@ -32,9 +31,6 @@ import com.trackery.trackerybackapiserver.domain.user.service.CustomUserDetailsS
 public abstract class CommonMockMvcControllerTestSetUp {
 	@MockitoBean
 	protected JwtUtil jwtUtil;
-
-	@MockitoBean
-	protected CustomUserDetailsService customUserDetailsService;
 
 	protected ObjectMapper objectMapper = new ObjectMapper();
 }

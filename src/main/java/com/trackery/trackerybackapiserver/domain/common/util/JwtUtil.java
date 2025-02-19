@@ -53,12 +53,13 @@ public class JwtUtil {
 	 * @param userName : 인증할 유저명
 	 * @return : 생성된 JWT 토큰
 	 */
-	public String generateJwt(Long userId, String userName) {
+	public String generateJwt(Long userId, String userName, Long roleId) {
 		try {
 			return JWT.create()
 				.withIssuer(projectDomain)
 				.withSubject(userId.toString())
 				.withClaim("username", userName)
+				.withClaim("role", roleId)
 				.withNotBefore(Instant.now())
 				.withIssuedAt(Instant.now())
 				.withExpiresAt(Instant.now().plusSeconds(EXPIRATION_TIME))

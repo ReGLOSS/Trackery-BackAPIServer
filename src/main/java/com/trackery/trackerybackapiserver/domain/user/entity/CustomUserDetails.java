@@ -4,7 +4,11 @@ import java.util.Collection;
 import java.util.List;
 
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import lombok.Builder;
+import lombok.Getter;
 
 /**
  *packageName    : com.trackery.trackerybackapiserver.domain.user.entity
@@ -20,48 +24,30 @@ import org.springframework.security.core.userdetails.UserDetails;
 //TODO 유저 권한 추가 필요
 public class CustomUserDetails implements UserDetails {
 	private final Long userId;
-	private final String userName;
-	private final String password;
+	private final Long roleId;
 
-	public CustomUserDetails(User user) {
-		this.userId = user.getUserId();
-		this.userName = user.getUserName();
-		this.password = user.getPassword();
+	@Builder
+	public CustomUserDetails(Long userId, Long roleId) {
+		this.userId = userId;
+		this.roleId = roleId;
 	}
 
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
-		return List.of();
+		return List.of(new SimpleGrantedAuthority(roleId.toString()));
 	}
 
 	@Override
 	public String getPassword() {
-		return this.password;
+		return "";
 	}
 
-	//인터페이스 메서드 선언이 getUsername()입니다 오타 아닙니다
 	@Override
 	public String getUsername() {
-		return this.userName;
+		return "";
 	}
 
-	@Override
-	public boolean isAccountNonExpired() {
-		return UserDetails.super.isAccountNonExpired();
-	}
-
-	@Override
-	public boolean isAccountNonLocked() {
-		return UserDetails.super.isAccountNonLocked();
-	}
-
-	@Override
-	public boolean isCredentialsNonExpired() {
-		return UserDetails.super.isCredentialsNonExpired();
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return UserDetails.super.isEnabled();
+	public Long getUserId() {
+		return userId;
 	}
 }

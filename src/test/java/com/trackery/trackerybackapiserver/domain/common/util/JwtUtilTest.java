@@ -33,7 +33,7 @@ class JwtUtilTest {
 
 	@Test
 	void JWT_토큰_생성_테스트() {
-		String jwt = jwtUtil.generateJwt(1L, "abcdefg");
+		String jwt = jwtUtil.generateJwt(1L, "abcdefg", 1L);
 		log.info(jwt);
 		assertNotNull(jwt);
 		assertTrue(jwt.startsWith("eyJ"));
