@@ -18,10 +18,12 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.user.controller.UserController;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
+import com.trackery.trackerybackapiserver.domain.user.service.CustomUserDetailsService;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 /**
@@ -35,8 +37,7 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
  25. 2. 15.        durururuk       최초 생성*/
-@WebMvcTest
-class GlobalExceptionHandlerTest {
+class GlobalExceptionHandlerTest extends CommonMockMvcControllerTestSetUp {
 	@MockitoBean
 	private UserController userController;
 
@@ -45,11 +46,6 @@ class GlobalExceptionHandlerTest {
 
 	@Spy
 	UserRegisterDto userRegisterDto;
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Test
 	@WithMockUser

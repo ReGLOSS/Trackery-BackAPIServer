@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
@@ -31,24 +32,18 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
  ===========================================================
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
- 25. 2. 14.        durururuk       최초 생성*/
-@WebMvcTest(UserController.class)
-@AutoConfigureMockMvc
+ 25. 2. 14.        durururuk       최초 생성
+ */
+
 @WithMockUser
-class UserControllerTest {
+class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 	@MockitoBean
 	private UserService userService;
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	private final ObjectMapper objectMapper = new ObjectMapper();
 
 	@Spy
 	private UserRegisterDto dto;
 
 	@Test
-	@WithMockUser
 	void 회원가입_성공() throws Exception {
 		ReflectionTestUtils.setField(dto, "email", "a@a.com");
 		ReflectionTestUtils.setField(dto, "userName", "abcdefg");
@@ -69,7 +64,6 @@ class UserControllerTest {
 	}
 
 	@Test
-	@WithMockUser
 	void 유저명_중복체크_성공() throws Exception {
 		when(userService.checkUsernameAvailability(anyString())).thenReturn(true);
 
