@@ -35,6 +35,7 @@ public class ImageService {
 
 	/**
 	 * 공개된 이미지 URL 목록을 조회합니다.
+	 * 이미지가 없거나 비었을시 ErrorCode.NOT_FOUND_IMAGE
 	 * 결과는 하루동안 캐시됩니다.
 	 *
 	 * @return 공개된 이미지 URL 목록
