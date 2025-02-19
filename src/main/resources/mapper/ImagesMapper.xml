@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.trackery.trackerybackapiserver.domain.home.mapper.ImagesMapper">
+    <resultMap id="ImageMap" type="com.trackery.trackerybackapiserver.domain.home.entity.Image">
+        <id property="imageId" column="image_id"/>
+        <result property="coordPointId" column="coord_point_id"/>
+        <result property="imageName" column="image_name"/>
+        <result property="imageFile" column="image_file"/>
+        <result property="isPublic" column="is_public"/>
+        <result property="isDeleted" column="is_deleted"/>
+        <result property="imageType" column="image_type"/>
+        <result property="imageContents" column="image_contents"/>
+        <result property="imageDate" column="image_date"/>
+        <result property="imageRegDate" column="image_reg_date"/>
+    </resultMap>
+
+    <!-- 랜딩페이지에서 쓸 공개되어있고 삭제되지 않은 이미지 주소를 무작위로 30개 가져오는 쿼리 -->
+    <select id="selectPublicImageFiles" resultType="string">
+        SELECT image_file
+        FROM image
+        WHERE is_deleted = 0
+        AND is_public = 1
+        ORDER BY RAND()
+        LIMIT 30
+    </select>
+</mapper>

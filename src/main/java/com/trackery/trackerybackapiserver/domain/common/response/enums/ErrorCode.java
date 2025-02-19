@@ -13,6 +13,7 @@ public enum ErrorCode {
 	FORBIDDEN(HttpStatus.FORBIDDEN, 403, "Forbidden"),
 	NOT_FOUND(HttpStatus.NOT_FOUND, 404, "Not Found"),
 
+
 	INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, 500, "Internal Server Error"),
 	NOT_IMPLEMENTED(HttpStatus.NOT_IMPLEMENTED, 501, "Not Implemented"),
 	BAD_GATEWAY(HttpStatus.BAD_GATEWAY, 502, "Bad Gateway"),
@@ -22,6 +23,8 @@ public enum ErrorCode {
 
 	INTERNAL_SERVER_ERROR_NO_SUCH_ALGORITHM(HttpStatus.INTERNAL_SERVER_ERROR, 500, "SHA-256 알고리즘을 사용할 수 없습니다."),
 	INTERNAL_SERVER_ERROR_UTIL_CLASS_INSTANTIATED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "유틸리티 클래스 객체가 생성되었습니다."),
+	INTERNAL_SERVER_ERROR_LOAD_DATABASE(HttpStatus.INTERNAL_SERVER_ERROR, 500, "이미지 URL 조회중 오류가 발생했습니다."),
+	NOT_FOUND_IMAGE(HttpStatus.NOT_FOUND, 404, "이미지를 불러올 수 없습니다."),
 	INTERNAL_SERVER_ERROR_FAILED_TO_GENERATE_JWT(HttpStatus.INTERNAL_SERVER_ERROR, 500, "JWT 토큰 생성에 실패했습니다."),
 	UNAUTHORIZED_JWT_VERIFY_FAILED(HttpStatus.UNAUTHORIZED, 401, "JWT 검증에 실패했습니다."),
 	UNAUTHORIZED_MISSING_AUTH_HEADER(HttpStatus.UNAUTHORIZED, 401, "인증 헤더가 없습니다.");
