@@ -13,4 +13,8 @@
         SELECT EXISTS (SELECT 1 FROM user WHERE username = #{username})
     </select>
 
+    <select id = "findById" parameterType="Long" resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
+        SELECT * FROM users WHERE user_id = #{userId}
+    </select>
+
 </mapper>
