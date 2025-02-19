@@ -7,10 +7,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Spy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
@@ -31,12 +34,18 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
  */
 
 @WithMockUser
+@WebMvcTest(UserController.class)
 class UserControllerTest extends CommonMockMvcControllerTestSetUp {
+	@Autowired
+	private MockMvc mockMvc;
+
 	@MockitoBean
 	private UserService userService;
 
 	@Spy
 	private UserRegisterDto dto;
+
+
 
 	@Test
 	void 회원가입_성공() throws Exception {

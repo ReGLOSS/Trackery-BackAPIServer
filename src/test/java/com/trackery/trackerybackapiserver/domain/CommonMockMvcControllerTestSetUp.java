@@ -29,11 +29,7 @@ import com.trackery.trackerybackapiserver.domain.user.service.CustomUserDetailsS
 @Import(SecurityConfig.class)
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
-@WebMvcTest
 public abstract class CommonMockMvcControllerTestSetUp {
-	@Autowired
-	protected MockMvc mockMvc;
-
 	@MockitoBean
 	protected JwtUtil jwtUtil;
 
