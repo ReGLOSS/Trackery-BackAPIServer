@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -36,6 +38,7 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
  -----------------------------------------------------------
  25. 2. 15.        durururuk       최초 생성*/
 @WebMvcTest(UserController.class)
+@AutoConfigureMockMvc(addFilters = false)
 class GlobalExceptionHandlerTest extends CommonMockMvcControllerTestSetUp {
 	@Autowired
 	private MockMvc mockMvc;

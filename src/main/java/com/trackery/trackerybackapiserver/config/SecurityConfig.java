@@ -13,18 +13,25 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
+import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
+
+import lombok.RequiredArgsConstructor;
+
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 	@Value("${PROJECT_DOMAIN}")
 	private String projectDomain;
 	@Value("${LOCAL_DOMAIN}")
 	private String localDomain;
 
+	private final JwtUtil jwtUtil;
+
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-			.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
 			.cors(cors -> cors.configurationSource(request -> {
 				CorsConfiguration config = new CorsConfiguration();
 				config.setAllowedOrigins(List.of(projectDomain, localDomain));
@@ -34,10 +41,7 @@ public class SecurityConfig {
 			}))
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.csrf(AbstractHttpConfigurer::disable)
-			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/error").permitAll()
-				.requestMatchers("/api/home/images", "/api/users/register", "/api/users/exists/username").permitAll()
-				.anyRequest().authenticated());
+			.authorizeHttpRequests(auth -> auth.anyRequest().authenticated());
 		return http.build();
 	}
 }
