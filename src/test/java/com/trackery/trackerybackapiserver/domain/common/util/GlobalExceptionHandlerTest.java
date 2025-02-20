@@ -73,7 +73,7 @@ class GlobalExceptionHandlerTest extends CommonMockMvcControllerTestSetUp {
 		ReflectionTestUtils.setField(userRegisterDto, "nickname", "");
 		ReflectionTestUtils.setField(userRegisterDto, "password", "Qwerasdf1234!!asdf");
 
-		doNothing().when(userService).registerUser(any());
+		when(userService.registerUser(any())).thenReturn(null);
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
@@ -88,7 +88,7 @@ class GlobalExceptionHandlerTest extends CommonMockMvcControllerTestSetUp {
 	@Test
 	@WithMockUser
 	void HttpMessageNotReadableException_처리_테스트() throws Exception {
-		doNothing().when(userService).registerUser(any());
+		when(userService.registerUser(any())).thenReturn(null);
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
 				.with(csrf())

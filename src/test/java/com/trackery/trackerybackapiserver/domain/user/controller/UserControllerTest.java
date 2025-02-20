@@ -54,7 +54,7 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 		ReflectionTestUtils.setField(dto, "nickname", "김커피");
 		ReflectionTestUtils.setField(dto, "password", "Qwerasdf1234!!asdf");
 
-		doNothing().when(userService).registerUser(any());
+		when(userService.registerUser(any())).thenReturn("Bearer jwt");
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
@@ -64,7 +64,8 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			);
 
 		result
-			.andExpect(status().isCreated());
+			.andExpect(status().isCreated())
+			.andExpect(header().exists("Authorization"));
 	}
 
 	@Test
