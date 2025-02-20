@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
+import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
@@ -17,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserService {
 	private final UserMapper userMapper;
+	private final JwtUtil jwtUtil;
 
 	/**
 	 * 회원가입 정보를 담아서 db에 인서트하는 메서드입니다.
@@ -24,7 +26,7 @@ public class UserService {
 	 *
 	 * @param userRegisterDto : 회원 가입 정보를 담은 DTO
 	 */
-	public void registerUser(UserRegisterDto userRegisterDto) {
+	public String registerUser(UserRegisterDto userRegisterDto) {
 		String salt = PasswordUtil.generateSalt();
 		String hashedPassword = PasswordUtil.hashPassword(userRegisterDto.getPassword(), salt);
 
@@ -48,6 +50,10 @@ public class UserService {
 			.build();
 
 		userMapper.insertUserRole(userRole);
+
+		String jwt = jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
+
+		return String.format("Bearer %s", jwt);
 	}
 
 	/**

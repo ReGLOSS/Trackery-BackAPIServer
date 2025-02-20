@@ -33,7 +33,8 @@ import lombok.extern.slf4j.Slf4j;
  ===========================================================
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
- 25. 2. 19.        durururuk       최초 생성*/
+ 25. 2. 19.        durururuk       최초 생성
+ */
 @Slf4j
 @RequiredArgsConstructor
 @Component
@@ -61,7 +62,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		String token = authHeader.substring(7);
 		DecodedJWT jwt = jwtUtil.verifyJwt(token);
 
-		Long userId = jwt.getClaim("userId").asLong();
+		Long userId = Long.valueOf(jwt.getSubject());
 		Long roleId = jwt.getClaim("roleId").asLong();
 
 		UserDetails userDetails = CustomUserDetails.builder().userId(userId).roleId(roleId).build();

@@ -12,6 +12,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
@@ -40,6 +41,9 @@ class UserServiceTest {
 	@Spy
 	UserRegisterDto dto;
 
+	@Mock
+	private JwtUtil jwtUtil;
+
 	@Test
 	void 회원가입_성공() {
 		try (MockedStatic<PasswordUtil> mockedStatic = mockStatic(PasswordUtil.class)) {
@@ -53,9 +57,19 @@ class UserServiceTest {
 				ReflectionTestUtils.setField(user, "userId", 1L);
 				return null;
 			}).when(userMapper).insertUser(any(User.class));
-			doNothing().when(userMapper).insertUserRole(any(UserRole.class));
 
-			userService.registerUser(dto);
+			doAnswer(invocation -> {
+				UserRole userRole = invocation.getArgument(0);
+				ReflectionTestUtils.setField(userRole, "userId", 1L);
+				ReflectionTestUtils.setField(userRole, "roleId", 1L);
+				return null;
+			}).when(userMapper).insertUserRole(any(UserRole.class));
+
+			when(jwtUtil.generateJwt(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
+
+			String result =  userService.registerUser(dto);
+
+			assertEquals("Bearer jwt token", result);
 
 			verify(userMapper, times(1)).insertUser(any(User.class));
 			verify(userMapper, times(1)).insertUserRole(any(UserRole.class));

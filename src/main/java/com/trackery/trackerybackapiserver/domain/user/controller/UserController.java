@@ -31,9 +31,10 @@ public class UserController {
 	 */
 	@PostMapping("/register")
 	public ResponseEntity<ApiResponse<String>> registerUser(@Valid @RequestBody UserRegisterDto userRegisterDto) {
-		userService.registerUser(userRegisterDto);
+		String header = userService.registerUser(userRegisterDto);
 		return ResponseEntity
 			.status(HttpStatus.CREATED)
+			.header("Authorization", header)
 			.body(ApiResponse.success(SuccessCode.CREATED));
 	}
 

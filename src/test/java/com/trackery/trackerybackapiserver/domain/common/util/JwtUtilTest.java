@@ -5,6 +5,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
+
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -17,7 +19,9 @@ import lombok.extern.slf4j.Slf4j;
  ===========================================================
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
- 25. 2. 18.        durururuk       최초 생성*/
+ 25. 2. 18.        durururuk       최초 생성
+ 25. 2. 20.		   durururuk       jwt 생성 및 검증 테스트 코드 추가
+ */
 @Slf4j
 class JwtUtilTest {
 	private JwtUtil jwtUtil;
@@ -32,10 +36,13 @@ class JwtUtilTest {
 	}
 
 	@Test
-	void JWT_토큰_생성_테스트() {
-		String jwt = jwtUtil.generateJwt(1L, "abcdefg", 1L);
-		log.info(jwt);
-		assertNotNull(jwt);
-		assertTrue(jwt.startsWith("eyJ"));
+	void JWT_토큰_생성_검증_테스트() {
+		String token = jwtUtil.generateJwt(1L, "abcdefg", 1L);
+
+		DecodedJWT decodedJwt = jwtUtil.verifyJwt(token);
+
+		assertEquals(1L, Long.valueOf(decodedJwt.getSubject()));
+		assertEquals("abcdefg", decodedJwt.getClaim("username").asString());
+		assertEquals(1L, decodedJwt.getClaim("role").asLong());
 	}
 }

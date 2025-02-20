@@ -27,8 +27,8 @@ import lombok.extern.slf4j.Slf4j;
  ===========================================================
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
- 25. 2. 18.        durururuk       최초 생성*/
-
+ 25. 2. 18.        durururuk       최초 생성
+ */
 @Slf4j
 @Component
 public class JwtUtil {
@@ -43,8 +43,6 @@ public class JwtUtil {
 		this.algorithm = Algorithm.HMAC256(jwtSecretKey);
 		this.projectDomain = projectDomain;
 	}
-
-	//TODO 유저 권한 추가 필요
 
 	/**
 	 * JWT 생성 메서드
