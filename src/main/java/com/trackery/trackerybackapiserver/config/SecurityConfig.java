@@ -13,6 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
+import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -21,10 +23,20 @@ public class SecurityConfig {
 	@Value("${LOCAL_DOMAIN}")
 	private String localDomain;
 
+	private final JwtUtil jwtUtil;
+
+	public SecurityConfig(JwtUtil jwtUtil) {
+		this.jwtUtil = jwtUtil;
+	}
+
 	@Bean
-	public SecurityFilterChain filterChain(HttpSecurity http, JwtFilter jwtFilter) throws Exception {
+	public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 		http
-			.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+			.authorizeHttpRequests(auth -> auth
+				.requestMatchers("/error").permitAll()
+				.requestMatchers("/api/home/images", "/api/users/register", "/api/users/**").permitAll()
+				.anyRequest().authenticated())
+			.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
 			.cors(cors -> cors.configurationSource(request -> {
 				CorsConfiguration config = new CorsConfiguration();
 				config.setAllowedOrigins(List.of(projectDomain, localDomain));
@@ -33,11 +45,8 @@ public class SecurityConfig {
 				return config;
 			}))
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-			.csrf(AbstractHttpConfigurer::disable)
-			.authorizeHttpRequests(auth -> auth
-				.requestMatchers("/error").permitAll()
-				.requestMatchers("/api/home/images", "/api/users/register", "/api/users/exists/username").permitAll()
-				.anyRequest().authenticated());
+			.csrf(AbstractHttpConfigurer::disable);
+
 		return http.build();
 	}
 }

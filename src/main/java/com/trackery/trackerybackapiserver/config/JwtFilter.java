@@ -20,6 +20,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -37,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RequiredArgsConstructor
-@Component
 public class JwtFilter extends OncePerRequestFilter {
 	private final JwtUtil jwtUtil;
 
@@ -46,11 +46,11 @@ public class JwtFilter extends OncePerRequestFilter {
 	 * @param uri 퍼블릭 uri
 	 * @return 퍼블릭 uri면 true, 아니라면 false
 	 */
-	private boolean isPublicUri(String uri) {
-		return uri.startsWith("/error")
-			|| uri.startsWith("/api/users/register")
-			|| uri.startsWith("/api/users/exists/username");
-	}
+	// private boolean isPublicUri(String uri) {
+	// 	return uri.startsWith("/error")
+	// 		|| uri.startsWith("/api/users/register")
+	// 		|| uri.startsWith("/api/users/exists/username");
+	// }
 
 	/**
 	 * JWT 인증/인가를 해주는 필터
@@ -70,10 +70,10 @@ public class JwtFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response,
 		@NonNull FilterChain filterChain) throws ServletException, IOException {
 
-		if (isPublicUri(request.getRequestURI())) {
-			filterChain.doFilter(request, response);
-			return;
-		}
+		// if (isPublicUri(request.getRequestURI())) {
+		// 	filterChain.doFilter(request, response);
+		// 	return;
+		// }
 
 		String authHeader = Optional.ofNullable(request.getHeader("Authorization"))
 			.filter(header -> header.startsWith("Bearer "))
