@@ -41,11 +41,31 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtFilter extends OncePerRequestFilter {
 	private final JwtUtil jwtUtil;
 
+	/**
+	 * JWT 인증/인가 필요없는 퍼블릭 uri를 모아서 boolean을 반환하는 메서드
+	 * @param uri 퍼블릭 uri
+	 * @return 퍼블릭 uri면 true, 아니라면 false
+	 */
 	private boolean isPublicUri(String uri) {
-		return uri.startsWith("/error") || uri.startsWith("/api/users/register") || uri.startsWith(
-			"/api/users/exists/username");
+		return uri.startsWith("/error")
+			|| uri.startsWith("/api/users/register")
+			|| uri.startsWith("/api/users/exists/username");
 	}
 
+	/**
+	 * JWT 인증/인가를 해주는 필터
+	 *
+	 * 1. 요청 uri가 퍼블릭이라면 필터 통과
+	 * 2. 인증 헤더가 올바르지 않으면 예외 처리
+	 * 3. jwt 토큰 파싱, 검증
+	 * 4. 인증 정보를 SecurityContext에 담고 필터 통과
+	 *
+	 * @param request : 클라이언트의 http 요청 객체
+	 * @param response : 서버의 http 응답 객체
+	 * @param filterChain : 다음 필터 혹은 리소스로 넘겨주는 필터체인 객체
+	 * @throws ServletException : 필터 처리 중 발생할 수 있는 서블릿 관련 예외
+	 * @throws IOException : 입출력 처리 중 발생할 수 있는 예외
+	 */
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response,
 		@NonNull FilterChain filterChain) throws ServletException, IOException {

@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
  -----------------------------------------------------------
  25. 2. 18.        durururuk       최초 생성
  */
+//TODO 레디스 설정 후 액세스 토큰 + 리프레쉬 토큰으로 변경 필요
 @Slf4j
 @Component
 public class JwtUtil {
@@ -69,6 +70,12 @@ public class JwtUtil {
 		}
 	}
 
+	//TODO 레디스 설정 후 JID, 추가 검증 필요
+	/**
+	 * JWT 파싱, 검증 해주는 메서드
+	 * @param token : jwt 토큰
+	 * @return : jwt의 디코딩된 정보를 담고있는 DecodedJWT 객체
+	 */
 	public DecodedJWT verifyJwt(String token) {
 		try {
 			JWTVerifier verifier = JWT.require(algorithm)
