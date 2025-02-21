@@ -12,9 +12,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
+import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
 /**
@@ -39,6 +41,9 @@ class UserServiceTest {
 	@Spy
 	UserRegisterDto dto;
 
+	@Mock
+	private JwtUtil jwtUtil;
+
 	@Test
 	void 회원가입_성공() {
 		try (MockedStatic<PasswordUtil> mockedStatic = mockStatic(PasswordUtil.class)) {
@@ -47,10 +52,27 @@ class UserServiceTest {
 			ReflectionTestUtils.setField(dto, "nickname", "김커피");
 			ReflectionTestUtils.setField(dto, "password", "Qwerasdf1234!!asdf");
 
-			doNothing().when(userMapper).insertUser(any(User.class));
-			userService.registerUser(dto);
+			doAnswer(invocation -> {
+				User user = invocation.getArgument(0);
+				ReflectionTestUtils.setField(user, "userId", 1L);
+				return null;
+			}).when(userMapper).insertUser(any(User.class));
+
+			doAnswer(invocation -> {
+				UserRole userRole = invocation.getArgument(0);
+				ReflectionTestUtils.setField(userRole, "userId", 1L);
+				ReflectionTestUtils.setField(userRole, "roleId", 1L);
+				return null;
+			}).when(userMapper).insertUserRole(any(UserRole.class));
+
+			when(jwtUtil.generateJwt(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
+
+			String result =  userService.registerUser(dto);
+
+			assertEquals("Bearer jwt token", result);
 
 			verify(userMapper, times(1)).insertUser(any(User.class));
+			verify(userMapper, times(1)).insertUserRole(any(UserRole.class));
 
 			mockedStatic.verify(() -> PasswordUtil.hashPassword(anyString(), nullable(String.class)), times(1));
 			mockedStatic.verify(PasswordUtil::generateSalt, times(1));
@@ -59,9 +81,9 @@ class UserServiceTest {
 
 	@Test
 	void 유저명_중복_확인_성공() {
-		when(userMapper.checkUsernameAvailability(anyString())).thenReturn(true);
+		when(userMapper.isExistsUserName(anyString())).thenReturn(false);
 		userService.checkUsernameAvailability("abcdefg");
-		verify(userMapper, times(1)).checkUsernameAvailability(anyString());
+		verify(userMapper, times(1)).isExistsUserName(anyString());
 		assertTrue(userService.checkUsernameAvailability("abcdefg"));
 	}
 }

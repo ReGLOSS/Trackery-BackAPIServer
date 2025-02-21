@@ -9,8 +9,17 @@
         VALUES (#{email}, #{userName}, #{nickname}, #{password}, #{salt}, #{startDate}, #{status}, #{lastLogin}, #{userProfile});
     </insert>
 
-    <select id="checkUsernameAvailability" resultType="boolean" parameterType="String">
+    <select id="isExistsUserName" resultType="boolean" parameterType="String">
         SELECT EXISTS (SELECT 1 FROM user WHERE username = #{username})
     </select>
+
+    <select id = "findById" parameterType="Long" resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
+        SELECT * FROM users WHERE user_id = #{userId}
+    </select>
+
+    <insert id="insertUserRole" parameterType="com.trackery.trackerybackapiserver.domain.user.entity.UserRole" useGeneratedKeys="true" keyProperty="userRoleId" >
+        INSERT INTO user_role (user_id, role_id)
+        VALUES (#{userId}, #{roleId})
+    </insert>
 
 </mapper>

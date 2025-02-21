@@ -9,8 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -18,8 +19,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trackery.trackerybackapiserver.config.CacheConfig;
+import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.user.controller.UserController;
@@ -37,18 +37,20 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
  25. 2. 15.        durururuk       최초 생성*/
-@WebMvcTest(GlobalExceptionHandler.class)
-@Import(CacheConfig.class)
-class GlobalExceptionHandlerTest {
-	private final ObjectMapper objectMapper = new ObjectMapper();
-	@Spy
-	UserRegisterDto userRegisterDto;
-	@MockitoBean
-	private UserController userController;
-	@Mock
-	private UserService userService;
+@WebMvcTest(UserController.class)
+@AutoConfigureMockMvc(addFilters = false)
+class GlobalExceptionHandlerTest extends CommonMockMvcControllerTestSetUp {
 	@Autowired
 	private MockMvc mockMvc;
+
+	@MockitoBean
+	private UserController userController;
+
+	@Mock
+	private UserService userService;
+
+	@Spy
+	UserRegisterDto userRegisterDto;
 
 	@Test
 	@WithMockUser
@@ -74,7 +76,7 @@ class GlobalExceptionHandlerTest {
 		ReflectionTestUtils.setField(userRegisterDto, "nickname", "");
 		ReflectionTestUtils.setField(userRegisterDto, "password", "Qwerasdf1234!!asdf");
 
-		doNothing().when(userService).registerUser(any());
+		when(userService.registerUser(any())).thenReturn(null);
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
@@ -89,7 +91,7 @@ class GlobalExceptionHandlerTest {
 	@Test
 	@WithMockUser
 	void HttpMessageNotReadableException_처리_테스트() throws Exception {
-		doNothing().when(userService).registerUser(any());
+		when(userService.registerUser(any())).thenReturn(null);
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
 				.with(csrf())
