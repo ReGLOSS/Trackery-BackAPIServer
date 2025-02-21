@@ -63,6 +63,6 @@ public class UserService {
 	 * @return db에 존재하지 않을 경우 true, db에 존재할 경우 false 반환
 	 */
 	public boolean checkUsernameAvailability(String username) {
-		return userMapper.checkUsernameAvailability(username);
+		return !userMapper.isExistsUsername(username);
 	}
 }

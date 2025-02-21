@@ -81,9 +81,9 @@ class UserServiceTest {
 
 	@Test
 	void 유저명_중복_확인_성공() {
-		when(userMapper.checkUsernameAvailability(anyString())).thenReturn(true);
+		when(userMapper.isExistsUsername(anyString())).thenReturn(false);
 		userService.checkUsernameAvailability("abcdefg");
-		verify(userMapper, times(1)).checkUsernameAvailability(anyString());
+		verify(userMapper, times(1)).isExistsUsername(anyString());
 		assertTrue(userService.checkUsernameAvailability("abcdefg"));
 	}
 }

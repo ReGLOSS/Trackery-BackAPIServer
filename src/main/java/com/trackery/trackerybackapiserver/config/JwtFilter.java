@@ -7,7 +7,6 @@ import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -42,10 +41,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
 	/**
 	 * JWT 인증/인가를 해주는 필터
-	 *
-	 * 2. 인증 헤더가 올바르지 않으면 예외 처리
-	 * 3. jwt 토큰 파싱, 검증
-	 * 4. 인증 정보를 SecurityContext에 담고 필터 통과
+	 * 1. 인증 헤더가 올바르지 않으면 예외 처리
+	 * 2. jwt 토큰 파싱, 검증
+	 * 3. 인증 정보를 SecurityContext에 담고 필터 통과
 	 *
 	 * @param request : 클라이언트의 http 요청 객체
 	 * @param response : 서버의 http 응답 객체
