@@ -9,7 +9,7 @@
         VALUES (#{email}, #{userName}, #{nickname}, #{password}, #{salt}, #{startDate}, #{status}, #{lastLogin}, #{userProfile});
     </insert>
 
-    <select id="checkUsernameAvailability" resultType="boolean" parameterType="String">
+    <select id="isExistsUserName" resultType="boolean" parameterType="String">
         SELECT EXISTS (SELECT 1 FROM user WHERE username = #{username})
     </select>
 

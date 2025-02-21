@@ -11,7 +11,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
 public interface UserMapper {
 	void insertUser(User user);
 
-	boolean isExistsUsername(String username);
+	boolean isExistsUserName(String username);
 
 	Optional<User> findByUserId(Long userId);
 
