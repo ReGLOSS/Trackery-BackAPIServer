@@ -65,9 +65,6 @@ public class UserService {
 	 * @return db에 존재하지 않을 경우 true, db에 존재할 경우 false 반환
 	 */
 	public boolean checkUsernameAvailability(String username) {
-		if (userMapper.isExistsUserName(username)) {
-			throw new ApiException(ErrorCode.BAD_REQUEST);
-		}
-		return true;
+		return !userMapper.isExistsUserName(username);
 	}
 }
