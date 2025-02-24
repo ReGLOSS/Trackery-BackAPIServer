@@ -5,8 +5,6 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
-import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
-import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
@@ -53,9 +51,7 @@ public class UserService {
 
 		userMapper.insertUserRole(userRole);
 
-		String jwt = jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
-
-		return String.format("Bearer %s", jwt);
+		return jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
 
 	/**

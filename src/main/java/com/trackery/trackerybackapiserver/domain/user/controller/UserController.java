@@ -1,6 +1,10 @@
 package com.trackery.trackerybackapiserver.domain.user.controller;
 
+import java.time.Duration;
+
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,10 +35,19 @@ public class UserController {
 	 */
 	@PostMapping("/register")
 	public ResponseEntity<ApiResponse<String>> registerUser(@Valid @RequestBody UserRegisterDto userRegisterDto) {
-		String authHeader = userService.registerUser(userRegisterDto);
+		String jwt = userService.registerUser(userRegisterDto);
+
+		ResponseCookie cookie = ResponseCookie.from("accessToken", jwt)
+			.httpOnly(true)
+			.secure(false)
+			.path("/")
+			.maxAge(Duration.ofDays(7))
+			.sameSite("Strict")
+			.build();
+
 		return ResponseEntity
 			.status(HttpStatus.CREATED)
-			.header("Authorization", authHeader)
+			.header(HttpHeaders.SET_COOKIE, cookie.toString())
 			.body(ApiResponse.success(SuccessCode.CREATED));
 	}
 
