@@ -14,7 +14,7 @@ import com.trackery.trackerybackapiserver.domain.home.service.ImageService;
 import lombok.RequiredArgsConstructor;
 
 /**
- *packageName    : com.trackery.trackerybackapiserver.domain.home.controller
+ * packageName    : com.trackery.trackerybackapiserver.domain.home.controller
  * fileName       : LandingImagesController
  * author         : inari
  * date           : 25. 2. 14.
