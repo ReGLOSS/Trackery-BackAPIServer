@@ -18,16 +18,15 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import lombok.extern.slf4j.Slf4j;
 
 /**
- *packageName    : com.trackery.trackerybackapiserver.domain.common.util
-
- fileName       : JwtUtil
- author         : durururuk
- date           : 25. 2. 18.
- description    : JWT 토큰 생성, 검증, 파싱을 담당하는 유틸리티 클래스
- ===========================================================
- DATE              AUTHOR             NOTE
- -----------------------------------------------------------
- 25. 2. 18.        durururuk       최초 생성
+ * packageName    : com.trackery.trackerybackapiserver.domain.common.util
+ * fileName       : JwtUtil
+ * author         : durururuk
+ * date           : 25. 2. 18.
+ * description    : JWT 토큰 생성, 검증, 파싱을 담당하는 유틸리티 클래스
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 2. 18.        durururuk       최초 생성
  */
 //TODO 레디스 설정 후 액세스 토큰 + 리프레쉬 토큰으로 변경 필요
 @Slf4j

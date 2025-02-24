@@ -8,13 +8,36 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCo
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+/**
+ * packageName    : com.trackery.trackerybackapiserver.domain.common.response
+ * fileName       : ApiResponse
+ * author         : durururuk
+ * date           : 25. 2. 13.
+ * description    : API 응갑을 표준화하기 위한 응답 클래스입니다.
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 2. 13.        durururuk       최초 생성
+ * 25. 2. 21.        inari			 상세 주석 추가
+ */
 @Getter
 @AllArgsConstructor
 @JsonPropertyOrder({"code", "message", "data"})
 public class ApiResponse<T> {
 
+	/**
+	 * 응답 코드 (API에서 정의한 코드)
+	 */
 	private final int code;
+
+	/**
+	 * 응답 메시지
+	 */
 	private final String message;
+
+	/**
+	 * 응답 데이터
+	 */
 	@JsonInclude(JsonInclude.Include.NON_NULL)
 	private T data;
 

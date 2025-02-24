@@ -12,6 +12,20 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * packageName    : com.trackery.trackerybackapiserver.domain.common.response.util
+ * fileName       : GlobalExceptionHandler
+ * author         : durururuk
+ * date           : 25. 2. 13.
+ * description    : 글로벌 예외를 처리하는 클래스입니다.
+ * 					컨트롤러에서 발생하는 예외를 처리하여 일관된 응답 형식을 제공하며
+ * 					로깅을 통해 예외 정보를 기록합니다.
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 2. 13.        durururuk       최초 생성
+ * 25. 2. 21.        inari			 상세 주석 추가
+ */
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {

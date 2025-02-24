@@ -17,10 +17,27 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * packageName    : com.trackery.trackerybackapiserver.domain.user.controller
+ * fileName       : UserController
+ * author         : dururuk
+ * date           : 25. 2. 12.
+ * description    : 사용자 관련 HTTP 요청을 처리하는 컨트롤러 클래스입니다.
+ * 					회원가입과 사용자명 중복 확인 기능을 제공합니다.
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 2. 12.        dururuk       최초 생성
+ * 25. 2. 24.        inari         주석 추가
+ */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
+
+	/**
+	 * 사용자 서비스 객체입니다.
+	 */
 	private final UserService userService;
 
 	/**
