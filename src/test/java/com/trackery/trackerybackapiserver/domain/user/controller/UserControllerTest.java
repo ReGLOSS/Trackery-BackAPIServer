@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.user.controller;
 
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
@@ -54,7 +55,7 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 		ReflectionTestUtils.setField(dto, "nickname", "김커피");
 		ReflectionTestUtils.setField(dto, "password", "Qwerasdf1234!!asdf");
 
-		when(userService.registerUser(any())).thenReturn("Bearer jwt");
+		when(userService.registerUser(any())).thenReturn("jwt");
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
@@ -65,8 +66,9 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		result
 			.andExpect(status().isCreated())
-			.andExpect(header().exists("Authorization"))
-			.andExpect(header().string("Authorization", "Bearer jwt"));
+			.andExpect(cookie().exists("accessToken"))
+			.andExpect(cookie().httpOnly("accessToken", true))
+			.andExpect(cookie().value("accessToken", notNullValue()));
 	}
 
 	@Test

@@ -55,18 +55,14 @@ public class SecurityConfig {
 
 	@Bean
 	@Order(2)
-	public SecurityFilterChain protectedFilterChain(HttpSecurity http, AuthenticationEntryPoint entryPoint,
-		AccessDeniedHandler accessDeniedHandler) throws Exception {
+	public SecurityFilterChain protectedFilterChain(HttpSecurity http) throws Exception {
 		http
 			.cors(Customizer.withDefaults())
 			.csrf(AbstractHttpConfigurer::disable)
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/error").permitAll().anyRequest().authenticated())
-			.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
-			.exceptionHandling(handler -> handler
-				.authenticationEntryPoint(entryPoint)
-				.accessDeniedHandler(accessDeniedHandler));
+			.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
 	}

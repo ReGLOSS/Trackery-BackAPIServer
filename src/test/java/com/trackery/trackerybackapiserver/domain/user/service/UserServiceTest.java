@@ -69,7 +69,7 @@ class UserServiceTest {
 
 			String result =  userService.registerUser(dto);
 
-			assertEquals("Bearer jwt token", result);
+			assertEquals("jwt token", result);
 
 			verify(userMapper, times(1)).insertUser(any(User.class));
 			verify(userMapper, times(1)).insertUserRole(any(UserRole.class));
