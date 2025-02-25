@@ -44,10 +44,5 @@ public interface UserMapper {
 	 */
 	Optional<User> findByUserId(Long userId);
 
-	/**
-	 * 새로운 사용자-권한 관계를 데이터베이스에 저장합니다.
-	 *
-	 * @param userRole 저장할 사용자-권한 관계 정보
-	 */
-	void insertUserRole(UserRole userRole);
+	Optional<User> findByUserName(String userName);
 }
