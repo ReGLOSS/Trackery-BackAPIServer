@@ -5,12 +5,16 @@ import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
+import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 	private final UserMapper userMapper;
 	private final JwtUtil jwtUtil;
+	private final UserRoleMapper userRoleMapper;
 
 	/**
 	 * 회원가입 정보를 담아서 db에 인서트하는 메서드입니다.
@@ -61,7 +66,7 @@ public class UserService {
 			.roleId(1L)
 			.build();
 
-		userMapper.insertUserRole(userRole);
+		userRoleMapper.insertUserRole(userRole);
 
 		return jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
@@ -74,5 +79,28 @@ public class UserService {
 	 */
 	public boolean checkUsernameAvailability(String username) {
 		return !userMapper.isExistsUserName(username);
+	}
+
+	/**
+	 * 로그인 서비스 추가
+	 *
+	 * 유저의 username, password를 받아서 username으로 user 조회 후 salt, password 받아와서 맞으면 jwt 토큰 반환
+	 * 아니면 예외 처리
+	 *
+	 * 1. username 조회 했는데 없다 << username 없다 오류 발사
+	 * 2. password 조회 했는데 틀렸다 << 비밀번호 틀렸다 발사
+	 */
+	public String login(UserLoginDto userLoginDto) {
+		User user = userMapper.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new ApiException(
+			ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS));
+
+		if (!PasswordUtil.hashPassword(userLoginDto.getPassword(), user.getSalt()).equals(user.getPassword())) {
+			throw new ApiException(ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS);
+		}
+
+		UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
+			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
+
+		return jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
 }

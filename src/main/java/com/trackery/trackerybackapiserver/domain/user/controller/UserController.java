@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
@@ -51,7 +52,7 @@ public class UserController {
 	 * @return : 성공, 실패 여부 응답
 	 */
 	@PostMapping("/register")
-	public ResponseEntity<ApiResponse<String>> registerUser(@Valid @RequestBody UserRegisterDto userRegisterDto) {
+	public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody UserRegisterDto userRegisterDto) {
 		String jwt = userService.registerUser(userRegisterDto);
 
 		ResponseCookie cookie = ResponseCookie.from("accessToken", jwt)
@@ -66,6 +67,24 @@ public class UserController {
 			.status(HttpStatus.CREATED)
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
 			.body(ApiResponse.success(SuccessCode.CREATED));
+	}
+
+	@PostMapping("/login")
+	public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody UserLoginDto userLoginDto) {
+		String jwt = userService.login(userLoginDto);
+
+		ResponseCookie cookie = ResponseCookie.from("accessToken", jwt)
+			.httpOnly(true)
+			.secure(false)
+			.path("/")
+			.maxAge(Duration.ofDays(7))
+			.sameSite("Strict")
+			.build();
+
+		return ResponseEntity
+			.ok()
+			.header(HttpHeaders.SET_COOKIE, cookie.toString())
+			.body(ApiResponse.success(SuccessCode.OK));
 	}
 
 	/**

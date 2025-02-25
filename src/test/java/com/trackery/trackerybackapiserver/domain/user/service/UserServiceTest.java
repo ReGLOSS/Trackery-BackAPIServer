@@ -18,6 +18,7 @@ import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
+import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
 
 /**
  *packageName    : com.trackery.trackerybackapiserver.domain.user.service
@@ -37,6 +38,9 @@ class UserServiceTest {
 
 	@Mock
 	private UserMapper userMapper;
+
+	@Mock
+	private UserRoleMapper userRoleMapper;
 
 	@Spy
 	UserRegisterDto dto;
@@ -63,7 +67,7 @@ class UserServiceTest {
 				ReflectionTestUtils.setField(userRole, "userId", 1L);
 				ReflectionTestUtils.setField(userRole, "roleId", 1L);
 				return null;
-			}).when(userMapper).insertUserRole(any(UserRole.class));
+			}).when(userRoleMapper).insertUserRole(any(UserRole.class));
 
 			when(jwtUtil.generateJwt(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
 
@@ -72,7 +76,7 @@ class UserServiceTest {
 			assertEquals("jwt token", result);
 
 			verify(userMapper, times(1)).insertUser(any(User.class));
-			verify(userMapper, times(1)).insertUserRole(any(UserRole.class));
+			verify(userRoleMapper, times(1)).insertUserRole(any(UserRole.class));
 
 			mockedStatic.verify(() -> PasswordUtil.hashPassword(anyString(), nullable(String.class)), times(1));
 			mockedStatic.verify(PasswordUtil::generateSalt, times(1));
