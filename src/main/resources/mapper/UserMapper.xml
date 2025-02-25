@@ -14,7 +14,7 @@
     </select>
 
     <select id = "findById" parameterType="Long" resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
-        SELECT * FROM users WHERE user_id = #{userId}
+        SELECT * FROM user WHERE user_id = #{userId}
     </select>
 
     <insert id="insertUserRole" parameterType="com.trackery.trackerybackapiserver.domain.user.entity.UserRole" useGeneratedKeys="true" keyProperty="userRoleId" >
