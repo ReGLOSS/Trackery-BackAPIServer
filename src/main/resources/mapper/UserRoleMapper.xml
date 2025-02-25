@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper">
+
+    <insert id="insertUserRole" parameterType="com.trackery.trackerybackapiserver.domain.user.entity.UserRole" useGeneratedKeys="true" keyProperty="userRoleId" >
+        INSERT INTO user_role (user_id, role_id)
+        VALUES (#{userId}, #{roleId})
+    </insert>
+
+    <select id = "findByUserId" parameterType="Long" resultType="com.trackery.trackerybackapiserver.domain.user.entity.UserRole">
+        SELECT * FROM user_role WHERE user_id = #{userId}
+    </select>
+
+</mapper>
