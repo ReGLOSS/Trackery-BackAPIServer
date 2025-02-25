@@ -1,6 +1,7 @@
 package com.trackery.trackerybackapiserver.config;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.springframework.lang.NonNull;
@@ -17,6 +18,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -58,15 +60,17 @@ public class JwtFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response,
 		@NonNull FilterChain filterChain) throws ServletException, IOException {
 
-		String authHeader = Optional.ofNullable(request.getHeader("Authorization"))
-			.filter(header -> header.startsWith("Bearer "))
-			.orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED_MISSING_AUTH_HEADER));
+		String requestToken = Optional.ofNullable(request.getCookies())
+			.flatMap(cookies -> Arrays.stream(cookies)
+				.filter(cookie -> "accessToken".equals(cookie.getName()))
+				.findFirst()
+				.map(Cookie::getValue))
+			.orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED));
 
-		String token = authHeader.substring(7);
-		DecodedJWT jwt = jwtUtil.verifyJwt(token);
+		DecodedJWT jwt = jwtUtil.verifyJwt(requestToken);
 
 		Long userId = Long.valueOf(jwt.getSubject());
-		Long roleId = jwt.getClaim("roleId").asLong();
+		Long roleId = jwt.getClaim("role").asLong();
 
 		UserDetails userDetails = CustomUserDetails.builder().userId(userId).roleId(roleId).build();
 
