@@ -10,23 +10,27 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 
 /**
- *packageName    : com.trackery.trackerybackapiserver.domain.common.util
-
- fileName       : PasswordUtil
- author         : durururuk
- date           : 25. 2. 14.
- description    : 비밀번호 생성에 필요한 salt 생성기와 해싱을 담당하는 유틸리티 클래스
- ===========================================================
- DATE              AUTHOR             NOTE
- -----------------------------------------------------------
- 25. 2. 14.        durururuk       최초 생성*/
+ * packageName    : com.trackery.trackerybackapiserver.domain.common.util
+ * fileName       : PasswordUtil
+ * author         : durururuk
+ * date           : 25. 2. 14.
+ * description    : 비밀번호 생성에 필요한 salt 생성기와 해싱을 담당하는 유틸리티 클래스
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 2. 14.        durururuk       최초 생성
+ * 25. 2. 21.        inari           주석 추가
+ */
 public class PasswordUtil {
+
+	/**
+	 * 해싱 반복 횟수
+	 */
+	private static final int HASH_ITERATIONS = 10000;
 
 	private PasswordUtil() {
 		throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR_UTIL_CLASS_INSTANTIATED);
 	}
-
-	private static final int HASH_ITERATIONS = 10000;
 
 	/**
 	 * 16바이트 난수를 생성하고 BASE64로 인코딩한 salt 생성하는 메서드

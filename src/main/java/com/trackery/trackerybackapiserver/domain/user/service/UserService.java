@@ -14,6 +14,18 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * packageName    : com.trackery.trackerybackapiserver.domain.user.service
+ * fileName       : UserMapper
+ * author         : dururuk
+ * date           : 25. 2. 12.
+ * description    : 사용자 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 2. 12.        dururuk       최초 생성
+ * 25. 2. 24.        inari         주석 추가
+ */
 @Service
 @RequiredArgsConstructor
 public class UserService {

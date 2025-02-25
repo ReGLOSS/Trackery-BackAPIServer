@@ -12,10 +12,12 @@ import org.springframework.context.annotation.Configuration;
  * author         : inari
  * date           : 25. 2. 14.
  * description    : 캐시 설정을 담당하는 클래스입니다.
+ * 					메모리 기반의 캐시를 지원합니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 14.        inari       최초 생성
+ * 25. 2. 21.        inari       상세 주석 추가
  */
 @Configuration
 @EnableCaching
@@ -23,6 +25,8 @@ public class CacheConfig {
 
 	/**
 	 * 캐시 매니저를 설정합니다.
+	 * 캐시에 null 값을 저장하는 것을 금지합니다.
+	 *
 	 * @return CacheManager 인스턴스
 	 */
 	@Bean

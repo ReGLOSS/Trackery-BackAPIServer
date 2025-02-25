@@ -25,20 +25,23 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- *packageName    : com.trackery.trackerybackapiserver.config
-
- fileName       : JwtFilter
- author         : durururuk
- date           : 25. 2. 19.
- description    : JWT 인증/인가를 담당하는 필터
- ===========================================================
- DATE              AUTHOR             NOTE
- -----------------------------------------------------------
- 25. 2. 19.        durururuk       최초 생성
+ * packageName    : com.trackery.trackerybackapiserver.config
+ * fileName       : JwtFilter
+ * author         : durururuk
+ * date           : 25. 2. 19.
+ * description    : JWT 인증/인가를 담당하는 필터
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 2. 19.        durururuk       최초 생성
  */
 @Slf4j
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
+
+	/**
+	 * 토큰 검증 및 파싱을 담당하는 JWT 유틸리티 클래스
+	 */
 	private final JwtUtil jwtUtil;
 
 	/**
