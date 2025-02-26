@@ -63,9 +63,7 @@ public class UserService {
 
 		userMapper.insertUserRole(userRole);
 
-		String jwt = jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
-
-		return String.format("Bearer %s", jwt);
+		return jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
 
 	/**
