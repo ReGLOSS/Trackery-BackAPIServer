@@ -110,6 +110,7 @@ class UserServiceTest {
 			.nickname("김커피")
 			.password(hashedPassword)
 			.salt(salt)
+			.status(1)
 			.build();
 		ReflectionTestUtils.setField(user, "userId", 1L);
 

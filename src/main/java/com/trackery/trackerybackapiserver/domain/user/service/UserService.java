@@ -21,14 +21,16 @@ import lombok.RequiredArgsConstructor;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.service
  * fileName       : UserMapper
- * author         : dururuk
+ * author         : durururuk
  * date           : 25. 2. 12.
  * description    : 사용자 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 12.        dururuk       최초 생성
+ * 25. 2. 12.        durururuk       최초 생성
  * 25. 2. 24.        inari         주석 추가
+ * 25. 2. 25.        durururuk       로그인 메서드 추가
+ * 25. 2. 26.        durururuk       로그인 시 비활성유저인지 확인하는 로직 추가
  */
 @Service
 @RequiredArgsConstructor
@@ -90,6 +92,10 @@ public class UserService {
 	public String login(UserLoginDto userLoginDto) {
 		User user = userMapper.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new ApiException(
 			ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS));
+
+		if (user.getStatus() == 0) {
+			throw new ApiException(ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS);
+		}
 
 		if (!PasswordUtil.hashPassword(userLoginDto.getPassword(), user.getSalt()).equals(user.getPassword())) {
 			throw new ApiException(ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS);
