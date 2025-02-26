@@ -82,13 +82,10 @@ public class UserService {
 	}
 
 	/**
-	 * 로그인 서비스 추가
+	 * 로그인 정보 DTO를 받아서 인증 후 jwt 토큰을 반환하는 메서드
 	 *
-	 * 유저의 username, password를 받아서 username으로 user 조회 후 salt, password 받아와서 맞으면 jwt 토큰 반환
-	 * 아니면 예외 처리
-	 *
-	 * 1. username 조회 했는데 없다 << username 없다 오류 발사
-	 * 2. password 조회 했는데 틀렸다 << 비밀번호 틀렸다 발사
+	 * @param userLoginDto : username, password를 받는 DTO
+	 * @return : 인증된 유저의 정보를 담고있는 jwt
 	 */
 	public String login(UserLoginDto userLoginDto) {
 		User user = userMapper.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new ApiException(
