@@ -1,6 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.user.controller;
 
-import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
@@ -19,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
@@ -33,6 +33,7 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
  25. 2. 14.        durururuk       최초 생성
+ 25. 2. 14.        durururuk       로그인 컨트롤러 테스트 코드 작성
  */
 
 @WithMockUser
@@ -46,21 +47,24 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 	private UserService userService;
 
 	@Spy
-	private UserRegisterDto dto;
+	private UserRegisterDto registerDto;
+
+	@Spy
+	private UserLoginDto loginDto;
 
 	@Test
 	void 회원가입_성공() throws Exception {
-		ReflectionTestUtils.setField(dto, "email", "a@a.com");
-		ReflectionTestUtils.setField(dto, "userName", "abcdefg");
-		ReflectionTestUtils.setField(dto, "nickname", "김커피");
-		ReflectionTestUtils.setField(dto, "password", "Qwerasdf1234!!asdf");
+		ReflectionTestUtils.setField(registerDto, "email", "a@a.com");
+		ReflectionTestUtils.setField(registerDto, "userName", "abcdefg");
+		ReflectionTestUtils.setField(registerDto, "nickname", "김커피");
+		ReflectionTestUtils.setField(registerDto, "password", "Qwerasdf1234!!asdf");
 
 		when(userService.registerUser(any())).thenReturn("jwt");
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
 				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(dto))
+				.content(objectMapper.writeValueAsString(registerDto))
 				.with(csrf())
 			);
 
@@ -68,7 +72,7 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isCreated())
 			.andExpect(cookie().exists("accessToken"))
 			.andExpect(cookie().httpOnly("accessToken", true))
-			.andExpect(cookie().value("accessToken", notNullValue()));
+			.andExpect(cookie().value("accessToken", "jwt"));
 	}
 
 	@Test
@@ -81,5 +85,25 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		result.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").value(true));
+	}
+
+	@Test
+	void 로그인_테스트() throws Exception {
+		ReflectionTestUtils.setField(loginDto, "userName", "abcdefg");
+		ReflectionTestUtils.setField(loginDto, "password", "Qwerasdf1234!");
+
+		when(userService.login(any())).thenReturn("jwt");
+
+		ResultActions result = mockMvc
+			.perform(post("/api/users/login")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(loginDto))
+				.with(csrf()));
+
+		result
+			.andExpect(status().isOk())
+			.andExpect(cookie().exists("accessToken"))
+			.andExpect(cookie().httpOnly("accessToken", true))
+			.andExpect(cookie().value("accessToken", "jwt"));
 	}
 }
