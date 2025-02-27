@@ -101,7 +101,9 @@ public enum ErrorCode {
 	/**
 	 * 인증 헤더가 누락됨 (HttpStatus.UNAUTHORIZED, 401, "인증 헤더가 없습니다.")
 	 */
-	UNAUTHORIZED_MISSING_AUTH_HEADER(HttpStatus.UNAUTHORIZED, 401, "인증 헤더가 없습니다.");
+	UNAUTHORIZED_MISSING_AUTH_HEADER(HttpStatus.UNAUTHORIZED, 401, "인증 헤더가 없습니다."),
+
+	UNAUTHORIZED_INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, 401, "유저명 혹은 비밀번호가 잘못되었습니다.");
 
 	/**
 	 * HTTP 상태 코드
