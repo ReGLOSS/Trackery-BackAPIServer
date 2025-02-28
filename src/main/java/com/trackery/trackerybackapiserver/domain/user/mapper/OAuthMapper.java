@@ -43,5 +43,5 @@ public interface OAuthMapper {
 	 * @param providerUserId  간편 로그인을 등록한 SNS에서 제공한 고유 식별자
 	 * @return 특정 유저가 연동한 간편 로그인 정보
 	 */
-	Optional<OAuth> findByUserIdAndProviderId(Long userId, String providerUserId);
+	Optional<OAuth> findByUserIdAndProvider(Long userId, String providerUserId);
 }

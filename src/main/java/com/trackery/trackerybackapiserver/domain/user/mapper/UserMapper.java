@@ -18,6 +18,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
  * -----------------------------------------------------------
  * 25. 2. 12.        dururuk       최초 생성
  * 25. 2. 24.        inari         주석 추가
+ * 25. 2. 25.        inari         fingByEmail, isExistsEmail 추가
  */
 @Mapper
 public interface UserMapper {
@@ -39,10 +40,34 @@ public interface UserMapper {
 
 	/**
 	 * 사용자 고유 식별자로 사용자 정보를 조회합니다.
+	 *
 	 * @param userId 조회할 사용자 고유 식별자
 	 * @return 조회된 사용자 정보
 	 */
 	Optional<User> findByUserId(Long userId);
+
+	/**
+	 * 새로운 사용자-권한 관계를 데이터베이스에 저장합니다.
+	 *
+	 * @param userRole 저장할 사용자-권한 관계 정보
+	 */
+	void insertUserRole(UserRole userRole);
+
+	/**
+	 * 사용자 이메일로 사용자 정보를 조회합니다.
+	 *
+	 * @param email 조회할 사용자 이메일
+	 * @return 조회된 사용자 정보
+	 */
+	Optional<User> findByEmail(String email);
+
+	/**
+	 * 주어진 이메일이 이미 존재하는지 확인합니다.
+	 *
+	 * @param email 확인할 사용자 이메일
+	 * @return 존재하면 true, 없으면 false
+	 */
+	boolean isExistsEmail(String email);
 
 	Optional<User> findByUserName(String userName);
 }

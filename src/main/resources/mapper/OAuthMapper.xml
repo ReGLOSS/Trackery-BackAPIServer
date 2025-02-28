@@ -10,13 +10,11 @@
         INSERT INTO user_oauth (
             user_id,
             provider,
-            provider_user_id,
-            refresh_token
+            provider_user_id
         ) VALUES (
             #{userId},
             #{provider},
-            #{providerUserId},
-            #{refreshToken}
+            #{providerUserId}
         )
     </insert>
 

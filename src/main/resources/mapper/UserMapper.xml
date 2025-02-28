@@ -22,7 +22,7 @@
     </select>
 
     <!-- 이메일로 회원 정보 찾는 쿼리 -->
-    <select id="findByEmail" resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
+    <select id="findByEmail" parameterType="String" resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
         SELECT * FROM user WHERE email = #{email}
     </select>
 

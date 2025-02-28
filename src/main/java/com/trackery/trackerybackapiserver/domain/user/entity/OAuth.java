@@ -10,11 +10,12 @@ import lombok.NoArgsConstructor;
  * fileName       : OAuth
  * author         : inari
  * date           : 25. 2. 24.
- * description    : 유저 간편로그인 정보를 담는 엔티티 클래스입니다.
+ * description    : 유저 간편 로그인 정보를 담는 엔티티 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 24.        inari       최초 생성
+ * 25. 2. 28.        inari       리프레시 토큰 제거
  */
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -36,20 +37,14 @@ public class OAuth {
 	private String provider;
 
 	/**
-	 * 간편 로그인을 등록한 SNS에서 제공한 고유 식별자입니다.
+	 * 간편 로그인을 등록한 SNS에서 제공한 사용자의 고유 식별자입니다.
 	 */
 	private String providerUserId;
 
-	/**
-	 * 리프레시 토큰입니다.
-	 */
-	private String refreshToken;
-
 	@Builder
-	public OAuth(Long userId, String provider, String providerUserId, String refreshToken) {
+	public OAuth(Long userId, String provider, String providerUserId) {
 		this.userId = userId;
 		this.provider = provider;
 		this.providerUserId = providerUserId;
-		this.refreshToken = refreshToken;
 	}
 }
