@@ -33,7 +33,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @RestController
-@RequestMapping("/api/oauth")
+@RequestMapping("/api/users/oauth")
 @RequiredArgsConstructor
 public class OAuthController {
 

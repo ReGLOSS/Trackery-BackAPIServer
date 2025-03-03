@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.user.Client;
+package com.trackery.trackerybackapiserver.domain.user.client;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,16 +15,18 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trackery.trackerybackapiserver.config.OAuthProperties;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUserInfoDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.TokenResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.user.Client
+ * packageName    : com.trackery.trackerybackapiserver.domain.user.client
  * fileName       : GenericOAuthClient
  * author         : inari
  * date           : 25. 2. 26.
@@ -146,7 +148,7 @@ public class GenericOAuthClient implements OAuthClient {
 	 * @param provider 간편 로그인 제공자
 	 * @return 액세스 토큰 포함한 응답
 	 */
-	public TokenResponse getTokens(String code, String provider) {
+	public TokenResponseDto getTokens(String code, String provider) {
 		try {
 			OAuthProvider oAuthProvider = OAuthProvider.valueOf(provider.toUpperCase());
 			OAuthProperties.ProviderProperties properties = getProviderProperties(oAuthProvider);
@@ -180,7 +182,7 @@ public class GenericOAuthClient implements OAuthClient {
 				}
 
 				String accessToken = jsonNode.get("access_token").asText();
-				return new TokenResponse(accessToken);
+				return new TokenResponseDto(accessToken);
 			} else {
 				// 기존 다른 OAuth 제공자 처리 로직 유지
 				headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -209,7 +211,7 @@ public class GenericOAuthClient implements OAuthClient {
 				}
 
 				String accessToken = jsonNode.get("access_token").asText();
-				return new TokenResponse(accessToken);
+				return new TokenResponseDto(accessToken);
 			}
 		} catch (Exception e) {
 			log.error("OAuth 토큰 획득 실패: {}, 오류: {}", provider, e.getMessage(), e);

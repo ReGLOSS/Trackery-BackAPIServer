@@ -1,11 +1,11 @@
-package com.trackery.trackerybackapiserver.domain.user.Client;
+package com.trackery.trackerybackapiserver.domain.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.user.Client
- * fileName       : TokenResponse
+ * packageName    : com.trackery.trackerybackapiserver.domain.user.dto
+ * fileName       : TokenResponseDto
  * author         : inari
  * date           : 25. 2. 28.
  * description    : 간편 로그인 인증 과정에서 제공자로부터 받은 액세스 토큰 정보를 담는 클래스입니다.
@@ -15,10 +15,11 @@ import lombok.Getter;
  * -----------------------------------------------------------
  * 25. 2. 28.        inari       최초 생성
  * 25. 2. 28.        inari       리프레시 토큰 제거
+ * 25. 3. 03.        inari       경로 수정
  */
 @Getter
 @AllArgsConstructor
-public class TokenResponse {
+public class TokenResponseDto {
 
 	/**
 	 * OAuth 제공자로부터 발급받은 액세스 토큰입니다.

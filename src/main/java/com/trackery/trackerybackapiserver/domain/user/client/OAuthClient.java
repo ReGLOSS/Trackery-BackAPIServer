@@ -1,9 +1,10 @@
-package com.trackery.trackerybackapiserver.domain.user.Client;
+package com.trackery.trackerybackapiserver.domain.user.client;
 
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUserInfoDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.TokenResponseDto;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.user.Client
+ * packageName    : com.trackery.trackerybackapiserver.domain.user.client
  * fileName       : OAuthClient
  * author         : inari
  * date           : 25. 2. 26.
@@ -22,7 +23,7 @@ public interface OAuthClient {
 	 * @param provider 간편 로그인 제공자
 	 * @return 액세스 토큰과 리프레시 토큰을 포함한 응답
 	 */
-	TokenResponse getTokens(String code, String provider);
+	TokenResponseDto getTokens(String code, String provider);
 
 	/**
 	 * 인증 코드로 액세스 토큰을 획득하는 메서드

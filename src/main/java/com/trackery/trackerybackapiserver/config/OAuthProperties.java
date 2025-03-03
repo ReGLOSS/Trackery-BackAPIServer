@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.user.Client;
+package com.trackery.trackerybackapiserver.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.user.Client
+ * packageName    : com.trackery.trackerybackapiserver.domain.user.config
  * fileName       : OAuthProperties
  * author         : inari
  * date           : 25. 2. 26.
@@ -17,6 +17,7 @@ import lombok.Setter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 26.        inari       최초 생성
+ * 25. 3. 03.        inari       경로 수정
  */
 @Getter
 @Setter

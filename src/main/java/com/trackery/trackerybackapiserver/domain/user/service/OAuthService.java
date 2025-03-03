@@ -13,7 +13,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
-import com.trackery.trackerybackapiserver.domain.user.Client.OAuthClient;
+import com.trackery.trackerybackapiserver.domain.user.client.OAuthClient;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUserInfoDto;
