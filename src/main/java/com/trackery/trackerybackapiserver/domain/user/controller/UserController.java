@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,6 +17,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCo
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.VerifyEmailDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -91,5 +93,17 @@ public class UserController {
 	public ResponseEntity<ApiResponse<Boolean>> checkUsernameAvailability(@RequestParam String value) {
 		boolean isAvailable = userService.checkUsernameAvailability(value);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, isAvailable));
+	}
+
+	@PostMapping("/mail/request-verify")
+	public ResponseEntity<ApiResponse<String>> requestMailVerify(@RequestBody VerifyEmailDto dto) {
+		userService.requestEmailVerify(dto.getEmail());
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
+	}
+
+	@PostMapping("/mail/verify")
+	public ResponseEntity<ApiResponse<String>> verifyMail(@RequestBody VerifyEmailDto dto) {
+		String emailToken = userService.verifyEmail(dto.getEmail(), dto.getAuthNumber());
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, emailToken));
 	}
 }

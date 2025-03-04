@@ -52,7 +52,7 @@ public class SecurityConfig {
 		"/api/home/images",
 		"/api/users/register",
 		"/api/users/exists/username",
-		"/api/users/login",
+		"/api/users/**",
 		"/api/mail/**"
 	};
 

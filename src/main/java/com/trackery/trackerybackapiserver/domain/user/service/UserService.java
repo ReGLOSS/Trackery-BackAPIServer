@@ -124,8 +124,20 @@ public class UserService {
 	public void requestEmailVerify(String email) {
 		String authNumber = String.format("%06d", SECURE_RANDOM.nextInt(1000000));
 
-		mailService.sendAuthMessage(email, authNumber);
+		// mailService.sendAuthMessage(email, authNumber);
 
 		redisTemplate.opsForValue().set("email:verify:" + email, authNumber, 5, TimeUnit.MINUTES);
+	}
+
+	public String verifyEmail(String email, String authNumber) {
+		String redisNumber = redisTemplate.opsForValue().get("email:verify:" + email);
+
+		if (redisNumber == null || !redisNumber.equals(authNumber)) {
+			throw new ApiException(ErrorCode.BAD_REQUEST);
+		}
+
+		redisTemplate.delete("email:verify:" + email);
+
+		return jwtUtil.generateEmailToken(email);
 	}
 }
