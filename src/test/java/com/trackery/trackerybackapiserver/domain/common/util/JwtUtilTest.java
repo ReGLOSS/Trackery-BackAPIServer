@@ -37,7 +37,7 @@ class JwtUtilTest {
 
 	@Test
 	void JWT_토큰_생성_검증_테스트() {
-		String token = jwtUtil.generateJwt(1L, "abcdefg", 1L);
+		String token = jwtUtil.generateAccessToken(1L, "abcdefg", 1L);
 
 		DecodedJWT decodedJwt = jwtUtil.verifyJwt(token);
 

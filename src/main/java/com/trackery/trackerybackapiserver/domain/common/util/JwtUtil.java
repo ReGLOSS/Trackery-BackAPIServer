@@ -51,7 +51,7 @@ public class JwtUtil {
 	 * @param userName : 인증할 유저명
 	 * @return : 생성된 JWT 토큰
 	 */
-	public String generateJwt(Long userId, String userName, Long roleId) {
+	public String generateAccessToken(Long userId, String userName, Long roleId) {
 		try {
 			return JWT.create()
 				.withIssuer(projectDomain)
@@ -85,6 +85,21 @@ public class JwtUtil {
 		} catch (JWTVerificationException e) {
 			log.error(e.getMessage());
 			throw new ApiException(ErrorCode.UNAUTHORIZED_JWT_VERIFY_FAILED);
+		}
+	}
+
+	public String generateEmailToken(String email) {
+		try {
+			return JWT.create()
+				.withIssuer(projectDomain)
+				.withSubject(email)
+				.withNotBefore(Instant.now())
+				.withIssuedAt(Instant.now())
+				.withExpiresAt(Instant.now().plusSeconds(EXPIRATION_TIME))
+				.sign(algorithm);
+		} catch (JWTCreationException e) {
+			log.error(e.getMessage());
+			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR_FAILED_TO_GENERATE_JWT);
 		}
 	}
 }

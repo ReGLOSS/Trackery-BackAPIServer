@@ -1,12 +1,16 @@
 package com.trackery.trackerybackapiserver.domain.user.service;
 
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.common.service.MailService;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
@@ -38,6 +42,9 @@ public class UserService {
 	private final UserMapper userMapper;
 	private final JwtUtil jwtUtil;
 	private final UserRoleMapper userRoleMapper;
+	private final MailService mailService;
+	private final StringRedisTemplate redisTemplate;
+	private static final SecureRandom SECURE_RANDOM = new SecureRandom();
 
 	/**
 	 * 회원가입 정보를 담아서 db에 인서트하는 메서드입니다.
@@ -70,7 +77,7 @@ public class UserService {
 
 		userRoleMapper.insertUserRole(userRole);
 
-		return jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
+		return jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
 
 	/**
@@ -104,6 +111,21 @@ public class UserService {
 		UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
 			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-		return jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
+		return jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
+	}
+
+	/**
+	 * 이메일 인증 요청 서비스
+	 *
+	 * 1. 해당 이메일로 인증 요청이 온다.
+	 * 2. 랜덤 int 6자리 만들고 메일을 보낸다.
+	 * 3. 레디스에 이메일, authNumber 저장 (ttl 5분)
+	 */
+	public void requestEmailVerify(String email) {
+		String authNumber = String.format("%06d", SECURE_RANDOM.nextInt(1000000));
+
+		mailService.sendAuthMessage(email, authNumber);
+
+		redisTemplate.opsForValue().set("email:verify:" + email, authNumber, 5, TimeUnit.MINUTES);
 	}
 }

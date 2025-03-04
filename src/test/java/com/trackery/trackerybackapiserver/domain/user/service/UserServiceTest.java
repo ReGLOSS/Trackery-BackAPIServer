@@ -75,7 +75,7 @@ class UserServiceTest {
 				return null;
 			}).when(userRoleMapper).insertUserRole(any(UserRole.class));
 
-			when(jwtUtil.generateJwt(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
+			when(jwtUtil.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
 
 			String result =  userService.registerUser(registerDto);
 
@@ -122,7 +122,7 @@ class UserServiceTest {
 		when(userMapper.findByUserName(anyString())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
 
-		when(jwtUtil.generateJwt(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
+		when(jwtUtil.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
 
 		String result = userService.login(loginDto);
 
