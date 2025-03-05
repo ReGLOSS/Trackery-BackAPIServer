@@ -1,9 +1,9 @@
 package com.trackery.trackerybackapiserver.domain.user.service;
 
+import java.security.SecureRandom;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
@@ -53,7 +53,7 @@ public class OAuthService {
 	private final JwtUtil jwtUtil;
 	private final UserRoleMapper userRoleMapper;
 	private final OAuthClient oAuthClient;
-	private final Random random = new Random();
+	private final SecureRandom random = new SecureRandom();
 
 	/**
 	 * OAuth 로그인 처리 매서드입니다.
