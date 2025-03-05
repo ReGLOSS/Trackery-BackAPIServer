@@ -5,7 +5,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.Mapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -59,8 +58,7 @@ public class UserController {
 
 		ResponseCookie cookie = CookieUtil.createAccessTokenCookie(jwt);
 
-		return ResponseEntity
-			.status(HttpStatus.CREATED)
+		return ResponseEntity.status(HttpStatus.CREATED)
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
 			.body(ApiResponse.success(SuccessCode.CREATED));
 	}
@@ -77,8 +75,7 @@ public class UserController {
 
 		ResponseCookie cookie = CookieUtil.createAccessTokenCookie(jwt);
 
-		return ResponseEntity
-			.ok()
+		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
 			.body(ApiResponse.success(SuccessCode.OK));
 	}
@@ -93,17 +90,5 @@ public class UserController {
 	public ResponseEntity<ApiResponse<Boolean>> checkUsernameAvailability(@RequestParam String value) {
 		boolean isAvailable = userService.checkUsernameAvailability(value);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, isAvailable));
-	}
-
-	@PostMapping("/mail/request-verify")
-	public ResponseEntity<ApiResponse<String>> requestMailVerify(@RequestBody VerifyEmailDto dto) {
-		userService.requestEmailVerify(dto.getEmail());
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
-	}
-
-	@PostMapping("/mail/verify")
-	public ResponseEntity<ApiResponse<String>> verifyMail(@RequestBody VerifyEmailDto dto) {
-		String emailToken = userService.verifyEmail(dto.getEmail(), dto.getAuthNumber());
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, emailToken));
 	}
 }

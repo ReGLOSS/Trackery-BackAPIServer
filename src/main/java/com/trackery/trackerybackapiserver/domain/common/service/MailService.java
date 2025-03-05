@@ -1,11 +1,16 @@
 package com.trackery.trackerybackapiserver.domain.common.service;
 
+import java.security.SecureRandom;
+import java.util.concurrent.TimeUnit;
+
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -23,13 +28,23 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 3. 3.        durururuk      최초 생성
  * 25. 3. 3.        durururuk      인증번호 이메일 전송 기능 추가
+ * 25. 3. 5.        durururuk
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailService {
 	private final JavaMailSender javaMailSender;
+	private final StringRedisTemplate redisTemplate;
+	private final SecureRandom secureRandom = new SecureRandom();
+	private final JwtUtil jwtUtil;
 
+	/**
+	 * HTML 양식으로 작성된 이메일을 보냅니다.
+	 *
+	 * @param email : 발신 대상 이메일
+	 * @param authNumber : 인증번호
+	 */
 	@SuppressWarnings({"checkstyle:RegexpSingleline", "checkstyle:LineLength"})
 	public void sendAuthMessage(String email, String authNumber) {
 		try {
@@ -83,6 +98,37 @@ public class MailService {
 			log.error("인증 이메일 전송 실패 : {}", email);
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
+	}
 
+	/**
+	 * 인증번호를 생성해서 이메일을 보내고 레디스에 정보를 저장합니다.
+	 *
+	 * @param email : 대상 이메일
+	 */
+	public void requestEmailVerify(String email) {
+		String authNumber = String.format("%06d", secureRandom.nextInt(1000000));
+
+		sendAuthMessage(email, authNumber);
+
+		redisTemplate.opsForValue().set("email:verify:" + email, authNumber, 5, TimeUnit.MINUTES);
+	}
+
+	/**
+	 * 이메일 인증을 검증합니다.
+	 *
+	 * @param email : 검증할 이메일
+	 * @param authNumber : 입력된 인증번호
+	 * @return : 이메일 JWT 토큰
+	 */
+	public String verifyEmail(String email, String authNumber) {
+		String redisNumber = redisTemplate.opsForValue().get("email:verify:" + email);
+
+		if (redisNumber == null || !redisNumber.equals(authNumber)) {
+			throw new ApiException(ErrorCode.BAD_REQUEST);
+		}
+
+		redisTemplate.delete("email:verify:" + email);
+
+		return jwtUtil.generateEmailToken(email);
 	}
 }
