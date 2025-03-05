@@ -74,7 +74,6 @@ public class OAuthServiceTest {
 		oAuthUserInfoDto = OAuthUserInfoDto.builder()
 			.email("test@example.com")
 			.nickname("테스트닉네임")
-			.userprofile("profile_url")
 			.provider("KAKAO")
 			.providerUserId("12345")
 			.build();

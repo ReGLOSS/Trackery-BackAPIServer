@@ -146,7 +146,6 @@ class GenericOAuthClientTest {
 			// then
 			assertEquals("test@naver.com", result.getEmail());
 			assertEquals("네이버닉네임", result.getNickname());
-			assertEquals("http://example.com/profile.jpg", result.getUserprofile());
 			assertEquals("NAVER", result.getProvider());
 			assertEquals("12345", result.getProviderUserId());
 
@@ -245,7 +244,6 @@ class GenericOAuthClientTest {
 			// then
 			assertEquals("test@kakao.com", result.getEmail());
 			assertEquals("카카오닉네임", result.getNickname());
-			assertEquals("http://example.com/profile.jpg", result.getUserprofile());
 			assertEquals("KAKAO", result.getProvider());
 			assertEquals("12345", result.getProviderUserId());
 		}
@@ -329,7 +327,6 @@ class GenericOAuthClientTest {
 			// then
 			assertEquals("test@gmail.com", result.getEmail());
 			assertEquals("구글닉네임", result.getNickname());
-			assertEquals("http://example.com/profile.jpg", result.getUserprofile());
 			assertEquals("GOOGLE", result.getProvider());
 			assertEquals("12345", result.getProviderUserId());
 		}
@@ -419,7 +416,6 @@ class GenericOAuthClientTest {
 			// then
 			assertEquals("test@github.com", result.getEmail());
 			assertEquals("깃허브닉네임", result.getNickname());
-			assertEquals("http://example.com/profile.jpg", result.getUserprofile());
 			assertEquals("GITHUB", result.getProvider());
 			assertEquals("12345", result.getProviderUserId());
 		}
@@ -490,7 +486,6 @@ class GenericOAuthClientTest {
 			// then
 			assertEquals("private@github.com", result.getEmail()); // primary 이메일이 설정됨
 			assertEquals("깃허브닉네임", result.getNickname());
-			assertEquals("http://example.com/profile.jpg", result.getUserprofile());
 			assertEquals("GITHUB", result.getProvider());
 			assertEquals("12345", result.getProviderUserId());
 
