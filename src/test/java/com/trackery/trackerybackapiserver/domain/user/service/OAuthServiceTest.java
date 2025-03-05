@@ -106,7 +106,7 @@ public class OAuthServiceTest {
 		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.of(oAuth));
 		when(userMapper.findByUserId(anyLong())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
-		when(jwtUtil.generateJwt(anyLong(), anyString(), anyLong())).thenReturn("jwt_token");
+		when(jwtUtil.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt_token");
 
 		// when
 		OAuthService.OAuthLoginResult result = oAuthService.processOAuthLogin(oAuthLoginDto);
@@ -120,7 +120,7 @@ public class OAuthServiceTest {
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
 		verify(userMapper).findByUserId(anyLong());
 		verify(userRoleMapper).findByUserId(anyLong());
-		verify(jwtUtil).generateJwt(anyLong(), anyString(), anyLong());
+		verify(jwtUtil).generateAccessToken(anyLong(), anyString(), anyLong());
 	}
 
 	@Test
@@ -159,7 +159,7 @@ public class OAuthServiceTest {
 		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.empty());
 		when(userMapper.findByEmail(anyString())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
-		when(jwtUtil.generateJwt(anyLong(), anyString(), anyLong())).thenReturn("jwt_token");
+		when(jwtUtil.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt_token");
 
 		// when
 		OAuthService.OAuthLoginResult result = oAuthService.processOAuthLogin(oAuthLoginDto);
@@ -174,7 +174,7 @@ public class OAuthServiceTest {
 		verify(userMapper).findByEmail(anyString());
 		verify(oAuthMapper).insertOAuth(any(OAuth.class));
 		verify(userRoleMapper).findByUserId(anyLong());
-		verify(jwtUtil).generateJwt(anyLong(), anyString(), anyLong());
+		verify(jwtUtil).generateAccessToken(anyLong(), anyString(), anyLong());
 	}
 
 	@Test
@@ -193,7 +193,7 @@ public class OAuthServiceTest {
 		}).when(userMapper).insertUser(any(User.class));
 
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
-		when(jwtUtil.generateJwt(anyLong(), anyString(), anyLong())).thenReturn("jwt_token");
+		when(jwtUtil.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt_token");
 
 		// when
 		OAuthService.OAuthLoginResult result = oAuthService.processOAuthLogin(oAuthLoginDto);
@@ -210,6 +210,6 @@ public class OAuthServiceTest {
 		verify(userRoleMapper).insertUserRole(any(UserRole.class));
 		verify(oAuthMapper).insertOAuth(any(OAuth.class));
 		verify(userRoleMapper).findByUserId(anyLong());
-		verify(jwtUtil).generateJwt(anyLong(), anyString(), anyLong());
+		verify(jwtUtil).generateAccessToken(anyLong(), anyString(), anyLong());
 	}
 }

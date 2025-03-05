@@ -90,7 +90,7 @@ public class OAuthService {
 			UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
 				.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-			String jwt = jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
+			String jwt = jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
 
 			return new OAuthLoginResult(
 				OAuthResponseDto.builder().isExistingEmail(false).build(),
@@ -117,7 +117,7 @@ public class OAuthService {
 				UserRole userRole = userRoleMapper.findByUserId(existingUser.get().getUserId())
 					.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-				String jwt = jwtUtil.generateJwt(
+				String jwt = jwtUtil.generateAccessToken(
 					existingUser.get().getUserId(),
 					existingUser.get().getUserName(),
 					userRole.getRoleId()
@@ -137,7 +137,7 @@ public class OAuthService {
 		UserRole userRole = userRoleMapper.findByUserId(newUser.getUserId())
 			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-		String jwt = jwtUtil.generateJwt(newUser.getUserId(), newUser.getUserName(), userRole.getRoleId());
+		String jwt = jwtUtil.generateAccessToken(newUser.getUserId(), newUser.getUserName(), userRole.getRoleId());
 
 		return new OAuthLoginResult(
 			OAuthResponseDto.builder().isExistingEmail(false).build(),
