@@ -17,6 +17,8 @@ import lombok.Getter;
  * -----------------------------------------------------------
  * 25. 2. 13.        durururuk       최초 생성
  * 25. 2. 21.        inari			 상세 주석 추가
+ * 25. 2. 25.        inari			 Duplicate_EMAIL 추가
+ * 25. 2. 26.        inari			 UNAUTHORIZED_OAUTH_FAILED, BAD_REQUEST_INVALID_OAUTH_PROVIDER 추가
  */
 @Getter
 @AllArgsConstructor
@@ -103,7 +105,22 @@ public enum ErrorCode {
 	 */
 	UNAUTHORIZED_MISSING_AUTH_HEADER(HttpStatus.UNAUTHORIZED, 401, "인증 헤더가 없습니다."),
 
-	UNAUTHORIZED_INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, 401, "유저명 혹은 비밀번호가 잘못되었습니다.");
+	UNAUTHORIZED_INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, 401, "유저명 혹은 비밀번호가 잘못되었습니다."),
+
+	/**
+	 * 이미 데이터베이스에 존재하는 이메일임 (HttpStatus.CONFLICT, 409, "이미 가입된 이메일입니다.")
+	 */
+	Duplicate_EMAIL(HttpStatus.CONFLICT, 409, "이미 가입된 이메일입니다."),
+
+	/**
+	 * OAuth 인증에 실패 (HttpStatus.UNAUTHORIZED, 401, "OAuth 인증에 실패했습니다.")
+	 */
+	UNAUTHORIZED_OAUTH_FAILED(HttpStatus.UNAUTHORIZED, 401, "OAuth 인증에 실패했습니다."),
+
+	/**
+	 * OAuth 제공자 정보가 잘못됨 (HttpStatus.BAD_REQUEST, 400, "지원하지 않는 OAuth 제공자입니다.")
+	 */
+	BAD_REQUEST_INVALID_OAUTH_PROVIDER(HttpStatus.BAD_REQUEST, 400, "지원하지 않는 OAuth 제공자입니다.");
 
 	/**
 	 * HTTP 상태 코드

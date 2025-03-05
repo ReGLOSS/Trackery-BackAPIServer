@@ -34,6 +34,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 2. 06.        inari       최초 생성
  * 25. 2. 21.        durururuk   JWT 추가
  * 25. 2. 21.        inari       상세 주석 추가
+ * 25. 2. 27.        inari       간편 로그인 경로 추가
  */
 @Configuration
 @EnableWebSecurity
@@ -52,7 +53,9 @@ public class SecurityConfig {
 		"/api/home/images",
 		"/api/users/register",
 		"/api/users/exists/username",
-		"/api/users/login"
+		"/api/users/login",
+		"/api/users/oauth/**",
+		"/favicon.ico"
 	};
 
 	/**
