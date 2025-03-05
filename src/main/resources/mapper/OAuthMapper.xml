@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.trackery.trackerybackapiserver.domain.user.mapper.OAuthMapper">
+
+    <!-- 간편 로그인 정보를 테이블에 삽입하는 쿼리 -->
+    <insert id="insertOAuth" parameterType="com.trackery.trackerybackapiserver.domain.user.entity.OAuth"
+            useGeneratedKeys="true">
+        INSERT INTO user_oauth (
+            user_id,
+            provider,
+            provider_user_id
+        ) VALUES (
+            #{userId},
+            #{provider},
+            #{providerUserId}
+        )
+    </insert>
+
+    <!-- 간편 로그인 제공자와 제공된 ID로 조회하여 기존 등록자인지 확인하는 쿼리 -->
+    <select id="findByProviderAndProviderId" resultType="com.trackery.trackerybackapiserver.domain.user.entity.OAuth">
+        SELECT *
+        FROM user_oauth
+        WHERE provider = #{provider}
+        AND provider_user_id = #{providerUserId}
+    </select>
+
+    <!-- 특정 유저 아이디와 간편 로그인 제공자로 간편 로그인 정보를 조회하는 쿼리 -->
+    <select id="findByUserIdAndProvider" resultType="com.trackery.trackerybackapiserver.domain.user.entity.OAuth">
+        SELECT *
+        FROM user_oauth
+        WHERE user_id = #{userId}
+        AND provider = #{provider}
+    </select>
+</mapper>
