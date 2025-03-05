@@ -37,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 2. 26.        inari       최초 생성
  * 25. 2. 28.        inari       리프레시 토큰 제거, 깃허브 로그인시 이메일 요청 추가
+ * 25. 3. 05.        inari       프로필 사진 제거
  */
 @Slf4j
 @Component
@@ -70,12 +71,10 @@ public class GenericOAuthClient implements OAuthClient {
 			String id = responseNode.get("id").asText();
 			String email = responseNode.has("email") ? responseNode.get("email").asText() : null;
 			String nickname = responseNode.has("nickname") ? responseNode.get("nickname").asText() : null;
-			String profileImage = responseNode.has("profileImage") ? responseNode.get("profileImage").asText() : null;
 
 			return OAuthUserInfoDto.builder()
 				.email(email)
 				.nickname(nickname)
-				.userprofile(profileImage)
 				.provider(OAuthProvider.NAVER.name())
 				.providerUserId(id)
 				.build();
@@ -89,12 +88,10 @@ public class GenericOAuthClient implements OAuthClient {
 			String id = jsonNode.get("id").asText();
 			String email = kakaoAccount.has("email") ? kakaoAccount.get("email").asText() : null;
 			String nickname = profile.has("nickname") ? profile.get("nickname").asText() : null;
-			String profileImage = profile.has("profile_image_url") ? profile.get("profile_image_url").asText() : null;
 
 			return OAuthUserInfoDto.builder()
 				.email(email)
 				.nickname(nickname)
-				.userprofile(profileImage)
 				.provider(OAuthProvider.KAKAO.name())
 				.providerUserId(id)
 				.build();
@@ -105,12 +102,10 @@ public class GenericOAuthClient implements OAuthClient {
 			String id = jsonNode.get("sub").asText();
 			String email = jsonNode.has("email") ? jsonNode.get("email").asText() : null;
 			String nickname = jsonNode.has("name") ? jsonNode.get("name").asText() : null;
-			String profileImage = jsonNode.has("picture") ? jsonNode.get("picture").asText() : null;
 
 			return OAuthUserInfoDto.builder()
 				.email(email)
 				.nickname(nickname)
-				.userprofile(profileImage)
 				.provider(OAuthProvider.GOOGLE.name())
 				.providerUserId(id)
 				.build();
@@ -129,12 +124,10 @@ public class GenericOAuthClient implements OAuthClient {
 			log.debug("GitHub 이메일 (기본 응답): {}", email);
 
 			String nickname = jsonNode.has("login") ? jsonNode.get("login").asText() : null;
-			String profileImage = jsonNode.has("avatar_url") ? jsonNode.get("avatar_url").asText() : null;
 
 			return OAuthUserInfoDto.builder()
 				.email(email) // 기본 응답의 이메일 (나중에 보완될 수 있음)
 				.nickname(nickname)
-				.userprofile(profileImage)
 				.provider(OAuthProvider.GITHUB.name())
 				.providerUserId(id)
 				.build();
@@ -321,7 +314,6 @@ public class GenericOAuthClient implements OAuthClient {
 								userInfo = OAuthUserInfoDto.builder()
 									.email(primaryEmail)
 									.nickname(userInfo.getNickname())
-									.userprofile(userInfo.getUserprofile())
 									.provider(userInfo.getProvider())
 									.providerUserId(userInfo.getProviderUserId())
 									.build();

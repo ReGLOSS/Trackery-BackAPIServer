@@ -14,6 +14,7 @@ import lombok.Getter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 24.        inari       최초 생성
+ * 25. 3. 05.        inari       프로필 사진 제거
  */
 @Getter
 @Builder
@@ -28,11 +29,6 @@ public class OAuthUserInfoDto {
 	 * 사용자의 닉네임입니다.
 	 */
 	private String nickname;
-
-	/**
-	 * 사용자의 프로필 사진입니다.
-	 */
-	private String userprofile;
 
 	/**
 	 * 간편 로그인을 등록한 SNS 이름입니다.

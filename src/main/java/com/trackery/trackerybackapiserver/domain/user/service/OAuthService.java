@@ -172,7 +172,7 @@ public class OAuthService {
 			.startDate(Timestamp.valueOf(LocalDateTime.now()))
 			.status(1)
 			.lastLogin(Timestamp.valueOf(LocalDateTime.now()))
-			.userProfile(userInfo.getUserprofile())
+			.userProfile(null)
 			.build();
 
 		userMapper.insertUser(newUser);
