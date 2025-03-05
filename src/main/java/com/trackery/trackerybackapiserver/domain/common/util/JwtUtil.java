@@ -88,6 +88,11 @@ public class JwtUtil {
 		}
 	}
 
+	/**
+	 * 회원가입 할 때 이메일 인증을 확인할 수 있는 이메일 토큰 발급 기능
+	 * @param email : 인증된 이메일
+	 * @return : jwt 토큰
+	 */
 	public String generateEmailToken(String email) {
 		try {
 			return JWT.create()

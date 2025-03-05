@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 3. 3.        durururuk      최초 생성
  * 25. 3. 3.        durururuk      인증번호 이메일 전송 기능 추가
- * 25. 3. 5.        durururuk
+ * 25. 3. 5.        durururuk	   이메일 관련 기능 user 도메인에서 분리
  */
 @Slf4j
 @Service
