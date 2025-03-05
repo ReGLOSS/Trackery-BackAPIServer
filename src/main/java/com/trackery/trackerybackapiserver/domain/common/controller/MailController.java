@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.common.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.common.dto.VerifyEmailDto;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
  */
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api")
 public class MailController {
 	private final MailService mailService;
 

@@ -16,7 +16,6 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCo
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
-import com.trackery.trackerybackapiserver.domain.user.dto.VerifyEmailDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import jakarta.validation.Valid;
