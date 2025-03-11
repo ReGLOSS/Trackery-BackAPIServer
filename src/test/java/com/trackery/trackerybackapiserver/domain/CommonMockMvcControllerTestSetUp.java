@@ -29,6 +29,9 @@ import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
 public abstract class CommonMockMvcControllerTestSetUp {
+	@Autowired
+	protected MockMvc mockMvc;
+
 	@MockitoBean
 	protected JwtUtil jwtUtil;
 

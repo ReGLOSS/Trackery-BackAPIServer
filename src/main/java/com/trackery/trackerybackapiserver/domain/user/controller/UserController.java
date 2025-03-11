@@ -57,8 +57,7 @@ public class UserController {
 
 		ResponseCookie cookie = CookieUtil.createAccessTokenCookie(jwt);
 
-		return ResponseEntity
-			.status(HttpStatus.CREATED)
+		return ResponseEntity.status(HttpStatus.CREATED)
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
 			.body(ApiResponse.success(SuccessCode.CREATED));
 	}
@@ -75,8 +74,7 @@ public class UserController {
 
 		ResponseCookie cookie = CookieUtil.createAccessTokenCookie(jwt);
 
-		return ResponseEntity
-			.ok()
+		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
 			.body(ApiResponse.success(SuccessCode.OK));
 	}

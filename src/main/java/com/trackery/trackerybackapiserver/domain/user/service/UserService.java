@@ -70,7 +70,7 @@ public class UserService {
 
 		userRoleMapper.insertUserRole(userRole);
 
-		return jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
+		return jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
 
 	/**
@@ -104,6 +104,6 @@ public class UserService {
 		UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
 			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-		return jwtUtil.generateJwt(user.getUserId(), user.getUserName(), userRole.getRoleId());
+		return jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
 }
