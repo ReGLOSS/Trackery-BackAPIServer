@@ -36,7 +36,7 @@
 
     <update id="updatePassword" parameterType="String">
         UPDATE user
-        SET password = #{password}, salt = ${salt}
-        WHERE username = #{userName}
+        SET password = #{password}, salt = #{salt}
+        WHERE email = #{email}
     </update>
 </mapper>

@@ -109,22 +109,20 @@ public class UserService {
 		return jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
 
-	
-
 	/**
 	 * 비밀번호를 변경하는 메서드
 	 * @param email : 변경할 유저의 이메일
 	 * @param password : 새로 변경될 비밀번호
 	 */
 	public void changePassword(String email, String password) {
-		String userName = userMapper
-			.findByEmail(email).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND))
-			.getUserName();
+		if (!userMapper.isExistsEmail(email)) {
+			throw new ApiException(ErrorCode.NOT_FOUND);
+		}
 
 		String salt = PasswordUtil.generateSalt();
 		String hashedPassword = PasswordUtil.hashPassword(password, salt);
 
-		userMapper.updatePassword(userName, hashedPassword, salt);
+		userMapper.updatePassword(email, hashedPassword, salt);
 	}
 
 }

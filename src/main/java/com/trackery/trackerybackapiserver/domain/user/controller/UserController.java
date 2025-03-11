@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
+import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
@@ -89,5 +91,14 @@ public class UserController {
 	public ResponseEntity<ApiResponse<Boolean>> checkUsernameAvailability(@RequestParam String value) {
 		boolean isAvailable = userService.checkUsernameAvailability(value);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, isAvailable));
+	}
+
+	/**
+	 * 비밀번호 변경 APi
+	 */
+	@PatchMapping("/password-reset")
+	public ResponseEntity<ApiResponse<String>> resetPassword(@Valid @RequestBody ChangePasswordDto dto) {
+		userService.changePassword(dto.getEmail(), dto.getPassword());
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 }

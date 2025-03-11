@@ -79,9 +79,9 @@ public interface UserMapper {
 
 	/**
 	 * 비밀번호와 salt를 업데이트합니다.
-	 * @param userName : 업데이트할 유저
+	 * @param email : 업데이트할 유저의 이메일
 	 * @param password : 새 비밀번호
 	 * @param salt : 새 salt
 	 */
-	void updatePassword(String userName, String password, String salt);
+	void updatePassword(String email, String password, String salt);
 }

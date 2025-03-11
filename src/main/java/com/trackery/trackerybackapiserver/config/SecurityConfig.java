@@ -55,6 +55,7 @@ public class SecurityConfig {
 		"/api/users/exists/username",
 		"/api/users/login",
 		"/api/users/oauth/**",
+		"/api/users/password-reset",
 		"/favicon.ico",
 		"/api/mail/**"
 	};
