@@ -4,10 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
-import java.util.concurrent.TimeUnit;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,11 +13,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.mail.javamail.JavaMailSender;
 
-import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
-import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 /**
@@ -57,33 +50,15 @@ class MailServiceTest {
 	@Test
 	void 메일_발송_테스트() {
 		String email = "a@a.com";
-		String authNumber = "123456";
 		MimeMessage mimeMessage = mock(MimeMessage.class);
 
 		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
 		doNothing().when(javaMailSender).send(any(MimeMessage.class));
 
-		mailService.sendAuthMessage(email, authNumber);
+		mailService.sendEmailVerifyMail(email);
 
 		verify(javaMailSender, times(1)).createMimeMessage();
 		verify(javaMailSender, times(1)).send(mimeMessage);
-	}
-
-	@Test
-	void 메일_인증_요청_테스트() {
-		String email = "a@a.com";
-		MimeMessage mimeMessage = mock(MimeMessage.class);
-		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
-		doNothing().when(javaMailSender).send(any(MimeMessage.class));
-		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-		doNothing().when(valueOperations).set(anyString(), anyString(), anyLong(), any(TimeUnit.class));
-		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-
-		mailService.requestEmailVerify(email);
-
-		verify(javaMailSender, times(1)).createMimeMessage();
-		verify(javaMailSender, times(1)).send(any(MimeMessage.class));
-		verify(valueOperations, times(1)).set(startsWith("email:verify:" + email), anyString(), eq(5L), eq(TimeUnit.MINUTES));
 	}
 
 	@Test

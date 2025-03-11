@@ -43,10 +43,11 @@ public class MailService {
 	 * HTML 양식으로 인증번호를 알려주는 이메일을 보냅니다.
 	 *
 	 * @param email : 발신 대상 이메일
-	 * @param authNumber : 인증번호
 	 */
 	@SuppressWarnings({"checkstyle:RegexpSingleline", "checkstyle:LineLength"})
-	public void sendAuthMessage(String email, String authNumber) {
+	public void sendEmailVerifyMail(String email) {
+		String authNumber = String.format("%06d", secureRandom.nextInt(1000000));
+
 		String content = String.format("""
 				<!DOCTYPE html>
 				<html lang="ko">
@@ -86,17 +87,6 @@ public class MailService {
 		String logTitle = "회원가입 인증번호";
 
 		sendEmail(email, subject, content, logTitle);
-	}
-
-	/**
-	 * 인증번호를 생성해서 이메일을 보내고 레디스에 정보를 저장합니다.
-	 *
-	 * @param email : 대상 이메일
-	 */
-	public void requestEmailVerify(String email) {
-		String authNumber = String.format("%06d", secureRandom.nextInt(1000000));
-
-		sendAuthMessage(email, authNumber);
 
 		redisTemplate.opsForValue().set("email:verify:" + email, authNumber, 5, TimeUnit.MINUTES);
 	}
@@ -120,28 +110,13 @@ public class MailService {
 		return jwtUtil.generateEmailToken(email);
 	}
 
-	public void sendUserNameEmail(String email, String username) {
-		try {
-			MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-
-			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-
-			mimeMessageHelper.setTo(email);
-			mimeMessageHelper.setSubject("Trackery 회원가입 인증번호입니다.");
-
-			String content = "";
-
-			mimeMessageHelper.setText(content, true);
-
-			javaMailSender.send(mimeMessage);
-			log.info("유저명 찾기 이메일 전송 완료 : {}", email);
-
-		} catch (MessagingException e) {
-			log.error("유저명 찾기 이메일 전송 실패 : {}", email);
-			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
-		}
-	}
-
+	/**
+	 * 이메일을 전송합니다.
+	 * @param email : 발신 대상 이메일
+	 * @param subject : 이메일 제목
+	 * @param content : 이메일 본문
+	 * @param logTitle : 로그 제목
+	 */
 	public void sendEmail(String email, String subject, String content, String logTitle) {
 		try {
 			MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -154,10 +129,10 @@ public class MailService {
 			mimeMessageHelper.setText(content, true);
 
 			javaMailSender.send(mimeMessage);
-			log.info(logTitle + " 이메일 전송 완료 : {}", email);
+			log.info("{} 이메일 전송 완료 : {}", logTitle, email);
 
 		} catch (MessagingException e) {
-			log.error(logTitle + " 이메일 전송 실패 : {}", email);
+			log.error("{} 이메일 전송 실패 : {}", logTitle, email);
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}

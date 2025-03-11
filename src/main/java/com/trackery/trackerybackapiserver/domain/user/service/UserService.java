@@ -109,6 +109,8 @@ public class UserService {
 		return jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
 
+	
+
 	/**
 	 * 비밀번호를 변경하는 메서드
 	 * @param email : 변경할 유저의 이메일

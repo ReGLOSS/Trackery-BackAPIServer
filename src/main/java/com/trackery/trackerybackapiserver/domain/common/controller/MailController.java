@@ -31,14 +31,15 @@ import lombok.RequiredArgsConstructor;
 public class MailController {
 	private final MailService mailService;
 
+	//TODO URI 더 생각해보기
 	/**
-	 * 인증 메일 요청
+	 * 이메일 인증 메일 요청
 	 * @param dto : 이메일 DTO
 	 * @return : 메일 발송
 	 */
-	@PostMapping("/mail/request-verify")
+	@PostMapping("/mail/request-verify/email")
 	public ResponseEntity<ApiResponse<String>> requestMailVerify(@RequestBody VerifyEmailDto dto) {
-		mailService.requestEmailVerify(dto.getEmail());
+		mailService.sendEmailVerifyMail(dto.getEmail());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 
@@ -47,7 +48,7 @@ public class MailController {
 	 * @param dto : email, authNumber
 	 * @return : 인증된 이메일이 subject인 jwt 토큰 발급
 	 */
-	@PostMapping("/mail/verify")
+	@PostMapping("/mail/verify/email")
 	public ResponseEntity<ApiResponse<String>> verifyMail(@RequestBody VerifyEmailDto dto) {
 		String emailToken = mailService.verifyEmail(dto.getEmail(), dto.getAuthNumber());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, emailToken));
