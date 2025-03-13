@@ -23,7 +23,7 @@ class CookieUtilTest {
 	void 액세스_토큰_쿠키_생성_성공() {
 		String jwt = "jwt";
 
-		ResponseCookie cookie = CookieUtil.createAccessTokenCookie(jwt);
+		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie(jwt);
 
 		assertNotNull(cookie);
 		assertEquals("accessToken", cookie.getName());

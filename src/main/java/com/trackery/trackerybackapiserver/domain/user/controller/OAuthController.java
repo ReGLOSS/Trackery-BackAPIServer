@@ -146,7 +146,7 @@ public class OAuthController {
 
 			// 로그인 성공 또는 계정 연동 성공한 경우
 			// JWT 토큰을 쿠키에 설정
-			ResponseCookie cookie = CookieUtil.createAccessTokenCookie(result.getJwtToken());
+			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", result.getJwtToken());
 
 			return ResponseEntity.ok()
 				.header(HttpHeaders.SET_COOKIE, cookie.toString())

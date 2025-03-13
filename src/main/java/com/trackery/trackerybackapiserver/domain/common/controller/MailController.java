@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.common.controller;
 
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -10,7 +12,9 @@ import com.trackery.trackerybackapiserver.domain.common.dto.VerifyEmailDto;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.service.MailService;
+import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -38,7 +42,7 @@ public class MailController {
 	 * @return : 메일 발송
 	 */
 	@PostMapping("/mail/request-verify/email")
-	public ResponseEntity<ApiResponse<String>> requestMailVerify(@RequestBody VerifyEmailDto dto) {
+	public ResponseEntity<ApiResponse<String>> requestMailVerify(@Valid @RequestBody VerifyEmailDto dto) {
 		mailService.sendEmailVerifyMail(dto.getEmail());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
@@ -51,6 +55,12 @@ public class MailController {
 	@PostMapping("/mail/verify/email")
 	public ResponseEntity<ApiResponse<String>> verifyMail(@RequestBody VerifyEmailDto dto) {
 		String emailToken = mailService.verifyEmail(dto.getEmail(), dto.getAuthNumber());
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, emailToken));
+
+		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("emailToken", emailToken);
+
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, cookie.toString())
+			.body(ApiResponse.success(SuccessCode.OK));
+
 	}
 }

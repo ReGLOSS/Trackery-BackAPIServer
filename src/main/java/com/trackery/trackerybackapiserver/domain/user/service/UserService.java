@@ -6,8 +6,10 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
@@ -111,10 +113,14 @@ public class UserService {
 
 	/**
 	 * 비밀번호를 변경하는 메서드
-	 * @param email : 변경할 유저의 이메일
+	 * @param emailToken : 변경할 유저의 이메일
 	 * @param password : 새로 변경될 비밀번호
 	 */
-	public void changePassword(String email, String password) {
+	public void changePassword(String emailToken, String password) {
+		DecodedJWT jwt = jwtUtil.verifyJwt(emailToken);
+
+		String email = jwt.getSubject();
+
 		if (!userMapper.isExistsEmail(email)) {
 			throw new ApiException(ErrorCode.NOT_FOUND);
 		}

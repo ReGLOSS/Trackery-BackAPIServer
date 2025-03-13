@@ -61,12 +61,12 @@ public class MailService {
 						style="border: 1px solid gray; background-color: #ffffff; text-align: center;">
 						<tr>
 							<td style="background-color: #71717c; padding: 15px; color: white; font-weight: bold; font-size: 18px;">
-								Trackery 회원 가입을 위한 인증번호입니다.
+								Trackery 인증번호입니다.
 							</td>
 						</tr>
 						<tr>
 							<td style="padding: 20px; background-color: #d8e0e6; text-align: center; font-size: 14px;">
-								아래 인증 번호를 확인하여 이메일 주소 인증을 완료해주세요.
+								아래 인증 번호를 확인하여 인증을 완료해주세요.
 								<hr style="border: 0; border-top: 1px solid #bbb;">
 								<p><strong>이메일 :</strong> %s</p>
 								<p><strong>인증 번호 :</strong> %s</p>
@@ -82,9 +82,9 @@ public class MailService {
 				</html>
 			\t""", email, authNumber);
 
-		String subject = "Trackery 회원가입 인증번호입니다.";
+		String subject = "Trackery 인증번호입니다.";
 
-		String logTitle = "회원가입 인증번호";
+		String logTitle = "인증번호";
 
 		sendEmail(email, subject, content, logTitle);
 
