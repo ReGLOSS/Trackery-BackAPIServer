@@ -81,10 +81,9 @@ public class UserService {
 	}
 
 	/**
-	 * 유저명이 이미 db에 존재하는지 체크하는 메서드
-	 *
-	 * @param userName 조회할 유저명
-	 * @return db에 존재하지 않을 경우 true, db에 존재할 경우 false 반환
+	 * 유저명 중복체크를 하여 토큰 발급하는 메서드
+	 * @param userName : 중복체크할 유저명
+	 * @return : boolean, jwt 토큰을 담은 DTO
 	 */
 	public UserNameAvailabilityResponseDto checkUsernameAvailability(String userName) {
 		if (!userMapper.isExistsUserName(userName)) {
@@ -96,9 +95,9 @@ public class UserService {
 	}
 
 	/**
-	 * 로그인 정보 DTO를 받아서 인증 후 jwt 토큰을 반환하는 메서드
+	 * 로그인 정보 DTO 받아서 인증 후 jwt 토큰을 반환하는 메서드
 	 *
-	 * @param userLoginDto : username, password를 받는 DTO
+	 * @param userLoginDto : username, password 받는 DTO
 	 * @return : 인증된 유저의 정보를 담고있는 jwt
 	 */
 	public String login(UserLoginDto userLoginDto) {

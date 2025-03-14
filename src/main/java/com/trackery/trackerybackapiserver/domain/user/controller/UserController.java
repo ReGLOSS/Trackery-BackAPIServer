@@ -84,10 +84,10 @@ public class UserController {
 	}
 
 	/**
-	 * 해당 유저명이 사용 가능한지 체크하는 API
+	 * 유저명이 사용가능한지 체크하는 API
 	 *
-	 * @param value String으로 유저명을 받습니다.
-	 * @return db 조회 후 해당 유저명이 없다면 true, 이미 존재한다면 false를 반환합니다.
+	 * @param value : 체크할 유저명
+	 * @return : 유저명 토큰과 boolean 값을 담은 응답
 	 */
 	@GetMapping("/exists/username")
 	public ResponseEntity<ApiResponse<Boolean>> checkUsernameAvailability(@RequestParam String value) {
