@@ -27,8 +27,8 @@ class JwtUtilTest {
 	private JwtUtil jwtUtil;
 
 	//운영환경에서 쓰이지 않는 테스트용 시크릿키입니다.
-	String jwtSecretKeyForTest = "and0c2VjcmV0a2V5Zm9ydGVzdA==";
-	String fakeProjectDomain = "www.a.com";
+	final String jwtSecretKeyForTest = "and0c2VjcmV0a2V5Zm9ydGVzdA==";
+	final String fakeProjectDomain = "www.a.com";
 
 	@BeforeEach
 	void setUp() {

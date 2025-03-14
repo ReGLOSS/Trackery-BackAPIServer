@@ -10,7 +10,6 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
