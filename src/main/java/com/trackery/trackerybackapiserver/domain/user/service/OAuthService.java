@@ -106,7 +106,10 @@ public class OAuthService {
 				// 연동을 원하지 않는 경우
 				if (!oAuthLoginDto.isLinkAccount()) {
 					return new OAuthLoginResult(
-						OAuthResponseDto.builder().isExistingEmail(true).build(),
+						OAuthResponseDto.builder()
+							.isExistingEmail(true)
+							.email(userInfo.getEmail())
+							.build(),
 						null
 					);
 				}

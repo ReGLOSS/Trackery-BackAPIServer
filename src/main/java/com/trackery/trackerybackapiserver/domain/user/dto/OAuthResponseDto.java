@@ -24,4 +24,6 @@ public class OAuthResponseDto {
 	 * 이미 데이터베이스에 존재하는 이메일이면 true, 존재하지 않으면 false를 리턴합니다.
 	 */
 	private boolean isExistingEmail;
+
+	private String email;
 }
