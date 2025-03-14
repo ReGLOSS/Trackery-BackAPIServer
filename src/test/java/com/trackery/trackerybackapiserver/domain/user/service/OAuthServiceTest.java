@@ -36,7 +36,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  * 25. 3. 3.        inari       최초 생성
  */
 @ExtendWith(MockitoExtension.class)
-public class OAuthServiceTest {
+class OAuthServiceTest {
 
 	@InjectMocks
 	private OAuthService oAuthService;
