@@ -13,6 +13,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
@@ -82,11 +83,16 @@ public class UserService {
 	/**
 	 * 유저명이 이미 db에 존재하는지 체크하는 메서드
 	 *
-	 * @param username 조회할 유저명
+	 * @param userName 조회할 유저명
 	 * @return db에 존재하지 않을 경우 true, db에 존재할 경우 false 반환
 	 */
-	public boolean checkUsernameAvailability(String username) {
-		return !userMapper.isExistsUserName(username);
+	public UserNameAvailabilityResponseDto checkUsernameAvailability(String userName) {
+		if (!userMapper.isExistsUserName(userName)) {
+			String jwt = jwtUtil.generateTokenWithSubject(userName);
+			return new UserNameAvailabilityResponseDto(true, jwt);
+		} else {
+			return new UserNameAvailabilityResponseDto(false, null);
+		}
 	}
 
 	/**

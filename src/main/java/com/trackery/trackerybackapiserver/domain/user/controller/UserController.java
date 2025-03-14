@@ -18,6 +18,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCo
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
@@ -90,8 +91,17 @@ public class UserController {
 	 */
 	@GetMapping("/exists/username")
 	public ResponseEntity<ApiResponse<Boolean>> checkUsernameAvailability(@RequestParam String value) {
-		boolean isAvailable = userService.checkUsernameAvailability(value);
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, isAvailable));
+		UserNameAvailabilityResponseDto result = userService.checkUsernameAvailability(value);
+
+		if (result.available()) {
+			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("userNameToken", result.token());
+
+			return ResponseEntity.ok()
+				.header(HttpHeaders.SET_COOKIE, cookie.toString())
+				.body(ApiResponse.success(SuccessCode.OK, true));
+		} else {
+			return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, false));
+		}
 	}
 
 	/**

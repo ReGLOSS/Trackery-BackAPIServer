@@ -107,7 +107,7 @@ public class MailService {
 
 		redisTemplate.delete("email:verify:" + email);
 
-		return jwtUtil.generateEmailToken(email);
+		return jwtUtil.generateTokenWithSubject(email);
 	}
 
 	/**

@@ -49,7 +49,7 @@ class JwtUtilTest {
 	@Test
 	void JWT_이메일_토큰_생성_테스트() {
 		String email = "a@a.com";
-		String token = jwtUtil.generateEmailToken(email);
+		String token = jwtUtil.generateTokenWithSubject(email);
 
 		DecodedJWT decodedJWT = jwtUtil.verifyJwt(token);
 
