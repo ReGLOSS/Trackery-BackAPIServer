@@ -95,7 +95,11 @@ public class UserController {
 	}
 
 	/**
-	 * 비밀번호 변경 APi
+	 * 유저의 비밀번호를 변경하는 API
+	 *
+	 * @param emailToken : 인증된 이메일
+	 * @param dto : 변경될 비밀번호 dto
+	 * @return : 이메일 토큰 재사용 못하게 제거하는 쿠키 + Ok 응답
 	 */
 	@PatchMapping("/password-reset")
 	public ResponseEntity<ApiResponse<String>> resetPassword(@CookieValue(name = "emailToken") String emailToken,
