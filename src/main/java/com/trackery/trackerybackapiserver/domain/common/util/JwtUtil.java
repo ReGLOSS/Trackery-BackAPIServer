@@ -10,6 +10,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
@@ -73,7 +74,7 @@ public class JwtUtil {
 	 * @param token : jwt 토큰
 	 * @return : jwt의 디코딩된 정보를 담고있는 DecodedJWT 객체
 	 */
-	public DecodedJWT verifyJwt(String token) {
+	public DecodedJWT verifyJwt(String token) throws JWTVerificationException {
 		JWTVerifier verifier = JWT.require(algorithm)
 			.withIssuer(projectDomain)
 			.build();
