@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
@@ -20,6 +21,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.service
@@ -35,6 +37,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 2. 25.        durururuk       로그인 메서드 추가
  * 25. 2. 26.        durururuk       로그인 시 비활성유저인지 확인하는 로직 추가
  */
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -117,7 +120,13 @@ public class UserService {
 	 * @param password : 새로 변경될 비밀번호
 	 */
 	public void changePassword(String emailToken, String password) {
-		DecodedJWT jwt = jwtUtil.verifyJwt(emailToken);
+		DecodedJWT jwt;
+		try {
+			jwt = jwtUtil.verifyJwt(emailToken);
+		} catch (JWTVerificationException e) {
+			log.error(e.getMessage());
+			throw new ApiException(ErrorCode.BAD_REQUEST);
+		}
 
 		String email = jwt.getSubject();
 

@@ -31,6 +31,7 @@ import jakarta.mail.internet.MimeMessage;
  * -----------------------------------------------------------
  * 25. 3. 5.        durururuk      최초 생성
  * 25. 3. 5.		durururuk      메일 서비스 단위 테스트 코드 작성
+ * 25. 3. 14.		durururuk	   분리된 로직에 맞게 테스트 코드 재작성
  */
 @ExtendWith(MockitoExtension.class)
 class MailServiceTest {
