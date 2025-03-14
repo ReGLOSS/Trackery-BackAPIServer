@@ -56,8 +56,10 @@ public class UserController {
 	 * @return : 성공, 실패 여부 응답
 	 */
 	@PostMapping("/register")
-	public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody UserRegisterDto userRegisterDto) {
-		String jwt = userService.registerUser(userRegisterDto);
+	public ResponseEntity<ApiResponse<String>> register(@CookieValue(name = "emailToken") String emailToken,
+		@CookieValue(name = "userNameToken") String userNameToken,
+		@Valid @RequestBody UserRegisterDto userRegisterDto) {
+		String jwt = userService.registerUser(emailToken, userNameToken, userRegisterDto);
 
 		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", jwt);
 

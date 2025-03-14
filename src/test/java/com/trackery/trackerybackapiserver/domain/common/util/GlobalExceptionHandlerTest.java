@@ -25,6 +25,8 @@ import com.trackery.trackerybackapiserver.domain.user.controller.UserController;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
+import jakarta.servlet.http.Cookie;
+
 /**
  *packageName    : com.trackery.trackerybackapiserver.domain.common.util
 
@@ -70,17 +72,17 @@ class GlobalExceptionHandlerTest extends CommonMockMvcControllerTestSetUp {
 	@Test
 	@WithMockUser
 	void ValidationException_처리_테스트() throws Exception {
-		ReflectionTestUtils.setField(userRegisterDto, "email", "a@a.com");
-		ReflectionTestUtils.setField(userRegisterDto, "userName", "abcdefg");
 		ReflectionTestUtils.setField(userRegisterDto, "nickname", "");
 		ReflectionTestUtils.setField(userRegisterDto, "password", "Qwerasdf1234!!asdf");
 
-		when(userService.registerUser(any())).thenReturn(null);
+		when(userService.registerUser(any(), any(), any())).thenReturn(null);
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
 				.with(csrf()).contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(userRegisterDto)));
+				.content(objectMapper.writeValueAsString(userRegisterDto))
+				.cookie(new Cookie("emailToken", "emailToken"))
+				.cookie(new Cookie("userNameToken", "userNameToken")));
 
 		result
 			.andExpect(status().isBadRequest())
@@ -90,11 +92,13 @@ class GlobalExceptionHandlerTest extends CommonMockMvcControllerTestSetUp {
 	@Test
 	@WithMockUser
 	void HttpMessageNotReadableException_처리_테스트() throws Exception {
-		when(userService.registerUser(any())).thenReturn(null);
+		when(userService.registerUser(any(), any(), any())).thenReturn(null);
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
 				.with(csrf())
-				.contentType(MediaType.APPLICATION_JSON));
+				.contentType(MediaType.APPLICATION_JSON)
+				.cookie(new Cookie("emailToken", "emailToken"))
+				.cookie(new Cookie("userNameToken", "userNameToken")));
 
 		result
 			.andExpect(status().isBadRequest())

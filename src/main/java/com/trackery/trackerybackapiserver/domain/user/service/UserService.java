@@ -52,13 +52,19 @@ public class UserService {
 	 *
 	 * @param userRegisterDto : 회원 가입 정보를 담은 DTO
 	 */
-	public String registerUser(UserRegisterDto userRegisterDto) {
+	public String registerUser(String emailToken, String userNameToken, UserRegisterDto userRegisterDto) {
+		DecodedJWT decodedEmailToken = jwtUtil.verifyJwt(emailToken);
+		DecodedJWT decodedUserNameToken = jwtUtil.verifyJwt(userNameToken);
+
+		String email = decodedEmailToken.getSubject();
+		String userName = decodedUserNameToken.getSubject();
+
 		String salt = PasswordUtil.generateSalt();
 		String hashedPassword = PasswordUtil.hashPassword(userRegisterDto.getPassword(), salt);
 
 		User user = User.builder()
-			.email(userRegisterDto.getEmail())
-			.userName(userRegisterDto.getUserName())
+			.email(email)
+			.userName(userName)
 			.nickname(userRegisterDto.getNickname())
 			.password(hashedPassword)
 			.salt(salt)
