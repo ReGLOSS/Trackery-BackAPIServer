@@ -4,10 +4,13 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import java.util.concurrent.TimeUnit;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
@@ -44,22 +47,25 @@ class MailServiceTest {
 	@Mock
 	private ValueOperations<String, String> valueOperations;
 
+	@Spy
 	@InjectMocks
 	private MailService mailService;
 
 	@Test
-	void 메일_발송_테스트() {
+	void 인증_메일_발송_테스트() {
 		String email = "a@a.com";
-		MimeMessage mimeMessage = mock(MimeMessage.class);
 
-		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
-		doNothing().when(javaMailSender).send(any(MimeMessage.class));
+		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+		doNothing().when(mailService).sendEmail(anyString(), anyString(), anyString(), anyString());
+		doNothing().when(valueOperations).set(anyString(), anyString(), anyLong(), any(TimeUnit.class));
 
 		mailService.sendEmailVerifyMail(email);
 
-		verify(javaMailSender, times(1)).createMimeMessage();
-		verify(javaMailSender, times(1)).send(mimeMessage);
+		verify(mailService, times(1)).sendEmail(anyString(), anyString(), anyString(), anyString());
+		verify(redisTemplate, times(1)).opsForValue();
+		verify(valueOperations, times(1)).set(anyString(), anyString(), anyLong(), any(TimeUnit.class));
 	}
+
 
 	@Test
 	void 메일_검증_테스트() {
@@ -79,5 +85,22 @@ class MailServiceTest {
 		verify(valueOperations, times(1)).get(redisKey);
 		verify(jwtUtil, times(1)).generateEmailToken(email);
 		verify(redisTemplate, times(1)).delete(redisKey);
+	}
+
+	@Test
+	void 메일_전송_테스트() {
+		String email = "a@a.com";
+		String subject = "제목";
+		String content = "내용";
+		String logTitle = "테스트 메일";
+		MimeMessage mimeMessage = mock(MimeMessage.class);
+
+		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
+		doNothing().when(javaMailSender).send(any(MimeMessage.class));
+
+		mailService.sendEmail(email, subject, content, logTitle);
+
+		verify(javaMailSender, times(1)).createMimeMessage();
+		verify(javaMailSender, times(1)).send(mimeMessage);
 	}
 }

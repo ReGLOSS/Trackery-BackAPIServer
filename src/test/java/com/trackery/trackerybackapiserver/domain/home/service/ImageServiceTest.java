@@ -76,7 +76,7 @@ class ImageServiceTest {
 	@DisplayName("캐시가 정상적으로 초기화되는지 테스트")
 	void evictImageCache_ShouldClearCache() {
 		// Given
-		List<String> mockUrls = Arrays.asList("http://example.com/image1.jpg");
+		List<String> mockUrls = List.of("http://example.com/image1.jpg");
 		when(imagesMapper.selectPublicImageFiles()).thenReturn(mockUrls);
 
 		// When

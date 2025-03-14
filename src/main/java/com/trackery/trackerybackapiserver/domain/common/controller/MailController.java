@@ -61,6 +61,5 @@ public class MailController {
 		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
 			.body(ApiResponse.success(SuccessCode.OK));
-
 	}
 }
