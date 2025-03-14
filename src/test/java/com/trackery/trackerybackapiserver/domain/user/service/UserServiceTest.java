@@ -17,6 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
@@ -92,9 +93,14 @@ class UserServiceTest {
 	@Test
 	void 유저명_중복_확인_성공() {
 		when(userMapper.isExistsUserName(anyString())).thenReturn(false);
-		userService.checkUsernameAvailability("abcdefg");
+		when(jwtUtil.generateTokenWithSubject("abcdefg")).thenReturn("jwt");
+
+		UserNameAvailabilityResponseDto result = userService.checkUsernameAvailability("abcdefg");
+
 		verify(userMapper, times(1)).isExistsUserName(anyString());
-		assertTrue(userService.checkUsernameAvailability("abcdefg"));
+
+		assertTrue(result.available());
+		assertEquals("jwt", result.token());
 	}
 
 	@Test

@@ -19,6 +19,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
@@ -77,13 +78,16 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 
 	@Test
 	void 유저명_중복체크_성공() throws Exception {
-		when(userService.checkUsernameAvailability(anyString())).thenReturn(true);
+		UserNameAvailabilityResponseDto dto = new UserNameAvailabilityResponseDto(true, "jwt");
+		when(userService.checkUsernameAvailability(anyString())).thenReturn(dto);
 
 		ResultActions result = mockMvc
 			.perform(get("/api/users/exists/username")
 				.queryParam("value", "abcdefg"));
 
 		result.andExpect(status().isOk())
+			.andExpect(cookie().exists("userNameToken"))
+			.andExpect(cookie().value("userNameToken", "jwt"))
 			.andExpect(jsonPath("$.data").value(true));
 	}
 
