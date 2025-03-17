@@ -27,7 +27,7 @@ public class OAuthResponseDto {
 	private boolean isExistingEmail;
 
 	/**
-	 * 이메일 주소
+	 * 사용자 이메일입니다.
 	 */
 	private String email;
 }
