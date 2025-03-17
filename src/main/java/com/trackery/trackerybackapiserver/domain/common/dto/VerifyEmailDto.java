@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.common.dto;
 
+import jakarta.validation.constraints.Email;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,6 +19,7 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class VerifyEmailDto {
+	@Email
 	private String email;
 	private String authNumber;
 }

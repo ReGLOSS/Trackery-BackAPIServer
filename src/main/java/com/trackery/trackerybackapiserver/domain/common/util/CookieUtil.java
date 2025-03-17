@@ -28,21 +28,31 @@ public class CookieUtil {
 	}
 
 	//TODO maxAge 추후 재설정, 배포 환경에서는 secure(true)로 되게 추가 필요
+
 	/**
 	 * 생성된 액세스 토큰으로 http-only 쿠키를 생성하는 메서드
 	 * secure : https 연결에서만 쿠키 생성하게 설정
 	 * path("/") : 모든 경로 요청에 대해 적용
 	 * sameSite("Strict") : 프론트 도메인 안에서만 해당 액세스 코드 작동하게 쿠키 설정
 	 *
-	 * @param jwt : jwt 토큰
-	 * @return : accessToken : jwt 토큰 으로 쿠키 생성
+	 * @param key : 쿠키 이름
+	 * @param value : 쿠키 값
+	 * @return : 생성된 http-only 쿠키
 	 */
-	public static ResponseCookie createAccessTokenCookie(String jwt) {
-		return ResponseCookie.from("accessToken", jwt)
+	public static ResponseCookie createHttpOnlyCookie(String key, String value) {
+		return ResponseCookie.from(key, value)
 			.httpOnly(true)
-			.secure(false)
 			.path("/")
 			.maxAge(Duration.ofDays(7))
+			.sameSite("Strict")
+			.build();
+	}
+
+	public static ResponseCookie deleteCookie(String key) {
+		return ResponseCookie.from(key, "")
+			.httpOnly(true)
+			.path("/")
+			.maxAge(0)
 			.sameSite("Strict")
 			.build();
 	}

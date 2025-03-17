@@ -10,6 +10,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
@@ -67,7 +68,14 @@ public class JwtFilter extends OncePerRequestFilter {
 				.map(Cookie::getValue))
 			.orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED));
 
-		DecodedJWT jwt = jwtUtil.verifyJwt(requestToken);
+		DecodedJWT jwt;
+
+		try {
+			jwt = jwtUtil.verifyJwt(requestToken);
+		} catch (JWTVerificationException e) {
+			log.error(e.getMessage());
+			throw new ApiException(ErrorCode.UNAUTHORIZED_JWT_VERIFY_FAILED);
+		}
 
 		Long userId = Long.valueOf(jwt.getSubject());
 		Long roleId = jwt.getClaim("role").asLong();

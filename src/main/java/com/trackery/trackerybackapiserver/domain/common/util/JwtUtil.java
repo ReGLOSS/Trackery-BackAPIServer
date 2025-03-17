@@ -69,23 +69,17 @@ public class JwtUtil {
 		}
 	}
 
-	//TODO 레디스 설정 후 JID, 추가 검증 필요
 	/**
 	 * JWT 파싱, 검증 해주는 메서드
 	 * @param token : jwt 토큰
 	 * @return : jwt의 디코딩된 정보를 담고있는 DecodedJWT 객체
 	 */
-	public DecodedJWT verifyJwt(String token) {
-		try {
-			JWTVerifier verifier = JWT.require(algorithm)
-				.withIssuer(projectDomain)
-				.build();
+	public DecodedJWT verifyJwt(String token) throws JWTVerificationException {
+		JWTVerifier verifier = JWT.require(algorithm)
+			.withIssuer(projectDomain)
+			.build();
 
-			return verifier.verify(token);
-		} catch (JWTVerificationException e) {
-			log.error(e.getMessage());
-			throw new ApiException(ErrorCode.UNAUTHORIZED_JWT_VERIFY_FAILED);
-		}
+		return verifier.verify(token);
 	}
 
 	/**

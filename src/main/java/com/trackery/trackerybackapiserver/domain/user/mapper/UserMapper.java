@@ -10,15 +10,16 @@ import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.mapper
  * fileName       : UserMapper
- * author         : dururuk
+ * author         : durururuk
  * date           : 25. 2. 12.
  * description    : 사용자 데이터 처리를 위한 MyBatis Mapper 인터페이스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 12.        dururuk       최초 생성
+ * 25. 2. 12.        durururuk     최초 생성
  * 25. 2. 24.        inari         주석 추가
  * 25. 2. 25.        inari         fingByEmail, isExistsEmail 추가
+ * 25. 3. 6.		 durururuk	   비밀번호 업데이트 추가
  */
 @Mapper
 public interface UserMapper {
@@ -69,5 +70,18 @@ public interface UserMapper {
 	 */
 	boolean isExistsEmail(String email);
 
+	/**
+	 * 유저명으로 User를 찾아서 반환합니다.
+	 * @param userName : 유저명
+	 * @return : Optional<User>
+	 */
 	Optional<User> findByUserName(String userName);
+
+	/**
+	 * 비밀번호와 salt를 업데이트합니다.
+	 * @param email : 업데이트할 유저의 이메일
+	 * @param password : 새 비밀번호
+	 * @param salt : 새 salt
+	 */
+	void updatePassword(String email, String password, String salt);
 }

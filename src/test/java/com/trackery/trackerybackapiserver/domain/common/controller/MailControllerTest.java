@@ -1,19 +1,17 @@
 package com.trackery.trackerybackapiserver.domain.common.controller;
 
-import static org.mockito.ArgumentMatchers.*;
+import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static reactor.core.publisher.Mono.*;
-
-import javax.print.attribute.standard.Media;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Spy;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -54,11 +52,12 @@ class MailControllerTest extends CommonMockMvcControllerTestSetUp {
 
 	@Test
 	void 인증_메일_요청_테스트() throws Exception {
-		doNothing().when(mailService).requestEmailVerify(anyString());
+		doNothing().when(mailService).sendEmailVerifyMail(anyString());
 
-		ResultActions result = mockMvc.perform(post("/api/mail/request-verify").contentType(MediaType.APPLICATION_JSON)
-			.content(objectMapper.writeValueAsString(verifyEmailDto))
-			.with(csrf()));
+		ResultActions result = mockMvc.perform(
+			post("/api/mail/request-verify/email").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(verifyEmailDto))
+				.with(csrf()));
 
 		result
 			.andExpect(status().isOk());
@@ -66,14 +65,17 @@ class MailControllerTest extends CommonMockMvcControllerTestSetUp {
 
 	@Test
 	void 메일_검증_테스트() throws Exception {
-		when(mailService.verifyEmail(anyString(), anyString())).thenReturn("jwt");
+		String testJwt = "jwt";
+		when(mailService.verifyEmail(anyString(), anyString())).thenReturn(testJwt);
 
-		ResultActions result = mockMvc.perform(post("/api/mail/verify").contentType(MediaType.APPLICATION_JSON)
+		ResultActions result = mockMvc.perform(post("/api/mail/verify/email")
+			.contentType(MediaType.APPLICATION_JSON)
 			.content(objectMapper.writeValueAsString(verifyEmailDto))
 			.with(csrf()));
 
 		result
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data").value("jwt"));
+			.andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("emailToken=")));
 	}
+
 }
