@@ -42,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 26.        inari       최초 생성
  * 25. 2. 27.        inari       userRoleMapper 추가
  * 25. 2. 28.        inari       리프레시 토큰 제거
+ * 25. 3. 14.        inari       주석 추가
  */
 @Slf4j
 @Service
@@ -59,7 +60,7 @@ public class OAuthService {
 	 * OAuth 로그인 처리 매서드입니다.
 	 *
 	 * @param oAuthLoginDto OAuth 로그인 요청 정보
-	 * @return
+	 * @return OAuth 로그인 결과와 JWT 토큰
 	 */
 	@Transactional
 	public OAuthLoginResult processOAuthLogin(OAuthLoginDto oAuthLoginDto) {

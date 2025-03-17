@@ -14,6 +14,7 @@ import lombok.Getter;
  * -----------------------------------------------------------
  * 25. 2. 25.        inari       최초 생성
  * 25. 2. 26.        inari       JWT 인증 헤더 삭제
+ * 25. 3. 14.        inari       이메일 추가
  */
 @Getter
 @Builder
@@ -25,5 +26,8 @@ public class OAuthResponseDto {
 	 */
 	private boolean isExistingEmail;
 
+	/**
+	 * 이메일 주소
+	 */
 	private String email;
 }
