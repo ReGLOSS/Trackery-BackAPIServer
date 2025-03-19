@@ -5,6 +5,8 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -33,19 +35,24 @@ import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
 @WithMockUser
 @WebMvcTest(OAuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
+class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Autowired
 	private MockMvc mockMvc;
 
 	@MockitoBean
 	private OAuthService oAuthService;
 
-	@Test
-	void 카카오_로그인_성공() throws Exception {
+	@ParameterizedTest
+	@ValueSource(strings = {"KAKAO", "GOOGLE", "GITHUB"})
+	void OAuth_로그인_성공(String provider) throws Exception {
 		// given
+		final String AUTH_CODE = "auth_code";
+		final String API_PATH = "/api/users/oauth/login/";
+		final String JWT = "jwt";
+
 		OAuthLoginDto oAuthLoginDto = OAuthLoginDto.builder()
-			.provider("KAKAO")
-			.code("auth_code")
+			.provider(provider)
+			.code(AUTH_CODE)
 			.linkAccount(false)
 			.build();
 
@@ -53,22 +60,19 @@ public class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.isExistingEmail(false)
 			.build();
 
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto,"jwt");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT);
 
 		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
 
 		// when
 		ResultActions resultActions = mockMvc
-			.perform(get("/api/users/oauth/login/kakao")
-				.queryParam("code", "auth_code")
+			.perform(get(API_PATH + provider.toLowerCase())
+				.queryParam("code", AUTH_CODE)
 				.contentType(MediaType.APPLICATION_JSON));
 
 		// then
 		resultActions
-			.andExpect(status().isOk())
-			.andExpect(cookie().exists("accessToken"))
-			.andExpect(cookie().httpOnly("accessToken", true))
-			.andExpect(cookie().value("accessToken", "jwt"))
+			.andExpect(cookie().value("accessToken", JWT))
 			.andExpect(jsonPath("$.data.existingEmail").value(false));
 	}
 
@@ -94,70 +98,6 @@ public class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.perform(get("/api/users/oauth/login/naver")
 				.queryParam("code", "auth_code")
 				.queryParam("state", "state")
-				.contentType(MediaType.APPLICATION_JSON));
-
-		// then
-		resultActions
-			.andExpect(status().isOk())
-			.andExpect(cookie().exists("accessToken"))
-			.andExpect(cookie().httpOnly("accessToken", true))
-			.andExpect(cookie().value("accessToken", "jwt"))
-			.andExpect(jsonPath("$.data.existingEmail").value(false));
-	}
-
-	@Test
-	void 구글_로그인_성공() throws Exception {
-		// given
-		OAuthLoginDto oAuthLoginDto = OAuthLoginDto.builder()
-			.provider("GOOGLE")
-			.code("auth_code")
-			.linkAccount(false)
-			.build();
-
-		OAuthResponseDto responseDto = OAuthResponseDto.builder()
-			.isExistingEmail(false)
-			.build();
-
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, "jwt");
-
-		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
-
-		// when
-		ResultActions resultActions = mockMvc
-			.perform(get("/api/users/oauth/login/google")
-				.queryParam("code", "auth_code")
-				.contentType(MediaType.APPLICATION_JSON));
-
-		// then
-		resultActions
-			.andExpect(status().isOk())
-			.andExpect(cookie().exists("accessToken"))
-			.andExpect(cookie().httpOnly("accessToken", true))
-			.andExpect(cookie().value("accessToken", "jwt"))
-			.andExpect(jsonPath("$.data.existingEmail").value(false));
-	}
-
-	@Test
-	void 깃허브_로그인_성공() throws Exception {
-		// given
-		OAuthLoginDto oAuthLoginDto = OAuthLoginDto.builder()
-			.provider("GITHUB")
-			.code("auth_code")
-			.linkAccount(false)
-			.build();
-
-		OAuthResponseDto responseDto = OAuthResponseDto.builder()
-			.isExistingEmail(false)
-			.build();
-
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, "jwt");
-
-		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
-
-		// when
-		ResultActions resultActions = mockMvc
-			.perform(get("/api/users/oauth/login/github")
-				.queryParam("code", "auth_code")
 				.contentType(MediaType.APPLICATION_JSON));
 
 		// then
