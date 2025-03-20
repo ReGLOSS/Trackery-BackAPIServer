@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.common.service;
+package com.trackery.trackerybackapiserver.domain.mail.service;
 
 import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
@@ -9,13 +9,12 @@ import org.springframework.stereotype.Service;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
-import com.trackery.trackerybackapiserver.domain.mail.service.EmailSenderService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.common.service
+ * packageName    : com.trackery.trackerybackapiserver.domain.mail.service
  * fileName       : MailService
  * author         : durururuk
  * date           : 25. 3. 3.

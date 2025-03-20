@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.common.controller;
+package com.trackery.trackerybackapiserver.domain.mail.controller;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.trackery.trackerybackapiserver.domain.common.dto.VerifyEmailDto;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
-import com.trackery.trackerybackapiserver.domain.common.service.MailService;
+import com.trackery.trackerybackapiserver.domain.mail.service.MailService;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 
 import jakarta.validation.Valid;

@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.common.service;
+package com.trackery.trackerybackapiserver.domain.mail.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -13,11 +13,8 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.mail.javamail.JavaMailSender;
 
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
-
-import jakarta.mail.internet.MimeMessage;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.common.service
@@ -36,9 +33,6 @@ import jakarta.mail.internet.MimeMessage;
 class MailServiceTest {
 
 	@Mock
-	private JavaMailSender javaMailSender;
-
-	@Mock
 	private StringRedisTemplate redisTemplate;
 
 	@Mock
@@ -47,6 +41,9 @@ class MailServiceTest {
 	@Mock
 	private ValueOperations<String, String> valueOperations;
 
+	@Mock
+	private EmailSenderService emailSenderService;
+
 	@Spy
 	@InjectMocks
 	private MailService mailService;
@@ -54,14 +51,16 @@ class MailServiceTest {
 	@Test
 	void 인증_메일_발송_테스트() {
 		String email = "a@a.com";
+		String content = "테스트 html";
 
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-		doNothing().when(mailService).sendEmail(anyString(), anyString(), anyString(), anyString());
 		doNothing().when(valueOperations).set(anyString(), anyString(), anyLong(), any(TimeUnit.class));
+		when(emailSenderService.generateEmailContents(anyString(), anyString())).thenReturn(content);
+		doNothing().when(emailSenderService).sendEmail(anyString(), anyString(), anyString(), anyString());
 
 		mailService.sendEmailVerifyMail(email);
 
-		verify(mailService, times(1)).sendEmail(anyString(), anyString(), anyString(), anyString());
+		verify(emailSenderService, times(1)).sendEmail(anyString(), anyString(), anyString(), anyString());
 		verify(redisTemplate, times(1)).opsForValue();
 		verify(valueOperations, times(1)).set(anyString(), anyString(), anyLong(), any(TimeUnit.class));
 	}
@@ -85,22 +84,5 @@ class MailServiceTest {
 		verify(valueOperations, times(1)).get(redisKey);
 		verify(jwtUtil, times(1)).generateTokenWithSubject(email);
 		verify(redisTemplate, times(1)).delete(redisKey);
-	}
-
-	@Test
-	void 메일_전송_테스트() {
-		String email = "a@a.com";
-		String subject = "제목";
-		String content = "내용";
-		String logTitle = "테스트 메일";
-		MimeMessage mimeMessage = mock(MimeMessage.class);
-
-		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
-		doNothing().when(javaMailSender).send(any(MimeMessage.class));
-
-		mailService.sendEmail(email, subject, content, logTitle);
-
-		verify(javaMailSender, times(1)).createMimeMessage();
-		verify(javaMailSender, times(1)).send(mimeMessage);
 	}
 }
