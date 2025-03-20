@@ -39,11 +39,21 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 26.        inari       최초 생성
  * 25. 2. 28.        inari       리프레시 토큰 제거, 깃허브 로그인시 이메일 요청 추가
  * 25. 3. 05.        inari       프로필 사진 제거
+ * 25. 3. 20.        inari       소나큐브 코드스멜 개선
  */
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class GenericOAuthClient implements OAuthClient {
+
+	/**
+	 * 사용자 정보 필드 상수
+	 */
+	private static final String FIELD_EMAIL = "email";
+	private static final String FIELD_NICKNAME = "nickname";
+	private static final String FIELD_ID = "id";
+	private static final String FIELD_ACCESS_TOKEN = "access_token";
+	private static final String FIELD_PRIMARY = "primary";
 
 	/**
 	 * HTTP 요청을 위한 RestTemplate 객체
@@ -70,9 +80,9 @@ public class GenericOAuthClient implements OAuthClient {
 		// 네이버 간편 로그인 파서
 		userInfoParsers.put(OAuthProvider.NAVER, (jsonNode) -> {
 			JsonNode responseNode = jsonNode.get("response");
-			String id = responseNode.get("id").asText();
-			String email = responseNode.has("email") ? responseNode.get("email").asText() : null;
-			String nickname = responseNode.has("nickname") ? responseNode.get("nickname").asText() : null;
+			String id = responseNode.get(FIELD_ID).asText();
+			String email = responseNode.has(FIELD_EMAIL) ? responseNode.get(FIELD_EMAIL).asText() : null;
+			String nickname = responseNode.has(FIELD_NICKNAME) ? responseNode.get(FIELD_NICKNAME).asText() : null;
 
 			return OAuthUserInfoDto.builder()
 				.email(email)
@@ -87,9 +97,9 @@ public class GenericOAuthClient implements OAuthClient {
 			JsonNode kakaoAccount = jsonNode.get("kakao_account");
 			JsonNode profile = kakaoAccount.get("profile");
 
-			String id = jsonNode.get("id").asText();
-			String email = kakaoAccount.has("email") ? kakaoAccount.get("email").asText() : null;
-			String nickname = profile.has("nickname") ? profile.get("nickname").asText() : null;
+			String id = jsonNode.get(FIELD_ID).asText();
+			String email = kakaoAccount.has(FIELD_EMAIL) ? kakaoAccount.get(FIELD_EMAIL).asText() : null;
+			String nickname = profile.has(FIELD_NICKNAME) ? profile.get(FIELD_NICKNAME).asText() : null;
 
 			return OAuthUserInfoDto.builder()
 				.email(email)
@@ -102,7 +112,7 @@ public class GenericOAuthClient implements OAuthClient {
 		// 구글 간편 로그인 파서
 		userInfoParsers.put(OAuthProvider.GOOGLE, (jsonNode) -> {
 			String id = jsonNode.get("sub").asText();
-			String email = jsonNode.has("email") ? jsonNode.get("email").asText() : null;
+			String email = jsonNode.has(FIELD_EMAIL) ? jsonNode.get(FIELD_EMAIL).asText() : null;
 			String nickname = jsonNode.has("name") ? jsonNode.get("name").asText() : null;
 
 			return OAuthUserInfoDto.builder()
@@ -115,11 +125,11 @@ public class GenericOAuthClient implements OAuthClient {
 
 		// 깃허브 간편 로그인 파서
 		userInfoParsers.put(OAuthProvider.GITHUB, (jsonNode) -> {
-			String id = jsonNode.get("id").asText();
+			String id = jsonNode.get(FIELD_ID).asText();
 
 			// email이 null이나 빈 문자열인 경우가 많음
-			String email = jsonNode.has("email") && !jsonNode.get("email").isNull()
-				? jsonNode.get("email").asText() : null;
+			String email = jsonNode.has(FIELD_EMAIL) && !jsonNode.get(FIELD_EMAIL).isNull()
+				? jsonNode.get(FIELD_EMAIL).asText() : null;
 
 			// 로깅 추가
 			log.debug("GitHub 사용자 정보 원본: {}", jsonNode.toString());
@@ -171,12 +181,12 @@ public class GenericOAuthClient implements OAuthClient {
 
 				JsonNode jsonNode = objectMapper.readTree(response);
 
-				if (!jsonNode.has("access_token")) {
+				if (!jsonNode.has(FIELD_ACCESS_TOKEN)) {
 					log.error("깃허브 액세스 토큰이 응답에 없습니다. 응답: {}", response);
 					throw new ApiException(ErrorCode.UNAUTHORIZED_OAUTH_FAILED);
 				}
 
-				String accessToken = jsonNode.get("access_token").asText();
+				String accessToken = jsonNode.get(FIELD_ACCESS_TOKEN).asText();
 				return new TokenResponseDto(accessToken);
 			} else {
 				// 기존 다른 OAuth 제공자 처리 로직 유지
@@ -200,12 +210,12 @@ public class GenericOAuthClient implements OAuthClient {
 
 				JsonNode jsonNode = objectMapper.readTree(response);
 
-				if (!jsonNode.has("access_token")) {
+				if (!jsonNode.has(FIELD_ACCESS_TOKEN)) {
 					log.error("액세스 토큰이 응답에 없습니다. 응답: {}", response);
 					throw new ApiException(ErrorCode.UNAUTHORIZED_OAUTH_FAILED);
 				}
 
-				String accessToken = jsonNode.get("access_token").asText();
+				String accessToken = jsonNode.get(FIELD_ACCESS_TOKEN).asText();
 				return new TokenResponseDto(accessToken);
 			}
 		} catch (Exception e) {
@@ -296,9 +306,9 @@ public class GenericOAuthClient implements OAuthClient {
 
 							// 먼저 primary=true인 이메일 찾기
 							for (JsonNode emailNode : emailsNode) {
-								if (emailNode.has("primary") && emailNode.get("primary").asBoolean()
-									&& emailNode.has("email")) {
-									primaryEmail = emailNode.get("email").asText();
+								if (emailNode.has(FIELD_PRIMARY) && emailNode.get(FIELD_PRIMARY).asBoolean()
+									&& emailNode.has(FIELD_EMAIL)) {
+									primaryEmail = emailNode.get(FIELD_EMAIL).asText();
 									log.info("GitHub primary 이메일 찾음: {}", primaryEmail);
 									break;
 								}
@@ -306,8 +316,8 @@ public class GenericOAuthClient implements OAuthClient {
 
 							// primary 이메일이 없으면 첫 번째 이메일 사용
 							if (primaryEmail == null && emailsNode.size() > 0
-								&& emailsNode.get(0).has("email")) {
-								primaryEmail = emailsNode.get(0).get("email").asText();
+								&& emailsNode.get(0).has(FIELD_EMAIL)) {
+								primaryEmail = emailsNode.get(0).get(FIELD_EMAIL).asText();
 								log.info("GitHub primary 이메일이 없어 첫 번째 이메일 사용: {}", primaryEmail);
 							}
 
