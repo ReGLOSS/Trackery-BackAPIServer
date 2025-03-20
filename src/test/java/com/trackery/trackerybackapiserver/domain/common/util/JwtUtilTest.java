@@ -27,8 +27,8 @@ class JwtUtilTest {
 	private JwtUtil jwtUtil;
 
 	//운영환경에서 쓰이지 않는 테스트용 시크릿키입니다.
-	String jwtSecretKeyForTest = "and0c2VjcmV0a2V5Zm9ydGVzdA==";
-	String fakeProjectDomain = "www.a.com";
+	final String jwtSecretKeyForTest = "and0c2VjcmV0a2V5Zm9ydGVzdA==";
+	final String fakeProjectDomain = "www.a.com";
 
 	@BeforeEach
 	void setUp() {
@@ -36,7 +36,7 @@ class JwtUtilTest {
 	}
 
 	@Test
-	void JWT_토큰_생성_검증_테스트() {
+	void JWT_액세스_토큰_생성_검증_테스트() {
 		String token = jwtUtil.generateAccessToken(1L, "abcdefg", 1L);
 
 		DecodedJWT decodedJwt = jwtUtil.verifyJwt(token);
@@ -44,5 +44,16 @@ class JwtUtilTest {
 		assertEquals(1L, Long.valueOf(decodedJwt.getSubject()));
 		assertEquals("abcdefg", decodedJwt.getClaim("username").asString());
 		assertEquals(1L, decodedJwt.getClaim("role").asLong());
+	}
+
+	@Test
+	void JWT_이메일_토큰_생성_테스트() {
+		String email = "a@a.com";
+		String token = jwtUtil.generateEmailToken(email);
+
+		DecodedJWT decodedJWT = jwtUtil.verifyJwt(token);
+
+		assertEquals(fakeProjectDomain, decodedJWT.getIssuer());
+		assertEquals(email, decodedJWT.getSubject());
 	}
 }

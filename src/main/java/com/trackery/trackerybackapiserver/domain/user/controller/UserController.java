@@ -4,7 +4,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
+import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
@@ -55,7 +58,7 @@ public class UserController {
 	public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody UserRegisterDto userRegisterDto) {
 		String jwt = userService.registerUser(userRegisterDto);
 
-		ResponseCookie cookie = CookieUtil.createAccessTokenCookie(jwt);
+		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", jwt);
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -72,7 +75,7 @@ public class UserController {
 	public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody UserLoginDto userLoginDto) {
 		String jwt = userService.login(userLoginDto);
 
-		ResponseCookie cookie = CookieUtil.createAccessTokenCookie(jwt);
+		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", jwt);
 
 		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -89,5 +92,24 @@ public class UserController {
 	public ResponseEntity<ApiResponse<Boolean>> checkUsernameAvailability(@RequestParam String value) {
 		boolean isAvailable = userService.checkUsernameAvailability(value);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, isAvailable));
+	}
+
+	/**
+	 * 유저의 비밀번호를 변경하는 API
+	 *
+	 * @param emailToken : 인증된 이메일
+	 * @param dto : 변경될 비밀번호 dto
+	 * @return : 이메일 토큰 재사용 못하게 제거하는 쿠키 + Ok 응답
+	 */
+	@PatchMapping("/password-reset")
+	public ResponseEntity<ApiResponse<String>> resetPassword(@CookieValue(name = "emailToken") String emailToken,
+		@Valid @RequestBody ChangePasswordDto dto) {
+		userService.changePassword(emailToken, dto.getPassword());
+
+		ResponseCookie cookie = CookieUtil.deleteCookie("emailToken");
+
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, cookie.toString())
+			.body(ApiResponse.success(SuccessCode.OK));
 	}
 }

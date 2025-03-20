@@ -5,7 +5,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import lombok.Getter;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.common.response.exeption
+ * packageName    : com.trackery.trackerybackapiserver.domain.common.response.exception
  * fileName       : ApiException
  * author         : durururuk
  * date           : 25. 2. 13.

@@ -55,8 +55,8 @@ public class SecurityConfig {
 		"/api/users/exists/username",
 		"/api/users/login",
 		"/api/users/oauth/**",
+		"/api/users/password-reset",
 		"/favicon.ico",
-		"/api/users/**",
 		"/api/mail/**"
 	};
 
@@ -108,7 +108,8 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/error").permitAll().anyRequest().authenticated())
-			.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class);
+			.addFilterBefore(new JwtFilter(jwtUtil), UsernamePasswordAuthenticationFilter.class)
+			.addFilterBefore(new ExceptionHandlerFilter(), JwtFilter.class);
 
 		return http.build();
 	}

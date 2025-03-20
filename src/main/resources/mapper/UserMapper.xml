@@ -14,16 +14,16 @@
     </select>
 
     <select id="findByUserId" parameterType="Long" resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
-        SELECT * FROM user WHERE user_id = #{userId}
+        SELECT * FROM user WHERE user_id = #{userId} AND status = 1
     </select>
 
     <select id="findByUserName" parameterType="String" resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
-        SELECT * FROM user WHERE username = #{userName}
+        SELECT * FROM user WHERE username = #{userName} AND status = 1
     </select>
 
     <!-- 이메일로 회원 정보 찾는 쿼리 -->
     <select id="findByEmail" parameterType="String" resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
-        SELECT * FROM user WHERE email = #{email}
+        SELECT * FROM user WHERE email = #{email} AND status = 1
     </select>
 
     <!-- 주어진 이메일이 이미 존재하는지 확인하는 쿼리 -->
@@ -33,4 +33,10 @@
             FROM user
             WHERE email = #{email})
     </select>
+
+    <update id="updatePassword" parameterType="String">
+        UPDATE user
+        SET password = #{password}, salt = #{salt}
+        WHERE email = #{email}
+    </update>
 </mapper>

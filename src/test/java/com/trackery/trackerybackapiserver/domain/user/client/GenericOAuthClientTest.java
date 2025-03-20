@@ -1,7 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.user.client;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.DisplayName;
