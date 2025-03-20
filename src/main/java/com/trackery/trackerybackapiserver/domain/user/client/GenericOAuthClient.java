@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.user.client;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -62,7 +63,8 @@ public class GenericOAuthClient implements OAuthClient {
 	/**
 	 * OAuth 제공자별 사용자 정보 파싱을 위한 매핑
 	 */
-	private final Map<OAuthProvider, Function<JsonNode, OAuthUserInfoDto>> userInfoParsers = new HashMap<>();
+	private final Map<OAuthProvider, Function<JsonNode, OAuthUserInfoDto>> userInfoParsers
+		= new EnumMap<>(OAuthProvider.class);
 
 	{
 		// 네이버 간편 로그인 파서
@@ -116,8 +118,8 @@ public class GenericOAuthClient implements OAuthClient {
 			String id = jsonNode.get("id").asText();
 
 			// email이 null이나 빈 문자열인 경우가 많음
-			String email = jsonNode.has("email") && !jsonNode.get("email").isNull() ?
-				jsonNode.get("email").asText() : null;
+			String email = jsonNode.has("email") && !jsonNode.get("email").isNull()
+				? jsonNode.get("email").asText() : null;
 
 			// 로깅 추가
 			log.debug("GitHub 사용자 정보 원본: {}", jsonNode.toString());
@@ -270,8 +272,8 @@ public class GenericOAuthClient implements OAuthClient {
 				OAuthUserInfoDto userInfo = userInfoParser.apply(jsonNode);
 
 				// 깃허브의 경우 이메일이 null이면 이메일 API를 추가로 호출
-				if (oAuthProvider == OAuthProvider.GITHUB &&
-					(userInfo.getEmail() == null || userInfo.getEmail().isEmpty())) {
+				if (oAuthProvider == OAuthProvider.GITHUB
+					&& (userInfo.getEmail() == null || userInfo.getEmail().isEmpty())) {
 
 					log.info("GitHub 이메일이 없습니다. 이메일 API 호출을 시도합니다.");
 
@@ -294,8 +296,8 @@ public class GenericOAuthClient implements OAuthClient {
 
 							// 먼저 primary=true인 이메일 찾기
 							for (JsonNode emailNode : emailsNode) {
-								if (emailNode.has("primary") && emailNode.get("primary").asBoolean() &&
-									emailNode.has("email")) {
+								if (emailNode.has("primary") && emailNode.get("primary").asBoolean()
+									&& emailNode.has("email")) {
 									primaryEmail = emailNode.get("email").asText();
 									log.info("GitHub primary 이메일 찾음: {}", primaryEmail);
 									break;
@@ -303,8 +305,8 @@ public class GenericOAuthClient implements OAuthClient {
 							}
 
 							// primary 이메일이 없으면 첫 번째 이메일 사용
-							if (primaryEmail == null && emailsNode.size() > 0 &&
-								emailsNode.get(0).has("email")) {
+							if (primaryEmail == null && emailsNode.size() > 0
+								&& emailsNode.get(0).has("email")) {
 								primaryEmail = emailsNode.get(0).get("email").asText();
 								log.info("GitHub primary 이메일이 없어 첫 번째 이메일 사용: {}", primaryEmail);
 							}
