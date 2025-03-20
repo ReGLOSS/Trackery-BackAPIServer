@@ -4,18 +4,13 @@ import java.security.SecureRandom;
 import java.util.concurrent.TimeUnit;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
+import com.trackery.trackerybackapiserver.domain.mail.service.EmailSenderService;
 
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,58 +27,18 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 3.        durururuk      인증번호 이메일 전송 기능 추가
  * 25. 3. 5.        durururuk	   이메일 관련 기능 user 도메인에서 분리
  * 25. 3. 20.		durururuk	   이메일 템플릿 정적 리소스에 넣어두고 꺼내쓸 수 있게 수정
+ * 25. 3. 20.	    durururuk	   이메일 전송 관련 로직 분리
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class MailService {
-	private final JavaMailSender javaMailSender;
 	private final StringRedisTemplate redisTemplate;
 	private final SecureRandom secureRandom = new SecureRandom();
 	private final JwtUtil jwtUtil;
-	private final TemplateEngine templateEngine;
+	private final EmailSenderService emailSenderService;
 
 	private static final String EMAIL_VERIFICATION_REDIS_KEY = "email:verify:";
-
-	/**
-	 * 이메일 템플릿 내부에서의 제목과 본문을 동적으로 작성하는 메서드
-	 * @param htmlTitle : 이메일 내부 제목
-	 * @param htmlContents 이메일 내부 본문
-	 * @return : 동적으로 생성된 html 템플릿
-	 */
-	private String generateEmailContents(String htmlTitle, String htmlContents) {
-		Context context = new Context();
-		context.setVariable("htmlTitle", htmlTitle);
-		context.setVariable("htmlContents", htmlContents);
-		return templateEngine.process("email-template", context);
-	}
-
-	/**
-	 * 이메일을 전송합니다.
-	 * @param emailAddress : 발신 대상 이메일
-	 * @param emailTitle : 이메일 제목
-	 * @param content : 이메일 본문
-	 * @param logTitle : 로그 제목
-	 */
-	private void sendEmail(String emailAddress, String emailTitle, String content, String logTitle) {
-		try {
-			MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-
-			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
-
-			mimeMessageHelper.setTo(emailAddress);
-			mimeMessageHelper.setSubject(emailTitle);
-
-			mimeMessageHelper.setText(content, true);
-
-			javaMailSender.send(mimeMessage);
-			log.info("{} 이메일 전송 완료 : {}", logTitle, emailAddress);
-
-		} catch (MessagingException e) {
-			log.error("{} 이메일 전송 실패 : {}", logTitle, emailAddress);
-			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
-		}
-	}
 
 	/**
 	 * HTML 양식으로 인증번호를 알려주는 이메일을 보냅니다.
@@ -102,13 +57,13 @@ public class MailService {
 			<p><strong>인증 번호 :</strong> %s</p>
 			""", emailAddress, authNumber);
 
-		String content = generateEmailContents(htmlTitle, htmlContents);
+		String content = emailSenderService.generateEmailContents(htmlTitle, htmlContents);
 
 		String emailTitle = "Trackery 인증번호입니다.";
 
 		String logTitle = "인증번호";
 
-		sendEmail(emailAddress, emailTitle, content, logTitle);
+		emailSenderService.sendEmail(emailAddress, emailTitle, content, logTitle);
 
 		redisTemplate.opsForValue().set(EMAIL_VERIFICATION_REDIS_KEY + emailAddress, authNumber, 5, TimeUnit.MINUTES);
 	}
