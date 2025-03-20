@@ -19,6 +19,7 @@ import lombok.Getter;
  * 25. 2. 21.        inari			 상세 주석 추가
  * 25. 2. 25.        inari			 Duplicate_EMAIL 추가
  * 25. 2. 26.        inari			 UNAUTHORIZED_OAUTH_FAILED, BAD_REQUEST_INVALID_OAUTH_PROVIDER 추가
+ * 25. 3. 20.        inari			 BAD_REQUEST_INVALID_INPUT 추가
  */
 @Getter
 @AllArgsConstructor
@@ -69,6 +70,10 @@ public enum ErrorCode {
 	 */
 	BAD_REQUEST_INVALID_REQUEST_BODY(HttpStatus.BAD_REQUEST, 400, "잘못된 Request Body"),
 
+	/**
+	 * GitHub 계정이 미공개가 이메일을 찾을수 없을 경우 (HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다. GitHub 계정에 공개 이메일을 설정해주세요.")
+	 */
+	BAD_REQUEST_INVALID_INPUT(HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다. GitHub 계정에 공개 이메일을 설정해주세요."),
 
 	/**
 	 * SHA-256 알고리즘을 사용할 수 없음 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "SHA-256 알고리즘을 사용할 수 없습니다.")
