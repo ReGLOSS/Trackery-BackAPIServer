@@ -7,6 +7,8 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
@@ -29,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 3.        durururuk      최초 생성
  * 25. 3. 3.        durururuk      인증번호 이메일 전송 기능 추가
  * 25. 3. 5.        durururuk	   이메일 관련 기능 user 도메인에서 분리
+ * 25. 3. 20.		durururuk	   이메일 템플릿 정적 리소스에 넣어두고 꺼내쓸 수 있게 수정
  */
 @Slf4j
 @Service
@@ -38,102 +41,95 @@ public class MailService {
 	private final StringRedisTemplate redisTemplate;
 	private final SecureRandom secureRandom = new SecureRandom();
 	private final JwtUtil jwtUtil;
+	private final TemplateEngine templateEngine;
+
+	private static final String EMAIL_VERIFICATION_REDIS_KEY = "email:verify:";
 
 	/**
-	 * HTML 양식으로 인증번호를 알려주는 이메일을 보냅니다.
-	 *
-	 * @param email : 발신 대상 이메일
+	 * 이메일 템플릿 내부에서의 제목과 본문을 동적으로 작성하는 메서드
+	 * @param htmlTitle : 이메일 내부 제목
+	 * @param htmlContents 이메일 내부 본문
+	 * @return : 동적으로 생성된 html 템플릿
 	 */
-	@SuppressWarnings({"checkstyle:RegexpSingleline", "checkstyle:LineLength"})
-	public void sendEmailVerifyMail(String email) {
-		String authNumber = String.format("%06d", secureRandom.nextInt(1000000));
-
-		String content = String.format("""
-				<!DOCTYPE html>
-				<html lang="ko">
-				<head>
-					<meta charset="UTF-8">
-					<meta name="viewport" content="width=device-width, initial-scale=1.0">
-					<title>Trackery 인증 이메일</title>
-				</head>
-				<body style="margin: 0; padding: 0; font-family: Arial, sans-serif;">
-					<table align="center" width="500px" cellpadding="0" cellspacing="0" border="0"\s
-						style="border: 1px solid gray; background-color: #ffffff; text-align: center;">
-						<tr>
-							<td style="background-color: #71717c; padding: 15px; color: white; font-weight: bold; font-size: 18px;">
-								Trackery 인증번호입니다.
-							</td>
-						</tr>
-						<tr>
-							<td style="padding: 20px; background-color: #d8e0e6; text-align: center; font-size: 14px;">
-								아래 인증 번호를 확인하여 인증을 완료해주세요.
-								<hr style="border: 0; border-top: 1px solid #bbb;">
-								<p><strong>이메일 :</strong> %s</p>
-								<p><strong>인증 번호 :</strong> %s</p>
-							</td>
-						</tr>
-						<tr>
-							<td style="padding: 15px; font-size: 12px; color: #888;">
-								본 메일은 발신전용으로, 회신되지 않습니다.
-							</td>
-						</tr>
-					</table>
-				</body>
-				</html>
-			\t""", email, authNumber);
-
-		String subject = "Trackery 인증번호입니다.";
-
-		String logTitle = "인증번호";
-
-		sendEmail(email, subject, content, logTitle);
-
-		redisTemplate.opsForValue().set("email:verify:" + email, authNumber, 5, TimeUnit.MINUTES);
-	}
-
-	/**
-	 * 이메일 인증을 검증합니다.
-	 *
-	 * @param email : 검증할 이메일
-	 * @param authNumber : 입력된 인증번호
-	 * @return : 이메일 JWT 토큰
-	 */
-	public String verifyEmail(String email, String authNumber) {
-		String redisNumber = redisTemplate.opsForValue().get("email:verify:" + email);
-
-		if (redisNumber == null || !redisNumber.equals(authNumber)) {
-			throw new ApiException(ErrorCode.BAD_REQUEST);
-		}
-
-		redisTemplate.delete("email:verify:" + email);
-
-		return jwtUtil.generateTokenWithSubject(email);
+	private String generateEmailContents(String htmlTitle, String htmlContents) {
+		Context context = new Context();
+		context.setVariable("htmlTitle", htmlTitle);
+		context.setVariable("htmlContents", htmlContents);
+		return templateEngine.process("email-template", context);
 	}
 
 	/**
 	 * 이메일을 전송합니다.
-	 * @param email : 발신 대상 이메일
-	 * @param subject : 이메일 제목
+	 * @param emailAddress : 발신 대상 이메일
+	 * @param emailTitle : 이메일 제목
 	 * @param content : 이메일 본문
 	 * @param logTitle : 로그 제목
 	 */
-	public void sendEmail(String email, String subject, String content, String logTitle) {
+	private void sendEmail(String emailAddress, String emailTitle, String content, String logTitle) {
 		try {
 			MimeMessage mimeMessage = javaMailSender.createMimeMessage();
 
 			MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, false, "UTF-8");
 
-			mimeMessageHelper.setTo(email);
-			mimeMessageHelper.setSubject(subject);
+			mimeMessageHelper.setTo(emailAddress);
+			mimeMessageHelper.setSubject(emailTitle);
 
 			mimeMessageHelper.setText(content, true);
 
 			javaMailSender.send(mimeMessage);
-			log.info("{} 이메일 전송 완료 : {}", logTitle, email);
+			log.info("{} 이메일 전송 완료 : {}", logTitle, emailAddress);
 
 		} catch (MessagingException e) {
-			log.error("{} 이메일 전송 실패 : {}", logTitle, email);
+			log.error("{} 이메일 전송 실패 : {}", logTitle, emailAddress);
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
+
+	/**
+	 * HTML 양식으로 인증번호를 알려주는 이메일을 보냅니다.
+	 *
+	 * @param emailAddress : 발신 대상 이메일
+	 */
+	@SuppressWarnings({"checkstyle:RegexpSingleline", "checkstyle:LineLength"})
+	public void sendEmailVerifyMail(String emailAddress) {
+		String authNumber = String.format("%06d", secureRandom.nextInt(1000000));
+
+		String htmlTitle = "Trackery 인증번호입니다.";
+		String htmlContents = String.format("""
+			아래 인증 번호를 확인하여 인증을 완료해주세요.
+			<hr style="border: 0; border-top: 1px solid #bbb;">
+			<p><strong>이메일 :</strong> %s</p>
+			<p><strong>인증 번호 :</strong> %s</p>
+			""", emailAddress, authNumber);
+
+		String content = generateEmailContents(htmlTitle, htmlContents);
+
+		String emailTitle = "Trackery 인증번호입니다.";
+
+		String logTitle = "인증번호";
+
+		sendEmail(emailAddress, emailTitle, content, logTitle);
+
+		redisTemplate.opsForValue().set(EMAIL_VERIFICATION_REDIS_KEY + emailAddress, authNumber, 5, TimeUnit.MINUTES);
+	}
+
+	/**
+	 * 이메일 인증을 검증합니다.
+	 *
+	 * @param emailAddress : 검증할 이메일
+	 * @param authNumber : 입력된 인증번호
+	 * @return : 이메일 JWT 토큰
+	 */
+	public String verifyEmail(String emailAddress, String authNumber) {
+		String redisNumber = redisTemplate.opsForValue().get(EMAIL_VERIFICATION_REDIS_KEY + emailAddress);
+
+		if (redisNumber == null || !redisNumber.equals(authNumber)) {
+			throw new ApiException(ErrorCode.BAD_REQUEST);
+		}
+
+		redisTemplate.delete(EMAIL_VERIFICATION_REDIS_KEY + emailAddress);
+
+		return jwtUtil.generateTokenWithSubject(emailAddress);
+	}
+
 }
