@@ -78,7 +78,7 @@ public class GenericOAuthClient implements OAuthClient {
 
 	{
 		// 네이버 간편 로그인 파서
-		userInfoParsers.put(OAuthProvider.NAVER, (jsonNode) -> {
+		userInfoParsers.put(OAuthProvider.NAVER, jsonNode -> {
 			JsonNode responseNode = jsonNode.get("response");
 			String id = responseNode.get(FIELD_ID).asText();
 			String email = responseNode.has(FIELD_EMAIL) ? responseNode.get(FIELD_EMAIL).asText() : null;
@@ -93,7 +93,7 @@ public class GenericOAuthClient implements OAuthClient {
 		});
 
 		// 카카오 간편 로그인 파서
-		userInfoParsers.put(OAuthProvider.KAKAO, (jsonNode) -> {
+		userInfoParsers.put(OAuthProvider.KAKAO, jsonNode -> {
 			JsonNode kakaoAccount = jsonNode.get("kakao_account");
 			JsonNode profile = kakaoAccount.get("profile");
 
@@ -110,7 +110,7 @@ public class GenericOAuthClient implements OAuthClient {
 		});
 
 		// 구글 간편 로그인 파서
-		userInfoParsers.put(OAuthProvider.GOOGLE, (jsonNode) -> {
+		userInfoParsers.put(OAuthProvider.GOOGLE, jsonNode -> {
 			String id = jsonNode.get("sub").asText();
 			String email = jsonNode.has(FIELD_EMAIL) ? jsonNode.get(FIELD_EMAIL).asText() : null;
 			String nickname = jsonNode.has("name") ? jsonNode.get("name").asText() : null;
@@ -124,7 +124,7 @@ public class GenericOAuthClient implements OAuthClient {
 		});
 
 		// 깃허브 간편 로그인 파서
-		userInfoParsers.put(OAuthProvider.GITHUB, (jsonNode) -> {
+		userInfoParsers.put(OAuthProvider.GITHUB, jsonNode -> {
 			String id = jsonNode.get(FIELD_ID).asText();
 
 			// email이 null이나 빈 문자열인 경우가 많음
