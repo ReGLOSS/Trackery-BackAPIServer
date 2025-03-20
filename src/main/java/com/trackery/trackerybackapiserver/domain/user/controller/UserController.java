@@ -61,10 +61,16 @@ public class UserController {
 		@Valid @RequestBody UserRegisterDto userRegisterDto) {
 		String jwt = userService.registerUser(emailToken, userNameToken, userRegisterDto);
 
-		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", jwt);
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", jwt);
+		ResponseCookie emailTokenCookie = CookieUtil.deleteCookie("emailToken");
+		ResponseCookie userNameTokenCookie = CookieUtil.deleteCookie("userNameToken");
 
 		return ResponseEntity.status(HttpStatus.CREATED)
-			.header(HttpHeaders.SET_COOKIE, cookie.toString())
+			.headers(httpHeaders -> {
+				httpHeaders.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+				httpHeaders.add(HttpHeaders.SET_COOKIE, emailTokenCookie.toString());
+				httpHeaders.add(HttpHeaders.SET_COOKIE, userNameTokenCookie.toString());
+			})
 			.body(ApiResponse.success(SuccessCode.CREATED));
 	}
 
