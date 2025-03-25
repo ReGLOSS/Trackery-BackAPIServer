@@ -78,4 +78,16 @@ class MailControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("emailToken=")));
 	}
 
+	@Test
+	void 유저명_찾기_메일_테스트() throws Exception {
+		doNothing().when(mailService).sendUserNameMail(anyString());
+
+		ResultActions result = mockMvc.perform(
+			post("/api/mail/find-username").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(verifyEmailDto))
+				.with(csrf()));
+
+		result
+			.andExpect(status().isOk());
+	}
 }

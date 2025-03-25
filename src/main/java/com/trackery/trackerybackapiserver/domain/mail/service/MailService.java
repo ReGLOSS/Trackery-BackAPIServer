@@ -104,7 +104,7 @@ public class MailService {
 
 		String emailTitle = "Trackery 유저명 안내입니다.";
 
-		String htmlTitle = "Trackery 유저명은 다음과 같습니다.";
+		String htmlTitle = "Trackery 유저명 안내";
 		String htmlContents = String.format("""
 			유저명을 확인하여 로그인을 진행해주십시오.
 			<hr style="border: 0; border-top: 1px solid #bbb;">
