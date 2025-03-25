@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.common.controller;
+package com.trackery.trackerybackapiserver.domain.mail.controller;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.common.dto.VerifyEmailDto;
-import com.trackery.trackerybackapiserver.domain.common.service.MailService;
+import com.trackery.trackerybackapiserver.domain.mail.service.MailService;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.common.controller
@@ -78,4 +78,16 @@ class MailControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(header().string(HttpHeaders.SET_COOKIE, containsString("emailToken=")));
 	}
 
+	@Test
+	void 유저명_찾기_메일_테스트() throws Exception {
+		doNothing().when(mailService).sendUserNameMail(anyString());
+
+		ResultActions result = mockMvc.perform(
+			post("/api/mail/find-username").contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(verifyEmailDto))
+				.with(csrf()));
+
+		result
+			.andExpect(status().isOk());
+	}
 }

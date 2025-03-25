@@ -1,6 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.user.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.AccessLevel;
@@ -23,23 +22,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserRegisterDto {
-
-	/**
-	 * 사용자의 이메일 주소입니다.
-	 * 올바른 이메일 형식이여야하며 필수 입력값입니다.
-	 */
-	@Email(message = "이메일 형식이 아닙니다.") @NotBlank(message = "이메일은 공백일 수 없습니다.")
-	private String email;
-
-	/**
-	 * 사용자의 아이디입니다.
-	 * 4~15자 길이에 영문 대소문자,숫자,밑줄(_)만 허용됩니다.
-	 * 필수 입력값입니다.
-	 */
-	@NotBlank(message = "사용자명은 공백일 수 없습니다.")
-	@Pattern(regexp = "^\\w{4,15}$", message = "유저명은 4~15자 길이에 영문 대소문자,숫자,밑줄(_)만 허용됩니다.")
-	private String userName;
-
 	/**
 	 * 사용자의 닉네입입니다.
 	 * 필수 입력값 입니다.

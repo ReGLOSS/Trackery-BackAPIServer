@@ -19,8 +19,11 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
+
+import jakarta.servlet.http.Cookie;
 
 /**
  *packageName    : com.trackery.trackerybackapiserver.domain.user.controller
@@ -54,16 +57,19 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 
 	@Test
 	void 회원가입_성공() throws Exception {
-		ReflectionTestUtils.setField(registerDto, "email", "a@a.com");
-		ReflectionTestUtils.setField(registerDto, "userName", "abcdefg");
 		ReflectionTestUtils.setField(registerDto, "nickname", "김커피");
 		ReflectionTestUtils.setField(registerDto, "password", "Qwerasdf1234!!asdf");
 
-		when(userService.registerUser(any())).thenReturn("jwt");
+		String emailToken = "emailJwt";
+		String userNameToken = "userNameJwt";
+
+		when(userService.registerUser(eq(emailToken), eq(userNameToken), any(UserRegisterDto.class))).thenReturn("accessJwt");
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
 				.contentType(MediaType.APPLICATION_JSON)
+				.cookie(new Cookie("emailToken", emailToken))
+				.cookie(new Cookie("userNameToken", userNameToken))
 				.content(objectMapper.writeValueAsString(registerDto))
 				.with(csrf())
 			);
@@ -72,18 +78,21 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isCreated())
 			.andExpect(cookie().exists("accessToken"))
 			.andExpect(cookie().httpOnly("accessToken", true))
-			.andExpect(cookie().value("accessToken", "jwt"));
+			.andExpect(cookie().value("accessToken", "accessJwt"));
 	}
 
 	@Test
 	void 유저명_중복체크_성공() throws Exception {
-		when(userService.checkUsernameAvailability(anyString())).thenReturn(true);
+		UserNameAvailabilityResponseDto dto = new UserNameAvailabilityResponseDto(true, "jwt");
+		when(userService.checkUsernameAvailability(anyString())).thenReturn(dto);
 
 		ResultActions result = mockMvc
 			.perform(get("/api/users/exists/username")
 				.queryParam("value", "abcdefg"));
 
 		result.andExpect(status().isOk())
+			.andExpect(cookie().exists("userNameToken"))
+			.andExpect(cookie().value("userNameToken", "jwt"))
 			.andExpect(jsonPath("$.data").value(true));
 	}
 

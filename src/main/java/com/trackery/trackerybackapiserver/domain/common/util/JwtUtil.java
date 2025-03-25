@@ -83,15 +83,15 @@ public class JwtUtil {
 	}
 
 	/**
-	 * 회원가입 할 때 이메일 인증을 확인할 수 있는 이메일 토큰 발급 기능
-	 * @param email : 인증된 이메일
+	 * 특정 Subject 가지는 JWT 토큰 생성 메서드
+	 * @param subject : 설정할 Subject
 	 * @return : jwt 토큰
 	 */
-	public String generateEmailToken(String email) {
+	public String generateTokenWithSubject(String subject) {
 		try {
 			return JWT.create()
 				.withIssuer(projectDomain)
-				.withSubject(email)
+				.withSubject(subject)
 				.withNotBefore(Instant.now())
 				.withIssuedAt(Instant.now())
 				.withExpiresAt(Instant.now().plusSeconds(EXPIRATION_TIME))

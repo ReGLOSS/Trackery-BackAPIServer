@@ -14,9 +14,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
@@ -57,10 +59,20 @@ class UserServiceTest {
 	@Test
 	void 회원가입_성공() {
 		try (MockedStatic<PasswordUtil> mockedStatic = mockStatic(PasswordUtil.class)) {
-			ReflectionTestUtils.setField(registerDto, "email", "a@a.com");
-			ReflectionTestUtils.setField(registerDto, "userName", "abcdefg");
+			String emailToken = "emailToken";
+			String userNameToken = "userNameToken";
+
 			ReflectionTestUtils.setField(registerDto, "nickname", "김커피");
 			ReflectionTestUtils.setField(registerDto, "password", "Qwerasdf1234!!asdf");
+
+			DecodedJWT decodedEmailToken = mock(DecodedJWT.class);
+			DecodedJWT decodedUserNameToken = mock(DecodedJWT.class);
+
+			when(jwtUtil.verifyJwt(emailToken)).thenReturn(decodedEmailToken);
+			when(jwtUtil.verifyJwt(userNameToken)).thenReturn(decodedUserNameToken);
+
+			when(decodedEmailToken.getSubject()).thenReturn("a@a.com");
+			when(decodedUserNameToken.getSubject()).thenReturn("abcdfg");
 
 			doAnswer(invocation -> {
 				User user = invocation.getArgument(0);
@@ -77,7 +89,7 @@ class UserServiceTest {
 
 			when(jwtUtil.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
 
-			String result =  userService.registerUser(registerDto);
+			String result =  userService.registerUser(emailToken, userNameToken, registerDto);
 
 			assertEquals("jwt token", result);
 
@@ -92,9 +104,14 @@ class UserServiceTest {
 	@Test
 	void 유저명_중복_확인_성공() {
 		when(userMapper.isExistsUserName(anyString())).thenReturn(false);
-		userService.checkUsernameAvailability("abcdefg");
+		when(jwtUtil.generateTokenWithSubject("abcdefg")).thenReturn("jwt");
+
+		UserNameAvailabilityResponseDto result = userService.checkUsernameAvailability("abcdefg");
+
 		verify(userMapper, times(1)).isExistsUserName(anyString());
-		assertTrue(userService.checkUsernameAvailability("abcdefg"));
+
+		assertTrue(result.available());
+		assertEquals("jwt", result.token());
 	}
 
 	@Test
