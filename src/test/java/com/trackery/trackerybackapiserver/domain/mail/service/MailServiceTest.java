@@ -32,6 +32,8 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
  * 25. 3. 5.        durururuk      최초 생성
  * 25. 3. 5.		durururuk      메일 서비스 단위 테스트 코드 작성
  * 25. 3. 14.		durururuk	   분리된 로직에 맞게 테스트 코드 재작성
+ * 25. 3. 25.		durururuk	   유저명 찾기 테스트 코드 작성
+ * 25. 3. 25.		durururuk	   invocation -> when.thenReturn으로 수정
  */
 @ExtendWith(MockitoExtension.class)
 class MailServiceTest {
