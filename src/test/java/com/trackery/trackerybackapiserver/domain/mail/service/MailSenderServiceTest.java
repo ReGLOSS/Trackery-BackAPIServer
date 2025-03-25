@@ -25,9 +25,10 @@ import jakarta.mail.internet.MimeMessage;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 3. 20.        durururuk      최초 생성
+ * 25. 3. 25.		 durururuk		유저명 찾기 이메일 기능 테스트 코드 작성
  */
 @ExtendWith(MockitoExtension.class)
-class EmailSenderServiceTest {
+class MailSenderServiceTest {
 	@Mock
 	JavaMailSender javaMailSender;
 
@@ -35,7 +36,7 @@ class EmailSenderServiceTest {
 	TemplateEngine templateEngine;
 
 	@InjectMocks
-	EmailSenderService emailSenderService;
+	MailSenderService mailSenderService;
 
 	@Test
 	void 이메일_템플릿_생성_테스트() {
@@ -46,7 +47,7 @@ class EmailSenderServiceTest {
 
 		when(templateEngine.process(anyString(), any(Context.class))).thenReturn(expectedHtml);
 
-		String resultHtml = emailSenderService.generateEmailContents(htmlTitle, htmlContents);
+		String resultHtml = mailSenderService.generateEmailContents(htmlTitle, htmlContents);
 
 		assertNotNull(resultHtml);
 		assertEquals(expectedHtml, resultHtml);
@@ -65,7 +66,7 @@ class EmailSenderServiceTest {
 		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
 		doNothing().when(javaMailSender).send(any(MimeMessage.class));
 
-		emailSenderService.sendEmail(email, subject, content, logTitle);
+		mailSenderService.sendEmail(email, subject, content, logTitle);
 
 		verify(javaMailSender, times(1)).createMimeMessage();
 		verify(javaMailSender, times(1)).send(mimeMessage);

@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.mail.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
@@ -14,7 +15,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
+import com.trackery.trackerybackapiserver.domain.user.entity.User;
+import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.common.service
@@ -42,7 +46,10 @@ class MailServiceTest {
 	private ValueOperations<String, String> valueOperations;
 
 	@Mock
-	private EmailSenderService emailSenderService;
+	private MailSenderService mailSenderService;
+
+	@Mock
+	private UserMapper userMapper;
 
 	@Spy
 	@InjectMocks
@@ -55,12 +62,12 @@ class MailServiceTest {
 
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 		doNothing().when(valueOperations).set(anyString(), anyString(), anyLong(), any(TimeUnit.class));
-		when(emailSenderService.generateEmailContents(anyString(), anyString())).thenReturn(content);
-		doNothing().when(emailSenderService).sendEmail(anyString(), anyString(), anyString(), anyString());
+		when(mailSenderService.generateEmailContents(anyString(), anyString())).thenReturn(content);
+		doNothing().when(mailSenderService).sendEmail(anyString(), anyString(), anyString(), anyString());
 
 		mailService.sendEmailVerifyMail(email);
 
-		verify(emailSenderService, times(1)).sendEmail(anyString(), anyString(), anyString(), anyString());
+		verify(mailSenderService, times(1)).sendEmail(anyString(), anyString(), anyString(), anyString());
 		verify(redisTemplate, times(1)).opsForValue();
 		verify(valueOperations, times(1)).set(anyString(), anyString(), anyLong(), any(TimeUnit.class));
 	}
@@ -84,5 +91,38 @@ class MailServiceTest {
 		verify(valueOperations, times(1)).get(redisKey);
 		verify(jwtUtil, times(1)).generateTokenWithSubject(email);
 		verify(redisTemplate, times(1)).delete(redisKey);
+	}
+    @Test
+    void 유저명_메일_발송_테스트() {
+        String email = "a@a.com";
+		String userName = "abcdefg";
+
+		User user = User.builder()
+			.email(email)
+			.userName(userName)
+			.build();
+
+		doAnswer(invocation -> {
+			return Optional.of(user);
+		}).when(userMapper).findByEmail(email);
+
+		doNothing().when(mailSenderService).sendEmail(anyString(), anyString(), anyString(), anyString());
+
+		when(mailSenderService.generateEmailContents(anyString(), anyString())).thenReturn("이메일 html");
+
+		mailService.sendUserNameMail(email);
+
+		verify(userMapper, times(1)).findByEmail(email);
+		verify(mailSenderService, times(1)).sendEmail(anyString(), anyString(), anyString(), anyString());
+	}
+
+	@Test
+	void 유저명_메일_발송_테스트_유저_미존재() {
+		String email = "a@a.com";
+
+		when(userMapper.findByEmail(email)).thenReturn(Optional.empty());
+
+		assertThrows(ApiException.class, () -> mailService.sendUserNameMail(email));
+		verify(userMapper, times(1)).findByEmail(email);
 	}
 }
