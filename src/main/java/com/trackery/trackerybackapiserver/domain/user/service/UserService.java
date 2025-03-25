@@ -13,6 +13,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
@@ -51,13 +52,19 @@ public class UserService {
 	 *
 	 * @param userRegisterDto : 회원 가입 정보를 담은 DTO
 	 */
-	public String registerUser(UserRegisterDto userRegisterDto) {
+	public String registerUser(String emailToken, String userNameToken, UserRegisterDto userRegisterDto) {
+		DecodedJWT decodedEmailToken = jwtUtil.verifyJwt(emailToken);
+		DecodedJWT decodedUserNameToken = jwtUtil.verifyJwt(userNameToken);
+
+		String email = decodedEmailToken.getSubject();
+		String userName = decodedUserNameToken.getSubject();
+
 		String salt = PasswordUtil.generateSalt();
 		String hashedPassword = PasswordUtil.hashPassword(userRegisterDto.getPassword(), salt);
 
 		User user = User.builder()
-			.email(userRegisterDto.getEmail())
-			.userName(userRegisterDto.getUserName())
+			.email(email)
+			.userName(userName)
 			.nickname(userRegisterDto.getNickname())
 			.password(hashedPassword)
 			.salt(salt)
@@ -80,19 +87,23 @@ public class UserService {
 	}
 
 	/**
-	 * 유저명이 이미 db에 존재하는지 체크하는 메서드
-	 *
-	 * @param username 조회할 유저명
-	 * @return db에 존재하지 않을 경우 true, db에 존재할 경우 false 반환
+	 * 유저명 중복체크를 하여 토큰 발급하는 메서드
+	 * @param userName : 중복체크할 유저명
+	 * @return : boolean, jwt 토큰을 담은 DTO
 	 */
-	public boolean checkUsernameAvailability(String username) {
-		return !userMapper.isExistsUserName(username);
+	public UserNameAvailabilityResponseDto checkUsernameAvailability(String userName) {
+		if (!userMapper.isExistsUserName(userName)) {
+			String jwt = jwtUtil.generateTokenWithSubject(userName);
+			return new UserNameAvailabilityResponseDto(true, jwt);
+		} else {
+			return new UserNameAvailabilityResponseDto(false, null);
+		}
 	}
 
 	/**
-	 * 로그인 정보 DTO를 받아서 인증 후 jwt 토큰을 반환하는 메서드
+	 * 로그인 정보 DTO 받아서 인증 후 jwt 토큰을 반환하는 메서드
 	 *
-	 * @param userLoginDto : username, password를 받는 DTO
+	 * @param userLoginDto : username, password 받는 DTO
 	 * @return : 인증된 유저의 정보를 담고있는 jwt
 	 */
 	public String login(UserLoginDto userLoginDto) {

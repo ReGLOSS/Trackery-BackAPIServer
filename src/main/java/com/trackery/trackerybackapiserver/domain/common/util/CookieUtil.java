@@ -27,10 +27,8 @@ public class CookieUtil {
 		throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR_UTIL_CLASS_INSTANTIATED);
 	}
 
-	//TODO maxAge 추후 재설정, 배포 환경에서는 secure(true)로 되게 추가 필요
-
 	/**
-	 * 생성된 액세스 토큰으로 http-only 쿠키를 생성하는 메서드
+	 * 생성된 JWT 토큰으로 http-only 쿠키를 생성하는 메서드
 	 * secure : https 연결에서만 쿠키 생성하게 설정
 	 * path("/") : 모든 경로 요청에 대해 적용
 	 * sameSite("Strict") : 프론트 도메인 안에서만 해당 액세스 코드 작동하게 쿠키 설정
@@ -48,6 +46,11 @@ public class CookieUtil {
 			.build();
 	}
 
+	/**
+	 * 쿠키를 삭제합니다.
+	 * @param key 삭제할 쿠키 key
+	 * @return 삭제될 쿠키 정보
+	 */
 	public static ResponseCookie deleteCookie(String key) {
 		return ResponseCookie.from(key, "")
 			.httpOnly(true)

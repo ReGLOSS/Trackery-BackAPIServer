@@ -18,6 +18,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCo
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
@@ -55,13 +56,21 @@ public class UserController {
 	 * @return : 성공, 실패 여부 응답
 	 */
 	@PostMapping("/register")
-	public ResponseEntity<ApiResponse<String>> register(@Valid @RequestBody UserRegisterDto userRegisterDto) {
-		String jwt = userService.registerUser(userRegisterDto);
+	public ResponseEntity<ApiResponse<String>> register(@CookieValue(name = "emailToken") String emailToken,
+		@CookieValue(name = "userNameToken") String userNameToken,
+		@Valid @RequestBody UserRegisterDto userRegisterDto) {
+		String jwt = userService.registerUser(emailToken, userNameToken, userRegisterDto);
 
-		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", jwt);
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", jwt);
+		ResponseCookie emailTokenCookie = CookieUtil.deleteCookie("emailToken");
+		ResponseCookie userNameTokenCookie = CookieUtil.deleteCookie("userNameToken");
 
 		return ResponseEntity.status(HttpStatus.CREATED)
-			.header(HttpHeaders.SET_COOKIE, cookie.toString())
+			.headers(httpHeaders -> {
+				httpHeaders.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+				httpHeaders.add(HttpHeaders.SET_COOKIE, emailTokenCookie.toString());
+				httpHeaders.add(HttpHeaders.SET_COOKIE, userNameTokenCookie.toString());
+			})
 			.body(ApiResponse.success(SuccessCode.CREATED));
 	}
 
@@ -83,15 +92,24 @@ public class UserController {
 	}
 
 	/**
-	 * 해당 유저명이 사용 가능한지 체크하는 API
+	 * 유저명이 사용가능한지 체크하는 API
 	 *
-	 * @param value String으로 유저명을 받습니다.
-	 * @return db 조회 후 해당 유저명이 없다면 true, 이미 존재한다면 false를 반환합니다.
+	 * @param value : 체크할 유저명
+	 * @return : 유저명 토큰과 boolean 값을 담은 응답
 	 */
 	@GetMapping("/exists/username")
 	public ResponseEntity<ApiResponse<Boolean>> checkUsernameAvailability(@RequestParam String value) {
-		boolean isAvailable = userService.checkUsernameAvailability(value);
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, isAvailable));
+		UserNameAvailabilityResponseDto result = userService.checkUsernameAvailability(value);
+
+		if (result.available()) {
+			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("userNameToken", result.token());
+
+			return ResponseEntity.ok()
+				.header(HttpHeaders.SET_COOKIE, cookie.toString())
+				.body(ApiResponse.success(SuccessCode.OK, true));
+		} else {
+			return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, false));
+		}
 	}
 
 	/**

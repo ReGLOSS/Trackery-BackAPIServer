@@ -1,8 +1,9 @@
-package com.trackery.trackerybackapiserver.domain.common.service;
+package com.trackery.trackerybackapiserver.domain.mail.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.jupiter.api.Test;
@@ -13,11 +14,11 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.mail.javamail.JavaMailSender;
 
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
-
-import jakarta.mail.internet.MimeMessage;
+import com.trackery.trackerybackapiserver.domain.user.entity.User;
+import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.common.service
@@ -31,12 +32,11 @@ import jakarta.mail.internet.MimeMessage;
  * 25. 3. 5.        durururuk      최초 생성
  * 25. 3. 5.		durururuk      메일 서비스 단위 테스트 코드 작성
  * 25. 3. 14.		durururuk	   분리된 로직에 맞게 테스트 코드 재작성
+ * 25. 3. 25.		durururuk	   유저명 찾기 테스트 코드 작성
+ * 25. 3. 25.		durururuk	   invocation -> when.thenReturn으로 수정
  */
 @ExtendWith(MockitoExtension.class)
 class MailServiceTest {
-
-	@Mock
-	private JavaMailSender javaMailSender;
 
 	@Mock
 	private StringRedisTemplate redisTemplate;
@@ -47,6 +47,12 @@ class MailServiceTest {
 	@Mock
 	private ValueOperations<String, String> valueOperations;
 
+	@Mock
+	private MailSenderService mailSenderService;
+
+	@Mock
+	private UserMapper userMapper;
+
 	@Spy
 	@InjectMocks
 	private MailService mailService;
@@ -54,18 +60,19 @@ class MailServiceTest {
 	@Test
 	void 인증_메일_발송_테스트() {
 		String email = "a@a.com";
+		String content = "테스트 html";
 
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-		doNothing().when(mailService).sendEmail(anyString(), anyString(), anyString(), anyString());
 		doNothing().when(valueOperations).set(anyString(), anyString(), anyLong(), any(TimeUnit.class));
+		when(mailSenderService.generateEmailContents(anyString(), anyString())).thenReturn(content);
+		doNothing().when(mailSenderService).sendEmail(anyString(), anyString(), anyString(), anyString());
 
 		mailService.sendEmailVerifyMail(email);
 
-		verify(mailService, times(1)).sendEmail(anyString(), anyString(), anyString(), anyString());
+		verify(mailSenderService, times(1)).sendEmail(anyString(), anyString(), anyString(), anyString());
 		verify(redisTemplate, times(1)).opsForValue();
 		verify(valueOperations, times(1)).set(anyString(), anyString(), anyLong(), any(TimeUnit.class));
 	}
-
 
 	@Test
 	void 메일_검증_테스트() {
@@ -75,7 +82,7 @@ class MailServiceTest {
 		String emailToken = "mockedEmailToken";
 
 		when(valueOperations.get(redisKey)).thenReturn(authNumber);
-		when(jwtUtil.generateEmailToken(email)).thenReturn(emailToken);
+		when(jwtUtil.generateTokenWithSubject(email)).thenReturn(emailToken);
 		when(redisTemplate.delete(redisKey)).thenReturn(true);
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
@@ -83,24 +90,39 @@ class MailServiceTest {
 
 		assertEquals(emailToken, resultToken);
 		verify(valueOperations, times(1)).get(redisKey);
-		verify(jwtUtil, times(1)).generateEmailToken(email);
+		verify(jwtUtil, times(1)).generateTokenWithSubject(email);
 		verify(redisTemplate, times(1)).delete(redisKey);
 	}
 
 	@Test
-	void 메일_전송_테스트() {
+	void 유저명_메일_발송_테스트() {
 		String email = "a@a.com";
-		String subject = "제목";
-		String content = "내용";
-		String logTitle = "테스트 메일";
-		MimeMessage mimeMessage = mock(MimeMessage.class);
+		String userName = "abcdefg";
 
-		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
-		doNothing().when(javaMailSender).send(any(MimeMessage.class));
+		User user = User.builder()
+			.email(email)
+			.userName(userName)
+			.build();
 
-		mailService.sendEmail(email, subject, content, logTitle);
+		when(userMapper.findByEmail(email)).thenReturn(Optional.of(user));
 
-		verify(javaMailSender, times(1)).createMimeMessage();
-		verify(javaMailSender, times(1)).send(mimeMessage);
+		doNothing().when(mailSenderService).sendEmail(anyString(), anyString(), anyString(), anyString());
+
+		when(mailSenderService.generateEmailContents(anyString(), anyString())).thenReturn("이메일 html");
+
+		mailService.sendUserNameMail(email);
+
+		verify(userMapper, times(1)).findByEmail(email);
+		verify(mailSenderService, times(1)).sendEmail(anyString(), anyString(), anyString(), anyString());
+	}
+
+	@Test
+	void 유저명_메일_발송_테스트_유저_미존재() {
+		String email = "a@a.com";
+
+		when(userMapper.findByEmail(email)).thenReturn(Optional.empty());
+
+		assertThrows(ApiException.class, () -> mailService.sendUserNameMail(email));
+		verify(userMapper, times(1)).findByEmail(email);
 	}
 }
