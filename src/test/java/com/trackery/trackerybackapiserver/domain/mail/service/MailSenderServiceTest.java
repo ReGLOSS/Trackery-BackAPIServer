@@ -1,7 +1,8 @@
 package com.trackery.trackerybackapiserver.domain.mail.service;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.*;
 
 import org.junit.jupiter.api.Test;
@@ -17,7 +18,6 @@ import org.thymeleaf.context.Context;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 
-import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 
 /**
@@ -88,7 +88,8 @@ class MailSenderServiceTest {
 		MimeMessage mimeMessage = mock(MimeMessage.class);
 
 		when(javaMailSender.createMimeMessage()).thenReturn(mimeMessage);
-		doThrow(new MailException("테스트 예외") {}).when(javaMailSender).send(any(MimeMessage.class));
+		doThrow(new MailException("테스트 예외") {
+		}).when(javaMailSender).send(any(MimeMessage.class));
 
 		ApiException exception = assertThrows(ApiException.class,
 			() -> mailSenderService.sendEmail(email, subject, content, logTitle));

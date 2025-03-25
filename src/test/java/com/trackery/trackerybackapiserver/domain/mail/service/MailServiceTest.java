@@ -72,7 +72,6 @@ class MailServiceTest {
 		verify(valueOperations, times(1)).set(anyString(), anyString(), anyLong(), any(TimeUnit.class));
 	}
 
-
 	@Test
 	void 메일_검증_테스트() {
 		String email = "a@a.com";
@@ -92,9 +91,10 @@ class MailServiceTest {
 		verify(jwtUtil, times(1)).generateTokenWithSubject(email);
 		verify(redisTemplate, times(1)).delete(redisKey);
 	}
-    @Test
-    void 유저명_메일_발송_테스트() {
-        String email = "a@a.com";
+
+	@Test
+	void 유저명_메일_발송_테스트() {
+		String email = "a@a.com";
 		String userName = "abcdefg";
 
 		User user = User.builder()
@@ -102,9 +102,7 @@ class MailServiceTest {
 			.userName(userName)
 			.build();
 
-		doAnswer(invocation -> {
-			return Optional.of(user);
-		}).when(userMapper).findByEmail(email);
+		when(userMapper.findByEmail(email)).thenReturn(Optional.of(user));
 
 		doNothing().when(mailSenderService).sendEmail(anyString(), anyString(), anyString(), anyString());
 
