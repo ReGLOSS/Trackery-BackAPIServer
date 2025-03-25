@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.mail.service;
 
+import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -67,7 +68,7 @@ public class MailSenderService {
 			javaMailSender.send(mimeMessage);
 			log.info("{} 이메일 전송 완료 : {}", logTitle, emailAddress);
 
-		} catch (MessagingException e) {
+		} catch (MessagingException | MailException e) {
 			log.error("{} 이메일 전송 실패 : {}", logTitle, emailAddress);
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
