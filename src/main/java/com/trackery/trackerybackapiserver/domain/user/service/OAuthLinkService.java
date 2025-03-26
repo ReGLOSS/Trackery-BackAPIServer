@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 3. 26.        inari       최초 생성
+ * 25. 3. 26.        inari       프로바이더 및 이메일을 필수사항으로 지정
  */
 @Slf4j
 @Service

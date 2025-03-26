@@ -33,6 +33,7 @@ import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 3. 26.        inari       최초 생성
+ * 25. 3. 26.        inari       프로바이더, 이메일 필수 사항으로 전환
  */
 @ExtendWith(MockitoExtension.class)
 class OAuthLinkServiceTest {
@@ -71,20 +72,59 @@ class OAuthLinkServiceTest {
 	}
 
 	@Test
-	@DisplayName("토큰 생성 - 이메일 없는 경우")
-	void createLinkToken_WithoutEmail_Success() {
+	@DisplayName("토큰 생성 - 프로바이더 null")
+	void createLinkToken_NullProvider_ThrowsException() {
+		// given
+		String provider = null;
+		String email = "test@example.com";
+
+		// when & then
+		ApiException exception = assertThrows(ApiException.class, () -> {
+			oAuthLinkService.createLinkToken(provider, email);
+		});
+		assertEquals(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("토큰 생성 - 프로바이더 빈 문자열")
+	void createLinkToken_EmptyProvider_ThrowsException() {
+		// given
+		String provider = "  ";
+		String email = "test@example.com";
+
+		// when & then
+		ApiException exception = assertThrows(ApiException.class, () -> {
+			oAuthLinkService.createLinkToken(provider, email);
+		});
+		assertEquals(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("토큰 생성 - 이메일 null")
+	void createLinkToken_NullEmail_ThrowsException() {
 		// given
 		String provider = "google";
 		String email = null;
 
-		// when
-		String token = oAuthLinkService.createLinkToken(provider, email);
+		// when & then
+		ApiException exception = assertThrows(ApiException.class, () -> {
+			oAuthLinkService.createLinkToken(provider, email);
+		});
+		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT, exception.getErrorCode());
+	}
 
-		// then
-		assertNotNull(token);
-		verify(hashOperations).put(argThat(s -> s.startsWith(LINK_TOKEN_PREFIX)), eq("provider"), eq(provider));
-		verify(hashOperations, never()).put(argThat(s -> s.startsWith(LINK_TOKEN_PREFIX)), eq("email"), any());
-		verify(redisTemplate).expire(argThat(s -> s.startsWith(LINK_TOKEN_PREFIX)), eq(TOKEN_EXPIRY));
+	@Test
+	@DisplayName("토큰 생성 - 이메일 빈 문자열")
+	void createLinkToken_EmptyEmail_ThrowsException() {
+		// given
+		String provider = "naver";
+		String email = "";
+
+		// when & then
+		ApiException exception = assertThrows(ApiException.class, () -> {
+			oAuthLinkService.createLinkToken(provider, email);
+		});
+		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT, exception.getErrorCode());
 	}
 
 	@Test
@@ -123,18 +163,19 @@ class OAuthLinkServiceTest {
 
 		Map<Object, Object> linkInfo = new HashMap<>();
 		linkInfo.put("provider", provider);
+		// 이메일 없음
 
 		when(redisTemplate.hasKey(key)).thenReturn(true);
 		when(hashOperations.entries(key)).thenReturn(linkInfo);
 
-		// when
-		OAuthLinkRequestDto result = oAuthLinkService.validateToken(token);
+		when(redisTemplate.hasKey(key)).thenReturn(true);
+		when(hashOperations.entries(key)).thenReturn(linkInfo);
 
-		// then
-		assertNotNull(result);
-		assertEquals(provider, result.getProvider());
-		assertNull(result.getEmail());
-		assertTrue(result.isLinkAccount());
+		// when & then
+		ApiException exception = assertThrows(ApiException.class, () -> {
+			oAuthLinkService.validateToken(token);
+		});
+		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT, exception.getErrorCode());
 	}
 
 	@Test
@@ -185,8 +226,10 @@ class OAuthLinkServiceTest {
 		// given
 		String token = "invalid-token";
 		String key = LINK_TOKEN_PREFIX + token;
+		String email = "test@example.com";
 
 		Map<Object, Object> linkInfo = new HashMap<>();
+		linkInfo.put("email", email);
 		// provider가 없는 경우
 
 		when(redisTemplate.hasKey(key)).thenReturn(true);
@@ -196,7 +239,7 @@ class OAuthLinkServiceTest {
 		ApiException exception = assertThrows(ApiException.class, () -> {
 			oAuthLinkService.validateToken(token);
 		});
-		assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
+		assertEquals(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER, exception.getErrorCode());
 	}
 
 	@Test
