@@ -2,6 +2,7 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 
 import java.time.Duration;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.springframework.data.redis.core.RedisTemplate;
@@ -45,6 +46,25 @@ public class OAuthLinkService {
 	 * @return 생성된 연동 토큰 문자열
 	 */
 	public String createLinkToken(String provider, String email) {
+
+		// provider Optional로 변환 및 필수 검증
+		Optional<String> providerValue = Optional.ofNullable(provider)
+			.filter(e -> !e.trim().isEmpty());
+
+		// 프로바이더 필수 확인
+		if (providerValue.isEmpty()) {
+			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER);
+		}
+
+		// 이메일 Optional로 변환 및 필수 검증
+		Optional<String> emailValue = Optional.ofNullable(email)
+			.filter(e -> !e.trim().isEmpty());
+
+		// 이메일 필수 확인
+		if (emailValue.isEmpty()) {
+			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_INPUT);
+		}
+
 		// 고유 토큰 생성
 		String token = UUID.randomUUID().toString();
 		String key = LINK_TOKEN_PREFIX + token;
@@ -84,17 +104,25 @@ public class OAuthLinkService {
 
 		Map<Object, Object> linkInfo = redisTemplate.opsForHash().entries(key);
 
-		String provider = (String) linkInfo.get("provider");
-		String email = (String) linkInfo.get("email");
+		// Optional로 변환하여 처리
+		Optional<String> provider = Optional.ofNullable((String) linkInfo.get("provider"));
+		Optional<String> email = Optional.ofNullable((String) linkInfo.get("email"));
 
-		if (provider == null) {
+		// provider 필수 검증
+		String providerValue = provider.orElseThrow(() -> {
 			log.error("연동 토큰에 provider 정보 없음: {}", token);
-			throw new ApiException(ErrorCode.BAD_REQUEST);
-		}
+			return new ApiException(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER);
+		});
+
+		// 이메일 필수 검증
+		String emailValue = email.orElseThrow(() -> {
+			log.error("연동 토큰에 email 정보 없음: {}", token);
+			return new ApiException(ErrorCode.BAD_REQUEST_INVALID_INPUT);
+		});
 
 		return OAuthLinkRequestDto.builder()
-			.provider(provider)
-			.email(email)
+			.provider(providerValue)
+			.email(emailValue)
 			.linkAccount(true)
 			.build();
 	}

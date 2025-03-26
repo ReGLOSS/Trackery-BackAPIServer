@@ -73,7 +73,12 @@ public enum ErrorCode {
 	/**
 	 * GitHub 계정이 미공개가 이메일을 찾을수 없을 경우 (HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다. GitHub 계정에 공개 이메일을 설정해주세요.")
 	 */
-	BAD_REQUEST_INVALID_INPUT(HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다. GitHub 계정에 공개 이메일을 설정해주세요."),
+	BAD_REQUEST_INVALID_INPUT_GITHUB(HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다. GitHub 계정에 공개 이메일을 설정해주세요."),
+
+	/**
+	 * 이메일이 존재하지 않을 경우(HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다.")
+	 */
+	BAD_REQUEST_INVALID_INPUT(HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다."),
 
 	/**
 	 * SHA-256 알고리즘을 사용할 수 없음 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "SHA-256 알고리즘을 사용할 수 없습니다.")

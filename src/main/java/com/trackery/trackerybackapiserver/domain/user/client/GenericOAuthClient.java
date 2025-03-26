@@ -337,7 +337,7 @@ public class GenericOAuthClient implements OAuthClient {
 
 		if (primaryEmail == null) {
 			log.error("GitHub 계정에서 이메일을 찾을 수 없습니다.");
-			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_INPUT);
+			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_INPUT_GITHUB);
 		}
 
 		return updateUserInfoWithEmail(userInfo, primaryEmail);
