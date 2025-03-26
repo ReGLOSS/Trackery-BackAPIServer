@@ -4,6 +4,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -13,8 +16,11 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
+import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
+import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkService;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,7 +35,9 @@ import lombok.extern.slf4j.Slf4j;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 27.        inari       최초 생성
+ * 25. 2. 27.        inari       	최초 생성
+ * 25. 3. 25.        inari			계정 연동 토큰 생성 API 추가
+ * 25. 3. 26.        inari			로그인 통합 매서드로 변경
  */
 @Slf4j
 @RestController
@@ -43,88 +51,76 @@ public class OAuthController {
 	private final OAuthService oAuthService;
 
 	/**
-	 * 카카오 로그인 처리
-	 *
-	 * @param code 인증 코드
-	 * @param linkAccount 계정 연동 여부
-	 * @return 로그인 처리 결과
+	 * 간편 로그인 연동 서비스 객체입니다.
 	 */
-	@GetMapping("/login/kakao")
-	public ResponseEntity<ApiResponse<OAuthResponseDto>> kakaoLogin(
-		@RequestParam("code") String code,
-		@RequestParam(value = "link_account", defaultValue = "false") boolean linkAccount) {
+	private final OAuthLinkService oAuthLinkService;
 
-		OAuthLoginDto oAuthLoginDto = OAuthLoginDto.builder()
-			.provider("KAKAO")
-			.code(code)
-			.linkAccount(linkAccount)
-			.build();
+	/**
+	 * OAuth 계정 연동을 위한 토큰을 생성하는 API 메서드입니다.
+	 *
+	 * @param request 계정 연동 요청 정보(제공자, 이메일)를 담고 있는 DTO
+	 * @return 생성된 연동 토큰 정보를 포함한 응답 엔티티
+	 */
+	@PostMapping("/link-account")
+	public ResponseEntity<ApiResponse<OAuthLinkTokenDto>> createLinkToken(@RequestBody OAuthLinkRequestDto request) {
+		try {
+			// 연동 토큰 생성
+			String token = oAuthLinkService.createLinkToken(request.getProvider(), request.getEmail());
 
-		return processOAuthLogin(oAuthLoginDto);
+			OAuthLinkTokenDto response = OAuthLinkTokenDto.builder()
+				.token(token)
+				.provider(request.getProvider())
+				.build();
+
+			return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
+		} catch (ApiException e) {
+			log.error("계정 연동 토큰 생성 실패: {}", e.getMessage());
+			return ResponseEntity.status(e.getErrorCode().getStatus())
+				.body(ApiResponse.error(e.getErrorCode()));
+		} catch (Exception e) {
+			log.error("계정 연동 토큰 생성 중 오류: {}", e.getMessage(), e);
+			return ResponseEntity.internalServerError()
+				.body(ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR));
+		}
 	}
 
 	/**
-	 * 네이버 로그인 처리
+	 * 통합된 OAuth 로그인 처리 메서드입니다.
 	 *
+	 * @param provider OAuth 제공자(KAKAO, GOOGLE, GITHUB, NAVER)
 	 * @param code 인증 코드
-	 * @param state CSRF 방지용 상태값
-	 * @param linkAccount 계정 연동 여부
+	 * @param state 상태 값(선택 사항)
+	 * @param linkToken 계정 연동 토큰(선택 사항)
 	 * @return 로그인 처리 결과
 	 */
-	@GetMapping("/login/naver")
-	public ResponseEntity<ApiResponse<OAuthResponseDto>> naverLogin(
+	@GetMapping("/login/{provider}")
+	public ResponseEntity<ApiResponse<OAuthResponseDto>> oauthLogin(
+		@PathVariable("provider") String provider,
 		@RequestParam("code") String code,
-		@RequestParam("state") String state,
-		@RequestParam(value = "link_account", defaultValue = "false") boolean linkAccount) {
+		@RequestParam(value = "state", required = false) String state,
+		@RequestParam(value = "link_token", required = false) String linkToken) {
 
-		OAuthLoginDto oAuthLoginDto = OAuthLoginDto.builder()
-			.provider("NAVER")
-			.code(code)
-			.linkAccount(linkAccount)
-			.build();
+		provider = provider.toUpperCase();
+		OAuthLoginDto.OAuthLoginDtoBuilder builder = OAuthLoginDto.builder()
+			.provider(provider)
+			.code(code);
 
-		return processOAuthLogin(oAuthLoginDto);
-	}
+		// 링크 토큰이 있으면 Redis에서 검증하고 연동 플래그 설정
+		if (linkToken != null && !linkToken.isEmpty()) {
+			try {
+				OAuthLinkRequestDto linkRequest = oAuthLinkService.validateToken(linkToken);
+				builder.linkAccount(true);
+				log.info("계정 연동 요청 검증 성공: provider={}, token={}", provider, linkToken);
 
-	/**
-	 * 구글 로그인 처리
-	 *
-	 * @param code 인증 코드
-	 * @param linkAccount 계정 연동 여부
-	 * @return 로그인 처리 결과
-	 */
-	@GetMapping("/login/google")
-	public ResponseEntity<ApiResponse<OAuthResponseDto>> googleLogin(
-		@RequestParam("code") String code,
-		@RequestParam(value = "link_account", defaultValue = "false") boolean linkAccount) {
+				// 토큰 사용 후 삭제
+				oAuthLinkService.deleteToken(linkToken);
 
-		OAuthLoginDto oAuthLoginDto = OAuthLoginDto.builder()
-			.provider("GOOGLE")
-			.code(code)
-			.linkAccount(linkAccount)
-			.build();
+			} catch (Exception e) {
+				log.warn("계정 연동 토큰 검증 실패: {}", e.getMessage());
+			}
+		}
 
-		return processOAuthLogin(oAuthLoginDto);
-	}
-
-	/**
-	 * 깃허브 로그인 처리
-	 *
-	 * @param code 인증 코드
-	 * @param linkAccount 계정 연동 여부
-	 * @return 로그인 처리 결과
-	 */
-	@GetMapping("/login/github")
-	public ResponseEntity<ApiResponse<OAuthResponseDto>> githubLogin(
-		@RequestParam("code") String code,
-		@RequestParam(value = "link_account", defaultValue = "false") boolean linkAccount) {
-
-		OAuthLoginDto oAuthLoginDto = OAuthLoginDto.builder()
-			.provider("GITHUB")
-			.code(code)
-			.linkAccount(linkAccount)
-			.build();
-
+		OAuthLoginDto oAuthLoginDto = builder.build();
 		return processOAuthLogin(oAuthLoginDto);
 	}
 
