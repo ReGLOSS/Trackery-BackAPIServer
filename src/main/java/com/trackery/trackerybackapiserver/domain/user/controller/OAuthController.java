@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 27.        inari       	최초 생성
  * 25. 3. 25.        inari			계정 연동 토큰 생성 API 추가
  * 25. 3. 26.        inari			로그인 통합 매서드로 변경
+ * 25. 3. 27.        inari			provider를 enum으로 변경
  */
 @Slf4j
 @RestController

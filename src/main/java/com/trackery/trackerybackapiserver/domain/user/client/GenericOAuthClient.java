@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 28.        inari       리프레시 토큰 제거, 깃허브 로그인시 이메일 요청 추가
  * 25. 3. 05.        inari       프로필 사진 제거
  * 25. 3. 20.        inari       소나큐브 코드스멜 개선
+ * 25. 3. 27.        inari		 provider를 enum으로 변경
  */
 @Slf4j
 @Component
@@ -153,17 +154,16 @@ public class GenericOAuthClient implements OAuthClient {
 	 * @param provider 간편 로그인 제공자
 	 * @return 액세스 토큰 포함한 응답
 	 */
-	public TokenResponseDto getTokens(String code, String provider) {
+	public TokenResponseDto getTokens(String code, OAuthProvider provider) {
 		try {
-			OAuthProvider oAuthProvider = OAuthProvider.valueOf(provider.toUpperCase());
-			OAuthProperties.ProviderProperties properties = getProviderProperties(oAuthProvider);
+			OAuthProperties.ProviderProperties properties = getProviderProperties(provider);
 
 			HttpHeaders headers = new HttpHeaders();
 
 			headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
 			// GitHub OAuth API는 Accept 헤더가 필요함
-			if (oAuthProvider == OAuthProvider.GITHUB) {
+			if (provider == OAuthProvider.GITHUB) {
 				headers.set("Accept", "application/json");
 				headers.setContentType(MediaType.APPLICATION_JSON);
 
@@ -199,7 +199,7 @@ public class GenericOAuthClient implements OAuthClient {
 				body.add("code", code);
 				body.add("redirect_uri", properties.getRedirectUri());
 
-				if (oAuthProvider == OAuthProvider.NAVER && properties.getState() != null) {
+				if (provider == OAuthProvider.NAVER && properties.getState() != null) {
 					body.add("state", properties.getState());
 				}
 
@@ -232,7 +232,7 @@ public class GenericOAuthClient implements OAuthClient {
 	 * @return 액세스 토큰
 	 */
 	@Override
-	public String getAccessToken(String code, String provider) {
+	public String getAccessToken(String code, OAuthProvider provider) {
 		return getTokens(code, provider).getAccessToken();
 	}
 
@@ -244,22 +244,21 @@ public class GenericOAuthClient implements OAuthClient {
 	 * @return 사용자 정보
 	 */
 	@Override
-	public OAuthUserInfoDto getUserInfo(String accessToken, String provider) {
+	public OAuthUserInfoDto getUserInfo(String accessToken, OAuthProvider provider) {
 		try {
-			OAuthProvider oAuthProvider = OAuthProvider.valueOf(provider.toUpperCase());
-			OAuthProperties.ProviderProperties properties = getProviderProperties(oAuthProvider);
+			OAuthProperties.ProviderProperties properties = getProviderProperties(provider);
 
 			// HTTP 헤더 설정
-			HttpHeaders headers = configureHeaders(accessToken, oAuthProvider);
+			HttpHeaders headers = configureHeaders(accessToken, provider);
 
 			// 사용자 정보 요청 및 파싱
-			JsonNode userInfoJson = requestUserInfo(headers, properties, provider);
+			JsonNode userInfoJson = requestUserInfo(headers, properties, provider.name());
 
 			// 제공자별 파싱 함수를 통해 사용자 정보 추출
-			OAuthUserInfoDto userInfo = parseUserInfo(userInfoJson, oAuthProvider);
+			OAuthUserInfoDto userInfo = parseUserInfo(userInfoJson, provider);
 
 			// GitHub 사용자의 경우 이메일 보완 처리
-			if (oAuthProvider == OAuthProvider.GITHUB && isEmailMissing(userInfo)) {
+			if (provider == OAuthProvider.GITHUB && isEmailMissing(userInfo)) {
 				userInfo = completeGithubEmail(userInfo, headers);
 			}
 
@@ -319,14 +318,15 @@ public class GenericOAuthClient implements OAuthClient {
 	}
 
 	/**
-	 * 이메일 정보 누락 확인
+	 * 이메일 정보 누락을 확인하는 메서드입니다.
 	 */
 	private boolean isEmailMissing(OAuthUserInfoDto userInfo) {
 		return userInfo.getEmail() == null || userInfo.getEmail().isEmpty();
 	}
 
 	/**
-	 * GitHub 사용자의 이메일 정보 보완
+	 * GitHub 사용자의 이메일 정보 보완하는 메서드입니다.
+	 *
 	 * @throws ApiException 이메일이 필수인데 찾지 못한 경우 발생
 	 */
 	private OAuthUserInfoDto completeGithubEmail(OAuthUserInfoDto userInfo, HttpHeaders headers) {
@@ -344,7 +344,8 @@ public class GenericOAuthClient implements OAuthClient {
 	}
 
 	/**
-	 * GitHub 이메일 목록 요청
+	 * GitHub 이메일 목록 요청하는 메서드입니다.
+	 *
 	 * @throws ApiException 이메일 요청 실패 시 발생
 	 */
 	private JsonNode requestGithubEmails(HttpHeaders headers) {
@@ -366,7 +367,7 @@ public class GenericOAuthClient implements OAuthClient {
 	}
 
 	/**
-	 * GitHub 이메일 목록에서 적절한 이메일 찾기
+	 * GitHub 이메일 목록에서 적절한 이메일 찾는 메서드입니다.
 	 */
 	private String findPrimaryEmail(JsonNode emailsNode) {
 		if (!emailsNode.isArray() || emailsNode.size() == 0) {
@@ -394,7 +395,7 @@ public class GenericOAuthClient implements OAuthClient {
 	}
 
 	/**
-	 * 찾은 이메일로 사용자 정보 업데이트
+	 * 찾은 이메일로 사용자 정보를 업데이트하는 메서드입니다.
 	 */
 	private OAuthUserInfoDto updateUserInfoWithEmail(OAuthUserInfoDto userInfo, String email) {
 		return OAuthUserInfoDto.builder()
@@ -406,7 +407,7 @@ public class GenericOAuthClient implements OAuthClient {
 	}
 
 	/**
-	 * 간편 로그인 제공자 속성을 가져오는 메서드
+	 * 간편 로그인 제공자 속성을 가져오는 메서드입니다.
 	 *
 	 * @param provider 간편 로그인 제공자
 	 * @return 제공자별 속성
