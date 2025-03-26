@@ -270,7 +270,14 @@ public class GenericOAuthClient implements OAuthClient {
 	}
 
 	/**
-	 * 제공자별 HTTP 헤더 설정
+	 * 제공자별 HTTP 헤더 설정입니다.
+	 * 카카오는 API를 폼 데이터 형식으로 처리하며,
+	 * 깃허브는 "Accept", "application/json"으로 처리합니다.
+	 * 네이버와 구글은 기본 인증만으로 충분하므로 헤더 인증을 따로 하지 않습니다.
+	 *
+	 * @param accessToken 액세스토큰
+	 * @param provider 간편 로그인 제공자
+	 * @return 헤더
 	 */
 	private HttpHeaders configureHeaders(String accessToken, OAuthProvider provider) {
 		HttpHeaders headers = new HttpHeaders();

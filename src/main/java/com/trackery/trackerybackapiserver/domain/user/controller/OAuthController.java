@@ -128,7 +128,8 @@ public class OAuthController {
 	}
 
 	/**
-	 * OAuth 로그인 공통 처리 메서드
+	 * OAuth 로그인 공통 처리 메서드입니다.
+	 *
 	 * @param oAuthLoginDto OAuth 로그인 DTO
 	 * @return 로그인 처리 결과
 	 */
