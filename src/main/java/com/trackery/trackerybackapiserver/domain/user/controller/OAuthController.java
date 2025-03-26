@@ -20,6 +20,7 @@ import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
+import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkService;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
 
@@ -95,14 +96,15 @@ public class OAuthController {
 	 */
 	@GetMapping("/login/{provider}")
 	public ResponseEntity<ApiResponse<OAuthResponseDto>> oauthLogin(
-		@PathVariable("provider") String provider,
+		@PathVariable("provider") OAuthProvider provider,
 		@RequestParam("code") String code,
 		@RequestParam(value = "state", required = false) String state,
 		@RequestParam(value = "link_token", required = false) String linkToken) {
 
-		provider = provider.toUpperCase();
+		log.info("OAuth 로그인 요청: provider={}, code={}", provider, code);
+
 		OAuthLoginDto.OAuthLoginDtoBuilder builder = OAuthLoginDto.builder()
-			.provider(provider)
+			.provider(provider.name())
 			.code(code);
 
 		// 링크 토큰이 있으면 Redis에서 검증하고 연동 플래그 설정
