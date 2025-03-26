@@ -41,7 +41,7 @@ public class CookieUtil {
 		return ResponseCookie.from(key, value)
 			.httpOnly(true)
 			.path("/")
-			.maxAge(Duration.ofDays(7))
+			.maxAge(Duration.ofHours(1))
 			.sameSite("Strict")
 			.build();
 	}
