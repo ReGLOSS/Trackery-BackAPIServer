@@ -8,6 +8,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import lombok.Builder;
+import lombok.Getter;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.entity
@@ -20,8 +21,9 @@ import lombok.Builder;
  * -----------------------------------------------------------
  * 25. 2. 19.        durururuk       최초 생성
  */
-//TODO 유저 권한 추가 필요
+@Getter
 public class CustomUserDetails implements UserDetails {
+
 	private final Long userId;
 	private final Long roleId;
 
@@ -46,7 +48,4 @@ public class CustomUserDetails implements UserDetails {
 		return "";
 	}
 
-	public Long getUserId() {
-		return userId;
-	}
 }
