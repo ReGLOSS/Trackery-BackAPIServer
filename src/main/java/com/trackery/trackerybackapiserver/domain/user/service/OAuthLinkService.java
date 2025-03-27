@@ -28,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 3. 26.        inari       최초 생성
  * 25. 3. 26.        inari       프로바이더 및 이메일을 필수사항으로 지정
+ * 25. 3. 27.        inari       코드 스멜 수정
  */
 @Slf4j
 @Service
@@ -72,9 +73,7 @@ public class OAuthLinkService {
 
 		// 연동 정보 저장
 		redisTemplate.opsForHash().put(key, "provider", provider);
-		if (email != null) {
-			redisTemplate.opsForHash().put(key, "email", email);
-		}
+		redisTemplate.opsForHash().put(key, "email", email);
 
 		// 유효 시간 설정
 		redisTemplate.expire(key, TOKEN_EXPIRY);
