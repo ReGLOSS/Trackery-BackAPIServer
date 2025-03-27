@@ -18,7 +18,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  */
 @Service
 public class AuthService {
-	public AuthUserDto returnUserDto(CustomUserDetails customUserDetails) {
+	public AuthUserDto toAuthUserDto(CustomUserDetails customUserDetails) {
 		return new AuthUserDto(customUserDetails.getUserId(), customUserDetails.getUsername(),
 			customUserDetails.getRoleId());
 	}

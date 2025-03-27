@@ -35,7 +35,7 @@ public class AuthController {
 
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<AuthUserDto>> authCheck(@AuthenticationPrincipal CustomUserDetails userDetails) {
-		AuthUserDto authUserDto = authService.returnUserDto(userDetails);
+		AuthUserDto authUserDto = authService.toAuthUserDto(userDetails);
 
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, authUserDto));
 	}
