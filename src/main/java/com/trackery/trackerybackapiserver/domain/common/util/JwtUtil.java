@@ -28,13 +28,13 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 2. 18.        durururuk       최초 생성
  */
-//TODO 레디스 설정 후 액세스 토큰 + 리프레쉬 토큰으로 변경 필요
 @Slf4j
 @Component
 public class JwtUtil {
 
 	//만료시간 10분(600초)
-	private static final long EXPIRATION_TIME = 600;
+	//TODO JWT 만료시간 일괄 설정되게 수정
+	private static final int EXPIRATION_TIME = 600;
 
 	private final String projectDomain;
 	private final Algorithm algorithm;
