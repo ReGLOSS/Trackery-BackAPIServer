@@ -25,11 +25,13 @@ import lombok.Getter;
 public class CustomUserDetails implements UserDetails {
 
 	private final Long userId;
+	private final String userName;
 	private final Long roleId;
 
 	@Builder
-	public CustomUserDetails(Long userId, Long roleId) {
+	public CustomUserDetails(Long userId, String userName, Long roleId) {
 		this.userId = userId;
+		this.userName = userName;
 		this.roleId = roleId;
 	}
 
@@ -45,7 +47,7 @@ public class CustomUserDetails implements UserDetails {
 
 	@Override
 	public String getUsername() {
-		return "";
+		return userName;
 	}
 
 }

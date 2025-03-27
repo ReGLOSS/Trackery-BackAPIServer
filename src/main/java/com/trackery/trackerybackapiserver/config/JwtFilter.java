@@ -78,9 +78,14 @@ public class JwtFilter extends OncePerRequestFilter {
 		}
 
 		Long userId = Long.valueOf(jwt.getSubject());
+		String userName = jwt.getClaim("username").asString();
 		Long roleId = jwt.getClaim("role").asLong();
 
-		UserDetails userDetails = CustomUserDetails.builder().userId(userId).roleId(roleId).build();
+		UserDetails userDetails = CustomUserDetails.builder()
+			.userId(userId)
+			.userName(userName)
+			.roleId(roleId)
+			.build();
 
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails,
 			null, userDetails.getAuthorities());
