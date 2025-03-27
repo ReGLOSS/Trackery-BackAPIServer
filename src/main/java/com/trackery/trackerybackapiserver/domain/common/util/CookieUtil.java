@@ -41,7 +41,8 @@ public class CookieUtil {
 		return ResponseCookie.from(key, value)
 			.httpOnly(true)
 			.path("/")
-			.maxAge(Duration.ofDays(7))
+			//TODO JWT 토큰 만료시간 일괄 관리되게 수정
+			.maxAge(Duration.ofSeconds(600))
 			.sameSite("Strict")
 			.build();
 	}
