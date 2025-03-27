@@ -5,7 +5,7 @@ package com.trackery.trackerybackapiserver.domain.auth.dto;
  * fileName       : AuthUserDto
  * author         : durururuk
  * date           : 25. 3. 27.
- * description    :
+ * description    :	인증 정보 dto
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------

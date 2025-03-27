@@ -13,7 +13,6 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCo
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.auth.controller
@@ -26,13 +25,18 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 3. 26.        durururuk      최초 생성
  */
-@Slf4j
 @RestController
 @RequestMapping("/api/auth")
 @RequiredArgsConstructor
 public class AuthController {
 	private final AuthService authService;
 
+	/**
+	 * 인증 정보를 반환하는 API
+	 *
+	 * @param userDetails : JWT 필터를 통해 Security Context Holder에 저장된 인증 정보
+	 * @return : 인증 정보(id, 유저명, 역할id)가 담긴 DTO
+	 */
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<AuthUserDto>> authCheck(@AuthenticationPrincipal CustomUserDetails userDetails) {
 		AuthUserDto authUserDto = authService.toAuthUserDto(userDetails);
