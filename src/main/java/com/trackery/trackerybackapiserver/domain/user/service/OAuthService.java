@@ -43,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 27.        inari       userRoleMapper 추가
  * 25. 2. 28.        inari       리프레시 토큰 제거
  * 25. 3. 14.        inari       주석 추가
+ * 25. 3. 27.        inari		 provider를 enum으로 변경
  */
 @Slf4j
 @Service
@@ -64,14 +65,8 @@ public class OAuthService {
 	 */
 	@Transactional
 	public OAuthLoginResult processOAuthLogin(OAuthLoginDto oAuthLoginDto) {
-		String provider = oAuthLoginDto.getProvider().toUpperCase();
 
-		// 유효한 OAuth 제공자인지 확인
-		try {
-			OAuthProvider.valueOf(provider);
-		} catch (IllegalArgumentException e) {
-			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER);
-		}
+		OAuthProvider provider = OAuthProvider.valueOf(oAuthLoginDto.getProvider());
 
 		// 인증 코드로 토큰 획득
 		String accessToken = oAuthClient.getAccessToken(oAuthLoginDto.getCode(), provider);
@@ -80,7 +75,7 @@ public class OAuthService {
 		OAuthUserInfoDto userInfo = oAuthClient.getUserInfo(accessToken, provider);
 
 		// OAuth 연동 정보 조회
-		Optional<OAuth> existingOAuth = oAuthMapper.findByProviderAndProviderId(provider, userInfo.getProviderUserId());
+		Optional<OAuth> existingOAuth = oAuthMapper.findByProviderAndProviderId(provider.name(), userInfo.getProviderUserId());
 
 		// 이미 OAuth 연동된 계정이 있으면 그대로 로그인
 		if (existingOAuth.isPresent()) {
@@ -228,7 +223,7 @@ public class OAuthService {
 
 		// 영문, 숫자, 밑줄만 허용하는 정규식에 맞도록 조정
 		if (!baseUserName.matches("^\\w+$")) {
-			baseUserName = "user";
+			baseUserName = "user_";
 		}
 
 		// 랜덤 4자리 숫자 추가 (1000-9999)

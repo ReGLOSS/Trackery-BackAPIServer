@@ -20,6 +20,7 @@ import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
+import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
 import com.trackery.trackerybackapiserver.domain.user.mapper.OAuthMapper;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
@@ -101,8 +102,8 @@ class OAuthServiceTest {
 	@Test
 	void OAuth_로그인_기존_OAuth연동계정_성공() {
 		// given
-		when(oAuthClient.getAccessToken(anyString(), anyString())).thenReturn("access_token");
-		when(oAuthClient.getUserInfo(anyString(), anyString())).thenReturn(oAuthUserInfoDto);
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(), any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
 		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.of(oAuth));
 		when(userMapper.findByUserId(anyLong())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
@@ -115,8 +116,8 @@ class OAuthServiceTest {
 		assertNotNull(result);
 		assertEquals("jwt_token", result.getJwtToken());
 		assertFalse(result.getResponseDto().isExistingEmail());
-		verify(oAuthClient).getAccessToken(anyString(), anyString());
-		verify(oAuthClient).getUserInfo(anyString(), anyString());
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
 		verify(userMapper).findByUserId(anyLong());
 		verify(userRoleMapper).findByUserId(anyLong());
@@ -126,8 +127,8 @@ class OAuthServiceTest {
 	@Test
 	void OAuth_로그인_기존_이메일_존재_연동거부_테스트() {
 		// given
-		when(oAuthClient.getAccessToken(anyString(), anyString())).thenReturn("access_token");
-		when(oAuthClient.getUserInfo(anyString(), anyString())).thenReturn(oAuthUserInfoDto);
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(),any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
 		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.empty());
 		when(userMapper.findByEmail(anyString())).thenReturn(Optional.of(user));
 
@@ -138,8 +139,8 @@ class OAuthServiceTest {
 		assertNotNull(result);
 		assertNull(result.getJwtToken());
 		assertTrue(result.getResponseDto().isExistingEmail());
-		verify(oAuthClient).getAccessToken(anyString(), anyString());
-		verify(oAuthClient).getUserInfo(anyString(), anyString());
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
 		verify(userMapper).findByEmail(anyString());
 		verify(oAuthMapper, never()).insertOAuth(any(OAuth.class));
@@ -154,8 +155,8 @@ class OAuthServiceTest {
 			.linkAccount(true)
 			.build();
 
-		when(oAuthClient.getAccessToken(anyString(), anyString())).thenReturn("access_token");
-		when(oAuthClient.getUserInfo(anyString(), anyString())).thenReturn(oAuthUserInfoDto);
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(), any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
 		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.empty());
 		when(userMapper.findByEmail(anyString())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
@@ -168,8 +169,8 @@ class OAuthServiceTest {
 		assertNotNull(result);
 		assertEquals("jwt_token", result.getJwtToken());
 		assertFalse(result.getResponseDto().isExistingEmail());
-		verify(oAuthClient).getAccessToken(anyString(), anyString());
-		verify(oAuthClient).getUserInfo(anyString(), anyString());
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
 		verify(userMapper).findByEmail(anyString());
 		verify(oAuthMapper).insertOAuth(any(OAuth.class));
@@ -180,8 +181,8 @@ class OAuthServiceTest {
 	@Test
 	void OAuth_로그인_신규회원가입_성공() {
 		// given
-		when(oAuthClient.getAccessToken(anyString(), anyString())).thenReturn("access_token");
-		when(oAuthClient.getUserInfo(anyString(), anyString())).thenReturn(oAuthUserInfoDto);
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(), any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
 		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.empty());
 		when(userMapper.findByEmail(anyString())).thenReturn(Optional.empty());
 		when(userMapper.isExistsUserName(anyString())).thenReturn(false);
@@ -202,8 +203,8 @@ class OAuthServiceTest {
 		assertNotNull(result);
 		assertEquals("jwt_token", result.getJwtToken());
 		assertFalse(result.getResponseDto().isExistingEmail());
-		verify(oAuthClient).getAccessToken(anyString(), anyString());
-		verify(oAuthClient).getUserInfo(anyString(), anyString());
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(),any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
 		verify(userMapper).findByEmail(anyString());
 		verify(userMapper).insertUser(any(User.class));
