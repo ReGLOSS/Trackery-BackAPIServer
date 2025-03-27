@@ -1,18 +1,18 @@
 package com.trackery.trackerybackapiserver.domain.auth.controller;
 
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.trackery.trackerybackapiserver.domain.auth.dto.AuthUserDto;
+import com.trackery.trackerybackapiserver.domain.auth.service.AuthService;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
-import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
-import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -29,15 +29,14 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @RestController
 @RequestMapping("/api/auth")
+@RequiredArgsConstructor
 public class AuthController {
+	private final AuthService authService;
 
 	@GetMapping("/me")
-	public ResponseEntity<ApiResponse<String>> authCheck(@AuthenticationPrincipal CustomUserDetails userDetails) {
-		log.info("asf");
-		if (userDetails == null) {
-			throw new ApiException(ErrorCode.UNAUTHORIZED);
-		}
+	public ResponseEntity<ApiResponse<AuthUserDto>> authCheck(@AuthenticationPrincipal CustomUserDetails userDetails) {
+		AuthUserDto authUserDto = authService.returnUserDto(userDetails);
 
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, authUserDto));
 	}
 }
