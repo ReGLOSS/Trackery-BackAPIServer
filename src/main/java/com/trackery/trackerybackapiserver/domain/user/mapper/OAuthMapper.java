@@ -16,6 +16,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 24.        inari       최초 생성
+ * 25. 3. 21.        inari       오타 수정
  */
 @Mapper
 public interface OAuthMapper {
@@ -40,8 +41,8 @@ public interface OAuthMapper {
 	 * 특정 유저 아이디와 간편 로그인 제공자로 간편 로그인 정보를 조회하는 쿼리
 	 *
 	 * @param userId 사용자의 고유 식별자
-	 * @param providerUserId  간편 로그인을 등록한 SNS에서 제공한 고유 식별자
+	 * @param provider 간편 로그인을 등록한 SNS 이름
 	 * @return 특정 유저가 연동한 간편 로그인 정보
 	 */
-	Optional<OAuth> findByUserIdAndProvider(Long userId, String providerUserId);
+	Optional<OAuth> findByUserIdAndProvider(Long userId, String provider);
 }

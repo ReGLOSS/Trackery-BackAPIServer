@@ -5,6 +5,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
@@ -25,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 2. 13.        durururuk       최초 생성
  * 25. 2. 21.        inari			 상세 주석 추가
+ * 25. 3. 26.        inari			 handleMethodArgumentTypeMismatchException 추가
  */
 @Slf4j
 @RestControllerAdvice
@@ -77,5 +79,26 @@ public class GlobalExceptionHandler {
 		return ResponseEntity
 			.status(400)
 			.body(ApiResponse.error(ErrorCode.BAD_REQUEST_INVALID_REQUEST_BODY));
+	}
+
+	/**
+	 * Enum 타입의 파라미터에 대한 요청값이 유효하지 않은 경우를 처리하는 핸들러
+	 *
+	 * @param ex Enum 타입의 파라미터에 대한 요청값이 유효하지 않은 경우 발생하는 예외 MethodArgumentTypeMismatchException
+	 * @return 실패 코드, 메시지를 담은 응답 포맷 반환
+	 */
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<ApiResponse<Void>> handleMethodArgumentTypeMismatchException(
+		MethodArgumentTypeMismatchException ex) {
+
+		// 요청된 enum 값이 유효하지 않은 경우 처리
+		if (ex.getParameter().getParameterType().isEnum()) {
+			log.error("잘못된 Enum 값: {}", ex.getValue());
+			return ResponseEntity.badRequest()
+				.body(ApiResponse.error(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER));
+		}
+
+		return ResponseEntity.badRequest()
+			.body(ApiResponse.error(ErrorCode.BAD_REQUEST));
 	}
 }

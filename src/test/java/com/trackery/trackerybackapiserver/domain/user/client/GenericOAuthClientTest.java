@@ -24,6 +24,7 @@ import com.trackery.trackerybackapiserver.config.OAuthProperties;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUserInfoDto;
+import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.client
@@ -63,7 +64,7 @@ class GenericOAuthClientTest {
 		void getAccessToken_Success() throws Exception {
 			// given
 			String code = "test-auth-code";
-			String provider = "NAVER";
+			OAuthProvider provider = OAuthProvider.NAVER;
 			String accessToken = "naver-access-token";
 
 			// 네이버 속성 설정
@@ -108,7 +109,7 @@ class GenericOAuthClientTest {
 		void getUserInfo_Success() throws Exception {
 			// given
 			String accessToken = "test-access-token";
-			String provider = "NAVER";
+			OAuthProvider provider = OAuthProvider.NAVER;
 
 			// 네이버 속성 설정
 			when(oAuthProperties.getNaver()).thenReturn(naverProperties);
@@ -173,7 +174,7 @@ class GenericOAuthClientTest {
 		void getAccessToken_Success() throws Exception {
 			// given
 			String code = "test-auth-code";
-			String provider = "KAKAO";
+			OAuthProvider provider = OAuthProvider.KAKAO;
 			String accessToken = "kakao-access-token";
 
 			// 카카오 속성 설정
@@ -206,7 +207,7 @@ class GenericOAuthClientTest {
 		void getUserInfo_Success() throws Exception {
 			// given
 			String accessToken = "test-access-token";
-			String provider = "KAKAO";
+			OAuthProvider provider = OAuthProvider.KAKAO;
 
 			// 카카오 속성 설정
 			when(oAuthProperties.getKakao()).thenReturn(kakaoProperties);
@@ -260,7 +261,7 @@ class GenericOAuthClientTest {
 		void getAccessToken_Success() throws Exception {
 			// given
 			String code = "test-auth-code";
-			String provider = "GOOGLE";
+			OAuthProvider provider = OAuthProvider.GOOGLE;
 			String accessToken = "google-access-token";
 
 			// 구글 속성 설정
@@ -293,7 +294,7 @@ class GenericOAuthClientTest {
 		void getUserInfo_Success() throws Exception {
 			// given
 			String accessToken = "test-access-token";
-			String provider = "GOOGLE";
+			OAuthProvider provider = OAuthProvider.GOOGLE;
 
 			// 구글 속성 설정
 			when(oAuthProperties.getGoogle()).thenReturn(googleProperties);
@@ -343,7 +344,7 @@ class GenericOAuthClientTest {
 		void getAccessToken_Success() throws Exception {
 			// given
 			String code = "test-auth-code";
-			String provider = "GITHUB";
+			OAuthProvider provider = OAuthProvider.GITHUB;
 			String accessToken = "github-access-token";
 
 			// 깃허브 속성 설정
@@ -382,7 +383,7 @@ class GenericOAuthClientTest {
 		void getUserInfo_WithEmail_Success() throws Exception {
 			// given
 			String accessToken = "test-access-token";
-			String provider = "GITHUB";
+			OAuthProvider provider = OAuthProvider.GITHUB;
 
 			// 깃허브 속성 설정
 			when(oAuthProperties.getGithub()).thenReturn(githubProperties);
@@ -424,7 +425,7 @@ class GenericOAuthClientTest {
 		void getUserInfo_WithoutEmail_FetchFromEmailApi_Success() throws Exception {
 			// given
 			String accessToken = "test-access-token";
-			String provider = "GITHUB";
+			OAuthProvider provider = OAuthProvider.GITHUB;
 
 			// 깃허브 속성 설정
 			when(oAuthProperties.getGithub()).thenReturn(githubProperties);
@@ -509,7 +510,7 @@ class GenericOAuthClientTest {
 		void getAccessToken_Failure_ThrowsException() throws Exception {
 			// given
 			String code = "test-auth-code";
-			String provider = "NAVER";
+			OAuthProvider provider = OAuthProvider.NAVER;
 
 			// 네이버 속성 설정
 			when(oAuthProperties.getNaver()).thenReturn(naverProperties);
@@ -537,7 +538,7 @@ class GenericOAuthClientTest {
 		void getUserInfo_Failure_ThrowsException() {
 			// given
 			String accessToken = "test-access-token";
-			String provider = "NAVER";
+			OAuthProvider provider = OAuthProvider.NAVER;
 
 			when(oAuthProperties.getNaver()).thenReturn(naverProperties);
 			when(naverProperties.getUserInfoUri()).thenReturn("naver-user-info-uri");
@@ -561,7 +562,7 @@ class GenericOAuthClientTest {
 		void unsupportedProvider_ThrowsException() {
 			// given
 			String code = "test-auth-code";
-			String provider = "UNSUPPORTED";
+			OAuthProvider provider = null;
 
 			// when & then
 			ApiException exception = assertThrows(ApiException.class, () ->
