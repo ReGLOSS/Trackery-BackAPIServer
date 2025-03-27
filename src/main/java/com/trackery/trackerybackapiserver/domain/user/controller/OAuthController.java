@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 25.        inari			계정 연동 토큰 생성 API 추가
  * 25. 3. 26.        inari			로그인 통합 매서드로 변경
  * 25. 3. 27.        inari			provider를 enum으로 변경
+ * 25. 3. 27.        inari			코드 스멜 수정
  */
 @Slf4j
 @RestController
@@ -113,7 +114,8 @@ public class OAuthController {
 			try {
 				OAuthLinkRequestDto linkRequest = oAuthLinkService.validateToken(linkToken);
 				builder.linkAccount(true);
-				log.info("계정 연동 요청 검증 성공: provider={}, token={}", provider, linkToken);
+				log.info("계정 연동 요청 검증 성공: provider={}, email={}, token={}",
+					provider, linkRequest.getEmail(), linkToken);
 
 				// 토큰 사용 후 삭제
 				oAuthLinkService.deleteToken(linkToken);
