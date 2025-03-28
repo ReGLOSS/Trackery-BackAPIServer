@@ -14,6 +14,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
@@ -40,10 +41,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
-	/**
-	 * 토큰 검증 및 파싱을 담당하는 JWT 유틸리티 클래스
-	 */
 	private final JwtService jwtService;
+	private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
 
 	/**
 	 * JWT 인증/인가를 해주는 필터
@@ -58,40 +57,51 @@ public class JwtFilter extends OncePerRequestFilter {
 	 * @throws IOException : 입출력 처리 중 발생할 수 있는 예외
 	 */
 	@Override
-	protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response,
+	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 		@NonNull FilterChain filterChain) throws ServletException, IOException {
 
-		String requestToken = Optional.ofNullable(request.getCookies())
+		String accessToken = getAccessTokenFromCookie(request);
+
+		JwtUserInfoDto userInfo = verifyAndParseJwt(accessToken);
+
+		setAuthentication(userInfo);
+
+		filterChain.doFilter(request, response);
+	}
+
+	private String getAccessTokenFromCookie(HttpServletRequest request) {
+		return Optional.ofNullable(request.getCookies())
 			.flatMap(cookies -> Arrays.stream(cookies)
-				.filter(cookie -> "accessToken".equals(cookie.getName()))
+				.filter(cookie -> ACCESS_TOKEN_COOKIE_NAME.equals(cookie.getName()))
 				.findFirst()
 				.map(Cookie::getValue))
 			.orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED));
+	}
 
-		DecodedJWT jwt;
-
+	private JwtUserInfoDto verifyAndParseJwt(String accessToken) {
 		try {
-			jwt = jwtService.verifyJwt(requestToken);
+			DecodedJWT jwt = jwtService.verifyJwt(accessToken);
+			Long userId = Long.valueOf(jwt.getSubject());
+			String userName = jwt.getClaim("username").asString();
+			Long roleId = jwt.getClaim("role").asLong();
+
+			return new JwtUserInfoDto(userId, userName, roleId);
 		} catch (JWTVerificationException e) {
-			log.error(e.getMessage());
+			log.error("JWT 검증 실패: {}", e.getMessage());
 			throw new ApiException(ErrorCode.UNAUTHORIZED_JWT_VERIFY_FAILED);
 		}
+	}
 
-		Long userId = Long.valueOf(jwt.getSubject());
-		String userName = jwt.getClaim("username").asString();
-		Long roleId = jwt.getClaim("role").asLong();
-
+	private void setAuthentication(JwtUserInfoDto userInfo) {
 		UserDetails userDetails = CustomUserDetails.builder()
-			.userId(userId)
-			.userName(userName)
-			.roleId(roleId)
+			.userId(userInfo.userId())
+			.userName(userInfo.username())
+			.roleId(userInfo.roleId())
 			.build();
 
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails,
 			null, userDetails.getAuthorities());
 
 		SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-
-		filterChain.doFilter(request, response);
 	}
 }
