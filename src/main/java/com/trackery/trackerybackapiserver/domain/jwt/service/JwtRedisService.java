@@ -3,11 +3,8 @@ package com.trackery.trackerybackapiserver.domain.jwt.service;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.nimbusds.oauth2.sdk.token.RefreshToken;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
@@ -33,9 +30,11 @@ public class JwtRedisService {
 	private final StringRedisTemplate redisTemplate;
 	private final ObjectMapper objectMapper;
 
+	private static final String REFRESH_TOKEN_REDIS_KEY = "jwtRefreshToken:";
+
 	public void saveRefreshToken(RefreshTokenDto refreshTokenDto) {
 		try {
-			String redisKey = "jwtRefreshToken:" + refreshTokenDto.refreshToken();
+			String redisKey = REFRESH_TOKEN_REDIS_KEY + refreshTokenDto.refreshToken();
 			String jsonRefreshTokenDto = objectMapper.writeValueAsString(refreshTokenDto);
 
 			redisTemplate.opsForValue().set(redisKey, jsonRefreshTokenDto);
@@ -46,7 +45,7 @@ public class JwtRedisService {
 	}
 
 	public RefreshTokenDto getRefreshTokenInfo(String refreshToken) {
-		String redisKey = "jwtRefreshToken:" + refreshToken;
+		String redisKey = REFRESH_TOKEN_REDIS_KEY + refreshToken;
 		String jsonRefreshTokenDto = redisTemplate.opsForValue().get(redisKey);
 		try {
 			return objectMapper.readValue(jsonRefreshTokenDto, RefreshTokenDto.class);
@@ -54,6 +53,11 @@ public class JwtRedisService {
 			log.error("Json 매핑 중 에러 발생 : ", e);
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+	public void deleteRefreshToken(String refreshToken) {
+		String redisKey = REFRESH_TOKEN_REDIS_KEY + refreshToken;
+		redisTemplate.delete(redisKey);
 	}
 
 }
