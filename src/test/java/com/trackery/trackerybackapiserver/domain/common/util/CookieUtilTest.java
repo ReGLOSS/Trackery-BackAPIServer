@@ -2,6 +2,8 @@ package com.trackery.trackerybackapiserver.domain.common.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.time.Duration;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseCookie;
 
@@ -23,7 +25,7 @@ class CookieUtilTest {
 	void 액세스_토큰_쿠키_생성_성공() {
 		String jwt = "jwt";
 
-		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken" ,jwt);
+		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken" ,jwt, Duration.ofMinutes(60));
 
 		assertNotNull(cookie);
 		assertEquals("accessToken", cookie.getName());

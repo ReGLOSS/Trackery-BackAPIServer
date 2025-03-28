@@ -35,14 +35,15 @@ public class CookieUtil {
 	 *
 	 * @param key : 쿠키 이름
 	 * @param value : 쿠키 값
+	 * @param duration : 쿠키의 유효시간
 	 * @return : 생성된 http-only 쿠키
 	 */
-	public static ResponseCookie createHttpOnlyCookie(String key, String value) {
+	public static ResponseCookie createHttpOnlyCookie(String key, String value, Duration duration) {
 		return ResponseCookie.from(key, value)
 			.httpOnly(true)
 			.path("/")
 			//TODO JWT 토큰 만료시간 일괄 관리되게 수정
-			.maxAge(Duration.ofSeconds(600))
+			.maxAge(duration)
 			.sameSite("Strict")
 			.build();
 	}
