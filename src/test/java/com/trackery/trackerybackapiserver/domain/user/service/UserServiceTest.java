@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -15,8 +16,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
@@ -56,6 +59,9 @@ class UserServiceTest {
 	@Mock
 	private JwtService jwtService;
 
+	@Mock
+	private JwtRedisService jwtRedisService;
+
 	@Test
 	void 회원가입_성공() {
 		try (MockedStatic<PasswordUtil> mockedStatic = mockStatic(PasswordUtil.class)) {
@@ -89,7 +95,7 @@ class UserServiceTest {
 
 			when(jwtService.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
 
-			String result =  userService.registerUser(emailToken, userNameToken, registerDto);
+			String result = userService.registerUser(emailToken, userNameToken, registerDto);
 
 			assertEquals("jwt token", result);
 
@@ -136,14 +142,21 @@ class UserServiceTest {
 			.roleId(1L)
 			.build();
 
+		String accessToken = "access token";
+		String refreshToken = "refresh token";
+
 		when(userMapper.findByUserName(anyString())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
 
-		when(jwtService.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
+		when(jwtService.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn(accessToken);
+		when(jwtService.generateRefreshToken(anyLong())).thenReturn(
+			new RefreshTokenDto(refreshToken, "jid", "userId"));
 
-		String result = userService.login(loginDto);
+		doNothing().when(jwtRedisService).saveRefreshToken(any(RefreshTokenDto.class));
 
-		assertEquals("jwt token", result);
+		List<String> result = userService.login(loginDto);
+
+		assertEquals(List.of(accessToken, refreshToken), result);
 		verify(userMapper, times(1)).findByUserName(anyString());
 		verify(userRoleMapper, times(1)).findByUserId(anyLong());
 	}

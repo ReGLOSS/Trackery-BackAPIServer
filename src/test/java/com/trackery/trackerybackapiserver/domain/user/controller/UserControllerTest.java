@@ -5,6 +5,8 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,7 +103,12 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 		ReflectionTestUtils.setField(loginDto, "userName", "abcdefg");
 		ReflectionTestUtils.setField(loginDto, "password", "Qwerasdf1234!");
 
-		when(userService.login(any())).thenReturn("jwt");
+		String accessToken = "accessToken";
+		String refreshToken = "refreshToken";
+
+		List<String> expectedResult = List.of(accessToken, refreshToken);
+
+		when(userService.login(any())).thenReturn(expectedResult);
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/login")
@@ -113,6 +120,9 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isOk())
 			.andExpect(cookie().exists("accessToken"))
 			.andExpect(cookie().httpOnly("accessToken", true))
-			.andExpect(cookie().value("accessToken", "jwt"));
+			.andExpect(cookie().value("accessToken", accessToken))
+			.andExpect(cookie().exists("refreshToken"))
+			.andExpect(cookie().httpOnly("refreshToken", true))
+			.andExpect(cookie().value("refreshToken", refreshToken));
 	}
 }
