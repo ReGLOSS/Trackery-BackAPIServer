@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.common.util;
+package com.trackery.trackerybackapiserver.domain.jwt.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -7,8 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
-import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,6 +49,17 @@ class JwtServiceTest {
 		assertEquals(1L, Long.valueOf(decodedJwt.getSubject()));
 		assertEquals("abcdefg", decodedJwt.getClaim("username").asString());
 		assertEquals(1L, decodedJwt.getClaim("role").asLong());
+	}
+
+	@Test
+	void JWT_리프레시_토큰_생성_검증_테스트_성공() {
+		RefreshTokenDto refreshTokenDto = jwtService.generateRefreshToken(1L);
+
+		DecodedJWT decodedJWT = jwtService.verifyJwt(refreshTokenDto.refreshToken());
+
+		assertEquals(fakeProjectDomain, decodedJWT.getIssuer());
+		assertNotNull(decodedJWT.getId());
+		assertEquals(1L, Long.valueOf(decodedJWT.getSubject()));
 	}
 
 	@Test
