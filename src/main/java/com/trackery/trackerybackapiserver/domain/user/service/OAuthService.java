@@ -11,8 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.client.OAuthClient;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
@@ -75,7 +75,8 @@ public class OAuthService {
 		OAuthUserInfoDto userInfo = oAuthClient.getUserInfo(accessToken, provider);
 
 		// OAuth 연동 정보 조회
-		Optional<OAuth> existingOAuth = oAuthMapper.findByProviderAndProviderId(provider.name(), userInfo.getProviderUserId());
+		Optional<OAuth> existingOAuth = oAuthMapper.findByProviderAndProviderId(provider.name(),
+			userInfo.getProviderUserId());
 
 		// 이미 OAuth 연동된 계정이 있으면 그대로 로그인
 		if (existingOAuth.isPresent()) {
@@ -144,7 +145,6 @@ public class OAuthService {
 		);
 	}
 
-
 	/**
 	 * 신규 사용자 회원가입 매서드입니다.
 	 *
@@ -202,7 +202,6 @@ public class OAuthService {
 
 		oAuthMapper.insertOAuth(oAuth);
 	}
-
 
 	/**
 	 * 사용자명 생성 매서드입니다.
