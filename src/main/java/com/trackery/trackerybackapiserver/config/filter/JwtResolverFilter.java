@@ -1,16 +1,19 @@
 package com.trackery.trackerybackapiserver.config.filter;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
-import org.springframework.core.annotation.Order;
+import org.springframework.http.ResponseCookie;
 import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
@@ -61,22 +64,22 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 		@NonNull FilterChain filterChain) throws ServletException, IOException {
-		String accessToken = getAccessTokenFromCookie(request);
+		String accessToken = getAccessTokenFromCookie(request, response);
 
 		request.setAttribute(ACCESS_TOKEN_COOKIE_NAME, accessToken);
 		filterChain.doFilter(request, response);
 	}
 
-	private String getAccessTokenFromCookie(HttpServletRequest request) {
+	private String getAccessTokenFromCookie(HttpServletRequest request, HttpServletResponse response) {
 		return Optional.ofNullable(request.getCookies())
 			.flatMap(cookies -> Arrays.stream(cookies)
 				.filter(cookie -> ACCESS_TOKEN_COOKIE_NAME.equals(cookie.getName()))
 				.findFirst()
 				.map(Cookie::getValue))
-			.orElseGet(() -> reissueAccessTokenViaRefreshToken(request));
+			.orElseGet(() -> reissueAccessTokenViaRefreshToken(request, response));
 	}
 
-	private String reissueAccessTokenViaRefreshToken(HttpServletRequest request) {
+	private String reissueAccessTokenViaRefreshToken(HttpServletRequest request, HttpServletResponse response) {
 		String refreshToken = Optional.ofNullable(request.getCookies())
 			.flatMap(cookies -> Arrays.stream(cookies)
 				.filter(cookie -> REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName()))
@@ -94,6 +97,17 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 		Long userId = Long.valueOf(refreshTokenDto.subject());
 		JwtUserInfoDto jwtUserInfoDto = userService.getUserInfoById(userId);
 
-		return jwtService.generateAccessToken(jwtUserInfoDto.userId(), jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
+		List<String> newTokens = jwtService.generateAccessTokenAndRefreshToken(jwtUserInfoDto.userId(),
+			jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
+
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie(ACCESS_TOKEN_COOKIE_NAME, newTokens.get(0),
+			Duration.ofMinutes(60));
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie(REFRESH_TOKEN_COOKIE_NAME, newTokens.get(1),
+			Duration.ofDays(7));
+
+		response.addHeader("Set-Cookie", accessTokenCookie.toString());
+		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+
+		return newTokens.get(0);
 	}
 }
