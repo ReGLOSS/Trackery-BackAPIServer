@@ -56,7 +56,7 @@ public class UserService {
 	 *
 	 * @param userRegisterDto : 회원 가입 정보를 담은 DTO
 	 */
-	public String registerUser(String emailToken, String userNameToken, UserRegisterDto userRegisterDto) {
+	public List<String> registerUser(String emailToken, String userNameToken, UserRegisterDto userRegisterDto) {
 		DecodedJWT decodedEmailToken = jwtService.verifyJwt(emailToken);
 		DecodedJWT decodedUserNameToken = jwtService.verifyJwt(userNameToken);
 
@@ -87,21 +87,7 @@ public class UserService {
 
 		userRoleMapper.insertUserRole(userRole);
 
-		return jwtService.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
-	}
-
-	/**
-	 * 유저명 중복체크를 하여 토큰 발급하는 메서드
-	 * @param userName : 중복체크할 유저명
-	 * @return : boolean, jwt 토큰을 담은 DTO
-	 */
-	public UserNameAvailabilityResponseDto checkUsernameAvailability(String userName) {
-		if (!userMapper.isExistsUserName(userName)) {
-			String jwt = jwtService.generateTokenWithSubject(userName);
-			return new UserNameAvailabilityResponseDto(true, jwt);
-		} else {
-			return new UserNameAvailabilityResponseDto(false, null);
-		}
+		return generateTokens(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
 
 	/**
@@ -121,12 +107,34 @@ public class UserService {
 		UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
 			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-		String accessToken = jwtService.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
+		return generateTokens(user.getUserId(), user.getUserName(), userRole.getRoleId());
+	}
 
-		RefreshTokenDto refreshTokenDto = jwtService.generateRefreshToken(user.getUserId());
+	private List<String> generateTokens(Long userId, String userName, Long userRoleId) {
+		String accessToken = jwtService.generateAccessToken(userId, userName, userRoleId);
+		String refreshToken = generateRefreshTokenAndSaveInRedis(userId);
+
+		return List.of(accessToken, refreshToken);
+	}
+
+	private String generateRefreshTokenAndSaveInRedis(Long userId) {
+		RefreshTokenDto refreshTokenDto = jwtService.generateRefreshToken(userId);
 		jwtRedisService.saveRefreshToken(refreshTokenDto);
+		return refreshTokenDto.refreshToken();
+	}
 
-		return List.of(accessToken, refreshTokenDto.refreshToken());
+	/**
+	 * 유저명 중복체크를 하여 토큰 발급하는 메서드
+	 * @param userName : 중복체크할 유저명
+	 * @return : boolean, jwt 토큰을 담은 DTO
+	 */
+	public UserNameAvailabilityResponseDto checkUsernameAvailability(String userName) {
+		if (!userMapper.isExistsUserName(userName)) {
+			String jwt = jwtService.generateTokenWithSubject(userName);
+			return new UserNameAvailabilityResponseDto(true, jwt);
+		} else {
+			return new UserNameAvailabilityResponseDto(false, null);
+		}
 	}
 
 	/**
