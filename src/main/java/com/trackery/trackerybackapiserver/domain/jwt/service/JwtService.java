@@ -1,6 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.jwt.service;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 @Component
 public class JwtService {
+	private final JwtRedisService jwtRedisService;
 
 	//만료시간 10분(600초)
 	//TODO JWT 만료시간 일괄 설정되게 수정
@@ -42,8 +44,9 @@ public class JwtService {
 	private final String projectDomain;
 	private final Algorithm algorithm;
 
-	public JwtService(@Value("${JWT_SECRET_KEY}") String jwtSecretKey,
+	public JwtService(JwtRedisService jwtRedisService, @Value("${JWT_SECRET_KEY}") String jwtSecretKey,
 		@Value("${PROJECT_DOMAIN}") String projectDomain) {
+		this.jwtRedisService = jwtRedisService;
 		this.algorithm = Algorithm.HMAC256(jwtSecretKey);
 		this.projectDomain = projectDomain;
 	}
@@ -98,6 +101,18 @@ public class JwtService {
 		}
 
 		return new RefreshTokenDto(refreshToken, jid, userId.toString());
+	}
+
+	public List<String> generateAccessTokenAndRefreshToken(Long userId, String userName, Long userRoleId) {
+		String accessToken = generateAccessToken(userId, userName, userRoleId);
+		String refreshToken = generateRefreshTokenAndSaveToRedis(userId);
+		return List.of(accessToken, refreshToken);
+	}
+
+	private String generateRefreshTokenAndSaveToRedis(Long userId) {
+		RefreshTokenDto refreshTokenDto = generateRefreshToken(userId);
+		jwtRedisService.saveRefreshToken(refreshTokenDto);
+		return refreshTokenDto.refreshToken();
 	}
 
 	/**

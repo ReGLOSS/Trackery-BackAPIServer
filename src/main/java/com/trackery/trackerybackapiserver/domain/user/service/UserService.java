@@ -12,8 +12,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
-import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
-import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -47,7 +45,6 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService {
 	private final UserMapper userMapper;
 	private final JwtService jwtService;
-	private final JwtRedisService jwtRedisService;
 	private final UserRoleMapper userRoleMapper;
 
 	/**
@@ -87,7 +84,8 @@ public class UserService {
 
 		userRoleMapper.insertUserRole(userRole);
 
-		return generateTokens(user.getUserId(), user.getUserName(), userRole.getRoleId());
+		return jwtService.generateAccessTokenAndRefreshToken(user.getUserId(), user.getUserName(),
+			userRole.getRoleId());
 	}
 
 	/**
@@ -107,20 +105,8 @@ public class UserService {
 		UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
 			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-		return generateTokens(user.getUserId(), user.getUserName(), userRole.getRoleId());
-	}
-
-	private List<String> generateTokens(Long userId, String userName, Long userRoleId) {
-		String accessToken = jwtService.generateAccessToken(userId, userName, userRoleId);
-		String refreshToken = generateRefreshTokenAndSaveInRedis(userId);
-
-		return List.of(accessToken, refreshToken);
-	}
-
-	private String generateRefreshTokenAndSaveInRedis(Long userId) {
-		RefreshTokenDto refreshTokenDto = jwtService.generateRefreshToken(userId);
-		jwtRedisService.saveRefreshToken(refreshTokenDto);
-		return refreshTokenDto.refreshToken();
+		return jwtService.generateAccessTokenAndRefreshToken(user.getUserId(), user.getUserName(),
+			userRole.getRoleId());
 	}
 
 	/**
