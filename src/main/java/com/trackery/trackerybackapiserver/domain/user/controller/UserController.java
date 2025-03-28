@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.user.controller;
 
+import java.util.List;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -82,12 +84,14 @@ public class UserController {
 	 */
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody UserLoginDto userLoginDto) {
-		String jwt = userService.login(userLoginDto);
+		List<String> tokens = userService.login(userLoginDto);
 
-		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", jwt);
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", tokens.get(0));
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", tokens.get(1));
 
 		return ResponseEntity.ok()
-			.header(HttpHeaders.SET_COOKIE, cookie.toString())
+			.header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
 			.body(ApiResponse.success(SuccessCode.OK));
 	}
 

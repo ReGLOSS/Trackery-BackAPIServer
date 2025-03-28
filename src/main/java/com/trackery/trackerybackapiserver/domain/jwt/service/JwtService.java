@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.common.util;
+package com.trackery.trackerybackapiserver.domain.jwt.service;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -14,6 +14,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,7 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  */
 @Slf4j
 @Component
-public class JwtUtil {
+public class JwtService {
 
 	//만료시간 10분(600초)
 	//TODO JWT 만료시간 일괄 설정되게 수정
@@ -41,7 +42,8 @@ public class JwtUtil {
 	private final String projectDomain;
 	private final Algorithm algorithm;
 
-	public JwtUtil(@Value("${JWT_SECRET_KEY}") String jwtSecretKey, @Value("${PROJECT_DOMAIN}") String projectDomain) {
+	public JwtService(@Value("${JWT_SECRET_KEY}") String jwtSecretKey,
+		@Value("${PROJECT_DOMAIN}") String projectDomain) {
 		this.algorithm = Algorithm.HMAC256(jwtSecretKey);
 		this.projectDomain = projectDomain;
 	}
@@ -77,11 +79,14 @@ public class JwtUtil {
 	 * @param userId : 유저 ID
 	 * @return : 리프레시 토큰
 	 */
-	public String generateRefreshToken(Long userId) {
+	public RefreshTokenDto generateRefreshToken(Long userId) {
+		String jid = UUID.randomUUID().toString();
+		String refreshToken;
+
 		try {
-			return JWT.create()
+			refreshToken = JWT.create()
 				.withIssuer(projectDomain)
-				.withJWTId(UUID.randomUUID().toString())
+				.withJWTId(jid)
 				.withSubject(userId.toString())
 				.withNotBefore(Instant.now())
 				.withIssuedAt(Instant.now())
@@ -91,6 +96,8 @@ public class JwtUtil {
 			log.error(e.getMessage());
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR_FAILED_TO_GENERATE_JWT);
 		}
+
+		return new RefreshTokenDto(refreshToken, jid, userId.toString());
 	}
 
 	/**

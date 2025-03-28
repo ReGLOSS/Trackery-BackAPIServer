@@ -2,6 +2,7 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,8 +11,10 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
@@ -43,7 +46,8 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserService {
 	private final UserMapper userMapper;
-	private final JwtUtil jwtUtil;
+	private final JwtService jwtService;
+	private final JwtRedisService jwtRedisService;
 	private final UserRoleMapper userRoleMapper;
 
 	/**
@@ -53,8 +57,8 @@ public class UserService {
 	 * @param userRegisterDto : 회원 가입 정보를 담은 DTO
 	 */
 	public String registerUser(String emailToken, String userNameToken, UserRegisterDto userRegisterDto) {
-		DecodedJWT decodedEmailToken = jwtUtil.verifyJwt(emailToken);
-		DecodedJWT decodedUserNameToken = jwtUtil.verifyJwt(userNameToken);
+		DecodedJWT decodedEmailToken = jwtService.verifyJwt(emailToken);
+		DecodedJWT decodedUserNameToken = jwtService.verifyJwt(userNameToken);
 
 		String email = decodedEmailToken.getSubject();
 		String userName = decodedUserNameToken.getSubject();
@@ -83,7 +87,7 @@ public class UserService {
 
 		userRoleMapper.insertUserRole(userRole);
 
-		return jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
+		return jwtService.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
 
 	/**
@@ -93,7 +97,7 @@ public class UserService {
 	 */
 	public UserNameAvailabilityResponseDto checkUsernameAvailability(String userName) {
 		if (!userMapper.isExistsUserName(userName)) {
-			String jwt = jwtUtil.generateTokenWithSubject(userName);
+			String jwt = jwtService.generateTokenWithSubject(userName);
 			return new UserNameAvailabilityResponseDto(true, jwt);
 		} else {
 			return new UserNameAvailabilityResponseDto(false, null);
@@ -106,13 +110,9 @@ public class UserService {
 	 * @param userLoginDto : username, password 받는 DTO
 	 * @return : 인증된 유저의 정보를 담고있는 jwt
 	 */
-	public String login(UserLoginDto userLoginDto) {
+	public List<String> login(UserLoginDto userLoginDto) {
 		User user = userMapper.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new ApiException(
 			ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS));
-
-		if (user.getStatus() == 0) {
-			throw new ApiException(ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS);
-		}
 
 		if (!PasswordUtil.hashPassword(userLoginDto.getPassword(), user.getSalt()).equals(user.getPassword())) {
 			throw new ApiException(ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS);
@@ -121,7 +121,12 @@ public class UserService {
 		UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
 			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-		return jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
+		String accessToken = jwtService.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
+
+		RefreshTokenDto refreshTokenDto = jwtService.generateRefreshToken(user.getUserId());
+		jwtRedisService.saveRefreshToken(refreshTokenDto);
+
+		return List.of(accessToken, refreshTokenDto.refreshToken());
 	}
 
 	/**
@@ -132,7 +137,7 @@ public class UserService {
 	public void changePassword(String emailToken, String password) {
 		DecodedJWT jwt;
 		try {
-			jwt = jwtUtil.verifyJwt(emailToken);
+			jwt = jwtService.verifyJwt(emailToken);
 		} catch (JWTVerificationException e) {
 			log.error(e.getMessage());
 			throw new ApiException(ErrorCode.BAD_REQUEST);

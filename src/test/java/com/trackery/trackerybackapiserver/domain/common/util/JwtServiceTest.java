@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,8 +24,8 @@ import lombok.extern.slf4j.Slf4j;
  25. 2. 20.		   durururuk       jwt 생성 및 검증 테스트 코드 추가
  */
 @Slf4j
-class JwtUtilTest {
-	private JwtUtil jwtUtil;
+class JwtServiceTest {
+	private JwtService jwtService;
 
 	//운영환경에서 쓰이지 않는 테스트용 시크릿키입니다.
 	final String jwtSecretKeyForTest = "and0c2VjcmV0a2V5Zm9ydGVzdA==";
@@ -32,14 +33,14 @@ class JwtUtilTest {
 
 	@BeforeEach
 	void setUp() {
-		jwtUtil = new JwtUtil(jwtSecretKeyForTest, fakeProjectDomain);
+		jwtService = new JwtService(jwtSecretKeyForTest, fakeProjectDomain);
 	}
 
 	@Test
 	void JWT_액세스_토큰_생성_검증_테스트() {
-		String token = jwtUtil.generateAccessToken(1L, "abcdefg", 1L);
+		String token = jwtService.generateAccessToken(1L, "abcdefg", 1L);
 
-		DecodedJWT decodedJwt = jwtUtil.verifyJwt(token);
+		DecodedJWT decodedJwt = jwtService.verifyJwt(token);
 
 		assertEquals(1L, Long.valueOf(decodedJwt.getSubject()));
 		assertEquals("abcdefg", decodedJwt.getClaim("username").asString());
@@ -49,9 +50,9 @@ class JwtUtilTest {
 	@Test
 	void JWT_이메일_토큰_생성_테스트() {
 		String email = "a@a.com";
-		String token = jwtUtil.generateTokenWithSubject(email);
+		String token = jwtService.generateTokenWithSubject(email);
 
-		DecodedJWT decodedJWT = jwtUtil.verifyJwt(token);
+		DecodedJWT decodedJWT = jwtService.verifyJwt(token);
 
 		assertEquals(fakeProjectDomain, decodedJWT.getIssuer());
 		assertEquals(email, decodedJWT.getSubject());

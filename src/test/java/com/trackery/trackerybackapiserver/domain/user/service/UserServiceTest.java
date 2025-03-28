@@ -15,7 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -54,7 +54,7 @@ class UserServiceTest {
 	UserLoginDto loginDto;
 
 	@Mock
-	private JwtUtil jwtUtil;
+	private JwtService jwtService;
 
 	@Test
 	void 회원가입_성공() {
@@ -68,8 +68,8 @@ class UserServiceTest {
 			DecodedJWT decodedEmailToken = mock(DecodedJWT.class);
 			DecodedJWT decodedUserNameToken = mock(DecodedJWT.class);
 
-			when(jwtUtil.verifyJwt(emailToken)).thenReturn(decodedEmailToken);
-			when(jwtUtil.verifyJwt(userNameToken)).thenReturn(decodedUserNameToken);
+			when(jwtService.verifyJwt(emailToken)).thenReturn(decodedEmailToken);
+			when(jwtService.verifyJwt(userNameToken)).thenReturn(decodedUserNameToken);
 
 			when(decodedEmailToken.getSubject()).thenReturn("a@a.com");
 			when(decodedUserNameToken.getSubject()).thenReturn("abcdfg");
@@ -87,7 +87,7 @@ class UserServiceTest {
 				return null;
 			}).when(userRoleMapper).insertUserRole(any(UserRole.class));
 
-			when(jwtUtil.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
+			when(jwtService.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
 
 			String result =  userService.registerUser(emailToken, userNameToken, registerDto);
 
@@ -104,7 +104,7 @@ class UserServiceTest {
 	@Test
 	void 유저명_중복_확인_성공() {
 		when(userMapper.isExistsUserName(anyString())).thenReturn(false);
-		when(jwtUtil.generateTokenWithSubject("abcdefg")).thenReturn("jwt");
+		when(jwtService.generateTokenWithSubject("abcdefg")).thenReturn("jwt");
 
 		UserNameAvailabilityResponseDto result = userService.checkUsernameAvailability("abcdefg");
 
@@ -139,7 +139,7 @@ class UserServiceTest {
 		when(userMapper.findByUserName(anyString())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
 
-		when(jwtUtil.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
+		when(jwtService.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
 
 		String result = userService.login(loginDto);
 

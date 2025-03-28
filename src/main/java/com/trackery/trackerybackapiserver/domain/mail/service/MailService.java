@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MailService {
 	private final StringRedisTemplate redisTemplate;
 	private final SecureRandom secureRandom = new SecureRandom();
-	private final JwtUtil jwtUtil;
+	private final JwtService jwtService;
 	private final MailSenderService mailSenderService;
 
 	private static final String EMAIL_VERIFICATION_REDIS_KEY = "email:verify:";
@@ -87,7 +87,7 @@ public class MailService {
 
 		redisTemplate.delete(EMAIL_VERIFICATION_REDIS_KEY + emailAddress);
 
-		return jwtUtil.generateTokenWithSubject(emailAddress);
+		return jwtService.generateTokenWithSubject(emailAddress);
 	}
 
 	/**

@@ -40,7 +40,7 @@ class AuthControllerTest extends CommonMockMvcControllerTestSetUp {
 	void 인증_확인_성공() throws Exception {
 		//TODO 아래 9줄 어떻게 처리할지 수정 필요
 		DecodedJWT decodedJWT = mock(DecodedJWT.class);
-		when(jwtUtil.verifyJwt(anyString())).thenReturn(decodedJWT);
+		when(jwtService.verifyJwt(anyString())).thenReturn(decodedJWT);
 		when(decodedJWT.getSubject()).thenReturn("1");
 
 		Claim userRoleClaim = mock(Claim.class);

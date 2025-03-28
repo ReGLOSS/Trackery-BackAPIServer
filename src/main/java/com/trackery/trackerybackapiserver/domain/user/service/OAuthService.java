@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.user.client.OAuthClient;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
@@ -52,7 +52,7 @@ public class OAuthService {
 
 	private final UserMapper userMapper;
 	private final OAuthMapper oAuthMapper;
-	private final JwtUtil jwtUtil;
+	private final JwtService jwtService;
 	private final UserRoleMapper userRoleMapper;
 	private final OAuthClient oAuthClient;
 	private final SecureRandom random = new SecureRandom();
@@ -86,7 +86,7 @@ public class OAuthService {
 			UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
 				.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-			String jwt = jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
+			String jwt = jwtService.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
 
 			return new OAuthLoginResult(
 				OAuthResponseDto.builder().isExistingEmail(false).build(),
@@ -116,7 +116,7 @@ public class OAuthService {
 				UserRole userRole = userRoleMapper.findByUserId(existingUser.get().getUserId())
 					.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-				String jwt = jwtUtil.generateAccessToken(
+				String jwt = jwtService.generateAccessToken(
 					existingUser.get().getUserId(),
 					existingUser.get().getUserName(),
 					userRole.getRoleId()
@@ -136,7 +136,7 @@ public class OAuthService {
 		UserRole userRole = userRoleMapper.findByUserId(newUser.getUserId())
 			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-		String jwt = jwtUtil.generateAccessToken(newUser.getUserId(), newUser.getUserName(), userRole.getRoleId());
+		String jwt = jwtService.generateAccessToken(newUser.getUserId(), newUser.getUserName(), userRole.getRoleId());
 
 		return new OAuthLoginResult(
 			OAuthResponseDto.builder().isExistingEmail(false).build(),

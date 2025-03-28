@@ -16,7 +16,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
@@ -42,7 +42,7 @@ class MailServiceTest {
 	private StringRedisTemplate redisTemplate;
 
 	@Mock
-	private JwtUtil jwtUtil;
+	private JwtService jwtService;
 
 	@Mock
 	private ValueOperations<String, String> valueOperations;
@@ -82,7 +82,7 @@ class MailServiceTest {
 		String emailToken = "mockedEmailToken";
 
 		when(valueOperations.get(redisKey)).thenReturn(authNumber);
-		when(jwtUtil.generateTokenWithSubject(email)).thenReturn(emailToken);
+		when(jwtService.generateTokenWithSubject(email)).thenReturn(emailToken);
 		when(redisTemplate.delete(redisKey)).thenReturn(true);
 		when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 
@@ -90,7 +90,7 @@ class MailServiceTest {
 
 		assertEquals(emailToken, resultToken);
 		verify(valueOperations, times(1)).get(redisKey);
-		verify(jwtUtil, times(1)).generateTokenWithSubject(email);
+		verify(jwtService, times(1)).generateTokenWithSubject(email);
 		verify(redisTemplate, times(1)).delete(redisKey);
 	}
 

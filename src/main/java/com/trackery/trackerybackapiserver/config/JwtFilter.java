@@ -14,7 +14,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 import jakarta.servlet.FilterChain;
@@ -43,7 +43,7 @@ public class JwtFilter extends OncePerRequestFilter {
 	/**
 	 * 토큰 검증 및 파싱을 담당하는 JWT 유틸리티 클래스
 	 */
-	private final JwtUtil jwtUtil;
+	private final JwtService jwtService;
 
 	/**
 	 * JWT 인증/인가를 해주는 필터
@@ -71,7 +71,7 @@ public class JwtFilter extends OncePerRequestFilter {
 		DecodedJWT jwt;
 
 		try {
-			jwt = jwtUtil.verifyJwt(requestToken);
+			jwt = jwtService.verifyJwt(requestToken);
 		} catch (JWTVerificationException e) {
 			log.error(e.getMessage());
 			throw new ApiException(ErrorCode.UNAUTHORIZED_JWT_VERIFY_FAILED);
