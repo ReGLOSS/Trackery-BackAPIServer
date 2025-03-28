@@ -97,6 +97,8 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 		Long userId = Long.valueOf(refreshTokenDto.subject());
 		JwtUserInfoDto jwtUserInfoDto = userService.getUserInfoById(userId);
 
+		jwtRedisService.deleteRefreshToken(refreshToken);
+
 		List<String> newTokens = jwtService.generateAccessTokenAndRefreshToken(jwtUserInfoDto.userId(),
 			jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
 
