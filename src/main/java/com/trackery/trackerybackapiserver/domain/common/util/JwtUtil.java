@@ -26,7 +26,8 @@ import lombok.extern.slf4j.Slf4j;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 18.        durururuk       최초 생성
+ * 25. 2. 18.       durururuk       최초 생성
+ * 25. 3. 28.		durururuk		리프레시 토큰 생성 메서드 추가
  */
 @Slf4j
 @Component
@@ -34,7 +35,8 @@ public class JwtUtil {
 
 	//만료시간 10분(600초)
 	//TODO JWT 만료시간 일괄 설정되게 수정
-	private static final int EXPIRATION_TIME = 600;
+	private static final int ACCESS_TOKEN_EXPIRATION_TIME = 600;
+	private static final int REFRESH_TOKEN_EXPIRATION_TIME = 604800;
 
 	private final String projectDomain;
 	private final Algorithm algorithm;
@@ -45,7 +47,7 @@ public class JwtUtil {
 	}
 
 	/**
-	 * JWT 생성 메서드
+	 * 액세스 토큰 생성 메서드
 	 *
 	 * @param userId : 인증할 유저ID
 	 * @param userName : 인증할 유저명
@@ -60,8 +62,30 @@ public class JwtUtil {
 				.withClaim("role", roleId)
 				.withNotBefore(Instant.now())
 				.withIssuedAt(Instant.now())
-				.withExpiresAt(Instant.now().plusSeconds(EXPIRATION_TIME))
+				.withExpiresAt(Instant.now().plusSeconds(ACCESS_TOKEN_EXPIRATION_TIME))
 				.withJWTId(UUID.randomUUID().toString())
+				.sign(algorithm);
+		} catch (JWTCreationException e) {
+			log.error(e.getMessage());
+			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR_FAILED_TO_GENERATE_JWT);
+		}
+	}
+
+	/**
+	 * 유저 ID로 리프레시 토큰 발급하는 메서드
+	 *
+	 * @param userId : 유저 ID
+	 * @return : 리프레시 토큰
+	 */
+	public String generateRefreshToken(Long userId) {
+		try {
+			return JWT.create()
+				.withIssuer(projectDomain)
+				.withJWTId(UUID.randomUUID().toString())
+				.withSubject(userId.toString())
+				.withNotBefore(Instant.now())
+				.withIssuedAt(Instant.now())
+				.withExpiresAt(Instant.now().plusSeconds(REFRESH_TOKEN_EXPIRATION_TIME))
 				.sign(algorithm);
 		} catch (JWTCreationException e) {
 			log.error(e.getMessage());
@@ -94,7 +118,7 @@ public class JwtUtil {
 				.withSubject(subject)
 				.withNotBefore(Instant.now())
 				.withIssuedAt(Instant.now())
-				.withExpiresAt(Instant.now().plusSeconds(EXPIRATION_TIME))
+				.withExpiresAt(Instant.now().plusSeconds(ACCESS_TOKEN_EXPIRATION_TIME))
 				.sign(algorithm);
 		} catch (JWTCreationException e) {
 			log.error(e.getMessage());
