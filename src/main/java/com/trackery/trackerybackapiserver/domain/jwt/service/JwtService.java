@@ -15,7 +15,9 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
+import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class JwtService {
 	private final JwtRedisService jwtRedisService;
+	private final UserService userService;
 
 	//만료시간 10분(600초)
 	//TODO JWT 만료시간 일괄 설정되게 수정
@@ -44,9 +47,11 @@ public class JwtService {
 	private final String projectDomain;
 	private final Algorithm algorithm;
 
-	public JwtService(JwtRedisService jwtRedisService, @Value("${JWT_SECRET_KEY}") String jwtSecretKey,
+	public JwtService(JwtRedisService jwtRedisService, UserService userService,
+		@Value("${JWT_SECRET_KEY}") String jwtSecretKey,
 		@Value("${PROJECT_DOMAIN}") String projectDomain) {
 		this.jwtRedisService = jwtRedisService;
+		this.userService = userService;
 		this.algorithm = Algorithm.HMAC256(jwtSecretKey);
 		this.projectDomain = projectDomain;
 	}
@@ -140,6 +145,20 @@ public class JwtService {
 			.build();
 
 		return verifier.verify(token);
+	}
+
+	public String reissueAccessTokenByRefreshToken(String refreshToken) {
+		DecodedJWT decodedRefreshToken = verifyJwt(refreshToken);
+		RefreshTokenDto refreshTokenDto = jwtRedisService.getRefreshTokenInfo(refreshToken);
+
+		if (!decodedRefreshToken.getId().equals(refreshTokenDto.jid())) {
+			throw new ApiException(ErrorCode.UNAUTHORIZED);
+		}
+
+		Long userId = Long.valueOf(refreshTokenDto.subject());
+		JwtUserInfoDto jwtUserInfoDto = userService.getUserInfoById(userId);
+
+		return generateAccessToken(jwtUserInfoDto.userId(), jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
 	}
 
 	/**

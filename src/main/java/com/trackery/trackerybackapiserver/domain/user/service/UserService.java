@@ -12,6 +12,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -147,6 +148,13 @@ public class UserService {
 		String hashedPassword = PasswordUtil.hashPassword(password, salt);
 
 		userMapper.updatePassword(email, hashedPassword, salt);
+	}
+
+	public JwtUserInfoDto getUserInfoById(Long userId) {
+		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+		UserRole userRole = userRoleMapper.findByUserId(userId)
+			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
+		return new JwtUserInfoDto(userId, user.getUserName(), userRole.getRoleId());
 	}
 
 }

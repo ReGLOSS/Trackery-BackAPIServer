@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.trackery.trackerybackapiserver.config.JwtFilter;
+import com.trackery.trackerybackapiserver.config.filter.JwtResolverFilter;
 import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
@@ -35,11 +35,11 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 @AutoConfigureMockMvc
 class ExceptionHandlerFilterTest extends CommonMockMvcControllerTestSetUp {
 	@MockitoBean
-	private JwtFilter jwtFilter;
+	private JwtResolverFilter jwtResolverFilter;
 
 	@Test
 	void JWT_필터_예외_발생_시_처리_테스트() throws Exception {
-		doThrow(new ApiException(ErrorCode.UNAUTHORIZED_JWT_VERIFY_FAILED)).when(jwtFilter)
+		doThrow(new ApiException(ErrorCode.UNAUTHORIZED_JWT_VERIFY_FAILED)).when(jwtResolverFilter)
 			.doFilter(any(), any(), any());
 
 		ResultActions result = mockMvc.perform(get("/test"));

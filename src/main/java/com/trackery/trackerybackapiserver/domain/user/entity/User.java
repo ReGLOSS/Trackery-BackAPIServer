@@ -73,10 +73,12 @@ public class User {
 	 */
 	private String userProfile;
 
+	private Long roleId;
+
 	@Builder
 	public User(String email, String userName, String nickname, String password, String salt, Timestamp startDate,
 		Integer status,
-		Timestamp lastLogin, String userProfile) {
+		Timestamp lastLogin, String userProfile, Long roleId) {
 		this.email = email;
 		this.userName = userName;
 		this.nickname = nickname;
@@ -86,5 +88,6 @@ public class User {
 		this.status = status;
 		this.lastLogin = lastLogin;
 		this.userProfile = userProfile;
+		this.roleId = roleId;
 	}
 }
