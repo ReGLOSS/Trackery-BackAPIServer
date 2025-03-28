@@ -103,12 +103,26 @@ public class JwtService {
 		return new RefreshTokenDto(refreshToken, jid, userId.toString());
 	}
 
-	public List<String> generateAccessTokenAndRefreshToken(Long userId, String userName, Long userRoleId) {
-		String accessToken = generateAccessToken(userId, userName, userRoleId);
+	/**
+	 * 유저 정보를 받아서 액세스 토큰과 리프레시 토큰을 리스트로 반환하는 메서드
+	 *
+	 * @param userId : 유저 ID
+	 * @param userName : 유저명
+	 * @param roleId : 역할 ID
+	 * @return : 액세스 토큰, 리프레시 토큰이 담긴 리스트
+	 */
+	public List<String> generateAccessTokenAndRefreshToken(Long userId, String userName, Long roleId) {
+		String accessToken = generateAccessToken(userId, userName, roleId);
 		String refreshToken = generateRefreshTokenAndSaveToRedis(userId);
 		return List.of(accessToken, refreshToken);
 	}
 
+	/**
+	 * 리프레시 토큰을 발급하고 정보를 redis에 저장하고 토큰을 반환하는 메서드
+	 *
+	 * @param userId : 유저 ID
+	 * @return 리프레시 토큰
+	 */
 	private String generateRefreshTokenAndSaveToRedis(Long userId) {
 		RefreshTokenDto refreshTokenDto = generateRefreshToken(userId);
 		jwtRedisService.saveRefreshToken(refreshTokenDto);
