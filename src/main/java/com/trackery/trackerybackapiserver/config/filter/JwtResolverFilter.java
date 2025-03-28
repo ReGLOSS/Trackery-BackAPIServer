@@ -4,13 +4,18 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Optional;
 
+import org.springframework.core.annotation.Order;
 import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
+import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -37,6 +42,7 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 
 	private final JwtService jwtService;
 	private final JwtRedisService jwtRedisService;
+	private final UserService userService;
 	private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
 	private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
 
@@ -78,6 +84,16 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 				.map(Cookie::getValue))
 			.orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED));
 
-		return jwtService.reissueAccessTokenByRefreshToken(refreshToken);
+		DecodedJWT decodedRefreshToken = jwtService.verifyJwt(refreshToken);
+		RefreshTokenDto refreshTokenDto = jwtRedisService.getRefreshTokenInfo(refreshToken);
+
+		if (!decodedRefreshToken.getId().equals(refreshTokenDto.jid())) {
+			throw new ApiException(ErrorCode.UNAUTHORIZED);
+		}
+
+		Long userId = Long.valueOf(refreshTokenDto.subject());
+		JwtUserInfoDto jwtUserInfoDto = userService.getUserInfoById(userId);
+
+		return jwtService.generateAccessToken(jwtUserInfoDto.userId(), jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
 	}
 }

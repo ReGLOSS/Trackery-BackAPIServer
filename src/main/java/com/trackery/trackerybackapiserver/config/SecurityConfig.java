@@ -17,10 +17,12 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import com.trackery.trackerybackapiserver.config.filter.ExceptionHandlerFilter;
 import com.trackery.trackerybackapiserver.config.filter.JwtAuthenticationFilter;
 import com.trackery.trackerybackapiserver.config.filter.JwtResolverFilter;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
+import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -49,6 +51,7 @@ public class SecurityConfig {
 	 */
 	private final JwtService jwtService;
 	private final JwtRedisService jwtRedisService;
+	private final UserService userService;
 
 	/**
 	 * 인증 없이 접근 가능한 공개 API 목록
@@ -112,10 +115,11 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/error").permitAll().anyRequest().authenticated())
-			.addFilterBefore(new ExceptionHandlerFilter(), JwtResolverFilter.class)
-			.addFilterBefore(new JwtResolverFilter(jwtService, jwtRedisService),
+			.addFilterBefore(new JwtAuthenticationFilter(jwtService),
 				UsernamePasswordAuthenticationFilter.class)
-			.addFilterAfter(new JwtAuthenticationFilter(jwtService), JwtResolverFilter.class);
+			.addFilterBefore(new JwtResolverFilter(jwtService, jwtRedisService, userService),
+				JwtAuthenticationFilter.class)
+			.addFilterBefore(new ExceptionHandlerFilter(), JwtResolverFilter.class);
 
 		return http.build();
 	}
