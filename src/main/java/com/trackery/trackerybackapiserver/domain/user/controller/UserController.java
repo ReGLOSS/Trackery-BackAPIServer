@@ -62,15 +62,19 @@ public class UserController {
 	public ResponseEntity<ApiResponse<String>> register(@CookieValue(name = "emailToken") String emailToken,
 		@CookieValue(name = "userNameToken") String userNameToken,
 		@Valid @RequestBody UserRegisterDto userRegisterDto) {
-		String jwt = userService.registerUser(emailToken, userNameToken, userRegisterDto);
+		List<String> tokens = userService.registerUser(emailToken, userNameToken, userRegisterDto);
 
-		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", jwt, Duration.ofMinutes(60));
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", tokens.get(0),
+			Duration.ofMinutes(60));
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", tokens.get(1),
+			Duration.ofDays(7));
 		ResponseCookie emailTokenCookie = CookieUtil.deleteCookie("emailToken");
 		ResponseCookie userNameTokenCookie = CookieUtil.deleteCookie("userNameToken");
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.headers(httpHeaders -> {
 				httpHeaders.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+				httpHeaders.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 				httpHeaders.add(HttpHeaders.SET_COOKIE, emailTokenCookie.toString());
 				httpHeaders.add(HttpHeaders.SET_COOKIE, userNameTokenCookie.toString());
 			})
