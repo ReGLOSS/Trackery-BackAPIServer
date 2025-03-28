@@ -17,8 +17,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
-import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
-import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -150,7 +148,8 @@ class UserServiceTest {
 		when(userMapper.findByUserName(anyString())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
 
-		when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(List.of(accessToken, refreshToken));
+		when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(
+			List.of(accessToken, refreshToken));
 
 		List<String> result = userService.login(loginDto);
 
