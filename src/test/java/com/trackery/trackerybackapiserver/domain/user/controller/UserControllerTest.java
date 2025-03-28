@@ -62,10 +62,13 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 		ReflectionTestUtils.setField(registerDto, "nickname", "김커피");
 		ReflectionTestUtils.setField(registerDto, "password", "Qwerasdf1234!!asdf");
 
+		String accessToken = "accessToken";
+		String refreshToken = "refreshToken";
+		List<String> tokens = List.of(accessToken, refreshToken);
 		String emailToken = "emailJwt";
 		String userNameToken = "userNameJwt";
 
-		when(userService.registerUser(eq(emailToken), eq(userNameToken), any(UserRegisterDto.class))).thenReturn("accessJwt");
+		when(userService.registerUser(eq(emailToken), eq(userNameToken), any(UserRegisterDto.class))).thenReturn(tokens);
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
@@ -80,7 +83,10 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isCreated())
 			.andExpect(cookie().exists("accessToken"))
 			.andExpect(cookie().httpOnly("accessToken", true))
-			.andExpect(cookie().value("accessToken", "accessJwt"));
+			.andExpect(cookie().value("accessToken", accessToken))
+			.andExpect(cookie().exists("refreshToken"))
+			.andExpect(cookie().httpOnly("refreshToken", true))
+			.andExpect(cookie().value("refreshToken", refreshToken));
 	}
 
 	@Test

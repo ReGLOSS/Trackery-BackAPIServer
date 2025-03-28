@@ -59,9 +59,6 @@ class UserServiceTest {
 	@Mock
 	private JwtService jwtService;
 
-	@Mock
-	private JwtRedisService jwtRedisService;
-
 	@Test
 	void 회원가입_성공() {
 		try (MockedStatic<PasswordUtil> mockedStatic = mockStatic(PasswordUtil.class)) {
@@ -93,11 +90,16 @@ class UserServiceTest {
 				return null;
 			}).when(userRoleMapper).insertUserRole(any(UserRole.class));
 
-			when(jwtService.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
+			String accessToken = "accessToken";
+			String refreshToken = "refreshToken";
+			List<String> tokens = List.of(accessToken, refreshToken);
 
-			String result = userService.registerUser(emailToken, userNameToken, registerDto);
+			when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(tokens);
 
-			assertEquals("jwt token", result);
+			List<String> result = userService.registerUser(emailToken, userNameToken, registerDto);
+
+			assertEquals(accessToken, result.get(0));
+			assertEquals(refreshToken, result.get(1));
 
 			verify(userMapper, times(1)).insertUser(any(User.class));
 			verify(userRoleMapper, times(1)).insertUserRole(any(UserRole.class));
@@ -148,11 +150,7 @@ class UserServiceTest {
 		when(userMapper.findByUserName(anyString())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
 
-		when(jwtService.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn(accessToken);
-		when(jwtService.generateRefreshToken(anyLong())).thenReturn(
-			new RefreshTokenDto(refreshToken, "jid", "userId"));
-
-		doNothing().when(jwtRedisService).saveRefreshToken(any(RefreshTokenDto.class));
+		when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(List.of(accessToken, refreshToken));
 
 		List<String> result = userService.login(loginDto);
 

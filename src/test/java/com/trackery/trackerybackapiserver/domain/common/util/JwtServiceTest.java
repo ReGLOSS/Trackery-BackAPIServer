@@ -4,8 +4,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -27,13 +29,16 @@ import lombok.extern.slf4j.Slf4j;
 class JwtServiceTest {
 	private JwtService jwtService;
 
+	@Mock
+	private JwtRedisService jwtRedisService;
+
 	//운영환경에서 쓰이지 않는 테스트용 시크릿키입니다.
 	final String jwtSecretKeyForTest = "and0c2VjcmV0a2V5Zm9ydGVzdA==";
 	final String fakeProjectDomain = "www.a.com";
 
 	@BeforeEach
 	void setUp() {
-		jwtService = new JwtService(jwtSecretKeyForTest, fakeProjectDomain);
+		jwtService = new JwtService(jwtRedisService, jwtSecretKeyForTest, fakeProjectDomain);
 	}
 
 	@Test
