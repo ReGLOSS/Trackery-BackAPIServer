@@ -50,16 +50,12 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 	private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
 
 	/**
-	 * JWT 인증/인가를 해주는 필터
-	 * 1. 인증 헤더가 올바르지 않으면 예외 처리
-	 * 2. jwt 토큰 파싱, 검증
-	 * 3. 인증 정보를 SecurityContext에 담고 필터 통과
+	 * 필터 흐름
+	 *  1. 쿠키에서 액세스 토큰을 가져옵니다.
+	 *   1.1. 액세스 토큰이 없고 리프레시 토큰은 있다면 액세스 토큰을 재발급합니다.
+	 *   1.2. 액세스 토큰과 리프레시 토큰이 모두 없다면 401 에러를 반환합니다.
 	 *
-	 * @param request : 클라이언트의 http 요청 객체
-	 * @param response : 서버의 http 응답 객체
-	 * @param filterChain : 다음 필터 혹은 리소스로 넘겨주는 필터체인 객체
-	 * @throws ServletException : 필터 처리 중 발생할 수 있는 서블릿 관련 예외
-	 * @throws IOException : 입출력 처리 중 발생할 수 있는 예외
+	 *  2. 액세스 토큰을 Attribute에 담아서 필터체인을 진행합니다.
 	 */
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
@@ -70,6 +66,12 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 		filterChain.doFilter(request, response);
 	}
 
+	/**
+	 * 액세스 토큰을 쿠키에서 가져옵니다.
+	 * 만약 액세스 토큰이 없다면 리프레시 토큰을 가져오는 메서드로 진행됩니다.
+	 *
+	 * @return : 액세스 토큰
+	 */
 	private String getAccessTokenFromCookie(HttpServletRequest request, HttpServletResponse response) {
 		return Optional.ofNullable(request.getCookies())
 			.flatMap(cookies -> Arrays.stream(cookies)
@@ -79,7 +81,14 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 			.orElseGet(() -> reissueAccessTokenViaRefreshToken(request, response));
 	}
 
+	/**
+	 * 리프레시 토큰을 쿠키에서 가져옵니다. 만약 없다면 401 에러를 반환합니다.
+	 * 리프레시 토큰이 있다면 액세스 토큰을 재발급해서 반환합니다.
+	 *
+	 * @return : 액세스 토큰
+	 */
 	private String reissueAccessTokenViaRefreshToken(HttpServletRequest request, HttpServletResponse response) {
+		//쿠키에서 리프레시 토큰을 가져옵니다. 만약 없다면 401 에러를 반환합니다.
 		String refreshToken = Optional.ofNullable(request.getCookies())
 			.flatMap(cookies -> Arrays.stream(cookies)
 				.filter(cookie -> REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName()))
@@ -87,6 +96,9 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 				.map(Cookie::getValue))
 			.orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED));
 
+		/*
+		리프레시 토큰을 파싱하고 서버에 저장된 리프레시 토큰의 정보와 일치하는지 대조합니다.
+		 */
 		DecodedJWT decodedRefreshToken = jwtService.verifyJwt(refreshToken);
 		RefreshTokenDto refreshTokenDto = jwtRedisService.getRefreshTokenInfo(refreshToken);
 
@@ -99,6 +111,7 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 
 		jwtRedisService.deleteRefreshToken(refreshToken);
 
+		//액세스 토큰 재발급해서 쿠키에 담고 HttpServletResponse header에 추가합니다.
 		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(jwtUserInfoDto.userId(),
 			jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
 
