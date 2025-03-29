@@ -2,7 +2,6 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

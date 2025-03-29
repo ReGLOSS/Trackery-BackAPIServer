@@ -3,7 +3,6 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -93,7 +92,8 @@ class UserServiceTest {
 			String refreshToken = "refreshToken";
 			AuthTokenDto authTokenDto = new AuthTokenDto(accessToken, refreshToken);
 
-			when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(authTokenDto);
+			when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(
+				authTokenDto);
 
 			AuthTokenDto result = userService.registerUser(emailToken, userNameToken, registerDto);
 

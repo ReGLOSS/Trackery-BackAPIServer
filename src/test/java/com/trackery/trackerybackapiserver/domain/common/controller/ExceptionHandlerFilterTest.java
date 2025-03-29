@@ -6,18 +6,23 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.trackery.trackerybackapiserver.config.SecurityConfig;
 import com.trackery.trackerybackapiserver.config.filter.JwtResolverFilter;
-import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
+import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.common.controller
@@ -31,11 +36,23 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
  * 25. 3. 14.        durururuk      최초 생성
  */
 
+@Import(SecurityConfig.class)
 @WebMvcTest(TestController.class)
-@AutoConfigureMockMvc
-class ExceptionHandlerFilterTest extends CommonMockMvcControllerTestSetUp {
+class ExceptionHandlerFilterTest {
+	@Autowired
+	private MockMvc mockMvc;
+
 	@MockitoBean
 	private JwtResolverFilter jwtResolverFilter;
+
+	@MockitoBean
+	private UserService userService;
+
+	@MockitoBean
+	private JwtRedisService jwtRedisService;
+
+	@MockitoBean
+	private JwtService jwtService;
 
 	@Test
 	void JWT_필터_예외_발생_시_처리_테스트() throws Exception {

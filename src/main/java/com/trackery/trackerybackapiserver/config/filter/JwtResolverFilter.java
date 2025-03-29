@@ -3,7 +3,6 @@ package com.trackery.trackerybackapiserver.config.filter;
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.http.ResponseCookie;
@@ -103,9 +102,11 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(jwtUserInfoDto.userId(),
 			jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
 
-		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie(ACCESS_TOKEN_COOKIE_NAME, authTokenDto.accessToken(),
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie(ACCESS_TOKEN_COOKIE_NAME,
+			authTokenDto.accessToken(),
 			Duration.ofMinutes(60));
-		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie(REFRESH_TOKEN_COOKIE_NAME, authTokenDto.refreshToken(),
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie(REFRESH_TOKEN_COOKIE_NAME,
+			authTokenDto.refreshToken(),
 			Duration.ofDays(7));
 
 		response.addHeader("Set-Cookie", accessTokenCookie.toString());

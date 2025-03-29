@@ -10,8 +10,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.auth0.jwt.interfaces.Claim;
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.auth.dto.AuthUserDto;
 import com.trackery.trackerybackapiserver.domain.auth.service.AuthService;
@@ -38,20 +36,6 @@ class AuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 	@Test
 	void 인증_확인_성공() throws Exception {
-		//TODO 아래 9줄 어떻게 처리할지 수정 필요
-		DecodedJWT decodedJWT = mock(DecodedJWT.class);
-		when(jwtService.verifyJwt(anyString())).thenReturn(decodedJWT);
-		when(decodedJWT.getSubject()).thenReturn("1");
-
-		Claim userRoleClaim = mock(Claim.class);
-		when(decodedJWT.getClaim("role")).thenReturn(userRoleClaim);
-		when(userRoleClaim.asLong()).thenReturn(1L);
-
-		Claim userNameClaim = mock(Claim.class);
-		when(decodedJWT.getClaim("username")).thenReturn(userNameClaim);
-		when(userNameClaim.asString()).thenReturn("abcdefg");
-
-
 		AuthUserDto authUserDto = new AuthUserDto(1L, "abcdefg", 1L);
 		when(authService.toAuthUserDto(any())).thenReturn(authUserDto);
 

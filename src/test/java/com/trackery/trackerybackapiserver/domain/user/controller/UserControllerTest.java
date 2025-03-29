@@ -5,15 +5,11 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
@@ -42,9 +38,7 @@ import jakarta.servlet.http.Cookie;
  25. 2. 14.        durururuk       로그인 컨트롤러 테스트 코드 작성
  */
 
-@WithMockUser
 @WebMvcTest(UserController.class)
-@AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Autowired
 	private MockMvc mockMvc;
@@ -69,7 +63,8 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 		String emailToken = "emailJwt";
 		String userNameToken = "userNameJwt";
 
-		when(userService.registerUser(eq(emailToken), eq(userNameToken), any(UserRegisterDto.class))).thenReturn(authTokenDto);
+		when(userService.registerUser(eq(emailToken), eq(userNameToken), any(UserRegisterDto.class))).thenReturn(
+			authTokenDto);
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")

@@ -1,7 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.jwt.service;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Value;

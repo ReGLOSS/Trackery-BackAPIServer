@@ -1,7 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.user.controller;
 
 import java.time.Duration;
-import java.util.List;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
