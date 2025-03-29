@@ -11,7 +11,8 @@ import org.springframework.security.web.SecurityFilterChain;
  * fileName       : MockMvcUnitTestSecurityConfig
  * author         : durururuk
  * date           : 25. 3. 29.
- * description    :
+ * description    : MockMvc를 이용한 컨트롤러 단위 테스트를 하기위해
+ * 					따로 사용될 설정 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -19,7 +20,6 @@ import org.springframework.security.web.SecurityFilterChain;
  */
 @TestConfiguration
 public class MockMvcUnitTestSecurityConfig {
-
 	@Bean
 	public SecurityFilterChain testFilterChain(HttpSecurity http) throws Exception {
 		return http

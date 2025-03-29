@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain;
+package com.trackery.trackerybackapiserver.domain.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trackery.trackerybackapiserver.domain.config.MockMvcUnitTestSecurityConfig;
 
 /**
  *packageName    : com.trackery.trackerybackapiserver.domain
