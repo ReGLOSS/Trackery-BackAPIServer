@@ -12,6 +12,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
@@ -54,7 +55,7 @@ public class UserService {
 	 *
 	 * @param userRegisterDto : 회원 가입 정보를 담은 DTO
 	 */
-	public List<String> registerUser(String emailToken, String userNameToken, UserRegisterDto userRegisterDto) {
+	public AuthTokenDto registerUser(String emailToken, String userNameToken, UserRegisterDto userRegisterDto) {
 		DecodedJWT decodedEmailToken = jwtService.verifyJwt(emailToken);
 		DecodedJWT decodedUserNameToken = jwtService.verifyJwt(userNameToken);
 
@@ -95,7 +96,7 @@ public class UserService {
 	 * @param userLoginDto : username, password 받는 DTO
 	 * @return : 인증된 유저의 정보를 담고있는 jwt
 	 */
-	public List<String> login(UserLoginDto userLoginDto) {
+	public AuthTokenDto login(UserLoginDto userLoginDto) {
 		User user = userMapper.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new ApiException(
 			ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS));
 

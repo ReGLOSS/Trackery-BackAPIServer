@@ -14,6 +14,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
@@ -33,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * fileName       : JwtFilter
  * author         : durururuk
  * date           : 25. 2. 19.
- * description    : JWT 인증/인가를 담당하는 필터
+ * description    : 액세스 토큰을 가져오는 필터입니다
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -99,17 +100,17 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 
 		jwtRedisService.deleteRefreshToken(refreshToken);
 
-		List<String> newTokens = jwtService.generateAccessTokenAndRefreshToken(jwtUserInfoDto.userId(),
+		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(jwtUserInfoDto.userId(),
 			jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
 
-		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie(ACCESS_TOKEN_COOKIE_NAME, newTokens.get(0),
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie(ACCESS_TOKEN_COOKIE_NAME, authTokenDto.accessToken(),
 			Duration.ofMinutes(60));
-		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie(REFRESH_TOKEN_COOKIE_NAME, newTokens.get(1),
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie(REFRESH_TOKEN_COOKIE_NAME, authTokenDto.refreshToken(),
 			Duration.ofDays(7));
 
 		response.addHeader("Set-Cookie", accessTokenCookie.toString());
 		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
 
-		return newTokens.get(0);
+		return authTokenDto.accessToken();
 	}
 }

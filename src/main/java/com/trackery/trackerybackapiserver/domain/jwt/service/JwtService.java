@@ -15,6 +15,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
 
 import lombok.extern.slf4j.Slf4j;
@@ -112,10 +113,11 @@ public class JwtService {
 	 * @param roleId : 역할 ID
 	 * @return : 액세스 토큰, 리프레시 토큰이 담긴 리스트
 	 */
-	public List<String> generateAccessTokenAndRefreshToken(Long userId, String userName, Long roleId) {
+	public AuthTokenDto generateAccessTokenAndRefreshToken(Long userId, String userName, Long roleId) {
 		String accessToken = generateAccessToken(userId, userName, roleId);
 		String refreshToken = generateRefreshTokenAndSaveToRedis(userId);
-		return List.of(accessToken, refreshToken);
+
+		return new AuthTokenDto(accessToken, refreshToken);
 	}
 
 	/**

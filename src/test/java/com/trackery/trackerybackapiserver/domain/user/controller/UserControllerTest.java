@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
@@ -64,11 +65,11 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		String accessToken = "accessToken";
 		String refreshToken = "refreshToken";
-		List<String> tokens = List.of(accessToken, refreshToken);
+		AuthTokenDto authTokenDto = new AuthTokenDto(accessToken, refreshToken);
 		String emailToken = "emailJwt";
 		String userNameToken = "userNameJwt";
 
-		when(userService.registerUser(eq(emailToken), eq(userNameToken), any(UserRegisterDto.class))).thenReturn(tokens);
+		when(userService.registerUser(eq(emailToken), eq(userNameToken), any(UserRegisterDto.class))).thenReturn(authTokenDto);
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
@@ -111,10 +112,9 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		String accessToken = "accessToken";
 		String refreshToken = "refreshToken";
+		AuthTokenDto authTokenDto = new AuthTokenDto(accessToken, refreshToken);
 
-		List<String> expectedResult = List.of(accessToken, refreshToken);
-
-		when(userService.login(any())).thenReturn(expectedResult);
+		when(userService.login(any())).thenReturn(authTokenDto);
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/login")

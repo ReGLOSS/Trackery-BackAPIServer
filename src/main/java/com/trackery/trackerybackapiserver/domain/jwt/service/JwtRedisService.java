@@ -55,6 +55,7 @@ public class JwtRedisService {
 		}
 	}
 
+	//Todo 추후 unlink로 변경
 	public void deleteRefreshToken(String refreshToken) {
 		String redisKey = REFRESH_TOKEN_REDIS_KEY + refreshToken;
 		redisTemplate.delete(redisKey);

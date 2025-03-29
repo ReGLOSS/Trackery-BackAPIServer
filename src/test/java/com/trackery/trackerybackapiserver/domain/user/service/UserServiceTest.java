@@ -17,6 +17,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -90,14 +91,14 @@ class UserServiceTest {
 
 			String accessToken = "accessToken";
 			String refreshToken = "refreshToken";
-			List<String> tokens = List.of(accessToken, refreshToken);
+			AuthTokenDto authTokenDto = new AuthTokenDto(accessToken, refreshToken);
 
-			when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(tokens);
+			when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(authTokenDto);
 
-			List<String> result = userService.registerUser(emailToken, userNameToken, registerDto);
+			AuthTokenDto result = userService.registerUser(emailToken, userNameToken, registerDto);
 
-			assertEquals(accessToken, result.get(0));
-			assertEquals(refreshToken, result.get(1));
+			assertEquals(accessToken, result.accessToken());
+			assertEquals(refreshToken, result.refreshToken());
 
 			verify(userMapper, times(1)).insertUser(any(User.class));
 			verify(userRoleMapper, times(1)).insertUserRole(any(UserRole.class));
@@ -144,16 +145,17 @@ class UserServiceTest {
 
 		String accessToken = "access token";
 		String refreshToken = "refresh token";
+		AuthTokenDto authTokenDto = new AuthTokenDto(accessToken, refreshToken);
 
 		when(userMapper.findByUserName(anyString())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
 
 		when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(
-			List.of(accessToken, refreshToken));
+			authTokenDto);
 
-		List<String> result = userService.login(loginDto);
+		AuthTokenDto result = userService.login(loginDto);
 
-		assertEquals(List.of(accessToken, refreshToken), result);
+		assertEquals(authTokenDto, result);
 		verify(userMapper, times(1)).findByUserName(anyString());
 		verify(userRoleMapper, times(1)).findByUserId(anyLong());
 	}

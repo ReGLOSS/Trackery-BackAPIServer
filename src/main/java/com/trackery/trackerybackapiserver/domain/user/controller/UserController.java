@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -62,11 +63,11 @@ public class UserController {
 	public ResponseEntity<ApiResponse<String>> register(@CookieValue(name = "emailToken") String emailToken,
 		@CookieValue(name = "userNameToken") String userNameToken,
 		@Valid @RequestBody UserRegisterDto userRegisterDto) {
-		List<String> tokens = userService.registerUser(emailToken, userNameToken, userRegisterDto);
+		AuthTokenDto authTokenDto = userService.registerUser(emailToken, userNameToken, userRegisterDto);
 
-		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", tokens.get(0),
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", authTokenDto.accessToken(),
 			Duration.ofMinutes(60));
-		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", tokens.get(1),
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", authTokenDto.refreshToken(),
 			Duration.ofDays(7));
 		ResponseCookie emailTokenCookie = CookieUtil.deleteCookie("emailToken");
 		ResponseCookie userNameTokenCookie = CookieUtil.deleteCookie("userNameToken");
@@ -89,11 +90,11 @@ public class UserController {
 	 */
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody UserLoginDto userLoginDto) {
-		List<String> tokens = userService.login(userLoginDto);
+		AuthTokenDto authTokenDto = userService.login(userLoginDto);
 
-		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", tokens.get(0),
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", authTokenDto.accessToken(),
 			Duration.ofMinutes(60));
-		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", tokens.get(1),
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", authTokenDto.refreshToken(),
 			Duration.ofDays(7));
 
 		return ResponseEntity.ok()
