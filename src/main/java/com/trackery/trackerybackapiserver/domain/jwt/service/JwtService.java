@@ -136,12 +136,17 @@ public class JwtService {
 	 * @param token : jwt 토큰
 	 * @return : jwt의 디코딩된 정보를 담고있는 DecodedJWT 객체
 	 */
-	public DecodedJWT verifyJwt(String token) throws JWTVerificationException {
-		JWTVerifier verifier = JWT.require(algorithm)
-			.withIssuer(projectDomain)
-			.build();
+	public DecodedJWT verifyJwt(String token) {
+		try {
+			JWTVerifier verifier = JWT.require(algorithm)
+				.withIssuer(projectDomain)
+				.build();
+			return verifier.verify(token);
 
-		return verifier.verify(token);
+		} catch (JWTVerificationException e) {
+			log.error(e.getMessage());
+			throw new ApiException(ErrorCode.BAD_REQUEST);
+		}
 	}
 
 	/**

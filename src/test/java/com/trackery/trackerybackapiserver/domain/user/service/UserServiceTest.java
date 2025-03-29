@@ -5,6 +5,9 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,8 +18,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -158,5 +163,67 @@ class UserServiceTest {
 		assertEquals(authTokenDto, result);
 		verify(userMapper, times(1)).findByUserName(anyString());
 		verify(userRoleMapper, times(1)).findByUserId(anyLong());
+	}
+
+	@Nested
+	@DisplayName("비밀번호 변경 테스트")
+	class changePasswordTest {
+		private static final String EMAIL_TOKEN = "emailToken";
+		private static final String NEW_PASSWORD = "aaaaaaaa";
+		private static final String EMAIL = "a@a.com";
+		private static final DecodedJWT DECODED_EMAIL_TOKEN = mock(DecodedJWT.class);
+
+		@Test
+		@DisplayName("성공")
+		void success() {
+			when(jwtService.verifyJwt(EMAIL_TOKEN)).thenReturn(DECODED_EMAIL_TOKEN);
+			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
+			when(userMapper.isExistsEmail(EMAIL)).thenReturn(true);
+			doNothing().when(userMapper).updatePassword(eq(EMAIL), anyString(), anyString());
+
+			userService.changePassword(EMAIL_TOKEN, NEW_PASSWORD);
+
+			verify(userMapper, times(1)).isExistsEmail(EMAIL);
+			verify(userMapper, times(1)).updatePassword(eq(EMAIL), anyString(), anyString());
+		}
+
+		@Test
+		@DisplayName("실패 - 이메일이 DB에 존재하지 않음")
+		void failure_1() {
+			when(jwtService.verifyJwt(EMAIL_TOKEN)).thenReturn(DECODED_EMAIL_TOKEN);
+			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
+			when(userMapper.isExistsEmail(EMAIL)).thenReturn(false);
+
+			assertThrows(ApiException.class, () -> userService.changePassword(EMAIL_TOKEN, NEW_PASSWORD));
+
+			verify(userMapper, times(1)).isExistsEmail(EMAIL);
+		}
+	}
+
+	@Nested
+	@DisplayName("액세스 토큰 발급 필요 정보 조회 테스트")
+	class getUserInfoByIdTest {
+		User user = User.builder().userName("abcdefg").build();
+		UserRole userRole = UserRole.builder().userId(1L).roleId(1L).build();
+		JwtUserInfoDto expectedDto = new JwtUserInfoDto(1L, "abcdefg", 1L);
+
+		@BeforeEach
+		void setUp() {
+			ReflectionTestUtils.setField(user, "userId", 1L);
+		}
+
+		@Test
+		@DisplayName("성공")
+		void success() {
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			when(userRoleMapper.findByUserId(1L)).thenReturn(Optional.of(userRole));
+
+			JwtUserInfoDto result = userService.getUserInfoById(1L);
+
+			assertEquals(expectedDto, result);
+
+			verify(userMapper, times(1)).findByUserId(1L);
+			verify(userRoleMapper, times(1)).findByUserId(1L);
+		}
 	}
 }

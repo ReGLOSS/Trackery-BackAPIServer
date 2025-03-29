@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
@@ -130,14 +129,7 @@ public class UserService {
 	 * @param password : 새로 변경될 비밀번호
 	 */
 	public void changePassword(String emailToken, String password) {
-		DecodedJWT jwt;
-		try {
-			jwt = jwtService.verifyJwt(emailToken);
-		} catch (JWTVerificationException e) {
-			log.error(e.getMessage());
-			throw new ApiException(ErrorCode.BAD_REQUEST);
-		}
-
+		DecodedJWT jwt = jwtService.verifyJwt(emailToken);
 		String email = jwt.getSubject();
 
 		if (!userMapper.isExistsEmail(email)) {
@@ -150,6 +142,12 @@ public class UserService {
 		userMapper.updatePassword(email, hashedPassword, salt);
 	}
 
+	/**
+	 * 액세스 토큰 발급을 위한 유저 정보를 DB에서 조회 후 DTO로 반환하는 메서드입니다.
+	 *
+	 * @param userId : 유저 ID
+	 * @return : userId, userName, userRole이 담긴 DTO
+	 */
 	public JwtUserInfoDto getUserInfoById(Long userId) {
 		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
 		UserRole userRole = userRoleMapper.findByUserId(userId)
