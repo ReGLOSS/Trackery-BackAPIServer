@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtService {
 	private final JwtRedisService jwtRedisService;
 
-	//만료시간 10분(600초)
+	//액세스 토큰 만료시간 1시간, 리프레시 토큰 만료시간 7일, 단위 : 초(s)
 	//TODO JWT 만료시간 일괄 설정되게 수정
 	private static final int ACCESS_TOKEN_EXPIRATION_TIME = 600;
 	private static final int REFRESH_TOKEN_EXPIRATION_TIME = 604800;
@@ -105,12 +105,12 @@ public class JwtService {
 	}
 
 	/**
-	 * 유저 정보를 받아서 액세스 토큰과 리프레시 토큰을 리스트로 반환하는 메서드
+	 * 유저 정보를 받아서 액세스 토큰과 리프레시 토큰을 DTO로 반환하는 메서드
 	 *
 	 * @param userId : 유저 ID
 	 * @param userName : 유저명
 	 * @param roleId : 역할 ID
-	 * @return : 액세스 토큰, 리프레시 토큰이 담긴 리스트
+	 * @return : 액세스 토큰, 리프레시 토큰이 담긴 DTO
 	 */
 	public AuthTokenDto generateAccessTokenAndRefreshToken(Long userId, String userName, Long roleId) {
 		String accessToken = generateAccessToken(userId, userName, roleId);

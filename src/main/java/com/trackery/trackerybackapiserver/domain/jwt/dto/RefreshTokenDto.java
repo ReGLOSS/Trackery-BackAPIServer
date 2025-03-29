@@ -5,7 +5,7 @@ package com.trackery.trackerybackapiserver.domain.jwt.dto;
  * fileName       : RefreshTokenDto
  * author         : durururuk
  * date           : 25. 3. 28.
- * description    :
+ * description    : 리프레시 토큰 정보를 담고있는 DTO
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
