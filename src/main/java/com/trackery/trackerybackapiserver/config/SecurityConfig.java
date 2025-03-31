@@ -20,7 +20,6 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.trackery.trackerybackapiserver.config.filter.ExceptionHandlerFilter;
 import com.trackery.trackerybackapiserver.config.filter.JwtAuthenticationFilter;
 import com.trackery.trackerybackapiserver.config.filter.JwtResolverFilter;
-import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
@@ -50,7 +49,6 @@ public class SecurityConfig {
 	 * JWT 토큰을 검증하는 유틸리티 클래스
 	 */
 	private final JwtService jwtService;
-	private final JwtRedisService jwtRedisService;
 	private final UserService userService;
 
 	/**
@@ -117,7 +115,7 @@ public class SecurityConfig {
 				.requestMatchers("/error").permitAll().anyRequest().authenticated())
 			.addFilterBefore(new JwtAuthenticationFilter(jwtService),
 				UsernamePasswordAuthenticationFilter.class)
-			.addFilterBefore(new JwtResolverFilter(jwtService, jwtRedisService, userService),
+			.addFilterBefore(new JwtResolverFilter(jwtService, userService),
 				JwtAuthenticationFilter.class)
 			.addFilterBefore(new ExceptionHandlerFilter(), JwtResolverFilter.class);
 

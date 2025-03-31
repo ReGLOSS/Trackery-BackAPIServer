@@ -12,7 +12,6 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
-import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
@@ -39,7 +38,6 @@ import lombok.extern.slf4j.Slf4j;
 public class JwtResolverFilter extends OncePerRequestFilter {
 
 	private final JwtService jwtService;
-	private final JwtRedisService jwtRedisService;
 	private final UserService userService;
 	private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
 	private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
@@ -73,7 +71,10 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 				throw new ApiException(ErrorCode.UNAUTHORIZED);
 			});
 
-		JwtUserInfoDto jwtUserInfoDto = jwtService.parseAndVerifyRefreshToken(refreshToken);
+		Long userId = jwtService.parseAndVerifyRefreshToken(refreshToken);
+
+		JwtUserInfoDto jwtUserInfoDto = userService.getUserInfoById(userId);
+
 
 		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(jwtUserInfoDto.userId(),
 			jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
