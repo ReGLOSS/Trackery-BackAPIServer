@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.NonNull;
@@ -54,31 +55,24 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 	 *  1. 쿠키에서 액세스 토큰을 가져옵니다.
 	 *   1.1. 액세스 토큰이 없고 리프레시 토큰은 있다면 액세스 토큰을 재발급합니다.
 	 *   1.2. 액세스 토큰과 리프레시 토큰이 모두 없다면 401 에러를 반환합니다.
-	 *
 	 *  2. 액세스 토큰을 Attribute에 담아서 필터체인을 진행합니다.
 	 */
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 		@NonNull FilterChain filterChain) throws ServletException, IOException {
-		String accessToken = getAccessTokenFromCookie(request, response);
+		String accessToken = extractToken(request, ACCESS_TOKEN_COOKIE_NAME, () -> reissueAccessTokenViaRefreshToken(request, response));
 
 		request.setAttribute(ACCESS_TOKEN_COOKIE_NAME, accessToken);
 		filterChain.doFilter(request, response);
 	}
 
-	/**
-	 * 액세스 토큰을 쿠키에서 가져옵니다.
-	 * 만약 액세스 토큰이 없다면 리프레시 토큰을 가져오는 메서드로 진행됩니다.
-	 *
-	 * @return : 액세스 토큰
-	 */
-	private String getAccessTokenFromCookie(HttpServletRequest request, HttpServletResponse response) {
+	private String extractToken(HttpServletRequest request, String cookieName, Supplier<String> ifAbsent) {
 		return Optional.ofNullable(request.getCookies())
 			.flatMap(cookies -> Arrays.stream(cookies)
-				.filter(cookie -> ACCESS_TOKEN_COOKIE_NAME.equals(cookie.getName()))
+				.filter(cookie -> cookieName.equals(cookie.getName()))
 				.findFirst()
 				.map(Cookie::getValue))
-			.orElseGet(() -> reissueAccessTokenViaRefreshToken(request, response));
+			.orElseGet(ifAbsent);
 	}
 
 	/**
@@ -88,32 +82,20 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 	 * @return : 액세스 토큰
 	 */
 	private String reissueAccessTokenViaRefreshToken(HttpServletRequest request, HttpServletResponse response) {
-		//쿠키에서 리프레시 토큰을 가져옵니다. 만약 없다면 401 에러를 반환합니다.
-		String refreshToken = Optional.ofNullable(request.getCookies())
-			.flatMap(cookies -> Arrays.stream(cookies)
-				.filter(cookie -> REFRESH_TOKEN_COOKIE_NAME.equals(cookie.getName()))
-				.findFirst()
-				.map(Cookie::getValue))
-			.orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED));
+		String refreshToken =  extractToken(request, REFRESH_TOKEN_COOKIE_NAME,
+			() -> { throw new ApiException(ErrorCode.UNAUTHORIZED); });
 
+		JwtUserInfoDto jwtUserInfoDto = parseAndVerifyRefreshToken(refreshToken);
 
-		//리프레시 토큰을 파싱하고 서버에 저장된 리프레시 토큰의 정보와 일치하는지 대조합니다.
-		DecodedJWT decodedRefreshToken = jwtService.verifyJwt(refreshToken);
-		RefreshTokenDto refreshTokenDto = jwtRedisService.getRefreshTokenInfo(refreshToken);
-
-		if (!decodedRefreshToken.getId().equals(refreshTokenDto.jid())) {
-			throw new ApiException(ErrorCode.UNAUTHORIZED);
-		}
-
-		Long userId = Long.valueOf(refreshTokenDto.subject());
-		JwtUserInfoDto jwtUserInfoDto = userService.getUserInfoById(userId);
-
-		jwtRedisService.deleteRefreshToken(refreshToken);
-
-		//액세스 토큰 재발급해서 쿠키에 담고 HttpServletResponse header에 추가합니다.
 		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(jwtUserInfoDto.userId(),
 			jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
 
+		addAuthCookiesToHeader(authTokenDto, response);
+
+		return authTokenDto.accessToken();
+	}
+
+	private void addAuthCookiesToHeader(AuthTokenDto authTokenDto, HttpServletResponse response) {
 		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie(ACCESS_TOKEN_COOKIE_NAME,
 			authTokenDto.accessToken(),
 			Duration.ofMinutes(60));
@@ -123,7 +105,20 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 
 		response.addHeader("Set-Cookie", accessTokenCookie.toString());
 		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+	}
 
-		return authTokenDto.accessToken();
+	private JwtUserInfoDto parseAndVerifyRefreshToken(String refreshToken) {
+		DecodedJWT decodedRefreshToken = jwtService.verifyJwt(refreshToken);
+		RefreshTokenDto refreshTokenDto = jwtRedisService.getRefreshTokenInfo(refreshToken);
+
+		if (!decodedRefreshToken.getId().equals(refreshTokenDto.jid())) {
+			throw new ApiException(ErrorCode.UNAUTHORIZED);
+		}
+
+		Long userId = Long.valueOf(refreshTokenDto.subject());
+
+		jwtRedisService.deleteRefreshToken(refreshToken);
+
+		return userService.getUserInfoById(userId);
 	}
 }
