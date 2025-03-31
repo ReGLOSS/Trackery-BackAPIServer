@@ -1,6 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.user.service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
@@ -69,9 +68,9 @@ public class UserService {
 			.nickname(userRegisterDto.getNickname())
 			.password(hashedPassword)
 			.salt(salt)
-			.startDate(Timestamp.valueOf(LocalDateTime.now()))
+			.startDate(LocalDateTime.now())
 			.status(1)
-			.lastLogin(Timestamp.valueOf(LocalDateTime.now()))
+			.lastLogin(LocalDateTime.now())
 			.userProfile(userRegisterDto.getUserProfile())
 			.build();
 

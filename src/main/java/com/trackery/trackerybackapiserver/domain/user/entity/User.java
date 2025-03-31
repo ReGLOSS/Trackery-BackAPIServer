@@ -1,6 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.user.entity;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
 
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -26,6 +26,7 @@ public class User {
 	/**
 	 * 사용자의 고유 식별자
 	 */
+	@SuppressWarnings("unused")
 	private Long userId;
 
 	/**
@@ -56,7 +57,7 @@ public class User {
 	/**
 	 * 계정 가입일자
 	 */
-	private Timestamp startDate;
+	private LocalDateTime startDate;
 
 	/**
 	 * 회원 상태 (탈퇴 여부등)
@@ -66,7 +67,7 @@ public class User {
 	/**
 	 * 마지막 로그인 일자
 	 */
-	private Timestamp lastLogin;
+	private LocalDateTime lastLogin;
 
 	/**
 	 * 사용자의 프로필 사진
@@ -77,9 +78,9 @@ public class User {
 
 	@Builder
 	@SuppressWarnings("java:S107")
-	public User(String email, String userName, String nickname, String password, String salt, Timestamp startDate,
+	public User(String email, String userName, String nickname, String password, String salt, LocalDateTime startDate,
 		Integer status,
-		Timestamp lastLogin, String userProfile, Long roleId) {
+		LocalDateTime lastLogin, String userProfile, Long roleId) {
 		this.email = email;
 		this.userName = userName;
 		this.nickname = nickname;

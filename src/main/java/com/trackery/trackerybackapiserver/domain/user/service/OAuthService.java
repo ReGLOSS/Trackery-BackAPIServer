@@ -1,7 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.user.service;
 
 import java.security.SecureRandom;
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
@@ -168,9 +167,9 @@ public class OAuthService {
 			.nickname(userInfo.getNickname() != null ? userInfo.getNickname() : userName)
 			.password(hashedPassword)
 			.salt(salt)
-			.startDate(Timestamp.valueOf(LocalDateTime.now()))
+			.startDate(LocalDateTime.now())
 			.status(1)
-			.lastLogin(Timestamp.valueOf(LocalDateTime.now()))
+			.lastLogin(LocalDateTime.now())
 			.userProfile(null)
 			.build();
 
