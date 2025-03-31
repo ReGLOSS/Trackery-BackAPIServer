@@ -16,6 +16,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
+import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -40,13 +41,16 @@ class JwtServiceTest {
 	@Mock
 	private JwtRedisService jwtRedisService;
 
+	@Mock
+	private UserService userService;
+
 	//운영환경에서 쓰이지 않는 테스트용 시크릿키입니다.
 	final String jwtSecretKeyForTest = "and0c2VjcmV0a2V5Zm9ydGVzdA==";
 	final String fakeProjectDomain = "www.a.com";
 
 	@BeforeEach
 	void setUp() {
-		jwtService = new JwtService(jwtRedisService, jwtSecretKeyForTest, fakeProjectDomain);
+		jwtService = new JwtService(jwtRedisService, userService, jwtSecretKeyForTest, fakeProjectDomain);
 	}
 
 	@Test

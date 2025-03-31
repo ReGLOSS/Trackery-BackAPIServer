@@ -2,28 +2,22 @@ package com.trackery.trackerybackapiserver.config.filter;
 
 import java.io.IOException;
 import java.time.Duration;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 import org.springframework.http.ResponseCookie;
 import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
-import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
-import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -60,19 +54,11 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 		@NonNull FilterChain filterChain) throws ServletException, IOException {
-		String accessToken = extractToken(request, ACCESS_TOKEN_COOKIE_NAME, () -> reissueAccessTokenViaRefreshToken(request, response));
+		String accessToken = CookieUtil.extractCookieValue(request, ACCESS_TOKEN_COOKIE_NAME,
+			() -> reissueAccessTokenByRefreshToken(request, response));
 
 		request.setAttribute(ACCESS_TOKEN_COOKIE_NAME, accessToken);
 		filterChain.doFilter(request, response);
-	}
-
-	private String extractToken(HttpServletRequest request, String cookieName, Supplier<String> ifAbsent) {
-		return Optional.ofNullable(request.getCookies())
-			.flatMap(cookies -> Arrays.stream(cookies)
-				.filter(cookie -> cookieName.equals(cookie.getName()))
-				.findFirst()
-				.map(Cookie::getValue))
-			.orElseGet(ifAbsent);
 	}
 
 	/**
@@ -81,11 +67,13 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 	 *
 	 * @return : 액세스 토큰
 	 */
-	private String reissueAccessTokenViaRefreshToken(HttpServletRequest request, HttpServletResponse response) {
-		String refreshToken =  extractToken(request, REFRESH_TOKEN_COOKIE_NAME,
-			() -> { throw new ApiException(ErrorCode.UNAUTHORIZED); });
+	private String reissueAccessTokenByRefreshToken(HttpServletRequest request, HttpServletResponse response) {
+		String refreshToken = CookieUtil.extractCookieValue(request, REFRESH_TOKEN_COOKIE_NAME,
+			() -> {
+				throw new ApiException(ErrorCode.UNAUTHORIZED);
+			});
 
-		JwtUserInfoDto jwtUserInfoDto = parseAndVerifyRefreshToken(refreshToken);
+		JwtUserInfoDto jwtUserInfoDto = jwtService.parseAndVerifyRefreshToken(refreshToken);
 
 		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(jwtUserInfoDto.userId(),
 			jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
@@ -95,6 +83,11 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 		return authTokenDto.accessToken();
 	}
 
+	/**
+	 * 인증에 필요한 토큰을 쿠키로 만들고 응답 헤더에 추가합니다.
+	 * @param authTokenDto : 액세스 토큰과 리프레시 토큰이 담긴 DTO
+	 * @param response : 응답 정보가 담긴 HttpServletResponse 객체
+	 */
 	private void addAuthCookiesToHeader(AuthTokenDto authTokenDto, HttpServletResponse response) {
 		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie(ACCESS_TOKEN_COOKIE_NAME,
 			authTokenDto.accessToken(),
@@ -105,20 +98,5 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 
 		response.addHeader("Set-Cookie", accessTokenCookie.toString());
 		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
-	}
-
-	private JwtUserInfoDto parseAndVerifyRefreshToken(String refreshToken) {
-		DecodedJWT decodedRefreshToken = jwtService.verifyJwt(refreshToken);
-		RefreshTokenDto refreshTokenDto = jwtRedisService.getRefreshTokenInfo(refreshToken);
-
-		if (!decodedRefreshToken.getId().equals(refreshTokenDto.jid())) {
-			throw new ApiException(ErrorCode.UNAUTHORIZED);
-		}
-
-		Long userId = Long.valueOf(refreshTokenDto.subject());
-
-		jwtRedisService.deleteRefreshToken(refreshToken);
-
-		return userService.getUserInfoById(userId);
 	}
 }

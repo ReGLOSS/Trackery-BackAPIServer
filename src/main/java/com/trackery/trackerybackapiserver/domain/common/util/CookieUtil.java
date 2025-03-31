@@ -1,11 +1,17 @@
 package com.trackery.trackerybackapiserver.domain.common.util;
 
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 import org.springframework.http.ResponseCookie;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.common.util
@@ -49,7 +55,8 @@ public class CookieUtil {
 	}
 
 	/**
-	 * 쿠키를 삭제합니다.
+	 * 쿠키를 삭제할 용도로 사용될 메서드입니다.
+	 * maxAge가 0인 쿠키를 만들어서 SET-COOKIE하여 바로 삭제되게 합니다.
 	 * @param key 삭제할 쿠키 key
 	 * @return 삭제될 쿠키 정보
 	 */
@@ -60,5 +67,23 @@ public class CookieUtil {
 			.maxAge(0)
 			.sameSite("Strict")
 			.build();
+	}
+
+	/**
+	 * 요청 객체에서 쿠키를 가져와서 원하는 쿠키 값을 반환합니다.
+	 * 찾지 못했을 경우 Supplier를 실행해서 대체 값을 반환합니다.
+	 *
+	 * @param request : HttpServletRequest 요청 객체, 여기서 쿠키를 가져옵니다.
+	 * @param cookieName : 가져오고자 하는 쿠키의 key값
+	 * @param ifAbsent : 쿠키를 가져오지 못했을 경우 실행될 람다 메서드
+	 * @return : 가져온 쿠키 값 혹은 Supplier에서 받아온 대체 값
+	 */
+	public static String extractCookieValue(HttpServletRequest request, String cookieName, Supplier<String> ifAbsent) {
+		return Optional.ofNullable(request.getCookies())
+			.flatMap(cookies -> Arrays.stream(cookies)
+				.filter(cookie -> cookieName.equals(cookie.getName()))
+				.findFirst()
+				.map(Cookie::getValue))
+			.orElseGet(ifAbsent);
 	}
 }
