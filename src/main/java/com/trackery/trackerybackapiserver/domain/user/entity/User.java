@@ -76,6 +76,7 @@ public class User {
 	private Long roleId;
 
 	@Builder
+	@SuppressWarnings("java:S107")
 	public User(String email, String userName, String nickname, String password, String salt, Timestamp startDate,
 		Integer status,
 		Timestamp lastLogin, String userProfile, Long roleId) {
