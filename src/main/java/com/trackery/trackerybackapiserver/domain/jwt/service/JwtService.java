@@ -101,7 +101,11 @@ public class JwtService {
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR_FAILED_TO_GENERATE_JWT);
 		}
 
-		return new RefreshTokenDto(refreshToken, jid, userId.toString());
+		RefreshTokenDto refreshTokenDto = new RefreshTokenDto(refreshToken, jid, userId.toString());
+
+		jwtRedisService.saveRefreshToken(refreshTokenDto);
+
+		return refreshTokenDto;
 	}
 
 	/**
@@ -114,21 +118,9 @@ public class JwtService {
 	 */
 	public AuthTokenDto generateAccessTokenAndRefreshToken(Long userId, String userName, Long roleId) {
 		String accessToken = generateAccessToken(userId, userName, roleId);
-		String refreshToken = generateRefreshTokenAndSaveToRedis(userId);
+		String refreshToken = generateRefreshToken(userId).refreshToken();
 
 		return new AuthTokenDto(accessToken, refreshToken);
-	}
-
-	/**
-	 * 리프레시 토큰을 발급하고 정보를 redis에 저장하고 토큰을 반환하는 메서드
-	 *
-	 * @param userId : 유저 ID
-	 * @return 리프레시 토큰
-	 */
-	private String generateRefreshTokenAndSaveToRedis(Long userId) {
-		RefreshTokenDto refreshTokenDto = generateRefreshToken(userId);
-		jwtRedisService.saveRefreshToken(refreshTokenDto);
-		return refreshTokenDto.refreshToken();
 	}
 
 	/**
