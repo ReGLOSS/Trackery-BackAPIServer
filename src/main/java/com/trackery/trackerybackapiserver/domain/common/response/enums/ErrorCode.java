@@ -120,7 +120,7 @@ public enum ErrorCode {
 	/**
 	 * 이미 데이터베이스에 존재하는 이메일임 (HttpStatus.CONFLICT, 409, "이미 가입된 이메일입니다.")
 	 */
-	Duplicate_EMAIL(HttpStatus.CONFLICT, 409, "이미 가입된 이메일입니다."),
+	DUPLICATE_EMAIL(HttpStatus.CONFLICT, 409, "이미 가입된 이메일입니다."),
 
 	/**
 	 * OAuth 인증에 실패 (HttpStatus.UNAUTHORIZED, 401, "OAuth 인증에 실패했습니다.")
