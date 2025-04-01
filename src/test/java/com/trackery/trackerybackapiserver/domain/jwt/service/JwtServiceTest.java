@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -16,12 +17,11 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
-import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import lombok.extern.slf4j.Slf4j;
 
 /**
- *packageName    : com.trackery.trackerybackapiserver.domain.common.util
+ packageName    : com.trackery.trackerybackapiserver.domain.common.util
 
  fileName       : JwtUtilTest
  author         : durururuk
@@ -30,8 +30,9 @@ import lombok.extern.slf4j.Slf4j;
  ===========================================================
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
- 25. 2. 18.        durururuk       최초 생성
- 25. 2. 20.		   durururuk       jwt 생성 및 검증 테스트 코드 추가
+ 25. 2. 18.        durururuk        최초 생성
+ 25. 2. 20.		   durururuk        jwt 생성 및 검증 테스트 코드 추가
+ 25. 4. 01.        durururuk		parseAndVerifyRefreshToken 테스트 코드 작성
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -41,9 +42,6 @@ class JwtServiceTest {
 	@Mock
 	private JwtRedisService jwtRedisService;
 
-	@Mock
-	private UserService userService;
-
 	//운영환경에서 쓰이지 않는 테스트용 시크릿키입니다.
 	final String jwtSecretKeyForTest = "and0c2VjcmV0a2V5Zm9ydGVzdA==";
 	final String fakeProjectDomain = "www.a.com";
@@ -51,6 +49,7 @@ class JwtServiceTest {
 	@BeforeEach
 	void setUp() {
 		jwtService = new JwtService(jwtRedisService, jwtSecretKeyForTest, fakeProjectDomain);
+		jwtService = Mockito.spy(jwtService);
 	}
 
 	@Test
@@ -91,7 +90,6 @@ class JwtServiceTest {
 			assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
 		}
 	}
-
 
 	@Test
 	void JWT_리프레시_토큰_생성_검증_테스트_성공() {
@@ -149,5 +147,60 @@ class JwtServiceTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("리프레시 토큰 파싱 및 검증 테스트")
+	class parseAndVerifyRefreshTokenTests {
+		DecodedJWT decodedJWT = mock(DecodedJWT.class);
+
+		private final String VALID_TOKEN = "validRefreshToken";
+		private final String INVALID_TOKEN = "invalidRefreshToken";
+
+		private final String SUBJECT = "1";
+
+		@Test
+		@DisplayName("성공")
+		void success() {
+			String VALID_JID = "validJid";
+			RefreshTokenDto refreshTokenDto = new RefreshTokenDto(VALID_TOKEN, VALID_JID, SUBJECT);
+
+			doReturn(decodedJWT).when(jwtService).verifyJwt(VALID_TOKEN);
+			when(jwtRedisService.getRefreshTokenInfo(VALID_TOKEN)).thenReturn(refreshTokenDto);
+			when(decodedJWT.getId()).thenReturn(VALID_JID);
+
+			Long userId = jwtService.parseAndVerifyRefreshToken(VALID_TOKEN);
+
+			assertEquals(1L, userId);
+			verify(jwtRedisService).deleteRefreshToken(VALID_TOKEN);
+		}
+
+		@Test
+		@DisplayName("실패 - 유효하지 않은 리프레시 토큰")
+		void shouldThrowUnauthorizedExceptionForInvalidRefreshToken() {
+			doThrow(new ApiException(ErrorCode.BAD_REQUEST)).when(jwtService).verifyJwt(INVALID_TOKEN);
+
+			ApiException exception = assertThrows(ApiException.class,
+				() -> jwtService.parseAndVerifyRefreshToken(INVALID_TOKEN));
+
+			assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
+			verify(jwtRedisService, never()).deleteRefreshToken(INVALID_TOKEN);
+		}
+
+		@Test
+		@DisplayName("실패 - 유효하지 않은 JID")
+		void shouldThrowUnauthorizedExceptionForInvalidJid() {
+			String INVALID_JID = "invalidJid";
+			RefreshTokenDto refreshTokenDto = new RefreshTokenDto(VALID_TOKEN, INVALID_JID, SUBJECT);
+
+			doReturn(decodedJWT).when(jwtService).verifyJwt(VALID_TOKEN);
+			when(jwtRedisService.getRefreshTokenInfo(VALID_TOKEN)).thenReturn(refreshTokenDto);
+			when(decodedJWT.getId()).thenReturn("differentJid");
+
+			ApiException exception = assertThrows(ApiException.class,
+				() -> jwtService.parseAndVerifyRefreshToken(VALID_TOKEN));
+
+			assertEquals(ErrorCode.UNAUTHORIZED, exception.getErrorCode());
+			verify(jwtRedisService, never()).deleteRefreshToken(VALID_TOKEN);
+		}
+	}
 
 }
