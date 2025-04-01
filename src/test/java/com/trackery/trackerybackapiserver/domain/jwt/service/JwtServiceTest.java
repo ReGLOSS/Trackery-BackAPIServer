@@ -50,7 +50,7 @@ class JwtServiceTest {
 
 	@BeforeEach
 	void setUp() {
-		jwtService = new JwtService(jwtRedisService, userService, jwtSecretKeyForTest, fakeProjectDomain);
+		jwtService = new JwtService(jwtRedisService, jwtSecretKeyForTest, fakeProjectDomain);
 	}
 
 	@Test
