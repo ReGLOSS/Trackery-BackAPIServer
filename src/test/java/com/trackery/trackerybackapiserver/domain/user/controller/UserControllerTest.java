@@ -8,16 +8,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import org.junit.jupiter.api.Test;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.trackery.trackerybackapiserver.domain.CommonMockMvcControllerTestSetUp;
+import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
@@ -39,9 +38,7 @@ import jakarta.servlet.http.Cookie;
  25. 2. 14.        durururuk       로그인 컨트롤러 테스트 코드 작성
  */
 
-@WithMockUser
 @WebMvcTest(UserController.class)
-@AutoConfigureMockMvc(addFilters = false)
 class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Autowired
 	private MockMvc mockMvc;
@@ -60,10 +57,14 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 		ReflectionTestUtils.setField(registerDto, "nickname", "김커피");
 		ReflectionTestUtils.setField(registerDto, "password", "Qwerasdf1234!!asdf");
 
+		String accessToken = "accessToken";
+		String refreshToken = "refreshToken";
+		AuthTokenDto authTokenDto = new AuthTokenDto(accessToken, refreshToken);
 		String emailToken = "emailJwt";
 		String userNameToken = "userNameJwt";
 
-		when(userService.registerUser(eq(emailToken), eq(userNameToken), any(UserRegisterDto.class))).thenReturn("accessJwt");
+		when(userService.registerUser(eq(emailToken), eq(userNameToken), any(UserRegisterDto.class))).thenReturn(
+			authTokenDto);
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/register")
@@ -78,7 +79,10 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isCreated())
 			.andExpect(cookie().exists("accessToken"))
 			.andExpect(cookie().httpOnly("accessToken", true))
-			.andExpect(cookie().value("accessToken", "accessJwt"));
+			.andExpect(cookie().value("accessToken", accessToken))
+			.andExpect(cookie().exists("refreshToken"))
+			.andExpect(cookie().httpOnly("refreshToken", true))
+			.andExpect(cookie().value("refreshToken", refreshToken));
 	}
 
 	@Test
@@ -101,7 +105,11 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 		ReflectionTestUtils.setField(loginDto, "userName", "abcdefg");
 		ReflectionTestUtils.setField(loginDto, "password", "Qwerasdf1234!");
 
-		when(userService.login(any())).thenReturn("jwt");
+		String accessToken = "accessToken";
+		String refreshToken = "refreshToken";
+		AuthTokenDto authTokenDto = new AuthTokenDto(accessToken, refreshToken);
+
+		when(userService.login(any())).thenReturn(authTokenDto);
 
 		ResultActions result = mockMvc
 			.perform(post("/api/users/login")
@@ -113,6 +121,9 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isOk())
 			.andExpect(cookie().exists("accessToken"))
 			.andExpect(cookie().httpOnly("accessToken", true))
-			.andExpect(cookie().value("accessToken", "jwt"));
+			.andExpect(cookie().value("accessToken", accessToken))
+			.andExpect(cookie().exists("refreshToken"))
+			.andExpect(cookie().httpOnly("refreshToken", true))
+			.andExpect(cookie().value("refreshToken", refreshToken));
 	}
 }

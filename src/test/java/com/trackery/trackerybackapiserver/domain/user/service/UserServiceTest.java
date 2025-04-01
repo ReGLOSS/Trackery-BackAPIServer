@@ -5,6 +5,9 @@ import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,8 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
@@ -54,7 +60,7 @@ class UserServiceTest {
 	UserLoginDto loginDto;
 
 	@Mock
-	private JwtUtil jwtUtil;
+	private JwtService jwtService;
 
 	@Test
 	void 회원가입_성공() {
@@ -68,8 +74,8 @@ class UserServiceTest {
 			DecodedJWT decodedEmailToken = mock(DecodedJWT.class);
 			DecodedJWT decodedUserNameToken = mock(DecodedJWT.class);
 
-			when(jwtUtil.verifyJwt(emailToken)).thenReturn(decodedEmailToken);
-			when(jwtUtil.verifyJwt(userNameToken)).thenReturn(decodedUserNameToken);
+			when(jwtService.verifyJwt(emailToken)).thenReturn(decodedEmailToken);
+			when(jwtService.verifyJwt(userNameToken)).thenReturn(decodedUserNameToken);
 
 			when(decodedEmailToken.getSubject()).thenReturn("a@a.com");
 			when(decodedUserNameToken.getSubject()).thenReturn("abcdfg");
@@ -87,11 +93,17 @@ class UserServiceTest {
 				return null;
 			}).when(userRoleMapper).insertUserRole(any(UserRole.class));
 
-			when(jwtUtil.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
+			String accessToken = "accessToken";
+			String refreshToken = "refreshToken";
+			AuthTokenDto authTokenDto = new AuthTokenDto(accessToken, refreshToken);
 
-			String result =  userService.registerUser(emailToken, userNameToken, registerDto);
+			when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(
+				authTokenDto);
 
-			assertEquals("jwt token", result);
+			AuthTokenDto result = userService.registerUser(emailToken, userNameToken, registerDto);
+
+			assertEquals(accessToken, result.accessToken());
+			assertEquals(refreshToken, result.refreshToken());
 
 			verify(userMapper, times(1)).insertUser(any(User.class));
 			verify(userRoleMapper, times(1)).insertUserRole(any(UserRole.class));
@@ -104,7 +116,7 @@ class UserServiceTest {
 	@Test
 	void 유저명_중복_확인_성공() {
 		when(userMapper.isExistsUserName(anyString())).thenReturn(false);
-		when(jwtUtil.generateTokenWithSubject("abcdefg")).thenReturn("jwt");
+		when(jwtService.generateTokenWithSubject("abcdefg")).thenReturn("jwt");
 
 		UserNameAvailabilityResponseDto result = userService.checkUsernameAvailability("abcdefg");
 
@@ -136,15 +148,82 @@ class UserServiceTest {
 			.roleId(1L)
 			.build();
 
+		String accessToken = "access token";
+		String refreshToken = "refresh token";
+		AuthTokenDto authTokenDto = new AuthTokenDto(accessToken, refreshToken);
+
 		when(userMapper.findByUserName(anyString())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
 
-		when(jwtUtil.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt token");
+		when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(
+			authTokenDto);
 
-		String result = userService.login(loginDto);
+		AuthTokenDto result = userService.login(loginDto);
 
-		assertEquals("jwt token", result);
+		assertEquals(authTokenDto, result);
 		verify(userMapper, times(1)).findByUserName(anyString());
 		verify(userRoleMapper, times(1)).findByUserId(anyLong());
+	}
+
+	@Nested
+	@DisplayName("비밀번호 변경 테스트")
+	class changePasswordTest {
+		private static final String EMAIL_TOKEN = "emailToken";
+		private static final String NEW_PASSWORD = "aaaaaaaa";
+		private static final String EMAIL = "a@a.com";
+		private static final DecodedJWT DECODED_EMAIL_TOKEN = mock(DecodedJWT.class);
+
+		@Test
+		@DisplayName("성공")
+		void success() {
+			when(jwtService.verifyJwt(EMAIL_TOKEN)).thenReturn(DECODED_EMAIL_TOKEN);
+			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
+			when(userMapper.isExistsEmail(EMAIL)).thenReturn(true);
+			doNothing().when(userMapper).updatePassword(eq(EMAIL), anyString(), anyString());
+
+			userService.changePassword(EMAIL_TOKEN, NEW_PASSWORD);
+
+			verify(userMapper, times(1)).isExistsEmail(EMAIL);
+			verify(userMapper, times(1)).updatePassword(eq(EMAIL), anyString(), anyString());
+		}
+
+		@Test
+		@DisplayName("실패 - 이메일이 DB에 존재하지 않음")
+		void failure_1() {
+			when(jwtService.verifyJwt(EMAIL_TOKEN)).thenReturn(DECODED_EMAIL_TOKEN);
+			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
+			when(userMapper.isExistsEmail(EMAIL)).thenReturn(false);
+
+			assertThrows(ApiException.class, () -> userService.changePassword(EMAIL_TOKEN, NEW_PASSWORD));
+
+			verify(userMapper, times(1)).isExistsEmail(EMAIL);
+		}
+	}
+
+	@Nested
+	@DisplayName("액세스 토큰 발급 필요 정보 조회 테스트")
+	class getUserInfoByIdTest {
+		User user = User.builder().userName("abcdefg").build();
+		UserRole userRole = UserRole.builder().userId(1L).roleId(1L).build();
+		JwtUserInfoDto expectedDto = new JwtUserInfoDto(1L, "abcdefg", 1L);
+
+		@BeforeEach
+		void setUp() {
+			ReflectionTestUtils.setField(user, "userId", 1L);
+		}
+
+		@Test
+		@DisplayName("성공")
+		void success() {
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			when(userRoleMapper.findByUserId(1L)).thenReturn(Optional.of(userRole));
+
+			JwtUserInfoDto result = userService.getUserInfoById(1L);
+
+			assertEquals(expectedDto, result);
+
+			verify(userMapper, times(1)).findByUserId(1L);
+			verify(userRoleMapper, times(1)).findByUserId(1L);
+		}
 	}
 }

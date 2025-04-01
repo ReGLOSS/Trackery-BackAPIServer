@@ -1,15 +1,12 @@
-package com.trackery.trackerybackapiserver.domain;
+package com.trackery.trackerybackapiserver.domain.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.restdocs.AutoConfigureRestDocs;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.trackery.trackerybackapiserver.config.SecurityConfig;
-import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 
 /**
  *packageName    : com.trackery.trackerybackapiserver.domain
@@ -24,15 +21,12 @@ import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
  25. 2. 19.        durururuk       최초 생성
  */
 
-@Import(SecurityConfig.class)
+@Import(MockMvcUnitTestSecurityConfig.class)
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
 public abstract class CommonMockMvcControllerTestSetUp {
 	@Autowired
 	protected MockMvc mockMvc;
-
-	@MockitoBean
-	protected JwtUtil jwtUtil;
 
 	protected ObjectMapper objectMapper = new ObjectMapper();
 }

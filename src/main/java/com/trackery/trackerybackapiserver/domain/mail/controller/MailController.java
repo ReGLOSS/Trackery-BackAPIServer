@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.mail.controller;
 
+import java.time.Duration;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -57,7 +59,7 @@ public class MailController {
 	public ResponseEntity<ApiResponse<String>> verifyMail(@Valid @RequestBody VerifyEmailDto dto) {
 		String emailToken = mailService.verifyEmail(dto.getEmail(), dto.getAuthNumber());
 
-		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("emailToken", emailToken);
+		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("emailToken", emailToken, Duration.ofMinutes(10));
 
 		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())

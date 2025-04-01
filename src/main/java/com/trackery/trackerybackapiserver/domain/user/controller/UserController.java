@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.user.controller;
 
+import java.time.Duration;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -59,15 +62,19 @@ public class UserController {
 	public ResponseEntity<ApiResponse<String>> register(@CookieValue(name = "emailToken") String emailToken,
 		@CookieValue(name = "userNameToken") String userNameToken,
 		@Valid @RequestBody UserRegisterDto userRegisterDto) {
-		String jwt = userService.registerUser(emailToken, userNameToken, userRegisterDto);
+		AuthTokenDto authTokenDto = userService.registerUser(emailToken, userNameToken, userRegisterDto);
 
-		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", jwt);
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", authTokenDto.accessToken(),
+			Duration.ofMinutes(60));
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", authTokenDto.refreshToken(),
+			Duration.ofDays(7));
 		ResponseCookie emailTokenCookie = CookieUtil.deleteCookie("emailToken");
 		ResponseCookie userNameTokenCookie = CookieUtil.deleteCookie("userNameToken");
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.headers(httpHeaders -> {
 				httpHeaders.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+				httpHeaders.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
 				httpHeaders.add(HttpHeaders.SET_COOKIE, emailTokenCookie.toString());
 				httpHeaders.add(HttpHeaders.SET_COOKIE, userNameTokenCookie.toString());
 			})
@@ -82,12 +89,16 @@ public class UserController {
 	 */
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody UserLoginDto userLoginDto) {
-		String jwt = userService.login(userLoginDto);
+		AuthTokenDto authTokenDto = userService.login(userLoginDto);
 
-		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", jwt);
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", authTokenDto.accessToken(),
+			Duration.ofMinutes(60));
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", authTokenDto.refreshToken(),
+			Duration.ofDays(7));
 
 		return ResponseEntity.ok()
-			.header(HttpHeaders.SET_COOKIE, cookie.toString())
+			.header(HttpHeaders.SET_COOKIE, accessTokenCookie.toString())
+			.header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
 			.body(ApiResponse.success(SuccessCode.OK));
 	}
 
@@ -102,7 +113,8 @@ public class UserController {
 		UserNameAvailabilityResponseDto result = userService.checkUsernameAvailability(value);
 
 		if (result.available()) {
-			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("userNameToken", result.token());
+			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("userNameToken", result.token(),
+				Duration.ofMinutes(10));
 
 			return ResponseEntity.ok()
 				.header(HttpHeaders.SET_COOKIE, cookie.toString())

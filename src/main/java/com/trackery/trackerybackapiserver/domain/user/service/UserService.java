@@ -1,17 +1,17 @@
 package com.trackery.trackerybackapiserver.domain.user.service;
 
-import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.common.util.JwtUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
@@ -43,7 +43,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class UserService {
 	private final UserMapper userMapper;
-	private final JwtUtil jwtUtil;
+	private final JwtService jwtService;
 	private final UserRoleMapper userRoleMapper;
 
 	/**
@@ -52,9 +52,9 @@ public class UserService {
 	 *
 	 * @param userRegisterDto : 회원 가입 정보를 담은 DTO
 	 */
-	public String registerUser(String emailToken, String userNameToken, UserRegisterDto userRegisterDto) {
-		DecodedJWT decodedEmailToken = jwtUtil.verifyJwt(emailToken);
-		DecodedJWT decodedUserNameToken = jwtUtil.verifyJwt(userNameToken);
+	public AuthTokenDto registerUser(String emailToken, String userNameToken, UserRegisterDto userRegisterDto) {
+		DecodedJWT decodedEmailToken = jwtService.verifyJwt(emailToken);
+		DecodedJWT decodedUserNameToken = jwtService.verifyJwt(userNameToken);
 
 		String email = decodedEmailToken.getSubject();
 		String userName = decodedUserNameToken.getSubject();
@@ -68,9 +68,9 @@ public class UserService {
 			.nickname(userRegisterDto.getNickname())
 			.password(hashedPassword)
 			.salt(salt)
-			.startDate(Timestamp.valueOf(LocalDateTime.now()))
+			.startDate(LocalDateTime.now())
 			.status(1)
-			.lastLogin(Timestamp.valueOf(LocalDateTime.now()))
+			.lastLogin(LocalDateTime.now())
 			.userProfile(userRegisterDto.getUserProfile())
 			.build();
 
@@ -83,7 +83,29 @@ public class UserService {
 
 		userRoleMapper.insertUserRole(userRole);
 
-		return jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
+		return jwtService.generateAccessTokenAndRefreshToken(user.getUserId(), user.getUserName(),
+			userRole.getRoleId());
+	}
+
+	/**
+	 * 로그인 정보 DTO 받아서 인증 후 jwt 토큰을 반환하는 메서드
+	 *
+	 * @param userLoginDto : username, password 받는 DTO
+	 * @return : 인증된 유저의 정보를 담고있는 jwt
+	 */
+	public AuthTokenDto login(UserLoginDto userLoginDto) {
+		User user = userMapper.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new ApiException(
+			ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS));
+
+		if (!PasswordUtil.hashPassword(userLoginDto.getPassword(), user.getSalt()).equals(user.getPassword())) {
+			throw new ApiException(ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS);
+		}
+
+		UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
+			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
+
+		return jwtService.generateAccessTokenAndRefreshToken(user.getUserId(), user.getUserName(),
+			userRole.getRoleId());
 	}
 
 	/**
@@ -93,35 +115,11 @@ public class UserService {
 	 */
 	public UserNameAvailabilityResponseDto checkUsernameAvailability(String userName) {
 		if (!userMapper.isExistsUserName(userName)) {
-			String jwt = jwtUtil.generateTokenWithSubject(userName);
+			String jwt = jwtService.generateTokenWithSubject(userName);
 			return new UserNameAvailabilityResponseDto(true, jwt);
 		} else {
 			return new UserNameAvailabilityResponseDto(false, null);
 		}
-	}
-
-	/**
-	 * 로그인 정보 DTO 받아서 인증 후 jwt 토큰을 반환하는 메서드
-	 *
-	 * @param userLoginDto : username, password 받는 DTO
-	 * @return : 인증된 유저의 정보를 담고있는 jwt
-	 */
-	public String login(UserLoginDto userLoginDto) {
-		User user = userMapper.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new ApiException(
-			ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS));
-
-		if (user.getStatus() == 0) {
-			throw new ApiException(ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS);
-		}
-
-		if (!PasswordUtil.hashPassword(userLoginDto.getPassword(), user.getSalt()).equals(user.getPassword())) {
-			throw new ApiException(ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS);
-		}
-
-		UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
-			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
-
-		return jwtUtil.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
 	}
 
 	/**
@@ -130,14 +128,7 @@ public class UserService {
 	 * @param password : 새로 변경될 비밀번호
 	 */
 	public void changePassword(String emailToken, String password) {
-		DecodedJWT jwt;
-		try {
-			jwt = jwtUtil.verifyJwt(emailToken);
-		} catch (JWTVerificationException e) {
-			log.error(e.getMessage());
-			throw new ApiException(ErrorCode.BAD_REQUEST);
-		}
-
+		DecodedJWT jwt = jwtService.verifyJwt(emailToken);
 		String email = jwt.getSubject();
 
 		if (!userMapper.isExistsEmail(email)) {
@@ -149,5 +140,20 @@ public class UserService {
 
 		userMapper.updatePassword(email, hashedPassword, salt);
 	}
+
+	/**
+	 * 액세스 토큰 발급을 위한 유저 정보를 DB에서 조회 후 DTO로 반환하는 메서드입니다.
+	 *
+	 * @param userId : 유저 ID
+	 * @return : userId, userName, userRole이 담긴 DTO
+	 */
+	public JwtUserInfoDto getUserInfoById(Long userId) {
+		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+		UserRole userRole = userRoleMapper.findByUserId(userId)
+			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
+		return new JwtUserInfoDto(userId, user.getUserName(), userRole.getRoleId());
+	}
+
+
 
 }

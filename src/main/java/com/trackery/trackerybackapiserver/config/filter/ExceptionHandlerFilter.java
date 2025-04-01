@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.config;
+package com.trackery.trackerybackapiserver.config.filter;
 
 import java.io.IOException;
 

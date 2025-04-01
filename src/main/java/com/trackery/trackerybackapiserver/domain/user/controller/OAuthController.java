@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.user.controller;
 
+import java.time.Duration;
+
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
@@ -148,7 +150,8 @@ public class OAuthController {
 
 			// 로그인 성공 또는 계정 연동 성공한 경우
 			// JWT 토큰을 쿠키에 설정
-			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", result.getJwtToken());
+			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", result.getJwtToken(),
+				Duration.ofMinutes(60));
 
 			return ResponseEntity.ok()
 				.header(HttpHeaders.SET_COOKIE, cookie.toString())
