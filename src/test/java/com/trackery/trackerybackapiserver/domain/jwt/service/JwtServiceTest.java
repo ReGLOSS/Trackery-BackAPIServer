@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
  25. 2. 18.        durururuk        최초 생성
  25. 2. 20.		   durururuk        jwt 생성 및 검증 테스트 코드 추가
  25. 4. 01.        durururuk		parseAndVerifyRefreshToken 테스트 코드 작성
+ 25. 4. 01.        durururuk		JWT 검증 실패 시 예외 에러 메시지 수정
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -198,7 +199,7 @@ class JwtServiceTest {
 			ApiException exception = assertThrows(ApiException.class,
 				() -> jwtService.parseAndVerifyRefreshToken(VALID_TOKEN));
 
-			assertEquals(ErrorCode.UNAUTHORIZED, exception.getErrorCode());
+			assertEquals(ErrorCode.UNAUTHORIZED_JWT_VERIFY_FAILED, exception.getErrorCode());
 			verify(jwtRedisService, never()).deleteRefreshToken(VALID_TOKEN);
 		}
 	}

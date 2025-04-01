@@ -171,7 +171,7 @@ public class JwtService {
 		RefreshTokenDto refreshTokenDto = jwtRedisService.getRefreshTokenInfo(refreshToken);
 
 		if (!decodedRefreshToken.getId().equals(refreshTokenDto.jid())) {
-			throw new ApiException(ErrorCode.UNAUTHORIZED);
+			throw new ApiException(ErrorCode.UNAUTHORIZED_JWT_VERIFY_FAILED);
 		}
 
 		jwtRedisService.deleteRefreshToken(refreshToken);
