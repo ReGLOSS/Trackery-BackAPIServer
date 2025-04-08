@@ -12,9 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
-import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
-import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkTokenDto;
@@ -41,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 26.        inari			로그인 통합 매서드로 변경
  * 25. 3. 27.        inari			provider를 enum으로 변경
  * 25. 3. 27.        inari			코드 스멜 수정
+ * 25. 4. 08.        inari			GlobalExceptionHandle로 예외 위임
  */
 @Slf4j
 @RestController
@@ -66,25 +65,15 @@ public class OAuthController {
 	 */
 	@PostMapping("/link-account")
 	public ResponseEntity<ApiResponse<OAuthLinkTokenDto>> createLinkToken(@RequestBody OAuthLinkRequestDto request) {
-		try {
-			// 연동 토큰 생성
-			String token = oAuthLinkService.createLinkToken(request.getProvider(), request.getEmail());
+		// 연동 토큰 생성
+		String token = oAuthLinkService.createLinkToken(request.getProvider(), request.getEmail());
 
-			OAuthLinkTokenDto response = OAuthLinkTokenDto.builder()
-				.token(token)
-				.provider(request.getProvider())
-				.build();
+		OAuthLinkTokenDto response = OAuthLinkTokenDto.builder()
+			.token(token)
+			.provider(request.getProvider())
+			.build();
 
-			return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
-		} catch (ApiException e) {
-			log.error("계정 연동 토큰 생성 실패: {}", e.getMessage());
-			return ResponseEntity.status(e.getErrorCode().getStatus())
-				.body(ApiResponse.error(e.getErrorCode()));
-		} catch (Exception e) {
-			log.error("계정 연동 토큰 생성 중 오류: {}", e.getMessage(), e);
-			return ResponseEntity.internalServerError()
-				.body(ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR));
-		}
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 
 	/**
@@ -124,7 +113,6 @@ public class OAuthController {
 				log.warn("계정 연동 토큰 검증 실패: {}", e.getMessage());
 			}
 		}
-
 		OAuthLoginDto oAuthLoginDto = builder.build();
 		return processOAuthLogin(oAuthLoginDto);
 	}
@@ -136,32 +124,22 @@ public class OAuthController {
 	 * @return 로그인 처리 결과
 	 */
 	private ResponseEntity<ApiResponse<OAuthResponseDto>> processOAuthLogin(OAuthLoginDto oAuthLoginDto) {
-		try {
-			// 통합된 메서드 호출로 OAuth 인증 및 JWT 토큰 생성을 한 번에 처리
-			OAuthService.OAuthLoginResult result = oAuthService.processOAuthLogin(oAuthLoginDto);
-			OAuthResponseDto responseDto = result.getResponseDto();
+		// 통합된 메서드 호출로 OAuth 인증 및 JWT 토큰 생성을 한 번에 처리
+		OAuthService.OAuthLoginResult result = oAuthService.processOAuthLogin(oAuthLoginDto);
+		OAuthResponseDto responseDto = result.getResponseDto();
 
-			// 이메일이 이미 존재하고 연동을 원하지 않는 경우
-			if (responseDto.isExistingEmail() && !oAuthLoginDto.isLinkAccount()) {
-				return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, responseDto));
-			}
-
-			// 로그인 성공 또는 계정 연동 성공한 경우
-			// JWT 토큰을 쿠키에 설정
-			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", result.getJwtToken());
-
-			return ResponseEntity.ok()
-				.header(HttpHeaders.SET_COOKIE, cookie.toString())
-				.body(ApiResponse.success(SuccessCode.OK, responseDto));
-
-		} catch (ApiException e) {
-			log.error("OAuth 로그인 처리 중 오류 발생: {}", e.getMessage());
-			return ResponseEntity.status(e.getErrorCode().getStatus())
-				.body(ApiResponse.error(e.getErrorCode()));
-		} catch (Exception e) {
-			log.error("OAuth 로그인 처리 중 예상치 못한 오류 발생: {}", e.getMessage(), e);
-			return ResponseEntity.internalServerError()
-				.body(ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR));
+		// 이메일이 이미 존재하고 연동을 원하지 않는 경우
+		if (responseDto.isExistingEmail() && !oAuthLoginDto.isLinkAccount()) {
+			return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, responseDto));
 		}
+
+		// 로그인 성공 또는 계정 연동 성공한 경우
+		// JWT 토큰을 쿠키에 설정
+		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", result.getJwtToken());
+
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, cookie.toString())
+			.body(ApiResponse.success(SuccessCode.OK, responseDto));
+
 	}
 }
