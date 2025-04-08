@@ -27,6 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 13.        durururuk       최초 생성
  * 25. 2. 21.        inari			 상세 주석 추가
  * 25. 3. 26.        inari			 handleMethodArgumentTypeMismatchException 추가
+ * 25. 3. 26.        inari			 handleRuntimeException 추가
  */
 @Slf4j
 @RestControllerAdvice
@@ -79,6 +80,21 @@ public class GlobalExceptionHandler {
 		return ResponseEntity
 			.status(400)
 			.body(ApiResponse.error(ErrorCode.BAD_REQUEST_INVALID_REQUEST_BODY));
+	}
+
+	/**
+	 * 처리되지 않은 예외를 처리하는 핸들러
+	 *
+	 * @param ex 처리되지 않은 예외
+	 * @return 실패 코드, 메시지를 담은 응답 포맷 반환
+	 */
+	@ExceptionHandler(RuntimeException.class)
+	public ResponseEntity<ApiResponse<Void>> handleRuntimeException(RuntimeException ex) {
+		log.error("처리되지 않은 예외 발생: {}", ex.getMessage(), ex);
+
+		return ResponseEntity
+			.status(500)
+			.body(ApiResponse.error(ErrorCode.INTERNAL_SERVER_ERROR));
 	}
 
 	/**
