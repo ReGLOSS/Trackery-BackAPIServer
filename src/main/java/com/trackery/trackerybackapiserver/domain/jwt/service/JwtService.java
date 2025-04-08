@@ -38,7 +38,7 @@ public class JwtService {
 
 	//액세스 토큰 만료시간 1시간, 리프레시 토큰 만료시간 7일, 단위 : 초(s)
 	//TODO JWT 만료시간 일괄 설정되게 수정
-	private static final int ACCESS_TOKEN_EXPIRATION_TIME = 600;
+	private static final int ACCESS_TOKEN_EXPIRATION_TIME = 3600;
 	private static final int REFRESH_TOKEN_EXPIRATION_TIME = 604800;
 
 	private final String projectDomain;
