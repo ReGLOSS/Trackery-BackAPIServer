@@ -15,9 +15,10 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.common.util.GlobalExceptionHandler;
+import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
@@ -37,7 +38,7 @@ import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
  * 25. 3. 26.       inari       계정 연동 토큰 테스트 추가
  */
 @WithMockUser
-@WebMvcTest(OAuthController.class)
+@WebMvcTest({OAuthController.class, GlobalExceptionHandler.class})
 @AutoConfigureMockMvc(addFilters = false)
 class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
