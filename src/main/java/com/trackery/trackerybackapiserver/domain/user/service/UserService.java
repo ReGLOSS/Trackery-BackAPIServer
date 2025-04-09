@@ -1,6 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.user.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -12,11 +13,14 @@ import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
+import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
+import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
+import com.trackery.trackerybackapiserver.domain.user.mapper.OAuthMapper;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
 
@@ -33,9 +37,10 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 12.        durururuk       최초 생성
- * 25. 2. 24.        inari         주석 추가
+ * 25. 2. 24.        inari           주석 추가
  * 25. 2. 25.        durururuk       로그인 메서드 추가
  * 25. 2. 26.        durururuk       로그인 시 비활성유저인지 확인하는 로직 추가
+ * 25. 4. 09.		 durururuk		 유저 상세 정보를 조회할 수 있는 메서드 추가
  */
 @Slf4j
 @Service
@@ -45,6 +50,7 @@ public class UserService {
 	private final UserMapper userMapper;
 	private final JwtService jwtService;
 	private final UserRoleMapper userRoleMapper;
+	private final OAuthMapper oAuthMapper;
 
 	/**
 	 * 회원가입 정보를 담아서 db에 인서트하는 메서드입니다.
@@ -154,6 +160,18 @@ public class UserService {
 		return new JwtUserInfoDto(userId, user.getUserName(), userRole.getRoleId());
 	}
 
+	/**
+	 * 유저의 상세 정보를 조회하는 메서드입니다.
+	 * 유저의 기본 정보, 간편로그인 연동 정보를 담은 DTO를 반환합니다.
+	 * @param userId : 찾을 userId
+	 * @return DTO
+	 */
+	//TODO 앨범 기능 구현 후 공개 앨범 정보도 조회할 수 있게 수정
+	public DetailedUserInfoDto getDetailedUserInfoByUserId(Long userId) {
+		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+		List<OAuth> oAuthList = oAuthMapper.findByUserId(userId);
 
-
+		return new DetailedUserInfoDto(user.getUserId(), user.getRoleId(), user.getUserName(), user.getNickname(),
+			user.getEmail(), oAuthList);
+	}
 }
