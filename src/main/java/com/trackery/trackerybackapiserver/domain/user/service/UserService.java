@@ -107,11 +107,8 @@ public class UserService {
 			throw new ApiException(ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS);
 		}
 
-		UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
-			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
-
 		return jwtService.generateAccessTokenAndRefreshToken(user.getUserId(), user.getUserName(),
-			userRole.getRoleId());
+			 user.getRoleId());
 	}
 
 	/**
@@ -138,7 +135,7 @@ public class UserService {
 		String email = jwt.getSubject();
 
 		if (!userMapper.isExistsEmail(email)) {
-			throw new ApiException(ErrorCode.NOT_FOUND);
+			throw new ApiException(ErrorCode.NOT_FOUND_USER);
 		}
 
 		String salt = PasswordUtil.generateSalt();
@@ -154,10 +151,8 @@ public class UserService {
 	 * @return : userId, userName, userRole이 담긴 DTO
 	 */
 	public JwtUserInfoDto getUserInfoById(Long userId) {
-		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
-		UserRole userRole = userRoleMapper.findByUserId(userId)
-			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
-		return new JwtUserInfoDto(userId, user.getUserName(), userRole.getRoleId());
+		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_USER));
+		return new JwtUserInfoDto(userId, user.getUserName(), user.getRoleId());
 	}
 
 	/**
@@ -168,7 +163,7 @@ public class UserService {
 	 */
 	//TODO 앨범 기능 구현 후 공개 앨범 정보도 조회할 수 있게 수정
 	public DetailedUserInfoDto getDetailedUserInfoByUserId(Long userId) {
-		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_USER));
 		List<OAuth> oAuthList = oAuthMapper.findByUserId(userId);
 
 		return new DetailedUserInfoDto(user.getUserId(), user.getRoleId(), user.getUserName(), user.getNickname(),

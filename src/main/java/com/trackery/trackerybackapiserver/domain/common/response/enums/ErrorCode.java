@@ -130,7 +130,9 @@ public enum ErrorCode {
 	/**
 	 * OAuth 제공자 정보가 잘못됨 (HttpStatus.BAD_REQUEST, 400, "지원하지 않는 OAuth 제공자입니다.")
 	 */
-	BAD_REQUEST_INVALID_OAUTH_PROVIDER(HttpStatus.BAD_REQUEST, 400, "지원하지 않는 OAuth 제공자입니다.");
+	BAD_REQUEST_INVALID_OAUTH_PROVIDER(HttpStatus.BAD_REQUEST, 400, "지원하지 않는 OAuth 제공자입니다."),
+
+	NOT_FOUND_USER(HttpStatus.NOT_FOUND, 404, "사용자를 찾을 수 없습니다.");
 
 	/**
 	 * HTTP 상태 코드
