@@ -28,7 +28,6 @@ import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityRe
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
-import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import jakarta.servlet.http.Cookie;
@@ -140,7 +139,6 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Nested
 	@DisplayName("유저 상세 정보 조회 테스트")
 	class getDetailedUserInfoTest {
-		private User user;
 		private OAuth oAuth;
 
 		@BeforeEach
