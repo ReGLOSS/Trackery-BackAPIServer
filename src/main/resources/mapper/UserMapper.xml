@@ -4,36 +4,58 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper">
 
-    <insert id="insertUser" parameterType="com.trackery.trackerybackapiserver.domain.user.entity.User" useGeneratedKeys="true" keyProperty="userId">
+    <!--유저 인서트 쿼리-->
+    <insert id="insertUser" parameterType="com.trackery.trackerybackapiserver.domain.user.entity.User"
+            useGeneratedKeys="true" keyProperty="userId">
         INSERT INTO user (email, username, nickname, password, salt, start_date, status, last_login, user_profile)
-        VALUES (#{email}, #{userName}, #{nickname}, #{password}, #{salt}, #{startDate}, #{status}, #{lastLogin}, #{userProfile});
+        VALUES (#{email}, #{userName}, #{nickname}, #{password}, #{salt}, #{startDate}, #{status}, #{lastLogin},
+        #{userProfile});
     </insert>
 
+    <!--  이미 유저명이 존재하는지 조회하는 쿼리 -->
     <select id="isExistsUserName" resultType="boolean" parameterType="String">
         SELECT EXISTS (SELECT 1 FROM user WHERE username = #{username})
     </select>
 
-    <select id="findByUserId" parameterType="Long" resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
-        SELECT * FROM user WHERE user_id = #{userId} AND status = 1
+    <!-- userId로 User 엔티티에 조회해서 매핑  -->
+    <select id="findByUserId" parameterType="Long"
+            resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
+        SELECT u.*, ur.role_id
+        FROM user u
+        LEFT JOIN user_role ur ON u.user_id = ur.user_id
+        WHERE u.user_id = #{userId}
+            AND u.status = 1
     </select>
 
-    <select id="findByUserName" parameterType="String" resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
-        SELECT * FROM user WHERE username = #{userName} AND status = 1
+    <!-- 유저명으로 User 엔티티에 조회해서 매핑  -->
+    <select id="findByUserName" parameterType="String"
+            resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
+        SELECT *, ur.role_id
+        FROM user u
+        LEFT JOIN user_role ur ON u.user_id = ur.user_id
+        WHERE u.username = #{userName}
+            AND u.status = 1
     </select>
 
-    <!-- 이메일로 회원 정보 찾는 쿼리 -->
-    <select id="findByEmail" parameterType="String" resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
-        SELECT * FROM user WHERE email = #{email} AND status = 1
+    <!-- 이메일로 User 엔티티에 조회해서 매핑  -->
+    <select id="findByEmail" parameterType="String"
+            resultType="com.trackery.trackerybackapiserver.domain.user.entity.User">
+        SELECT *, ur.role_id
+        FROM user u
+        LEFT JOIN user_role ur ON u.user_id = ur.user_id
+        WHERE u.email = #{email}
+            AND u.status = 1
     </select>
 
     <!-- 주어진 이메일이 이미 존재하는지 확인하는 쿼리 -->
     <select id="isExistsEmail" resultType="boolean" parameterType="String">
         SELECT EXISTS (
-            SELECT 1
-            FROM user
-            WHERE email = #{email})
+        SELECT 1
+        FROM user
+        WHERE email = #{email})
     </select>
 
+    <!--유저의 비밀번호를 업데이트 하는 쿼리-->
     <update id="updatePassword" parameterType="String">
         UPDATE user
         SET password = #{password}, salt = #{salt}

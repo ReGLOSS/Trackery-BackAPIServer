@@ -33,4 +33,10 @@
         WHERE user_id = #{userId}
         AND provider = #{provider}
     </select>
+
+    <select id="findByUserId" resultType="com.trackery.trackerybackapiserver.domain.user.entity.OAuth">
+        SELECT *
+        FROM user_oauth
+        WHERE user_id = #{userId}
+    </select>
 </mapper>
