@@ -19,11 +19,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
+import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UpdatePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
@@ -47,7 +49,8 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
  25. 2. 14.        durururuk       최초 생성
- 25. 4. 09		   durururuk	   유저 상세정보 서비스 테스트 코드 작성
+ 25. 4. 09.		   durururuk	   유저 상세정보 서비스 테스트 코드 작성
+ 25. 4. 10.		   durururuk	   인증 기반 비밀번호 변경 서비스 단위테스트 코드 작성
  */
 
 @ExtendWith(MockitoExtension.class)
@@ -270,6 +273,55 @@ class UserServiceTest {
 			verify(userMapper, times(1)).findByUserId(1L);
 			verify(oAuthMapper, times(1)).findByUserId(1L);
 
+		}
+	}
+
+	@Nested
+	@DisplayName("인증 기반 비밀번호 변경 테스트")
+	class changePasswordByAuthenticationTest {
+		private User user = User
+			.builder()
+			.password("storedHashedPassword")
+			.salt("storedSalt")
+			.build();
+
+		private ChangePasswordDto changePasswordDto = new ChangePasswordDto();
+
+		@BeforeEach
+		void setUp() {
+			ReflectionTestUtils.setField(user, "userId", 1L);
+
+			ReflectionTestUtils.setField(changePasswordDto, "oldPassword", "oldPassword");
+			ReflectionTestUtils.setField(changePasswordDto, "newPassword", "newPassword");
+		}
+
+		@Test
+		@DisplayName("성공")
+		void success() {
+			try (MockedStatic<PasswordUtil> mockedStatic = mockStatic(PasswordUtil.class)) {
+				when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+
+				mockedStatic.when(() -> PasswordUtil.hashPassword(anyString(), anyString()))
+					.thenReturn("storedHashedPassword");
+
+				doNothing().when(userMapper).updatePasswordByUserId(any(UpdatePasswordDto.class));
+
+				userService.changePasswordByAuthentication(1L, changePasswordDto);
+
+				verify(userMapper, times(1)).findByUserId(1L);
+				verify(userMapper, times(1)).updatePasswordByUserId(any(UpdatePasswordDto.class));
+			}
+		}
+
+		@Test
+		@DisplayName("기존 비밀번호와 일치하지 않는 경우")
+		void failure_1() {
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+
+			ApiException apiException =  assertThrows(ApiException.class, () -> userService.changePasswordByAuthentication(1L, changePasswordDto));
+
+			assertEquals(ErrorCode.BAD_REQUEST_INVALID_PASSWORD, apiException.getErrorCode());
+			verify(userMapper, times(1)).findByUserId(1L);
 		}
 	}
 }
