@@ -78,7 +78,7 @@ public enum ErrorCode {
 	/**
 	 * 이메일이 존재하지 않을 경우(HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다.")
 	 */
-	BAD_REQUEST_INVALID_INPUT(HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다."),
+	BAD_REQUEST_INVALID_INPUT_MISSING_EMAIL(HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다."),
 
 	/**
 	 * SHA-256 알고리즘을 사용할 수 없음 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "SHA-256 알고리즘을 사용할 수 없습니다.")
@@ -115,7 +115,7 @@ public enum ErrorCode {
 	 */
 	UNAUTHORIZED_MISSING_AUTH_HEADER(HttpStatus.UNAUTHORIZED, 401, "인증 헤더가 없습니다."),
 
-	UNAUTHORIZED_INVALID_CREDENTIALS(HttpStatus.UNAUTHORIZED, 401, "유저명 혹은 비밀번호가 잘못되었습니다."),
+	BAD_REQUEST_INVALID_CREDENTIALS(HttpStatus.BAD_REQUEST, 400, "유저명 혹은 비밀번호가 잘못되었습니다."),
 
 	/**
 	 * 이미 데이터베이스에 존재하는 이메일임 (HttpStatus.CONFLICT, 409, "이미 가입된 이메일입니다.")
@@ -132,7 +132,9 @@ public enum ErrorCode {
 	 */
 	BAD_REQUEST_INVALID_OAUTH_PROVIDER(HttpStatus.BAD_REQUEST, 400, "지원하지 않는 OAuth 제공자입니다."),
 
-	NOT_FOUND_USER(HttpStatus.NOT_FOUND, 404, "사용자를 찾을 수 없습니다.");
+	NOT_FOUND_USER(HttpStatus.NOT_FOUND, 404, "사용자를 찾을 수 없습니다."),
+
+	BAD_REQUEST_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, 400, "비밀번호가 일치하지 않습니다.");
 
 	/**
 	 * HTTP 상태 코드
