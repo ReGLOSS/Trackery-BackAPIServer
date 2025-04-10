@@ -188,7 +188,7 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 	@DisplayName("인증 기반 비밀번호 변경 API 테스트")
 	class patchPasswordByAuthenticationTest {
 		private CustomUserDetails customUserDetails;
-		private ChangePasswordDto changePasswordDto = new ChangePasswordDto();
+		private final ChangePasswordDto changePasswordDto = new ChangePasswordDto();
 
 		@BeforeEach
 		void setUp() {

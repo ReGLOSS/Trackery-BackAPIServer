@@ -79,12 +79,8 @@ public interface UserMapper {
 	Optional<User> findByUserName(String userName);
 
 	/**
-	 * 비밀번호와 salt를 업데이트합니다.
-	 * @param email : 업데이트할 유저의 이메일
-	 * @param password : 새 비밀번호
-	 * @param salt : 새 salt
+	 * 유저의 비밀번호를 업데이트하는 쿼리
+	 * @param updatePasswordDto : userId, 새 비밀번호, salt 담고있는 dto
 	 */
-	void updatePasswordByEmail(String email, String password, String salt);
-
 	void updatePasswordByUserId(UpdatePasswordDto updatePasswordDto);
 }

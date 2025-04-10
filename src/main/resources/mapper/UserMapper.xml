@@ -55,13 +55,6 @@
         WHERE email = #{email})
     </select>
 
-    <!--유저의 비밀번호를 업데이트 하는 쿼리-->
-    <update id="updatePasswordByEmail" parameterType="String">
-        UPDATE user
-        SET password = #{password}, salt = #{salt}
-        WHERE email = #{email}
-    </update>
-
     <update id="updatePasswordByUserId" parameterType="com.trackery.trackerybackapiserver.domain.user.dto.UpdatePasswordDto">
         UPDATE user
         SET password = #{password}, salt = #{salt}

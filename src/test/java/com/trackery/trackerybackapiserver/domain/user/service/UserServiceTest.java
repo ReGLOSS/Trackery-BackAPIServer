@@ -279,13 +279,13 @@ class UserServiceTest {
 	@Nested
 	@DisplayName("인증 기반 비밀번호 변경 테스트")
 	class changePasswordByAuthenticationTest {
-		private User user = User
+		private final User user = User
 			.builder()
 			.password("storedHashedPassword")
 			.salt("storedSalt")
 			.build();
 
-		private ChangePasswordDto changePasswordDto = new ChangePasswordDto();
+		private final ChangePasswordDto changePasswordDto = new ChangePasswordDto();
 
 		@BeforeEach
 		void setUp() {
