@@ -25,6 +25,7 @@ import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UpdatePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
@@ -170,7 +171,7 @@ class UserServiceTest {
 	}
 
 	@Nested
-	@DisplayName("비밀번호 변경 테스트")
+	@DisplayName("이메일 기반 비밀번호 변경 테스트")
 	class changePasswordTest {
 		private static final String EMAIL_TOKEN = "emailToken";
 		private static final String NEW_PASSWORD = "aaaaaaaa";
@@ -182,13 +183,13 @@ class UserServiceTest {
 		void success() {
 			when(jwtService.verifyJwt(EMAIL_TOKEN)).thenReturn(DECODED_EMAIL_TOKEN);
 			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
-			when(userMapper.isExistsEmail(EMAIL)).thenReturn(true);
-			doNothing().when(userMapper).updatePasswordByEmail(eq(EMAIL), anyString(), anyString());
+			when(userMapper.findByEmail(EMAIL)).thenReturn(Optional.of(User.builder().email(EMAIL).build()));
+			doNothing().when(userMapper).updatePasswordByUserId(any(UpdatePasswordDto.class));
 
 			userService.changePasswordByEmailToken(EMAIL_TOKEN, NEW_PASSWORD);
 
-			verify(userMapper, times(1)).isExistsEmail(EMAIL);
-			verify(userMapper, times(1)).updatePasswordByEmail(eq(EMAIL), anyString(), anyString());
+			verify(userMapper, times(1)).findByEmail(EMAIL);
+			verify(userMapper, times(1)).updatePasswordByUserId(any(UpdatePasswordDto.class));
 		}
 
 		@Test
@@ -196,11 +197,11 @@ class UserServiceTest {
 		void failure_1() {
 			when(jwtService.verifyJwt(EMAIL_TOKEN)).thenReturn(DECODED_EMAIL_TOKEN);
 			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
-			when(userMapper.isExistsEmail(EMAIL)).thenReturn(false);
+			when(userMapper.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
 			assertThrows(ApiException.class, () -> userService.changePasswordByEmailToken(EMAIL_TOKEN, NEW_PASSWORD));
 
-			verify(userMapper, times(1)).isExistsEmail(EMAIL);
+			verify(userMapper, times(1)).findByEmail(EMAIL);
 		}
 	}
 

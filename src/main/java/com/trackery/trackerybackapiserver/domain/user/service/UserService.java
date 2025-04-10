@@ -105,10 +105,6 @@ public class UserService {
 		User user = userMapper.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new ApiException(
 			ErrorCode.BAD_REQUEST_INVALID_CREDENTIALS));
 
-		log.info("입력된 비밀번호 : {}", userLoginDto.getPassword() );
-		log.info("유저의 해싱된 비밀번호 {}", user.getPassword());
-		log.info("유저의 salt {}", user.getSalt() );
-
 		if (!PasswordUtil.hashPassword(userLoginDto.getPassword(), user.getSalt()).equals(user.getPassword())) {
 			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_CREDENTIALS);
 		}
@@ -144,13 +140,6 @@ public class UserService {
 
 		String salt = PasswordUtil.generateSalt();
 		String hashedPassword = PasswordUtil.hashPassword(password, salt);
-		log.info("변경 될 유저 id : {}", user.getUserId() );
-		log.info("변경 전 비밀번호 : {}", user.getPassword() );
-		log.info("변경 후 해싱 전 비밀번호 : {}", password);
-		log.info("변경 후 해싱된 비밀번호 : {}", hashedPassword );
-
-		log.info("변경 전 salt : {}", user.getSalt() );
-		log.info("변경 후 salt : {}", salt );
 
 		userMapper.updatePasswordByUserId(new UpdatePasswordDto(user.getUserId(), hashedPassword, salt));
 	}
@@ -166,12 +155,6 @@ public class UserService {
 		String newSalt = PasswordUtil.generateSalt();
 
 		String newHashedPassword = PasswordUtil.hashPassword(changePasswordDto.getNewPassword(), newSalt);
-
-		log.info("변경 전 비밀번호 : {}", user.getPassword() );
-		log.info("변경 후 비밀번호 : {}", newHashedPassword );
-
-		log.info("변경 전 salt : {}", user.getSalt() );
-		log.info("변경 후 salt : {}", newSalt );
 
 		userMapper.updatePasswordByUserId(new UpdatePasswordDto(user.getUserId(), newHashedPassword, newSalt));
 	}
