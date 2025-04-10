@@ -158,7 +158,7 @@ public class UserController {
 	 * @return : 성공 시 Ok
 	 */
 	@PatchMapping("/me/password")
-	public ResponseEntity<ApiResponse<Void>> patchPasswordWithAuthentication(
+	public ResponseEntity<ApiResponse<Void>> patchPasswordByAuthentication(
 		@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody ChangePasswordDto changePasswordDto) {
 		userService.changePasswordByAuthentication(userDetails.getUserId(), changePasswordDto);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));

@@ -20,8 +20,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -45,6 +48,7 @@ import jakarta.servlet.http.Cookie;
  25. 2. 14.        durururuk       최초 생성
  25. 2. 14.        durururuk       로그인 컨트롤러 테스트 코드 작성
  25. 4. 09.		   durururuk	   유저 상세정보 조회 API 단위테스트 코드 작성
+ 25. 4. 10.		   durururuk	   인증 기반 비밀번호 변경 컨트롤러 mockMvc 테스트 작성
  */
 
 @WebMvcTest(UserController.class)
@@ -177,6 +181,69 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(jsonPath("$.data.OAuthList[0].userId").value(1))
 				.andExpect(jsonPath("$.data.OAuthList[0].provider").value("KAKAO"))
 				.andExpect(jsonPath("$.data.OAuthList[0].providerUserId").value("155788848"));
+		}
+	}
+
+	@Nested
+	@DisplayName("인증 기반 비밀번호 변경 API 테스트")
+	class patchPasswordByAuthenticationTest {
+		private CustomUserDetails customUserDetails;
+		private ChangePasswordDto changePasswordDto = new ChangePasswordDto();
+
+		@BeforeEach
+		void setUp() {
+			customUserDetails = CustomUserDetails.builder().userId(1L).userName("abcdefg").roleId(1L).build();
+		}
+
+		@Test
+		@DisplayName("성공")
+		void success() throws Exception {
+			ReflectionTestUtils.setField(changePasswordDto, "newPassword", "Qwerasdf1234!!!!!!!!");
+
+			doNothing().when(userService).changePasswordByAuthentication(eq(1L), any(ChangePasswordDto.class));
+
+			ResultActions result = mockMvc.perform(patch("/api/users/me/password")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(changePasswordDto))
+				.with(user(customUserDetails))
+				.with(csrf()));
+
+			result.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value("Ok"));
+		}
+
+		@Test
+		@DisplayName("실패 - 비밀번호 규격과 맞지 않는 경우")
+		void failure_1() throws Exception {
+			ReflectionTestUtils.setField(changePasswordDto, "newPassword", "short");
+
+			ResultActions result = mockMvc.perform(patch("/api/users/me/password")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(changePasswordDto))
+				.with(user(customUserDetails))
+				.with(csrf()));
+
+			result.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value("Validation 실패"))
+				.andExpect(jsonPath("$.data").value("비밀번호는 최소 16자리이며, 대문자, 소문자, 숫자, 밑줄(_)을 제외한 특수문자를 포함해야 합니다."));
+		}
+
+		@Test
+		@DisplayName("실패 - 기존 비밀번호가 DB에 저장된 유저의 비밀번호와 다른 경우")
+		void failure_2() throws Exception {
+			ReflectionTestUtils.setField(changePasswordDto, "newPassword", "Qwerasdf1234!!!!!");
+
+			doThrow(new ApiException(ErrorCode.BAD_REQUEST_INVALID_PASSWORD))
+				.when(userService).changePasswordByAuthentication(eq(1L), any(ChangePasswordDto.class));
+
+			ResultActions result = mockMvc.perform(patch("/api/users/me/password")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(changePasswordDto))
+				.with(user(customUserDetails))
+				.with(csrf()));
+
+			result.andExpect(status().isBadRequest())
+				.andExpect(jsonPath("$.message").value(ErrorCode.BAD_REQUEST_INVALID_PASSWORD.getMessage()));
 		}
 	}
 }
