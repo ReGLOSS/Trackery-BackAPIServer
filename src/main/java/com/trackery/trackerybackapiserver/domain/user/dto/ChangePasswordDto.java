@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.user.dto;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,9 +19,12 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class ChangePasswordDto {
+	private String oldPassword;
+
+	@NotBlank
 	@Pattern(
 		regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^\\w\\s])^\\S{16,}$",
 		message = "비밀번호는 최소 16자리이며, 대문자, 소문자, 숫자, 밑줄(_)을 제외한 특수문자를 포함해야 합니다."
 	)
-	private String password;
+	private String newPassword;
 }

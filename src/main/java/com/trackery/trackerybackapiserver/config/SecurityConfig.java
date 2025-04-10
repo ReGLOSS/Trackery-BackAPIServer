@@ -60,7 +60,7 @@ public class SecurityConfig {
 		"/api/users/exists/username",
 		"/api/users/login",
 		"/api/users/oauth/**",
-		"/api/users/password-reset",
+		"/api/users/me/password/email-token",
 		"/favicon.ico",
 		"/api/mail/**"
 	};

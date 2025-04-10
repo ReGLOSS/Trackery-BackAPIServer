@@ -183,12 +183,12 @@ class UserServiceTest {
 			when(jwtService.verifyJwt(EMAIL_TOKEN)).thenReturn(DECODED_EMAIL_TOKEN);
 			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
 			when(userMapper.isExistsEmail(EMAIL)).thenReturn(true);
-			doNothing().when(userMapper).updatePassword(eq(EMAIL), anyString(), anyString());
+			doNothing().when(userMapper).updatePasswordByEmail(eq(EMAIL), anyString(), anyString());
 
-			userService.changePassword(EMAIL_TOKEN, NEW_PASSWORD);
+			userService.changePasswordByEmailToken(EMAIL_TOKEN, NEW_PASSWORD);
 
 			verify(userMapper, times(1)).isExistsEmail(EMAIL);
-			verify(userMapper, times(1)).updatePassword(eq(EMAIL), anyString(), anyString());
+			verify(userMapper, times(1)).updatePasswordByEmail(eq(EMAIL), anyString(), anyString());
 		}
 
 		@Test
@@ -198,7 +198,7 @@ class UserServiceTest {
 			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
 			when(userMapper.isExistsEmail(EMAIL)).thenReturn(false);
 
-			assertThrows(ApiException.class, () -> userService.changePassword(EMAIL_TOKEN, NEW_PASSWORD));
+			assertThrows(ApiException.class, () -> userService.changePasswordByEmailToken(EMAIL_TOKEN, NEW_PASSWORD));
 
 			verify(userMapper, times(1)).isExistsEmail(EMAIL);
 		}

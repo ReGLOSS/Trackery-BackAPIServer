@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
 
+import com.trackery.trackerybackapiserver.domain.user.dto.UpdatePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
 
@@ -83,5 +84,7 @@ public interface UserMapper {
 	 * @param password : 새 비밀번호
 	 * @param salt : 새 salt
 	 */
-	void updatePassword(String email, String password, String salt);
+	void updatePasswordByEmail(String email, String password, String salt);
+
+	void updatePasswordByUserId(UpdatePasswordDto updatePasswordDto);
 }

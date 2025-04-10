@@ -13,7 +13,9 @@ import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
+import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UpdatePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
@@ -101,10 +103,14 @@ public class UserService {
 	 */
 	public AuthTokenDto login(UserLoginDto userLoginDto) {
 		User user = userMapper.findByUserName(userLoginDto.getUserName()).orElseThrow(() -> new ApiException(
-			ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS));
+			ErrorCode.BAD_REQUEST_INVALID_CREDENTIALS));
+
+		log.info("입력된 비밀번호 : {}", userLoginDto.getPassword() );
+		log.info("유저의 해싱된 비밀번호 {}", user.getPassword());
+		log.info("유저의 salt {}", user.getSalt() );
 
 		if (!PasswordUtil.hashPassword(userLoginDto.getPassword(), user.getSalt()).equals(user.getPassword())) {
-			throw new ApiException(ErrorCode.UNAUTHORIZED_INVALID_CREDENTIALS);
+			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_CREDENTIALS);
 		}
 
 		return jwtService.generateAccessTokenAndRefreshToken(user.getUserId(), user.getUserName(),
@@ -126,22 +132,48 @@ public class UserService {
 	}
 
 	/**
-	 * 비밀번호를 변경하는 메서드
-	 * @param emailToken : 변경할 유저의 이메일
+	 * 이메일 토큰을 기반으로 비밀번호를 변경하는 메서드
+	 * @param emailToken : 변경할 유저의 이메일 토큰
 	 * @param password : 새로 변경될 비밀번호
 	 */
-	public void changePassword(String emailToken, String password) {
+	public void changePasswordByEmailToken(String emailToken, String password) {
 		DecodedJWT jwt = jwtService.verifyJwt(emailToken);
 		String email = jwt.getSubject();
 
-		if (!userMapper.isExistsEmail(email)) {
-			throw new ApiException(ErrorCode.NOT_FOUND_USER);
-		}
+		User user = userMapper.findByEmail(email).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_USER));
 
 		String salt = PasswordUtil.generateSalt();
 		String hashedPassword = PasswordUtil.hashPassword(password, salt);
+		log.info("변경 될 유저 id : {}", user.getUserId() );
+		log.info("변경 전 비밀번호 : {}", user.getPassword() );
+		log.info("변경 후 해싱 전 비밀번호 : {}", password);
+		log.info("변경 후 해싱된 비밀번호 : {}", hashedPassword );
 
-		userMapper.updatePassword(email, hashedPassword, salt);
+		log.info("변경 전 salt : {}", user.getSalt() );
+		log.info("변경 후 salt : {}", salt );
+
+		userMapper.updatePasswordByUserId(new UpdatePasswordDto(user.getUserId(), hashedPassword, salt));
+	}
+
+	public void changePasswordByAuthentication(Long userId, ChangePasswordDto changePasswordDto) {
+		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_USER));
+		String hashedInputtedPassword = PasswordUtil.hashPassword(changePasswordDto.getOldPassword(), user.getSalt());
+
+		if (!hashedInputtedPassword.equals(user.getPassword())) {
+			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_PASSWORD);
+		}
+
+		String newSalt = PasswordUtil.generateSalt();
+
+		String newHashedPassword = PasswordUtil.hashPassword(changePasswordDto.getNewPassword(), newSalt);
+
+		log.info("변경 전 비밀번호 : {}", user.getPassword() );
+		log.info("변경 후 비밀번호 : {}", newHashedPassword );
+
+		log.info("변경 전 salt : {}", user.getSalt() );
+		log.info("변경 후 salt : {}", newSalt );
+
+		userMapper.updatePasswordByUserId(new UpdatePasswordDto(user.getUserId(), newHashedPassword, newSalt));
 	}
 
 	/**

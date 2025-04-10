@@ -45,6 +45,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 2. 24.        inari         주석 추가
  * 25. 2. 25.        durururuk      로그인 메서드 추가
  * 25. 4. 09.		 durururuk		상세 정보 조회 API 추가
+ * 25. 4. 10.		 durururuk		인증 기반 비밀번호 변경 API 추가
  */
 @RestController
 @RequestMapping("/api/users")
@@ -129,16 +130,17 @@ public class UserController {
 	}
 
 	/**
-	 * 유저의 비밀번호를 변경하는 API
+	 * 이메일 토큰으로 유저의 비밀번호를 변경하는 API
+	 * 로그인을 할 수 없는 유저가 이메일로 비밀번호를 변경할 때 사용되는 API입니다.
 	 *
 	 * @param emailToken : 인증된 이메일
 	 * @param dto : 변경될 비밀번호 dto
 	 * @return : 이메일 토큰 재사용 못하게 제거하는 쿠키 + Ok 응답
 	 */
-	@PatchMapping("/password-reset")
+	@PatchMapping("/me/password/email-token")
 	public ResponseEntity<ApiResponse<String>> resetPassword(@CookieValue(name = "emailToken") String emailToken,
 		@Valid @RequestBody ChangePasswordDto dto) {
-		userService.changePassword(emailToken, dto.getPassword());
+		userService.changePasswordByEmailToken(emailToken, dto.getNewPassword());
 
 		ResponseCookie cookie = CookieUtil.deleteCookie("emailToken");
 
@@ -148,13 +150,29 @@ public class UserController {
 	}
 
 	/**
+	 * 인증 정보와 DTO로 비밀번호를 변경하는 DTO
+	 * 로그인 한 유저가 마이페이지에서 비밀번호를 변경할 때 사용되는 API입니다.
+	 *
+	 * @param userDetails : 인증된 유저 정보
+	 * @param changePasswordDto : 기존 비밀번호, 새 비밀번호를 담고있는 DTO, Validation으로 한 번 검증
+	 * @return : 성공 시 Ok
+	 */
+	@PatchMapping("/me/password")
+	public ResponseEntity<ApiResponse<Void>> patchPasswordWithAuthentication(
+		@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody ChangePasswordDto changePasswordDto) {
+		userService.changePasswordByAuthentication(userDetails.getUserId(), changePasswordDto);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
+	}
+
+	/**
 	 * 유저의 상세 정보를 조회하는 API
 	 * 유저의 기본 정보, 간편로그인 연동 정보를 담은 DTO 반환
 	 * @param userDetails : 인증된 유저의 정보
 	 * @return DTO
 	 */
 	@GetMapping("/details")
-	public ResponseEntity<ApiResponse<DetailedUserInfoDto>> getDetailedUserInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+	public ResponseEntity<ApiResponse<DetailedUserInfoDto>> getDetailedUserInfo(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		DetailedUserInfoDto result = userService.getDetailedUserInfoByUserId(userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
