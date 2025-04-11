@@ -60,4 +60,20 @@
         SET password = #{password}, salt = #{salt}
         WHERE user_Id = #{userId}
     </update>
+
+    <update id="updateNicknameByUserId">
+        UPDATE user
+        SET nickname = #{nickname}
+        WHERE user_id = #{userId}
+    </update>
+
+    <select id="isExistsUser" parameterType="Long">
+        SELECT EXISTS (SELECT 1 FROM user WHERE userId = #{userId} AND status = 1)
+    </select>
+
+    <update id="updateUserNameByUserId">
+        UPDATE user
+        SET username = #{userName}
+        WHERE user_id = #{userId}
+    </update>
 </mapper>

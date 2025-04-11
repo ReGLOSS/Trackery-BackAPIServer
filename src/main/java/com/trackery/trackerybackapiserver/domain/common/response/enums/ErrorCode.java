@@ -134,7 +134,12 @@ public enum ErrorCode {
 
 	NOT_FOUND_USER(HttpStatus.NOT_FOUND, 404, "사용자를 찾을 수 없습니다."),
 
-	BAD_REQUEST_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, 400, "비밀번호가 일치하지 않습니다.");
+	BAD_REQUEST_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, 400, "비밀번호가 일치하지 않습니다."),
+
+	BAD_REQUEST_SAME_UPDATE(HttpStatus.BAD_REQUEST, 400, "같은 내용으로는 변경할 수 없습니다.")
+	;
+
+
 
 	/**
 	 * HTTP 상태 코드

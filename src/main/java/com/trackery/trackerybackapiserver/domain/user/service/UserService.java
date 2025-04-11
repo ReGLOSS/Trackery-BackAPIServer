@@ -110,7 +110,7 @@ public class UserService {
 		}
 
 		return jwtService.generateAccessTokenAndRefreshToken(user.getUserId(), user.getUserName(),
-			 user.getRoleId());
+			user.getRoleId());
 	}
 
 	/**
@@ -178,10 +178,22 @@ public class UserService {
 	 */
 	//TODO 앨범 기능 구현 후 공개 앨범 정보도 조회할 수 있게 수정
 	public DetailedUserInfoDto getDetailedUserInfoByUserId(Long userId) {
-		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_USER));
+		User user = userMapper.findByUserId(userId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_USER));
 		List<OAuth> oAuthList = oAuthMapper.findByUserId(userId);
 
 		return new DetailedUserInfoDto(user.getUserId(), user.getRoleId(), user.getUserName(), user.getNickname(),
 			user.getEmail(), oAuthList);
+	}
+
+	public void updateUserNickname(Long userId, String nickname) {
+		User user = userMapper.findByUserId(userId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_USER));
+
+		if (user.getNickname().equals(nickname)) {
+			throw new ApiException(ErrorCode.BAD_REQUEST_SAME_UPDATE);
+		}
+
+		userMapper.updateNicknameByUserId(userId, nickname);
 	}
 }

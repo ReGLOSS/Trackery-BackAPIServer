@@ -20,6 +20,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.ChangeNicknameDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
@@ -175,5 +176,14 @@ public class UserController {
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		DetailedUserInfoDto result = userService.getDetailedUserInfoByUserId(userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
+	}
+
+	@PatchMapping("/me/nickname")
+	public ResponseEntity<ApiResponse<Void>> patchNickname(
+		@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody ChangeNicknameDto dto
+	) {
+		userService.updateUserNickname(userDetails.getUserId(), dto.getNickname());
+
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 }
