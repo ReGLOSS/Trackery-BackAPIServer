@@ -24,7 +24,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
-import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdatePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -188,7 +188,7 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 	@DisplayName("인증 기반 비밀번호 변경 API 테스트")
 	class patchPasswordByAuthenticationTest {
 		private CustomUserDetails customUserDetails;
-		private final ChangePasswordDto changePasswordDto = new ChangePasswordDto();
+		private final UpdatePasswordDto changePasswordDto = new UpdatePasswordDto();
 
 		@BeforeEach
 		void setUp() {
@@ -200,7 +200,7 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 		void success() throws Exception {
 			ReflectionTestUtils.setField(changePasswordDto, "newPassword", "Qwerasdf1234!!!!!!!!");
 
-			doNothing().when(userService).changePasswordByAuthentication(eq(1L), any(ChangePasswordDto.class));
+			doNothing().when(userService).updatePasswordByAuthentication(eq(1L), any(UpdatePasswordDto.class));
 
 			ResultActions result = mockMvc.perform(patch("/api/users/me/password")
 				.contentType(MediaType.APPLICATION_JSON)
@@ -234,7 +234,7 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			ReflectionTestUtils.setField(changePasswordDto, "newPassword", "Qwerasdf1234!!!!!");
 
 			doThrow(new ApiException(ErrorCode.BAD_REQUEST_INVALID_PASSWORD))
-				.when(userService).changePasswordByAuthentication(eq(1L), any(ChangePasswordDto.class));
+				.when(userService).updatePasswordByAuthentication(eq(1L), any(UpdatePasswordDto.class));
 
 			ResultActions result = mockMvc.perform(patch("/api/users/me/password")
 				.contentType(MediaType.APPLICATION_JSON)

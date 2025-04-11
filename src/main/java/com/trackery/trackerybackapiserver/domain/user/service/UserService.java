@@ -13,9 +13,7 @@ import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
-import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
-import com.trackery.trackerybackapiserver.domain.user.dto.UpdatePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
@@ -128,38 +126,6 @@ public class UserService {
 	}
 
 	/**
-	 * 이메일 토큰을 기반으로 비밀번호를 변경하는 메서드
-	 * @param emailToken : 변경할 유저의 이메일 토큰
-	 * @param password : 새로 변경될 비밀번호
-	 */
-	public void changePasswordByEmailToken(String emailToken, String password) {
-		DecodedJWT jwt = jwtService.verifyJwt(emailToken);
-		String email = jwt.getSubject();
-
-		User user = userMapper.findByEmail(email).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_USER));
-
-		String salt = PasswordUtil.generateSalt();
-		String hashedPassword = PasswordUtil.hashPassword(password, salt);
-
-		userMapper.updatePasswordByUserId(new UpdatePasswordDto(user.getUserId(), hashedPassword, salt));
-	}
-
-	public void changePasswordByAuthentication(Long userId, ChangePasswordDto changePasswordDto) {
-		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_USER));
-		String hashedInputtedPassword = PasswordUtil.hashPassword(changePasswordDto.getOldPassword(), user.getSalt());
-
-		if (!hashedInputtedPassword.equals(user.getPassword())) {
-			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_PASSWORD);
-		}
-
-		String newSalt = PasswordUtil.generateSalt();
-
-		String newHashedPassword = PasswordUtil.hashPassword(changePasswordDto.getNewPassword(), newSalt);
-
-		userMapper.updatePasswordByUserId(new UpdatePasswordDto(user.getUserId(), newHashedPassword, newSalt));
-	}
-
-	/**
 	 * 액세스 토큰 발급을 위한 유저 정보를 DB에서 조회 후 DTO로 반환하는 메서드입니다.
 	 *
 	 * @param userId : 유저 ID
@@ -184,16 +150,5 @@ public class UserService {
 
 		return new DetailedUserInfoDto(user.getUserId(), user.getRoleId(), user.getUserName(), user.getNickname(),
 			user.getEmail(), oAuthList);
-	}
-
-	public void updateUserNickname(Long userId, String nickname) {
-		User user = userMapper.findByUserId(userId).orElseThrow(
-			() -> new ApiException(ErrorCode.NOT_FOUND_USER));
-
-		if (user.getNickname().equals(nickname)) {
-			throw new ApiException(ErrorCode.BAD_REQUEST_SAME_UPDATE);
-		}
-
-		userMapper.updateNicknameByUserId(userId, nickname);
 	}
 }

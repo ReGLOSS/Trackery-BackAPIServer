@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="프로젝트 전체 커버리지" type="JUnit" factoryName="JUnit">
     <module name="Trackery-BackAPIServer" />
-    <extension name="coverage" runner="jacoco">
+    <extension name="coverage">
       <pattern>
         <option name="PATTERN" value="com.trackery.trackerybackapiserver.config.*" />
         <option name="ENABLED" value="true" />
@@ -38,9 +38,8 @@
         <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
-        <option name="PATTERN" value="com.trackery.trackerybackapiserver.domain.user.dto.*" />
+        <option name="PATTERN" value="com.trackery.trackerybackapiserver.domain.user.dto.update.*" />
         <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
         <option name="PATTERN" value="com.trackery.trackerybackapiserver.domain.user.entity.*" />

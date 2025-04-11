@@ -55,7 +55,7 @@
         WHERE email = #{email})
     </select>
 
-    <update id="updatePasswordByUserId" parameterType="com.trackery.trackerybackapiserver.domain.user.dto.UpdatePasswordDto">
+    <update id="updatePasswordByUserId" parameterType="com.trackery.trackerybackapiserver.domain.user.dto.update.UpdatePasswordDto">
         UPDATE user
         SET password = #{password}, salt = #{salt}
         WHERE user_Id = #{userId}

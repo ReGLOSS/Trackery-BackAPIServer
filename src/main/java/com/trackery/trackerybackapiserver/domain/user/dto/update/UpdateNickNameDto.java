@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.user.dto;
+package com.trackery.trackerybackapiserver.domain.user.dto.update;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @NoArgsConstructor
-public class ChangeNicknameDto {
+public class UpdateNickNameDto {
 	@NotBlank
 	private String nickname;
 }

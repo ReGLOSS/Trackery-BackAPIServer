@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,8 +19,6 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
-import com.trackery.trackerybackapiserver.domain.user.dto.ChangeNicknameDto;
-import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -131,41 +128,6 @@ public class UserController {
 	}
 
 	/**
-	 * 이메일 토큰으로 유저의 비밀번호를 변경하는 API
-	 * 로그인을 할 수 없는 유저가 이메일로 비밀번호를 변경할 때 사용되는 API입니다.
-	 *
-	 * @param emailToken : 인증된 이메일
-	 * @param dto : 변경될 비밀번호 dto
-	 * @return : 이메일 토큰 재사용 못하게 제거하는 쿠키 + Ok 응답
-	 */
-	@PatchMapping("/me/password/email-token")
-	public ResponseEntity<ApiResponse<String>> resetPassword(@CookieValue(name = "emailToken") String emailToken,
-		@Valid @RequestBody ChangePasswordDto dto) {
-		userService.changePasswordByEmailToken(emailToken, dto.getNewPassword());
-
-		ResponseCookie cookie = CookieUtil.deleteCookie("emailToken");
-
-		return ResponseEntity.ok()
-			.header(HttpHeaders.SET_COOKIE, cookie.toString())
-			.body(ApiResponse.success(SuccessCode.OK));
-	}
-
-	/**
-	 * 인증 정보와 DTO로 비밀번호를 변경하는 DTO
-	 * 로그인 한 유저가 마이페이지에서 비밀번호를 변경할 때 사용되는 API입니다.
-	 *
-	 * @param userDetails : 인증된 유저 정보
-	 * @param changePasswordDto : 기존 비밀번호, 새 비밀번호를 담고있는 DTO, Validation으로 한 번 검증
-	 * @return : 성공 시 Ok
-	 */
-	@PatchMapping("/me/password")
-	public ResponseEntity<ApiResponse<Void>> patchPasswordByAuthentication(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody ChangePasswordDto changePasswordDto) {
-		userService.changePasswordByAuthentication(userDetails.getUserId(), changePasswordDto);
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
-	}
-
-	/**
 	 * 유저의 상세 정보를 조회하는 API
 	 * 유저의 기본 정보, 간편로그인 연동 정보를 담은 DTO 반환
 	 * @param userDetails : 인증된 유저의 정보
@@ -176,14 +138,5 @@ public class UserController {
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		DetailedUserInfoDto result = userService.getDetailedUserInfoByUserId(userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
-	}
-
-	@PatchMapping("/me/nickname")
-	public ResponseEntity<ApiResponse<Void>> patchNickname(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody ChangeNicknameDto dto
-	) {
-		userService.updateUserNickname(userDetails.getUserId(), dto.getNickname());
-
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 }

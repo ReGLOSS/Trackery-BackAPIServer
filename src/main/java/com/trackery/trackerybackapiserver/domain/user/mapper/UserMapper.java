@@ -5,7 +5,6 @@ import java.util.Optional;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
-import com.trackery.trackerybackapiserver.domain.user.dto.UpdatePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
 
@@ -78,11 +77,7 @@ public interface UserMapper {
 	 */
 	Optional<User> findByUserName(String userName);
 
-	/**
-	 * 유저의 비밀번호를 업데이트하는 쿼리
-	 * @param updatePasswordDto : userId, 새 비밀번호, salt 담고있는 dto
-	 */
-	void updatePasswordByUserId(UpdatePasswordDto updatePasswordDto);
+	void updatePasswordByUserId(@Param("userId") Long userId, @Param("password") String password, @Param("salt") String salt);
 
 	void updateNicknameByUserId(@Param("userId") Long userId, @Param("nickname") String nickname);
 

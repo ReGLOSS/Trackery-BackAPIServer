@@ -25,9 +25,8 @@ import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
-import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdatePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
-import com.trackery.trackerybackapiserver.domain.user.dto.UpdatePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
@@ -189,7 +188,7 @@ class UserServiceTest {
 			when(userMapper.findByEmail(EMAIL)).thenReturn(Optional.of(User.builder().email(EMAIL).build()));
 			doNothing().when(userMapper).updatePasswordByUserId(any(UpdatePasswordDto.class));
 
-			userService.changePasswordByEmailToken(EMAIL_TOKEN, NEW_PASSWORD);
+			userService.updatePasswordByEmailToken(EMAIL_TOKEN, NEW_PASSWORD);
 
 			verify(userMapper, times(1)).findByEmail(EMAIL);
 			verify(userMapper, times(1)).updatePasswordByUserId(any(UpdatePasswordDto.class));
@@ -202,7 +201,7 @@ class UserServiceTest {
 			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
 			when(userMapper.findByEmail(EMAIL)).thenReturn(Optional.empty());
 
-			assertThrows(ApiException.class, () -> userService.changePasswordByEmailToken(EMAIL_TOKEN, NEW_PASSWORD));
+			assertThrows(ApiException.class, () -> userService.updatePasswordByEmailToken(EMAIL_TOKEN, NEW_PASSWORD));
 
 			verify(userMapper, times(1)).findByEmail(EMAIL);
 		}
@@ -285,7 +284,7 @@ class UserServiceTest {
 			.salt("storedSalt")
 			.build();
 
-		private final ChangePasswordDto changePasswordDto = new ChangePasswordDto();
+		private final UpdatePasswordDto changePasswordDto = new UpdatePasswordDto();
 
 		@BeforeEach
 		void setUp() {
@@ -306,7 +305,7 @@ class UserServiceTest {
 
 				doNothing().when(userMapper).updatePasswordByUserId(any(UpdatePasswordDto.class));
 
-				userService.changePasswordByAuthentication(1L, changePasswordDto);
+				userService.updatePasswordByAuthentication(1L, changePasswordDto);
 
 				verify(userMapper, times(1)).findByUserId(1L);
 				verify(userMapper, times(1)).updatePasswordByUserId(any(UpdatePasswordDto.class));
@@ -318,7 +317,7 @@ class UserServiceTest {
 		void failure_1() {
 			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
 
-			ApiException apiException =  assertThrows(ApiException.class, () -> userService.changePasswordByAuthentication(1L, changePasswordDto));
+			ApiException apiException =  assertThrows(ApiException.class, () -> userService.updatePasswordByAuthentication(1L, changePasswordDto));
 
 			assertEquals(ErrorCode.BAD_REQUEST_INVALID_PASSWORD, apiException.getErrorCode());
 			verify(userMapper, times(1)).findByUserId(1L);

@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.user.dto;
+package com.trackery.trackerybackapiserver.domain.user.dto.update;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -18,7 +18,7 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @NoArgsConstructor
-public class ChangePasswordDto {
+public class UpdatePasswordDto {
 	private String oldPassword;
 
 	@NotBlank
