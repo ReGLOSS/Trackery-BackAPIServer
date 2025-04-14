@@ -156,6 +156,23 @@ class UpdateUserInfoServiceTest {
 			assertEquals(ErrorCode.BAD_REQUEST_INVALID_PASSWORD, e.getErrorCode());
 			verify(userMapper, never()).updatePasswordByUserId(anyLong(), any(), any());
 		}
+
+		@Test
+		@DisplayName("유저를 찾지 못한 경우")
+		void fail_userNotFound() {
+			UpdatePasswordDto dto = new UpdatePasswordDto();
+			ReflectionTestUtils.setField(dto, "oldPassword", "irrelevant");
+			ReflectionTestUtils.setField(dto, "newPassword", "newPass!");
+
+			when(userMapper.findByUserId(anyLong()))
+				.thenReturn(Optional.empty());
+
+			ApiException e = assertThrows(ApiException.class, () ->
+				updateUserInfoService.updatePasswordByAuthentication(999L, dto)
+			);
+
+			assertEquals(ErrorCode.NOT_FOUND_USER, e.getErrorCode());
+		}
 	}
 
 	@Nested
