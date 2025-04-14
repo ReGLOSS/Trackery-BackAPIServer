@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 12.		durururuk		최초 생성
+ * 25. 4. 14.		durururuk		이메일 수정 API 추가, 주석 작성
  */
 @Slf4j
 @RestController
@@ -42,6 +43,13 @@ import lombok.extern.slf4j.Slf4j;
 public class UpdateUserInfoController {
 	private final UpdateUserInfoService updateUserInfoService;
 
+	/**
+	 * 닉네임을 업데이트하는 API입니다.
+	 *
+	 * @param userDetails 인증 정보
+	 * @param dto 닉네임 DTO
+	 * @return 성공 시 따로 데이터는 없는 OK 공통 응답
+	 */
 	@PatchMapping("/nickname")
 	public ResponseEntity<ApiResponse<Void>> updateNickname(
 		@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody UpdateNickNameDto dto
@@ -51,6 +59,13 @@ public class UpdateUserInfoController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 
+	/**
+	 * 유저명을 업데이트 하는 API입니다.
+	 *
+	 * @param userDetails 기존 인증정보
+	 * @param dto 새 유저명을 담은 DTO
+ 	 * @return 성공 시 새 유저명으로 업데이트된 인증 토큰, OK 공통 응답
+	 */
 	@PatchMapping("/username")
 	public ResponseEntity<ApiResponse<Void>> updateUserName(
 		@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody UpdateUserNameDto dto
@@ -71,7 +86,7 @@ public class UpdateUserInfoController {
 	 *
 	 * @param emailToken : 인증된 이메일
 	 * @param dto : 변경될 비밀번호 dto
-	 * @return : 이메일 토큰 재사용 못하게 제거하는 쿠키 + Ok 응답
+	 * @return : 성공 시 이메일 토큰 재사용 못하게 제거하는 쿠키 + Ok 응답
 	 */
 	@PatchMapping("/password/email-token")
 	public ResponseEntity<ApiResponse<String>> updatePasswordByEmailToken(@CookieValue(name = "emailToken") String emailToken,
@@ -91,7 +106,7 @@ public class UpdateUserInfoController {
 	 *
 	 * @param userDetails : 인증된 유저 정보
 	 * @param updatePasswordDto : 기존 비밀번호, 새 비밀번호를 담고있는 DTO, Validation으로 한 번 검증
-	 * @return : 성공 시 Ok
+	 * @return : 성공 시 공통 OK 포맷
 	 */
 	@PatchMapping("/password")
 	public ResponseEntity<ApiResponse<Void>> updatePasswordByAuthentication(
@@ -100,4 +115,20 @@ public class UpdateUserInfoController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 
+	/**
+	 * 이메일을 업데이트 하는 API
+	 *
+	 * @param userDetails 인증 정보
+	 * @param emailToken 이메일 인증을 받을 때 받급받은 이메일 토큰
+	 * @return 성공 시 이메일 토큰 재사용하지 못하게 지우는 헤더 + 공통 OK 포맷
+	 */
+	@PatchMapping("/email")
+	public ResponseEntity<ApiResponse<Void>> updateEmail (
+		@AuthenticationPrincipal CustomUserDetails userDetails, @CookieValue(name = "emailToken") String emailToken) {
+		updateUserInfoService.updateEmail(userDetails.getUserId(), emailToken);
+		ResponseCookie cookie = CookieUtil.deleteCookie("emailToken");
+		return ResponseEntity.ok()
+			.header(HttpHeaders.SET_COOKIE, cookie.toString())
+			.body(ApiResponse.success(SuccessCode.OK));
+	}
 }

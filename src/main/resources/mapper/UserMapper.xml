@@ -76,4 +76,10 @@
         SET username = #{userName}
         WHERE user_id = #{userId}
     </update>
+
+    <update id="updateEmailByUserId">
+        UPDATE user
+        SET email = #{email}
+        WHERE user_id = #{userId}
+    </update>
 </mapper>

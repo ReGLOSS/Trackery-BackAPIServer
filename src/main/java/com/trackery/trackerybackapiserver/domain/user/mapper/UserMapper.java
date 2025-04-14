@@ -83,5 +83,7 @@ public interface UserMapper {
 
 	void updateUserNameByUserId(@Param("userId") Long userId, @Param("userName") String userName);
 
+	void updateEmailByUserId(@Param("userId") Long userId, @Param("email") String email);
+
 	boolean isExistsUser(Long userId);
 }

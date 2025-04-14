@@ -1,6 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.user.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
@@ -26,6 +27,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 4. 12.		durururuk		최초 생성
  */
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UpdateUserInfoService {
 	private final UserMapper userMapper;
@@ -49,7 +51,8 @@ public class UpdateUserInfoService {
 	}
 
 	public void updatePasswordByAuthentication(Long userId, UpdatePasswordDto updatePasswordDto) {
-		User user = userMapper.findByUserId(userId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_USER));
+		User user = findUserByUserIdOrElseThrowApiException(userId);
+
 		String hashedInputtedPassword = PasswordUtil.hashPassword(updatePasswordDto.getOldPassword(), user.getSalt());
 
 		if (!hashedInputtedPassword.equals(user.getPassword())) {
@@ -64,8 +67,7 @@ public class UpdateUserInfoService {
 	}
 
 	public void updateUserNickname(Long userId, String nickname) {
-		User user = userMapper.findByUserId(userId).orElseThrow(
-			() -> new ApiException(ErrorCode.NOT_FOUND_USER));
+		User user = findUserByUserIdOrElseThrowApiException(userId);
 
 		if (user.getNickname().equals(nickname)) {
 			throw new ApiException(ErrorCode.BAD_REQUEST_SAME_UPDATE);
@@ -75,8 +77,7 @@ public class UpdateUserInfoService {
 	}
 
 	public AuthTokenDto updateUserName(Long userId, String userName) {
-		User user = userMapper.findByUserId(userId).orElseThrow(
-			() -> new ApiException(ErrorCode.NOT_FOUND_USER));
+		User user = findUserByUserIdOrElseThrowApiException(userId);
 
 		if (user.getUserName().equals(userName)) {
 			throw new ApiException(ErrorCode.BAD_REQUEST_SAME_UPDATE);
@@ -87,5 +88,22 @@ public class UpdateUserInfoService {
 		return jwtService.generateAccessTokenAndRefreshToken(userId, userName, user.getRoleId());
 
 
+	}
+
+	public void updateEmail(Long userId, String emailToken) {
+		User user = findUserByUserIdOrElseThrowApiException(userId);
+
+		String email = jwtService.verifyJwt(emailToken).getSubject();
+
+		if (user.getEmail().equals(email)) {
+			throw new ApiException(ErrorCode.BAD_REQUEST_SAME_UPDATE);
+		}
+
+		userMapper.updateEmailByUserId(userId, email);
+	}
+
+	private User findUserByUserIdOrElseThrowApiException(Long userId) {
+		return userMapper.findByUserId(userId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_USER));
 	}
 }
