@@ -30,7 +30,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
  * fileName       : UpdateUserInfoServiceTest
  * author         : durururuk
  * date           : 25. 4. 14.
- * description    : 
+ * description    : UpdateUserInfoService 단위 테스트 클래스
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -105,8 +105,6 @@ class UpdateUserInfoServiceTest {
 
 			String salt = "SALT123";
 			String hashedOldPassword = PasswordUtil.hashPassword(oldPassword, salt);
-			String newSalt = "NEW_SALT456";
-			String newHashedPassword = PasswordUtil.hashPassword(newPassword, newSalt);
 
 			User user = User.builder()
 				.userName("테스트유저")

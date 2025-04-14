@@ -72,7 +72,6 @@ class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
 		@Test
 		@DisplayName("성공")
 		void success() throws Exception {
-			String oldUserName = "abcdefg";
 			String newUserName = "새 유저명";
 			UpdateUserNameDto dto = new UpdateUserNameDto();
 			ReflectionTestUtils.setField(dto, "userName", newUserName);
