@@ -110,7 +110,7 @@ class OAuthLinkServiceTest {
 		ApiException exception = assertThrows(ApiException.class, () -> {
 			oAuthLinkService.createLinkToken(provider, email);
 		});
-		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT, exception.getErrorCode());
+		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT_MISSING_EMAIL, exception.getErrorCode());
 	}
 
 	@Test
@@ -124,7 +124,7 @@ class OAuthLinkServiceTest {
 		ApiException exception = assertThrows(ApiException.class, () -> {
 			oAuthLinkService.createLinkToken(provider, email);
 		});
-		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT, exception.getErrorCode());
+		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT_MISSING_EMAIL, exception.getErrorCode());
 	}
 
 	@Test
@@ -175,7 +175,7 @@ class OAuthLinkServiceTest {
 		ApiException exception = assertThrows(ApiException.class, () -> {
 			oAuthLinkService.validateToken(token);
 		});
-		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT, exception.getErrorCode());
+		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT_MISSING_EMAIL, exception.getErrorCode());
 	}
 
 	@Test

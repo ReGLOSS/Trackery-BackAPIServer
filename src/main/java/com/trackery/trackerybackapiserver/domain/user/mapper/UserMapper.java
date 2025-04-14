@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.user.mapper;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
@@ -23,7 +24,6 @@ import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
  */
 @Mapper
 public interface UserMapper {
-
 	/**
 	 * 새로운 사용자 정보를 데이터 베이스에 저장합니다.
 	 *
@@ -77,11 +77,11 @@ public interface UserMapper {
 	 */
 	Optional<User> findByUserName(String userName);
 
-	/**
-	 * 비밀번호와 salt를 업데이트합니다.
-	 * @param email : 업데이트할 유저의 이메일
-	 * @param password : 새 비밀번호
-	 * @param salt : 새 salt
-	 */
-	void updatePassword(String email, String password, String salt);
+	void updatePasswordByUserId(@Param("userId") Long userId, @Param("password") String password, @Param("salt") String salt);
+
+	void updateNicknameByUserId(@Param("userId") Long userId, @Param("nickname") String nickname);
+
+	void updateUserNameByUserId(@Param("userId") Long userId, @Param("userName") String userName);
+
+	void updateEmailByUserId(@Param("userId") Long userId, @Param("email") String email);
 }

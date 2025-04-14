@@ -5,6 +5,11 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.util.List;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,9 +22,12 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
+import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
+import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import jakarta.servlet.http.Cookie;
@@ -36,6 +44,8 @@ import jakarta.servlet.http.Cookie;
  -----------------------------------------------------------
  25. 2. 14.        durururuk       최초 생성
  25. 2. 14.        durururuk       로그인 컨트롤러 테스트 코드 작성
+ 25. 4. 09.		   durururuk	   유저 상세정보 조회 API 단위테스트 코드 작성
+ 25. 4. 10.		   durururuk	   인증 기반 비밀번호 변경 컨트롤러 mockMvc 테스트 작성
  */
 
 @WebMvcTest(UserController.class)
@@ -125,5 +135,49 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(cookie().exists("refreshToken"))
 			.andExpect(cookie().httpOnly("refreshToken", true))
 			.andExpect(cookie().value("refreshToken", refreshToken));
+	}
+
+	@Nested
+	@DisplayName("유저 상세 정보 조회 테스트")
+	class getDetailedUserInfoTest {
+		private OAuth oAuth;
+
+		@BeforeEach
+		void setUp() {
+			oAuth = OAuth.builder()
+				.userId(1L)
+				.providerUserId("155788848")
+				.provider("KAKAO")
+				.build();
+			ReflectionTestUtils.setField(oAuth, "oauthId", 1L);
+		}
+
+		@Test
+		@DisplayName("성공")
+		void success() throws Exception {
+			CustomUserDetails customUserDetails = CustomUserDetails.builder()
+				.userId(1L).roleId(1L).build();
+
+			DetailedUserInfoDto dto = new DetailedUserInfoDto(1L, 1L,
+				"abcdefg", "김커피", "a@a.com", List.of(oAuth));
+
+			when(userService.getDetailedUserInfoByUserId(1L)).thenReturn(dto);
+
+			ResultActions result = mockMvc.perform(get("/api/users/details")
+				.with(user(customUserDetails)));
+
+			result
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value("Ok"))
+				.andExpect(jsonPath("$.data.userId").value(1))
+				.andExpect(jsonPath("$.data.userRoleId").value(1))
+				.andExpect(jsonPath("$.data.userName").value("abcdefg"))
+				.andExpect(jsonPath("$.data.nickname").value("김커피"))
+				.andExpect(jsonPath("$.data.email").value("a@a.com"))
+				.andExpect(jsonPath("$.data.OAuthList[0].oauthId").value(1))
+				.andExpect(jsonPath("$.data.OAuthList[0].userId").value(1))
+				.andExpect(jsonPath("$.data.OAuthList[0].provider").value("KAKAO"))
+				.andExpect(jsonPath("$.data.OAuthList[0].providerUserId").value("155788848"));
+		}
 	}
 }

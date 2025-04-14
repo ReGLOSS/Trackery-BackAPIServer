@@ -6,9 +6,9 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,10 +19,11 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
-import com.trackery.trackerybackapiserver.domain.user.dto.ChangePasswordDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
+import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import jakarta.validation.Valid;
@@ -41,6 +42,8 @@ import lombok.RequiredArgsConstructor;
  * 25. 2. 12.        durururuk       최초 생성
  * 25. 2. 24.        inari         주석 추가
  * 25. 2. 25.        durururuk      로그인 메서드 추가
+ * 25. 4. 09.		 durururuk		상세 정보 조회 API 추가
+ * 25. 4. 10.		 durururuk		인증 기반 비밀번호 변경 API 추가
  */
 @RestController
 @RequestMapping("/api/users")
@@ -125,21 +128,15 @@ public class UserController {
 	}
 
 	/**
-	 * 유저의 비밀번호를 변경하는 API
-	 *
-	 * @param emailToken : 인증된 이메일
-	 * @param dto : 변경될 비밀번호 dto
-	 * @return : 이메일 토큰 재사용 못하게 제거하는 쿠키 + Ok 응답
+	 * 유저의 상세 정보를 조회하는 API
+	 * 유저의 기본 정보, 간편로그인 연동 정보를 담은 DTO 반환
+	 * @param userDetails : 인증된 유저의 정보
+	 * @return DTO
 	 */
-	@PatchMapping("/password-reset")
-	public ResponseEntity<ApiResponse<String>> resetPassword(@CookieValue(name = "emailToken") String emailToken,
-		@Valid @RequestBody ChangePasswordDto dto) {
-		userService.changePassword(emailToken, dto.getPassword());
-
-		ResponseCookie cookie = CookieUtil.deleteCookie("emailToken");
-
-		return ResponseEntity.ok()
-			.header(HttpHeaders.SET_COOKIE, cookie.toString())
-			.body(ApiResponse.success(SuccessCode.OK));
+	@GetMapping("/details")
+	public ResponseEntity<ApiResponse<DetailedUserInfoDto>> getDetailedUserInfo(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		DetailedUserInfoDto result = userService.getDetailedUserInfoByUserId(userDetails.getUserId());
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 }

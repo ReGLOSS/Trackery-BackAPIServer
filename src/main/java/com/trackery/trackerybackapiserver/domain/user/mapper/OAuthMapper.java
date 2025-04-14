@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.user.mapper;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -17,6 +18,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
  * -----------------------------------------------------------
  * 25. 2. 24.        inari       최초 생성
  * 25. 3. 21.        inari       오타 수정
+ * 25. 4. 09.		 durururuk    주석 작성
  */
 @Mapper
 public interface OAuthMapper {
@@ -45,4 +47,11 @@ public interface OAuthMapper {
 	 * @return 특정 유저가 연동한 간편 로그인 정보
 	 */
 	Optional<OAuth> findByUserIdAndProvider(Long userId, String provider);
+
+	/**
+	 * 유저의 간편로그인 연동 정보를 조회
+	 * @param userId : 유저 ID
+	 * @return : OAuth 엔티티 리스트
+	 */
+	List<OAuth> findByUserId(Long userId);
 }

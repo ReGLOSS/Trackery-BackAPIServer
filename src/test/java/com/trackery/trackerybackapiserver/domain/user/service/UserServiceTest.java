@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -18,16 +19,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
+import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
+import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
+import com.trackery.trackerybackapiserver.domain.user.mapper.OAuthMapper;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
 
@@ -41,7 +44,11 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  ===========================================================
  DATE              AUTHOR             NOTE
  -----------------------------------------------------------
- 25. 2. 14.        durururuk       최초 생성*/
+ 25. 2. 14.        durururuk       최초 생성
+ 25. 4. 09.		   durururuk	   유저 상세정보 서비스 테스트 코드 작성
+ 25. 4. 10.		   durururuk	   인증 기반 비밀번호 변경 서비스 단위테스트 코드 작성
+ */
+
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
 	@InjectMocks
@@ -61,6 +68,9 @@ class UserServiceTest {
 
 	@Mock
 	private JwtService jwtService;
+
+	@Mock
+	private OAuthMapper oAuthMapper;
 
 	@Test
 	void 회원가입_성공() {
@@ -140,20 +150,15 @@ class UserServiceTest {
 			.password(hashedPassword)
 			.salt(salt)
 			.status(1)
-			.build();
-		ReflectionTestUtils.setField(user, "userId", 1L);
-
-		UserRole userRole = UserRole.builder()
-			.userId(1L)
 			.roleId(1L)
 			.build();
+		ReflectionTestUtils.setField(user, "userId", 1L);
 
 		String accessToken = "access token";
 		String refreshToken = "refresh token";
 		AuthTokenDto authTokenDto = new AuthTokenDto(accessToken, refreshToken);
 
 		when(userMapper.findByUserName(anyString())).thenReturn(Optional.of(user));
-		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
 
 		when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(
 			authTokenDto);
@@ -162,49 +167,12 @@ class UserServiceTest {
 
 		assertEquals(authTokenDto, result);
 		verify(userMapper, times(1)).findByUserName(anyString());
-		verify(userRoleMapper, times(1)).findByUserId(anyLong());
-	}
-
-	@Nested
-	@DisplayName("비밀번호 변경 테스트")
-	class changePasswordTest {
-		private static final String EMAIL_TOKEN = "emailToken";
-		private static final String NEW_PASSWORD = "aaaaaaaa";
-		private static final String EMAIL = "a@a.com";
-		private static final DecodedJWT DECODED_EMAIL_TOKEN = mock(DecodedJWT.class);
-
-		@Test
-		@DisplayName("성공")
-		void success() {
-			when(jwtService.verifyJwt(EMAIL_TOKEN)).thenReturn(DECODED_EMAIL_TOKEN);
-			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
-			when(userMapper.isExistsEmail(EMAIL)).thenReturn(true);
-			doNothing().when(userMapper).updatePassword(eq(EMAIL), anyString(), anyString());
-
-			userService.changePassword(EMAIL_TOKEN, NEW_PASSWORD);
-
-			verify(userMapper, times(1)).isExistsEmail(EMAIL);
-			verify(userMapper, times(1)).updatePassword(eq(EMAIL), anyString(), anyString());
-		}
-
-		@Test
-		@DisplayName("실패 - 이메일이 DB에 존재하지 않음")
-		void failure_1() {
-			when(jwtService.verifyJwt(EMAIL_TOKEN)).thenReturn(DECODED_EMAIL_TOKEN);
-			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
-			when(userMapper.isExistsEmail(EMAIL)).thenReturn(false);
-
-			assertThrows(ApiException.class, () -> userService.changePassword(EMAIL_TOKEN, NEW_PASSWORD));
-
-			verify(userMapper, times(1)).isExistsEmail(EMAIL);
-		}
 	}
 
 	@Nested
 	@DisplayName("액세스 토큰 발급 필요 정보 조회 테스트")
 	class getUserInfoByIdTest {
-		User user = User.builder().userName("abcdefg").build();
-		UserRole userRole = UserRole.builder().userId(1L).roleId(1L).build();
+		User user = User.builder().userName("abcdefg").roleId(1L).build();
 		JwtUserInfoDto expectedDto = new JwtUserInfoDto(1L, "abcdefg", 1L);
 
 		@BeforeEach
@@ -216,14 +184,56 @@ class UserServiceTest {
 		@DisplayName("성공")
 		void success() {
 			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
-			when(userRoleMapper.findByUserId(1L)).thenReturn(Optional.of(userRole));
 
 			JwtUserInfoDto result = userService.getUserInfoById(1L);
 
 			assertEquals(expectedDto, result);
 
 			verify(userMapper, times(1)).findByUserId(1L);
-			verify(userRoleMapper, times(1)).findByUserId(1L);
+		}
+	}
+
+	@Nested
+	@DisplayName("유저 상세 정보 조회 테스트")
+	class getDetailedUserInfoByUserIdTest {
+		private User user;
+		private OAuth oAuth;
+
+		@BeforeEach
+		void setUp() {
+			user = User.builder()
+				.roleId(1L)
+				.userName("abcdefg")
+				.nickname("김커피")
+				.email("a@a.com")
+				.build();
+
+			oAuth = OAuth.builder()
+				.userId(1L)
+				.providerUserId("155788848")
+				.provider("KAKAO")
+				.build();
+
+			ReflectionTestUtils.setField(user, "userId", 1L);
+			ReflectionTestUtils.setField(oAuth, "oauthId", 1L);
+		}
+
+		@Test
+		@DisplayName("성공")
+		void success() {
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			when(oAuthMapper.findByUserId(1L)).thenReturn(List.of(oAuth));
+
+			DetailedUserInfoDto expect = new DetailedUserInfoDto(1L, 1L,
+				"abcdefg", "김커피", "a@a.com", List.of(oAuth));
+
+			DetailedUserInfoDto result = userService.getDetailedUserInfoByUserId(1L);
+
+			assertEquals(expect, result);
+
+			verify(userMapper, times(1)).findByUserId(1L);
+			verify(oAuthMapper, times(1)).findByUserId(1L);
+
 		}
 	}
 }

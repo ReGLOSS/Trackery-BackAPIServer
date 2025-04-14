@@ -5,10 +5,12 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
@@ -86,4 +88,19 @@ public class CookieUtil {
 				.map(Cookie::getValue))
 			.orElseGet(ifAbsent);
 	}
+
+	public static HttpHeaders setAuthCookie(AuthTokenDto authTokenDto) {
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", authTokenDto.accessToken(),
+			Duration.ofMinutes(60));
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", authTokenDto.refreshToken(),
+			Duration.ofDays(7));
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.SET_COOKIE, accessTokenCookie.toString());
+		headers.add(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString());
+
+		return headers;
+	}
+
+
 }

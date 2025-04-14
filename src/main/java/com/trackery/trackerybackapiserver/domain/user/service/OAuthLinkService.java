@@ -64,7 +64,7 @@ public class OAuthLinkService {
 
 		// 이메일 필수 확인
 		if (emailValue.isEmpty()) {
-			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_INPUT);
+			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_INPUT_MISSING_EMAIL);
 		}
 
 		// 고유 토큰 생성
@@ -117,7 +117,7 @@ public class OAuthLinkService {
 		// 이메일 필수 검증
 		String emailValue = email.orElseThrow(() -> {
 			log.error("연동 토큰에 email 정보 없음: {}", token);
-			return new ApiException(ErrorCode.BAD_REQUEST_INVALID_INPUT);
+			return new ApiException(ErrorCode.BAD_REQUEST_INVALID_INPUT_MISSING_EMAIL);
 		});
 
 		return OAuthLinkRequestDto.builder()
