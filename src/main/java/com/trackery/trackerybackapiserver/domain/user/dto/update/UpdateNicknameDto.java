@@ -17,7 +17,7 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @NoArgsConstructor
-public class UpdateNickNameDto {
+public class UpdateNicknameDto {
 	@NotBlank
 	private String nickname;
 }

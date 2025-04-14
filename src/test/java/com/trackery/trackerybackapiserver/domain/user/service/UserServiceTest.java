@@ -19,13 +19,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
-import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
-import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
-import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdatePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
@@ -173,41 +170,6 @@ class UserServiceTest {
 	}
 
 	@Nested
-	@DisplayName("이메일 기반 비밀번호 변경 테스트")
-	class changePasswordTest {
-		private static final String EMAIL_TOKEN = "emailToken";
-		private static final String NEW_PASSWORD = "aaaaaaaa";
-		private static final String EMAIL = "a@a.com";
-		private static final DecodedJWT DECODED_EMAIL_TOKEN = mock(DecodedJWT.class);
-
-		@Test
-		@DisplayName("성공")
-		void success() {
-			when(jwtService.verifyJwt(EMAIL_TOKEN)).thenReturn(DECODED_EMAIL_TOKEN);
-			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
-			when(userMapper.findByEmail(EMAIL)).thenReturn(Optional.of(User.builder().email(EMAIL).build()));
-			doNothing().when(userMapper).updatePasswordByUserId(any(UpdatePasswordDto.class));
-
-			userService.updatePasswordByEmailToken(EMAIL_TOKEN, NEW_PASSWORD);
-
-			verify(userMapper, times(1)).findByEmail(EMAIL);
-			verify(userMapper, times(1)).updatePasswordByUserId(any(UpdatePasswordDto.class));
-		}
-
-		@Test
-		@DisplayName("실패 - 이메일이 DB에 존재하지 않음")
-		void failure_1() {
-			when(jwtService.verifyJwt(EMAIL_TOKEN)).thenReturn(DECODED_EMAIL_TOKEN);
-			when(DECODED_EMAIL_TOKEN.getSubject()).thenReturn(EMAIL);
-			when(userMapper.findByEmail(EMAIL)).thenReturn(Optional.empty());
-
-			assertThrows(ApiException.class, () -> userService.updatePasswordByEmailToken(EMAIL_TOKEN, NEW_PASSWORD));
-
-			verify(userMapper, times(1)).findByEmail(EMAIL);
-		}
-	}
-
-	@Nested
 	@DisplayName("액세스 토큰 발급 필요 정보 조회 테스트")
 	class getUserInfoByIdTest {
 		User user = User.builder().userName("abcdefg").roleId(1L).build();
@@ -272,55 +234,6 @@ class UserServiceTest {
 			verify(userMapper, times(1)).findByUserId(1L);
 			verify(oAuthMapper, times(1)).findByUserId(1L);
 
-		}
-	}
-
-	@Nested
-	@DisplayName("인증 기반 비밀번호 변경 테스트")
-	class changePasswordByAuthenticationTest {
-		private final User user = User
-			.builder()
-			.password("storedHashedPassword")
-			.salt("storedSalt")
-			.build();
-
-		private final UpdatePasswordDto changePasswordDto = new UpdatePasswordDto();
-
-		@BeforeEach
-		void setUp() {
-			ReflectionTestUtils.setField(user, "userId", 1L);
-
-			ReflectionTestUtils.setField(changePasswordDto, "oldPassword", "oldPassword");
-			ReflectionTestUtils.setField(changePasswordDto, "newPassword", "newPassword");
-		}
-
-		@Test
-		@DisplayName("성공")
-		void success() {
-			try (MockedStatic<PasswordUtil> mockedStatic = mockStatic(PasswordUtil.class)) {
-				when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
-
-				mockedStatic.when(() -> PasswordUtil.hashPassword(anyString(), anyString()))
-					.thenReturn("storedHashedPassword");
-
-				doNothing().when(userMapper).updatePasswordByUserId(any(UpdatePasswordDto.class));
-
-				userService.updatePasswordByAuthentication(1L, changePasswordDto);
-
-				verify(userMapper, times(1)).findByUserId(1L);
-				verify(userMapper, times(1)).updatePasswordByUserId(any(UpdatePasswordDto.class));
-			}
-		}
-
-		@Test
-		@DisplayName("기존 비밀번호와 일치하지 않는 경우")
-		void failure_1() {
-			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
-
-			ApiException apiException =  assertThrows(ApiException.class, () -> userService.updatePasswordByAuthentication(1L, changePasswordDto));
-
-			assertEquals(ErrorCode.BAD_REQUEST_INVALID_PASSWORD, apiException.getErrorCode());
-			verify(userMapper, times(1)).findByUserId(1L);
 		}
 	}
 }

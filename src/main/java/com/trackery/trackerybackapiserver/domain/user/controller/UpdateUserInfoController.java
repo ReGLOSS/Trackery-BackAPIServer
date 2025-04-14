@@ -14,7 +14,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
-import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdateNickNameDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdateNicknameDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdatePasswordDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdateUserNameDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
@@ -52,7 +52,7 @@ public class UpdateUserInfoController {
 	 */
 	@PatchMapping("/nickname")
 	public ResponseEntity<ApiResponse<Void>> updateNickname(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody UpdateNickNameDto dto
+		@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody UpdateNicknameDto dto
 	) {
 		updateUserInfoService.updateUserNickname(userDetails.getUserId(), dto.getNickname());
 

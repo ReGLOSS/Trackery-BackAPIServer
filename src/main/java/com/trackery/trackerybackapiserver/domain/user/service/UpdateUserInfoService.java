@@ -50,6 +50,12 @@ public class UpdateUserInfoService {
 		userMapper.updatePasswordByUserId(user.getUserId(), hashedPassword, salt);
 	}
 
+	/**
+	 * 인증을 기반으로 비밀번호를 변경하는 메서드
+	 *
+	 * @param userId : 비밀번호를 변경할 유저의 ID
+	 * @param updatePasswordDto : 기존 비밀번호와 새 비밀번호 정보가 포함된 DTO
+	 */
 	public void updatePasswordByAuthentication(Long userId, UpdatePasswordDto updatePasswordDto) {
 		User user = findUserByUserIdOrElseThrowApiException(userId);
 
@@ -66,6 +72,12 @@ public class UpdateUserInfoService {
 		userMapper.updatePasswordByUserId(user.getUserId(), newHashedPassword, newSalt);
 	}
 
+	/**
+	 * 유저의 닉네임을 변경하는 메서드
+	 *
+	 * @param userId : 닉네임을 변경할 유저의 ID
+	 * @param nickname : 새로 변경할 닉네임
+	 */
 	public void updateUserNickname(Long userId, String nickname) {
 		User user = findUserByUserIdOrElseThrowApiException(userId);
 
@@ -76,6 +88,13 @@ public class UpdateUserInfoService {
 		userMapper.updateNicknameByUserId(userId, nickname);
 	}
 
+	/**
+	 * 유저의 이름을 변경하고 새 Access Token과 Refresh Token을 반환하는 메서드
+	 *
+	 * @param userId : 이름을 변경할 유저의 ID
+	 * @param userName : 새로 변경할 유저 이름
+	 * @return AuthTokenDto : 새로운 Access Token과 Refresh Token 정보
+	 */
 	public AuthTokenDto updateUserName(Long userId, String userName) {
 		User user = findUserByUserIdOrElseThrowApiException(userId);
 
@@ -86,10 +105,14 @@ public class UpdateUserInfoService {
 		userMapper.updateUserNameByUserId(userId, userName);
 
 		return jwtService.generateAccessTokenAndRefreshToken(userId, userName, user.getRoleId());
-
-
 	}
 
+	/**
+	 * 이메일 토큰을 기반으로 유저의 이메일을 변경하는 메서드
+	 *
+	 * @param userId : 이메일을 변경할 유저의 ID
+	 * @param emailToken : 변경할 새 이메일의 토큰
+	 */
 	public void updateEmail(Long userId, String emailToken) {
 		User user = findUserByUserIdOrElseThrowApiException(userId);
 
@@ -102,6 +125,12 @@ public class UpdateUserInfoService {
 		userMapper.updateEmailByUserId(userId, email);
 	}
 
+	/**
+	 * UserMapper에서 Optional로 User를 가져올 때 예외처리를 해서 User 반환
+	 *
+	 * @param userId 조회할 UserId
+	 * @return User 엔티티 객체
+	 */
 	private User findUserByUserIdOrElseThrowApiException(Long userId) {
 		return userMapper.findByUserId(userId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_USER));
