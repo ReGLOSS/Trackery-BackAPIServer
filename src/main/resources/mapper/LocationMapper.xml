@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.trackery.trackerybackapiserver.domain.location.mapper.LocationMapper">
+    <resultMap id="JusoSigunguMap" type="com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu">
+        <id property="sigunguId" column="sgg_id" />
+        <result property="sigunguName" column="sgg_name" />
+
+        <association property="sido" javaType="com.trackery.trackerybackapiserver.domain.location.entity.JusoSido">
+            <id property="sidoId" column="sd_id" />
+            <result property="sidoName" column="sd_name" />
+        </association>
+    </resultMap>
+
+    <select id="getSigungu" parameterType="com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto" resultMap="JusoSigunguMap">
+        SELECT
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM juso_sigungu sgg
+                 JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE ST_Contains(
+                      sgg.sgg_border,
+                      ST_GeomFromText(CONCAT('POINT(', #{latitude}, ' ', #{longitude}, ')'), 4326)
+              )
+        LIMIT 1
+    </select>
+</mapper>
