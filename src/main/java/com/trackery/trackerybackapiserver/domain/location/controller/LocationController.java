@@ -1,7 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.location.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 public class LocationController {
 	private final LocationService locationService;
 
-	@GetMapping
+	@PostMapping("/name")
 	public ResponseEntity<ApiResponse<String>> getLocationName(@RequestBody @Valid CoordinateDto coordinateDto) {
 		String result = locationService.getCoordinatePoint(coordinateDto);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
