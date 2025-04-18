@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.home.entity;
+package com.trackery.trackerybackapiserver.domain.image.entity;
 
 import java.time.LocalDateTime;
 
@@ -73,9 +73,12 @@ public class Image {
 	 */
 	private LocalDateTime imageRegDate;
 
+	private Long userId;
+
 	@Builder
+	@SuppressWarnings("java:S107")
 	public Image(Long coordPointId, String imageName, String imageFile, Integer isPublic, Boolean isDeleted,
-		String imageType, String imageContent, LocalDateTime imageDate, LocalDateTime imageRegDate) {
+		String imageType, String imageContent, LocalDateTime imageDate, LocalDateTime imageRegDate, Long userId) {
 		this.coordPointId = coordPointId;
 		this.imageName = imageName;
 		this.imageFile = imageFile;
@@ -85,5 +88,6 @@ public class Image {
 		this.imageContent = imageContent;
 		this.imageDate = imageDate;
 		this.imageRegDate = imageRegDate;
+		this.userId = userId;
 	}
 }

@@ -18,9 +18,8 @@
         <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
-        <option name="PATTERN" value="com.trackery.trackerybackapiserver.domain.home.entity.*" />
+        <option name="PATTERN" value="com.trackery.trackerybackapiserver.domain.image.entity.*" />
         <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
         <option name="PATTERN" value="com.trackery.trackerybackapiserver.domain.home.mapper.*" />
@@ -28,9 +27,8 @@
         <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
-        <option name="PATTERN" value="com.trackery.trackerybackapiserver.domain.home.dto.*" />
+        <option name="PATTERN" value="com.trackery.trackerybackapiserver.domain.image.dto.*" />
         <option name="ENABLED" value="true" />
-        <option name="INCLUDE" value="false" />
       </pattern>
       <pattern>
         <option name="PATTERN" value="com.trackery.trackerybackapiserver.domain.jwt.dto.*" />

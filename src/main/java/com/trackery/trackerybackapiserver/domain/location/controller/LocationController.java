@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.location.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -33,7 +35,12 @@ public class LocationController {
 
 	@PostMapping("/name")
 	public ResponseEntity<ApiResponse<String>> getLocationName(@RequestBody @Valid CoordinateDto coordinateDto) {
-		String result = locationService.getCoordinatePoint(coordinateDto);
+		String result = locationService.getLocationNameByCoord(coordinateDto);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
+	}
+
+	@PostMapping("/test")
+	public ResponseEntity<ApiResponse<List<String>>> testPoint(@RequestBody @Valid CoordinateDto coordinateDto) {
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, locationService.test(coordinateDto)));
 	}
 }

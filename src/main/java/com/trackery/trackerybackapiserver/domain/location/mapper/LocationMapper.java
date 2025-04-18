@@ -3,8 +3,10 @@ package com.trackery.trackerybackapiserver.domain.location.mapper;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.locationtech.jts.geom.Point;
 
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
+import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 
 /**
@@ -20,5 +22,9 @@ import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
  */
 @Mapper
 public interface LocationMapper{
-	Optional<JusoSigungu> getSigungu(CoordinateDto coordinateDto);
+	Optional<JusoSigungu> findByCoord(CoordinateDto coordinateDto);
+
+	Optional<JusoSigungu> findByPoint(Point point);
+
+	CoordinatePoint insertCoordinatePoint(CoordinatePoint coordinatePoint);
 }

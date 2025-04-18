@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.home.dto;
+package com.trackery.trackerybackapiserver.domain.image.dto;
 
 import java.util.List;
 

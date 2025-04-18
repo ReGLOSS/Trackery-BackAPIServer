@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.home.controller;
+package com.trackery.trackerybackapiserver.domain.image.controller;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
-import com.trackery.trackerybackapiserver.domain.home.service.ImageService;
+import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 
 /**
  *packageName    : com.trackery.trackerybackapiserver.domain.home.controller

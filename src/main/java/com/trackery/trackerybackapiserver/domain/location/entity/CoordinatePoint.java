@@ -2,6 +2,8 @@ package com.trackery.trackerybackapiserver.domain.location.entity;
 
 import java.time.LocalDateTime;
 
+import org.locationtech.jts.geom.Point;
+
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,18 +26,20 @@ public class CoordinatePoint {
 	private String coordinatePointName;
 	private String coordinatePointDetail;
 	private byte coordinatePointType;
-	private LocalDateTime firstRegisterDate;
+	private Point coordinatePointPoint;
+	private LocalDateTime firstRegisteredDate;
 	private LocalDateTime lastModifiedDate;
 	private JusoSigungu sigungu;
 
 	@Builder
 	public CoordinatePoint(String coordinatePointName, String coordinatePointDetail, byte coordinatePointType,
-		LocalDateTime firstRegisterDate, LocalDateTime lastModifiedDate, JusoSigungu sigungu) {
+		LocalDateTime firstRegisteredDate, LocalDateTime lastModifiedDate, JusoSigungu sigungu, Point coordinatePointPoint) {
 		this.coordinatePointName = coordinatePointName;
 		this.coordinatePointDetail = coordinatePointDetail;
 		this.coordinatePointType = coordinatePointType;
-		this.firstRegisterDate = firstRegisterDate;
+		this.firstRegisteredDate = firstRegisteredDate;
 		this.lastModifiedDate = lastModifiedDate;
 		this.sigungu = sigungu;
+		this.coordinatePointPoint = coordinatePointPoint;
 	}
 }

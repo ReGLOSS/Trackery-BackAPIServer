@@ -14,7 +14,7 @@
         </association>
     </resultMap>
 
-    <select id="getSigungu" parameterType="com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto" resultMap="JusoSigunguMap">
+    <select id="findByCoord" parameterType="com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto" resultMap="JusoSigunguMap">
         SELECT
             sgg.sgg_id,
             sgg.sgg_name,
@@ -28,4 +28,23 @@
               )
         LIMIT 1
     </select>
+
+    <select id="findByPoint" parameterType="org.locationtech.jts.geom.Point" resultMap="JusoSigunguMap">
+        SELECT
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM juso_sigungu sgg JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE ST_Contains(
+              sgg.sgg_border,
+              ST_SRID(POINT(#{x}, #{y}), 4326)
+              )
+    </select>
+
+    <insert id="insertCoordinatePoint" useGeneratedKeys="true" keyProperty="coordinatePointId">
+        INSERT INTO coord_poi (coord_point_name, coord_point_point, coord_point_type, first_reg_dt, last_mod_dt, sgg_id)
+        VALUES (#{coordinatePointName}, #{coordinatePointPoint}, #{coordinatePointType}, #{firstRegisteredDate}, #{lastModifiedDate}, #{sigungu.sigunguId})
+    </insert>
+
 </mapper>
