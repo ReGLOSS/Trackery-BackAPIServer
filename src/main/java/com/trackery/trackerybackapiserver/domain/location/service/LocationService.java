@@ -53,7 +53,9 @@ public class LocationService {
 	}
 
 	public JusoSigungu getSigunguByPoint(Point point) {
-		return locationMapper.findByPoint(point).orElseThrow();
+		return locationMapper.findByPoint(point).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND)
+		);
 	}
 
 	public List<String> test(CoordinateDto coordinateDto) {

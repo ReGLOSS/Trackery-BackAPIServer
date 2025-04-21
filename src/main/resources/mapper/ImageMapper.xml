@@ -16,7 +16,9 @@
         <result property="imageRegDate" column="image_reg_date"/>
         <association property="coordPoint"
                      javaType="com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint">
-            <id property="coordPointId" column="coord_point_id"/>
+            <id property="coordinatePointId" column="coord_point_id"/>
+            <result property="coordinatePointDetail" column="coord_point_detail"/>
+            <result property="coordinatePointPoint" column="coord_point_point"/>
         </association>
         <association property="user" javaType="com.trackery.trackerybackapiserver.domain.user.entity.User">
             <id property="userId" column="user_id"/>
@@ -33,9 +35,26 @@
         LIMIT 30
     </select>
 
-<!--    <insert id="insertImage" parameterType="com.trackery.trackerybackapiserver.domain.image.entity.Image"-->
-<!--            useGeneratedKeys="true" keyProperty="imageId">-->
-<!--        INSERT INTO image()-->
-<!--        VALUES ()-->
-<!--    </insert>-->
+    <insert id="insertImage" parameterType="com.trackery.trackerybackapiserver.domain.image.entity.Image" useGeneratedKeys="true" keyProperty="imageId">
+        INSERT INTO image (image_name,
+                           image_file,
+                           is_public,
+                           is_deleted,
+                           image_type,
+                           image_contents,
+                           image_date,
+                           image_reg_date,
+                           coord_point_id,
+                           user_id)
+        VALUES (#{imageName},
+                #{imageFile},
+                #{isPublic},
+                #{isDeleted},
+                #{imageType},
+                #{imageContent},
+                #{imageDate},
+                #{imageRegDate},
+                #{coordPoint.coordinatePointId},
+                #{userId})
+    </insert>
 </mapper>

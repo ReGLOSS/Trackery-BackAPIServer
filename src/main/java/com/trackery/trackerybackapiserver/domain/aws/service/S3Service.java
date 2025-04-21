@@ -1,9 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.aws.service;
 
-import org.springframework.stereotype.Service;
-
-import lombok.RequiredArgsConstructor;
-
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.aws
  * fileName       : S3Service
@@ -15,7 +11,8 @@ import lombok.RequiredArgsConstructor;
  * -----------------------------------------------------------
  * 25. 4. 21.		durururuk		최초 생성
  */
-@Service
-@RequiredArgsConstructor
-public class S3Service {
+public interface S3Service {
+	public String generatePreSignedGetUrl(String objectKey);
+
+	public String generatePreSignedPutUrl(String objectKey);
 }

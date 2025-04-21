@@ -26,5 +26,5 @@ public interface ImageMapper {
 	 */
 	List<String> selectPublicImageFiles();
 
-	Image insertImage(Image image);
+	void insertImage(Image image);
 }
