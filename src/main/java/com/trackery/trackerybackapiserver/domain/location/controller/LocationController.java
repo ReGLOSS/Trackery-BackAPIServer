@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
+import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
 
 import jakarta.validation.Valid;
@@ -39,8 +40,14 @@ public class LocationController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 
-	@PostMapping("/test")
+	@PostMapping("/test/checking")
 	public ResponseEntity<ApiResponse<List<String>>> testPoint(@RequestBody @Valid CoordinateDto coordinateDto) {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, locationService.test(coordinateDto)));
 	}
+
+	@PostMapping("/test/insert-coord-poi")
+	public ResponseEntity<ApiResponse<CoordinatePoint>> testInsertCoordPoi(@RequestBody CoordinateDto coordinateDto) {
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, locationService.insertCoordinatePoint(coordinateDto)));
+	}
+
 }

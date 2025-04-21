@@ -2,6 +2,8 @@ package com.trackery.trackerybackapiserver.domain.image.entity;
 
 import java.time.LocalDateTime;
 
+import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -31,7 +33,7 @@ public class Image {
 	/**
 	 * 이미지의 좌표 식별번호입니다.
 	 */
-	private Long coordPointId;
+	private CoordinatePoint coordPoint;
 
 	/**
 	 * 이미지의 이름입니다.
@@ -73,13 +75,16 @@ public class Image {
 	 */
 	private LocalDateTime imageRegDate;
 
+	/**
+	 * 이미지를 업로드한 유저ID입니다.
+	 */
 	private Long userId;
 
 	@Builder
 	@SuppressWarnings("java:S107")
-	public Image(Long coordPointId, String imageName, String imageFile, Integer isPublic, Boolean isDeleted,
+	public Image(CoordinatePoint coordPoint, String imageName, String imageFile, Integer isPublic, Boolean isDeleted,
 		String imageType, String imageContent, LocalDateTime imageDate, LocalDateTime imageRegDate, Long userId) {
-		this.coordPointId = coordPointId;
+		this.coordPoint = coordPoint;
 		this.imageName = imageName;
 		this.imageFile = imageFile;
 		this.isPublic = isPublic;

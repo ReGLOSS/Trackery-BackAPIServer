@@ -18,6 +18,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ImageUploadDto {
 	private String imageName;
+	private String imageType;
 	private String description;
 	private String tags;
 	private double longitude;

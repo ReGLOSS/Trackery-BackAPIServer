@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -59,5 +60,9 @@ public class ImageService {
 	@CacheEvict(value = "publicImageUrls", allEntries = true)
 	public void evictImageCache() {
 		log.info("공개된 이미지 주소들을 삭제합니다.");
+	}
+
+	public Image insertImage(Image image) {
+		return imageMapper.insertImage(image);
 	}
 }
