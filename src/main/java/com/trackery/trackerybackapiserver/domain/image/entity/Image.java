@@ -41,7 +41,7 @@ public class Image {
 	private String imageName;
 
 	/**
-	 * 이미지의 S3 URL 주소입니다.
+	 * 이미지의 S3 버킷 Key입니다.
 	 */
 	private String imageFile;
 
