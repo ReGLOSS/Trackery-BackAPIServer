@@ -2,8 +2,6 @@ package com.trackery.trackerybackapiserver.domain.location.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -56,19 +54,6 @@ public class LocationService {
 		return locationMapper.findByPoint(point).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND)
 		);
-	}
-
-	public List<String> test(CoordinateDto coordinateDto) {
-		Point point = getPointByCoord(coordinateDto);
-
-		JusoSigungu sigungu = getSigunguByPoint(point);
-
-		List<String> result = new ArrayList<>();
-
-		result.add(sigungu.getSigunguName());
-		result.add(sigungu.getSido().getSidoName());
-
-		return result;
 	}
 
 	@Transactional

@@ -7,6 +7,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.trackery.trackerybackapiserver.domain.aws.service.S3Service;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
@@ -56,6 +57,7 @@ public class ImageUploadService {
 		}
 	}
 
+	@Transactional
 	public void saveImage(Long userId, ImageUploadDto imageUploadDto) {
 		CoordinateDto coordinateDto = new CoordinateDto(imageUploadDto.getLatitude(), imageUploadDto.getLongitude());
 		CoordinatePoint coordinatePoint = locationService.insertCoordinatePoint(coordinateDto);
