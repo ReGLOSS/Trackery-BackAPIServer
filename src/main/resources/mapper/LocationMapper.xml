@@ -79,22 +79,5 @@
         #{lastModifiedDate},
         #{sigungu.sigunguId}
         );
-
-        <selectKey keyProperty="coordinatePointId" resultType="Long" order="AFTER">
-            SELECT LAST_INSERT_ID();
-        </selectKey>
     </insert>
-
-    <select id="findCoordinatePointById" resultMap="CoordinatePointMap">
-        SELECT cp.coord_point_id, cp.coord_point_name, cp.coord_point_detail,
-               cp.coord_point_point, cp.coord_point_type, cp.first_reg_dt, cp.last_mod_dt,
-               s.sgg_id, s.sgg_name,
-               sd.sd_id, sd.sd_name
-        FROM coord_poi cp
-                 LEFT JOIN juso_sigungu s ON cp.sgg_id = s.sgg_id
-                 LEFT JOIN juso_sido sd ON s.sd_id = sd.sd_id
-        WHERE cp.coord_point_id = #{coordinatePointId}
-    </select>
-
-
 </mapper>

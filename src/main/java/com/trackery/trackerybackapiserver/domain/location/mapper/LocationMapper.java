@@ -26,5 +26,5 @@ public interface LocationMapper{
 
 	Optional<JusoSigungu> findByPoint(Point point);
 
-	CoordinatePoint insertCoordinatePoint(CoordinatePoint coordinatePoint);
+	void insertCoordinatePoint(CoordinatePoint coordinatePoint);
 }

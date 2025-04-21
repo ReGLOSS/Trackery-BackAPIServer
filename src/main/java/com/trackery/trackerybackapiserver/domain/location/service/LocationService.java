@@ -37,7 +37,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class LocationService {
 	private final LocationMapper locationMapper;
-	private GeometryFactory geometryFactory = new GeometryFactory();
+	private final GeometryFactory geometryFactory = new GeometryFactory();
 
 	public String getLocationNameByCoord(CoordinateDto coordinateDto) {
 		JusoSigungu sigungu = locationMapper.findByCoord(coordinateDto).orElseThrow(
@@ -84,6 +84,8 @@ public class LocationService {
 			.sigungu(sigungu)
 			.build();
 
-		return locationMapper.insertCoordinatePoint(coordinatePoint);
+		locationMapper.insertCoordinatePoint(coordinatePoint);
+
+		return coordinatePoint;
 	}
 }
