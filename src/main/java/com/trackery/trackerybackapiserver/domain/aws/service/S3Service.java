@@ -12,7 +12,7 @@ package com.trackery.trackerybackapiserver.domain.aws.service;
  * 25. 4. 21.		durururuk		최초 생성
  */
 public interface S3Service {
-	public String generatePreSignedGetUrl(String objectKey);
+	String generatePreSignedGetUrl(String objectKey);
 
-	public String generatePreSignedPutUrl(String objectKey);
+	String generatePreSignedPutUrl(String objectKey);
 }

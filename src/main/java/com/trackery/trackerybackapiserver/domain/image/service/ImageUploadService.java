@@ -38,12 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ImageUploadService {
 	private final ImageMapper imageMapper;
 	private final LocationService locationService;
-	private final ImageService imageService;
 	private final S3Service s3Service;
-
-	public String getPresignedGetUrl(String imageFileName) {
-		return s3Service.generatePreSignedGetUrl(imageFileName);
-	}
 
 	public String getPresignedPutUrl(String imageFileName) {
 		isImage(imageFileName);

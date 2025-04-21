@@ -10,7 +10,6 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.image.dto.LandingImagesResponse;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
-import com.trackery.trackerybackapiserver.domain.image.service.ImageUploadService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -31,7 +30,6 @@ import lombok.RequiredArgsConstructor;
 public class LandingImagesController {
 
 	private final ImageService imageService;
-	private final ImageUploadService imageUploadService;
 
 	/**
 	 * 랜딩 페이지에 표시할 공개 이미지 URL 목록을 반환합니다.
