@@ -27,7 +27,7 @@ import lombok.extern.slf4j.Slf4j;
  * fileName       : ImageUploadService
  * author         : durururuk
  * date           : 25. 4. 17.
- * description    : 
+ * description    : 이미지 업로드 관련 기능을 하는 서비스 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -41,12 +41,21 @@ public class ImageUploadService {
 	private final LocationService locationService;
 	private final S3Service s3Service;
 
+	/**
+	 * S3에 Object Put Presigned URL을 요청하는 메서드입니다.
+	 * @param imageFileName 이미지 파일명
+	 * @return S3 PresignedPutUrl
+	 */
 	public String getPresignedPutUrl(String imageFileName) {
 		isImage(imageFileName);
 
 		return s3Service.generatePreSignedPutUrl(imageFileName);
 	}
 
+	/**
+	 * 파일명이 이미지 확장자인지 검증하는 메서드입니다.
+	 * @param imageFileName 이미지 파일명
+	 */
 	private void isImage(String imageFileName) {
 		List<String> imageExtensions = List.of("jpg", "jpeg", "png", "webp");
 
@@ -57,6 +66,12 @@ public class ImageUploadService {
 		}
 	}
 
+	/**
+	 * yyyy / M /d 형식으로 들어오는 사진 촬영일을 LocalDateTime으로 변환합니다. 시간은 00시 00분으로 세팅됩니다.
+	 * 촬영일이 기록되지 않아 유저가 수동으로 날짜를 기입한 이미지 파일 때문에 이렇게 설정해놨지만 추후 회의를 통해 수정될 수 있습니다.
+	 * @param dateString yyyy / M / d 형식의 촬영일 String
+	 * @return : LocalDateTime 타입의 촬영일
+	 */
 	private LocalDateTime parseDateString(String dateString) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy / M / d");
 
@@ -65,6 +80,11 @@ public class ImageUploadService {
 		return date.atStartOfDay();
 	}
 
+	/**
+	 * boolean으로 들어오는 이미지 공개 여부를 int 타입으로 변환합니다.
+	 * @param isPublic boolean 타입의 이미지 공개 여부
+	 * @return int 타입의 이미지 공개 여부
+	 */
 	private int convertIsPublicToInt(boolean isPublic) {
 		if (isPublic) {
 			return 1;
@@ -73,8 +93,14 @@ public class ImageUploadService {
 		}
 	}
 
+	/**
+	 * 유저ID, 이미지 업로드 DTO에서 사진 메타데이터를 DB에 삽입하는 메서드입니다.
+	 * @param userId 사진을 업로드한 유저 ID
+	 * @param imageUploadDto 이미지 메타데이터를 담고 있는 DTO
+	 * @return DB에서 자동으로 할당된 ID를 포함하는 이미지 엔티티 객체
+	 */
 	@Transactional
-	public void saveImage(Long userId, ImageUploadDto imageUploadDto) {
+	public Image saveImage(Long userId, ImageUploadDto imageUploadDto) {
 		CoordinateDto coordinateDto = new CoordinateDto(imageUploadDto.getLatitude(), imageUploadDto.getLongitude());
 		CoordinatePoint coordinatePoint = locationService.insertCoordinatePoint(coordinateDto);
 		int isPublic = convertIsPublicToInt(imageUploadDto.isPublic());
@@ -94,6 +120,8 @@ public class ImageUploadService {
 			.build();
 
 		imageMapper.insertImage(image);
+
+		return image;
 	}
 
 }
