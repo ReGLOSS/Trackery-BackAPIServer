@@ -90,6 +90,8 @@ class LocationServiceTest {
 		void success() {
 			when(locationMapper.findSigunguByPoint(point)).thenReturn(Optional.of(new JusoSigungu()));
 
+			JusoSigungu sigungu = locationService.getSigunguByPoint(point);
+
 			verify(locationMapper, times(1)).findSigunguByPoint(point);
 		}
 
