@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ImageUploadService {
 	private final ImageMapper imageMapper;
 	private final LocationService locationService;
-	private final S3Service s3Service;
+	private final S3Service imageUploadS3ServiceImpl;
 
 	/**
 	 * S3에 Object Put Presigned URL을 요청하는 메서드입니다.
@@ -49,7 +49,7 @@ public class ImageUploadService {
 	public String getPresignedPutUrl(String imageFileName) {
 		isImage(imageFileName);
 
-		return s3Service.generatePreSignedPutUrl(imageFileName);
+		return imageUploadS3ServiceImpl.generatePreSignedPutUrl(imageFileName);
 	}
 
 	/**
