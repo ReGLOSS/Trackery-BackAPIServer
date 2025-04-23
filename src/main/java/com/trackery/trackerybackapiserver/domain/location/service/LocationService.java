@@ -55,7 +55,7 @@ public class LocationService {
 	 * @param coordinateDto : 좌표 DTO
 	 * @return : jts 라이브러리의 Point 객체
 	 */
-	public Point getPointByCoord(CoordinateDto coordinateDto) {
+	private Point getPointByCoord(CoordinateDto coordinateDto) {
 		Coordinate coordinate = new Coordinate(coordinateDto.longitude(), coordinateDto.latitude());
 		return geometryFactory.createPoint(coordinate);
 	}
@@ -80,7 +80,7 @@ public class LocationService {
 	public CoordinatePoint insertCoordinatePoint(CoordinateDto coordinateDto) {
 		Point point = getPointByCoord(coordinateDto);
 		JusoSigungu sigungu = getSigunguByPoint(point);
-		String pointName = String.format("%s, %s",sigungu.getSido().getSidoName(), sigungu.getSigunguName());
+		String pointName = String.format("%s %s",sigungu.getSido().getSidoName(), sigungu.getSigunguName());
 
 		CoordinatePoint coordinatePoint =  CoordinatePoint.builder()
 			.coordinatePointName(pointName)
