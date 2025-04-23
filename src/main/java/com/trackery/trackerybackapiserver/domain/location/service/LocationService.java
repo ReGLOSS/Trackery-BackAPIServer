@@ -43,7 +43,7 @@ public class LocationService {
 	 * @return : 시도 + 시군구 주소를 String으로 반환합니다 (예시 : 부산광역시 수영구)
 	 */
 	public String getLocationNameByCoord(CoordinateDto coordinateDto) {
-		JusoSigungu sigungu = locationMapper.findByCoord(coordinateDto).orElseThrow(
+		JusoSigungu sigungu = locationMapper.findSigunguByCoordinate(coordinateDto).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND)
 		);
 
@@ -66,7 +66,7 @@ public class LocationService {
 	 * @return : JusoSigungu (시군구 ID, 이름, 시도 ID, 이름을 담고 있는 엔티티 객체)
 	 */
 	public JusoSigungu getSigunguByPoint(Point point) {
-		return locationMapper.findByPoint(point).orElseThrow(
+		return locationMapper.findSigunguByPoint(point).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND)
 		);
 	}

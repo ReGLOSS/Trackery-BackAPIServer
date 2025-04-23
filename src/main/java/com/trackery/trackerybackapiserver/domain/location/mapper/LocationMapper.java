@@ -22,9 +22,23 @@ import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
  */
 @Mapper
 public interface LocationMapper{
-	Optional<JusoSigungu> findByCoord(CoordinateDto coordinateDto);
+	/**
+	 * 좌표로 시군구 엔티티를 DB에서 조회하고 반환하는 메서드입니다.
+	 * @param coordinateDto 좌표 DTO
+	 * @return 시군구 엔티티를 Optional로 반환합니다.
+	 */
+	Optional<JusoSigungu> findSigunguByCoordinate(CoordinateDto coordinateDto);
 
-	Optional<JusoSigungu> findByPoint(Point point);
+	/**
+	 * Point 객체로 시군구 엔티티를 DB에서 조회하고 반환하는 메서드입니다.
+	 * @param point Point 객체
+	 * @return 시군구 엔티티를 Optional로 반환합니다.
+	 */
+	Optional<JusoSigungu> findSigunguByPoint(Point point);
 
+	/**
+	 * CoordinatePoint 정보를 DB에 삽입합니다.
+	 * @param coordinatePoint CoordinatePoint 객체
+	 */
 	void insertCoordinatePoint(CoordinatePoint coordinatePoint);
 }
