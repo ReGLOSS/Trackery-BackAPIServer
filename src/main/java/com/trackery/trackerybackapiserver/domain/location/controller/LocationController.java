@@ -31,6 +31,12 @@ import lombok.RequiredArgsConstructor;
 public class LocationController {
 	private final LocationService locationService;
 
+	/**
+	 * 좌표로 시/도 + 시군구 주소명을 받을 수 있는 API입니다.
+	 *
+	 * @param coordinateDto 좌표 DTO : latitude(위도), longitude(경도)를 double 타입으로 받습니다.
+	 * @return json의 data node에 주소명이 들어갑니다.
+	 */
 	@PostMapping("/name")
 	public ResponseEntity<ApiResponse<String>> getLocationName(@RequestBody @Valid CoordinateDto coordinateDto) {
 		String result = locationService.getLocationNameByCoord(coordinateDto);
