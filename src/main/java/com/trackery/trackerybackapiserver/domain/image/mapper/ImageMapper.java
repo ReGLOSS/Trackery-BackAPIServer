@@ -26,5 +26,9 @@ public interface ImageMapper {
 	 */
 	List<String> selectPublicImageFiles();
 
+	/**
+	 * 이미지의 메타데이터를 DB에 삽입합니다.
+	 * @param image 이미지 엔티티 객체
+	 */
 	void insertImage(Image image);
 }

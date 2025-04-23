@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
  * fileName       : ImageUploadController
  * author         : durururuk
  * date           : 25. 4. 21.
- * description    : 
+ * description    : 이미지 업로드 관련 API를 담고 있는 RestController 클래스
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -34,12 +34,23 @@ import lombok.RequiredArgsConstructor;
 public class ImageUploadController {
 	private final ImageUploadService imageUploadService;
 
+	/**
+	 * S3 Object Put Presigned URL을 요청하는 API입니다.
+	 * @param imageFileName Object Key가 될 이미지 파일명
+	 * @return 성공 시 data node에 S3 PresignedPutUrl을 반환합니다.
+	 */
 	@GetMapping("/presigned-url/put")
 	public ResponseEntity<ApiResponse<String>> requestPreSignedPutUrl(@RequestParam String imageFileName) {
 		String result = imageUploadService.getPresignedPutUrl(imageFileName);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 
+	/**
+	 * 이미지 메타데이터를 DB에 삽입 요청하는 API입니다.
+	 * @param userDetails 업로드를 하는 유저 인증 정보
+	 * @param imageUploadDto 이미지 메타데이터 DTO
+	 * @return 성공 시 추가로 반환되는 데이터는 없습니다.
+	 */
 	@PostMapping
 	public ResponseEntity<ApiResponse<String>> saveImageMetaData(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ImageUploadDto imageUploadDto) {
 		imageUploadService.saveImage(userDetails.getUserId(), imageUploadDto);
