@@ -37,6 +37,11 @@ public class LocationService {
 	private final LocationMapper locationMapper;
 	private final GeometryFactory geometryFactory = new GeometryFactory();
 
+	/**
+	 * 좌표로 시도 + 시군구 주소를 조회하는 메서드입니다.
+	 * @param coordinateDto 좌표 DTO : latitude(위도), longitude(경도) 둘 다 double 타입입니다.
+	 * @return : 시도 + 시군구 주소를 String으로 반환합니다 (예시 : 부산광역시 수영구)
+	 */
 	public String getLocationNameByCoord(CoordinateDto coordinateDto) {
 		JusoSigungu sigungu = locationMapper.findByCoord(coordinateDto).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND)
@@ -45,17 +50,32 @@ public class LocationService {
 		return String.format("%s %s", sigungu.getSido().getSidoName(), sigungu.getSigunguName());
 	}
 
+	/**
+	 * 좌표로 Point 타입 객체를 반환하는 메서드입니다.
+	 * @param coordinateDto : 좌표 DTO
+	 * @return : jts 라이브러리의 Point 객체
+	 */
 	public Point getPointByCoord(CoordinateDto coordinateDto) {
 		Coordinate coordinate = new Coordinate(coordinateDto.longitude(), coordinateDto.latitude());
 		return geometryFactory.createPoint(coordinate);
 	}
 
+	/**
+	 * Point 객체로 시군구 엔티티를 반환합니다.
+	 * @param point : Point 객체
+	 * @return : JusoSigungu (시군구 ID, 이름, 시도 ID, 이름을 담고 있는 엔티티 객체)
+	 */
 	public JusoSigungu getSigunguByPoint(Point point) {
 		return locationMapper.findByPoint(point).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND)
 		);
 	}
 
+	/**
+	 * 좌표 객체 CoordinatePoint 객체를 생성하고 DB에 삽입하는 메서드입니다.
+	 * @param coordinateDto 좌표 DTO
+	 * @return DB에서 자동으로 할당된 ID를 포함하는 CoordinatePoint 객체
+	 */
 	@Transactional
 	public CoordinatePoint insertCoordinatePoint(CoordinateDto coordinateDto) {
 		Point point = getPointByCoord(coordinateDto);

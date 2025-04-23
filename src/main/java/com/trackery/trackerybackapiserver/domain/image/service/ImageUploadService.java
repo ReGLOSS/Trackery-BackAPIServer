@@ -47,7 +47,7 @@ public class ImageUploadService {
 		return s3Service.generatePreSignedPutUrl(imageFileName);
 	}
 
-	public void isImage(String imageFileName) {
+	private void isImage(String imageFileName) {
 		List<String> imageExtensions = List.of("jpg", "jpeg", "png", "webp");
 
 		String extension = imageFileName.substring(imageFileName.lastIndexOf(".") + 1).toLowerCase();
@@ -57,23 +57,28 @@ public class ImageUploadService {
 		}
 	}
 
+	private LocalDateTime parseDateString(String dateString) {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy / M / d");
+
+		LocalDate date = LocalDate.parse(dateString, formatter);
+
+		return date.atStartOfDay();
+	}
+
+	private int convertIsPublicToInt(boolean isPublic) {
+		if (isPublic) {
+			return 1;
+		} else {
+			return 0;
+		}
+	}
+
 	@Transactional
 	public void saveImage(Long userId, ImageUploadDto imageUploadDto) {
 		CoordinateDto coordinateDto = new CoordinateDto(imageUploadDto.getLatitude(), imageUploadDto.getLongitude());
 		CoordinatePoint coordinatePoint = locationService.insertCoordinatePoint(coordinateDto);
-		int isPublic;
-
-		if (imageUploadDto.isPublic()) {
-			isPublic = 1;
-		} else {
-			isPublic = 0;
-		}
-
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy / M / d");
-
-		LocalDate date = LocalDate.parse(imageUploadDto.getDateString(), formatter);
-
-		LocalDateTime dateTime = date.atStartOfDay();
+		int isPublic = convertIsPublicToInt(imageUploadDto.isPublic());
+		LocalDateTime dateTime = parseDateString(imageUploadDto.getDateString());
 
 		Image image = Image.builder()
 			.coordPoint(coordinatePoint)
