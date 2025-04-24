@@ -9,7 +9,7 @@ import lombok.Setter;
  * fileName       : JusoSido
  * author         : durururuk
  * date           : 25. 4. 15.
- * description    : 
+ * description    : 시/도 ID, 이름을 담는 엔티티입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------

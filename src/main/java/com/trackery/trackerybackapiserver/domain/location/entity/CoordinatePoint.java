@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
  * fileName       : CoordinatePoint
  * author         : durururuk
  * date           : 25. 4. 15.
- * description    : 
+ * description    : 좌표 엔티티 객체입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------

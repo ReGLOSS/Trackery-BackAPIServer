@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
  * fileName       : LocationController
  * author         : durururuk
  * date           : 25. 4. 15.
- * description    : 
+ * description    : 위치 서비스 관련 API를 담당하는 컨트롤러 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------

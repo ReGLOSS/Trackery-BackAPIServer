@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
  * fileName       : ImageUploadDto
  * author         : durururuk
  * date           : 25. 4. 17.
- * description    : 
+ * description    : 이미지를 업로드하기 위해 필요한 메타데이터를 담당하는 DTO
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
