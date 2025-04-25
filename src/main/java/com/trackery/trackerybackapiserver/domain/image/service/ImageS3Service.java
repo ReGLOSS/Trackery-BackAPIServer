@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.aws.service;
+package com.trackery.trackerybackapiserver.domain.image.service;
 
 import java.time.Duration;
 
@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -25,20 +28,23 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
  * 25. 4. 21.		durururuk		최초 생성
  */
 @Slf4j
-@Service("imageUploadS3ServiceImpl")
+@Service
 @RequiredArgsConstructor
-public class ImageUploadS3ServiceImpl implements S3Service {
+public class ImageS3Service {
 	private final S3Presigner s3Presigner;
+	private final S3Client s3Client;
 
 	@Value("${aws.bucketName}")
 	private String bucketName;
+
+	private static final String TEMP_FOLDER = "temp/";
+	private static final String IMAGES_FOLDER = "images/";
 
 	/**
 	 * Object Get Presigned URL을 요청하는 메서드
 	 * @param objectKey 조회할 Object Key
 	 * @return PresignedGetUrl
 	 */
-	@Override
 	public String generatePreSignedGetUrl(String objectKey) {
 		GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
 			.signatureDuration(java.time.Duration.ofMinutes(10))
@@ -56,9 +62,8 @@ public class ImageUploadS3ServiceImpl implements S3Service {
 	 * @param objectKey 추가될 Object의 key
 	 * @return PresignedPutURL
 	 */
-	@Override
 	public String generatePreSignedPutUrl(String objectKey) {
-		String keyWithTempFolder = "temp/" + objectKey;
+		String keyWithTempFolder = TEMP_FOLDER + objectKey;
 
 		PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
 			.signatureDuration(Duration.ofMinutes(10))
@@ -67,5 +72,28 @@ public class ImageUploadS3ServiceImpl implements S3Service {
 
 		PresignedPutObjectRequest pregisnedRequest = s3Presigner.presignPutObject(presignRequest);
 		return pregisnedRequest.url().toString();
+	}
+
+	/**
+	 * 이미지를 임시 폴더에서 이미지 폴더로 옮기는 메서드입니다.
+	 * 직접적인 이동이 불가능하기 때문에 images 폴더로 복사 후 temp 폴더의 객체를 지우는 방식으로 되어있습니다.
+	 * @param objectKey 이동할 objectKey
+	 */
+	public void moveObjectTempToImageFolder(String objectKey) {
+		CopyObjectRequest copyObjectRequest = CopyObjectRequest.builder()
+			.sourceBucket(bucketName)
+			.sourceKey(TEMP_FOLDER + objectKey)
+			.destinationBucket(bucketName)
+			.destinationKey(IMAGES_FOLDER + objectKey)
+			.build();
+
+		s3Client.copyObject(copyObjectRequest);
+
+		DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+			.bucket(bucketName)
+			.key(TEMP_FOLDER + objectKey)
+			.build();
+
+		s3Client.deleteObject(deleteObjectRequest);
 	}
 }

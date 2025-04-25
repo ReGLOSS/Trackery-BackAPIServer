@@ -9,7 +9,6 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trackery.trackerybackapiserver.domain.aws.service.S3Service;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.dto.upload.ImageUploadDto;
@@ -39,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ImageUploadService {
 	private final ImageMapper imageMapper;
 	private final LocationService locationService;
-	private final S3Service imageUploadS3ServiceImpl;
+	private final ImageS3Service imageS3Service;
 
 	/**
 	 * S3에 Object Put Presigned URL을 요청하는 메서드입니다.
@@ -49,7 +48,7 @@ public class ImageUploadService {
 	public String getPresignedPutUrl(String imageFileName) {
 		isImage(imageFileName);
 
-		return imageUploadS3ServiceImpl.generatePreSignedPutUrl(imageFileName);
+		return imageS3Service.generatePreSignedPutUrl(imageFileName);
 	}
 
 	/**
@@ -120,6 +119,8 @@ public class ImageUploadService {
 			.build();
 
 		imageMapper.insertImage(image);
+
+		imageS3Service.moveObjectTempToImageFolder(image.getImageFile());
 
 		return image;
 	}
