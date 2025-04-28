@@ -16,6 +16,7 @@ import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserProfileDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
@@ -150,5 +151,17 @@ public class UserService {
 
 		return new DetailedUserInfoDto(user.getUserId(), user.getRoleId(), user.getUserName(), user.getNickname(),
 			user.getEmail(), oAuthList);
+	}
+
+	public UserProfileDto getUserProfile(Long userId) {
+		User user = userMapper.findByUserId(userId)
+			.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+
+		return new UserProfileDto(
+			user.getUserId(),
+			user.getUserName(),
+			user.getNickname(),
+			user.getUserProfile()
+		);
 	}
 }

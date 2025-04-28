@@ -19,6 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
@@ -26,6 +28,7 @@ import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserNameAvailabilityResponseDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.UserProfileDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserRegisterDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
@@ -47,25 +50,21 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  25. 2. 14.        durururuk       최초 생성
  25. 4. 09.		   durururuk	   유저 상세정보 서비스 테스트 코드 작성
  25. 4. 10.		   durururuk	   인증 기반 비밀번호 변경 서비스 단위테스트 코드 작성
+ 25. 4. 27.		   inari	       사이드탭 추가용 서비스 단위테스트 코드 작성
  */
 
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
-	@InjectMocks
-	private UserService userService;
-
-	@Mock
-	private UserMapper userMapper;
-
-	@Mock
-	private UserRoleMapper userRoleMapper;
-
 	@Spy
 	UserRegisterDto registerDto;
-
 	@Spy
 	UserLoginDto loginDto;
-
+	@InjectMocks
+	private UserService userService;
+	@Mock
+	private UserMapper userMapper;
+	@Mock
+	private UserRoleMapper userRoleMapper;
 	@Mock
 	private JwtService jwtService;
 
@@ -234,6 +233,59 @@ class UserServiceTest {
 			verify(userMapper, times(1)).findByUserId(1L);
 			verify(oAuthMapper, times(1)).findByUserId(1L);
 
+		}
+	}
+
+	@Nested
+	@DisplayName("유저 프로필 정보 조회 테스트")
+	class getUserProfileTest {
+		private User user;
+
+		@BeforeEach
+		void setUp() {
+			user = User.builder()
+				.userName("abcdefg")
+				.nickname("김커피")
+				.userProfile("profile-url")
+				.build();
+
+			ReflectionTestUtils.setField(user, "userId", 1L);
+		}
+
+		@Test
+		@DisplayName("성공")
+		void success() {
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+
+			UserProfileDto expect = new UserProfileDto(
+				1L,
+				"abcdefg",
+				"김커피",
+				"profile-url"
+			);
+
+			UserProfileDto result = userService.getUserProfile(1L);
+
+			assertEquals(expect.getUserId(), result.getUserId());
+			assertEquals(expect.getUserName(), result.getUserName());
+			assertEquals(expect.getNickname(), result.getNickname());
+			assertEquals(expect.getUserProfile(), result.getUserProfile());
+
+			verify(userMapper, times(1)).findByUserId(1L);
+		}
+
+		@Test
+		@DisplayName("실패 - 사용자 없음")
+		void fail_userNotFound() {
+			when(userMapper.findByUserId(99L)).thenReturn(Optional.empty());
+
+			ApiException exception = assertThrows(
+				ApiException.class,
+				() -> userService.getUserProfile(99L)
+			);
+
+			assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+			verify(userMapper, times(1)).findByUserId(99L);
 		}
 	}
 }
