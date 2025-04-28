@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.home.controller;
+package com.trackery.trackerybackapiserver.domain.image.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
-import com.trackery.trackerybackapiserver.domain.home.dto.LandingImagesResponse;
-import com.trackery.trackerybackapiserver.domain.home.service.ImageService;
+import com.trackery.trackerybackapiserver.domain.image.dto.LandingImagesResponse;
+import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 
 import lombok.RequiredArgsConstructor;
 

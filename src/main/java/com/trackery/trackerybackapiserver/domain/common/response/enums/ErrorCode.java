@@ -136,10 +136,10 @@ public enum ErrorCode {
 
 	BAD_REQUEST_INVALID_PASSWORD(HttpStatus.BAD_REQUEST, 400, "비밀번호가 일치하지 않습니다."),
 
-	BAD_REQUEST_SAME_UPDATE(HttpStatus.BAD_REQUEST, 400, "같은 내용으로는 변경할 수 없습니다.")
+	BAD_REQUEST_SAME_UPDATE(HttpStatus.BAD_REQUEST, 400, "같은 내용으로는 변경할 수 없습니다."),
+
+	BAD_REQUEST_INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, 400, "허용된 이미지 파일이 아닙니다.")
 	;
-
-
 
 	/**
 	 * HTTP 상태 코드

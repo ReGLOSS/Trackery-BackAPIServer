@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.home.service;
+package com.trackery.trackerybackapiserver.domain.image.service;
 
 import java.util.List;
 
@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.home.mapper.ImagesMapper;
+import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,8 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @RequiredArgsConstructor
 public class ImageService {
-
-	private final ImagesMapper imagesMapper;
+	private final ImageMapper imageMapper;
 
 	/**
 	 * 공개된 이미지 URL 목록을 조회합니다.
@@ -44,7 +43,7 @@ public class ImageService {
 	public List<String> getPublicImageUrls() {
 		log.info("공개된 이미지의 주소들을 가져옵니다.");
 
-		List<String> images = imagesMapper.selectPublicImageFiles();
+		List<String> images = imageMapper.selectPublicImageFiles();
 
 		if (images == null || images.isEmpty()) {
 			throw new ApiException(ErrorCode.NOT_FOUND_IMAGE);

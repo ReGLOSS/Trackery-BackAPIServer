@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.trackery.trackerybackapiserver.domain.location.mapper.LocationMapper">
+    <resultMap id="JusoSigunguMap" type="com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu">
+        <id property="sigunguId" column="sgg_id" />
+        <result property="sigunguName" column="sgg_name" />
+
+        <association property="sido" javaType="com.trackery.trackerybackapiserver.domain.location.entity.JusoSido">
+            <id property="sidoId" column="sd_id" />
+            <result property="sidoName" column="sd_name" />
+        </association>
+    </resultMap>
+
+    <resultMap id="CoordinatePointMap" type="com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint">
+        <id property="coordinatePointId" column="coord_point_id" />
+        <result property="coordinatePointName" column="coord_point_name" />
+        <result property="coordinatePointDetail" column="coord_point_detail" />
+        <result property="coordinatePointPoint" column="coord_point_point" />
+        <result property="coordinatePointType" column="coord_point_type" />
+        <result property="firstRegisteredDate" column="first_reg_dt" />
+        <result property="lastModifiedDate" column="last_mod_dt" />
+
+        <association property="sigungu" javaType="com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu">
+            <id property="sigunguId" column="sgg_id" />
+            <result property="sigunguName" column="sgg_name" />
+
+            <association property="sido" javaType="com.trackery.trackerybackapiserver.domain.location.entity.JusoSido">
+                <id property="sidoId" column="sd_id" />
+                <result property="sidoName" column="sd_name" />
+            </association>
+        </association>
+    </resultMap>
+
+    <select id="findByCoord" parameterType="com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto" resultMap="JusoSigunguMap">
+        SELECT
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM juso_sigungu sgg
+                 JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE ST_Contains(
+                      sgg.sgg_border,
+                      ST_GeomFromText(CONCAT('POINT(', #{latitude}, ' ', #{longitude}, ')'), 4326)
+              )
+        LIMIT 1
+    </select>
+
+    <select id="findByPoint" parameterType="org.locationtech.jts.geom.Point" resultMap="JusoSigunguMap">
+        SELECT
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM juso_sigungu sgg JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE ST_Contains(
+              sgg.sgg_border,
+              #{point}
+              )
+    </select>
+
+    <insert id="insertCoordinatePoint" useGeneratedKeys="true" keyProperty="coordinatePointId" parameterType="com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint">
+        INSERT INTO coord_poi (
+        coord_point_name,
+        coord_point_point,
+        coord_point_type,
+        first_reg_dt,
+        last_mod_dt,
+        sgg_id
+        )
+        VALUES (
+        #{coordinatePointName},
+        #{coordinatePointPoint},
+        #{coordinatePointType},
+        #{firstRegisteredDate},
+        #{lastModifiedDate},
+        #{sigungu.sigunguId}
+        );
+    </insert>
+</mapper>

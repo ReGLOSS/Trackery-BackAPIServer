@@ -133,6 +133,17 @@
 			<artifactId>spring-boot-starter-thymeleaf</artifactId>
 			<version>3.4.3</version>
 		</dependency>
+		<dependency>
+			<groupId>org.locationtech.jts</groupId>
+			<artifactId>jts-core</artifactId>
+			<version>1.20.0</version>
+		</dependency>
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<version>2.31.25</version>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
