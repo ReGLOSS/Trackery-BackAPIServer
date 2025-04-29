@@ -22,6 +22,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.image.service.ImageS3Service;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
@@ -67,6 +68,8 @@ class UserServiceTest {
 	private UserRoleMapper userRoleMapper;
 	@Mock
 	private JwtService jwtService;
+	@Mock
+	private ImageS3Service imageS3Service;
 
 	@Mock
 	private OAuthMapper oAuthMapper;
@@ -246,22 +249,23 @@ class UserServiceTest {
 			user = User.builder()
 				.userName("abcdefg")
 				.nickname("김커피")
-				.userProfile("profile-url")
+				.userProfile("profilePic-object-key")
 				.build();
 
 			ReflectionTestUtils.setField(user, "userId", 1L);
 		}
 
 		@Test
-		@DisplayName("성공")
-		void success() {
+		@DisplayName("성공 - 프로필 사진이 업로드 돼있던 경우")
+		void success_1() {
 			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			when(imageS3Service.generatePreSignedGetUrl("profilePic-object-key")).thenReturn("profilePic-Presigned-url");
 
 			UserProfileDto expect = new UserProfileDto(
 				1L,
 				"abcdefg",
 				"김커피",
-				"profile-url"
+				"profilePic-Presigned-url"
 			);
 
 			UserProfileDto result = userService.getUserProfile(1L);
@@ -272,6 +276,38 @@ class UserServiceTest {
 			assertEquals(expect.getUserProfilePic(), result.getUserProfilePic());
 
 			verify(userMapper, times(1)).findByUserId(1L);
+			verify(imageS3Service, times(1)).generatePreSignedGetUrl("profilePic-object-key");
+		}
+
+		@Test
+		@DisplayName("성공 - 프로필 사진이 업로드 돼있지 않은 경우")
+		void success_2() {
+			User userWithoutProfilePic = User.builder()
+				.userName("abcdefg")
+				.nickname("김커피")
+				.userProfile(null)
+				.build();
+
+			ReflectionTestUtils.setField(userWithoutProfilePic, "userId", 1L);
+
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(userWithoutProfilePic));
+
+			UserProfileDto expect = new UserProfileDto(
+				1L,
+				"abcdefg",
+				"김커피",
+				null
+			);
+
+			UserProfileDto result = userService.getUserProfile(1L);
+
+			assertEquals(expect.getUserId(), result.getUserId());
+			assertEquals(expect.getUserName(), result.getUserName());
+			assertEquals(expect.getNickname(), result.getNickname());
+			assertEquals(expect.getUserProfilePic(), result.getUserProfilePic());
+
+			verify(userMapper, times(1)).findByUserId(1L);
+			verify(imageS3Service, times(0)).generatePreSignedGetUrl(anyString());
 		}
 
 		@Test
