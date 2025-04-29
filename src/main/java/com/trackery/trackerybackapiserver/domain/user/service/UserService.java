@@ -10,6 +10,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.image.service.ImageS3Service;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
@@ -52,6 +53,7 @@ public class UserService {
 	private final JwtService jwtService;
 	private final UserRoleMapper userRoleMapper;
 	private final OAuthMapper oAuthMapper;
+	private final ImageS3Service imageS3Service;
 
 	/**
 	 * 회원가입 정보를 담아서 db에 인서트하는 메서드입니다.
@@ -153,15 +155,28 @@ public class UserService {
 			user.getEmail(), oAuthList);
 	}
 
+	/**
+	 * 사이트 헤더에 사용될 유저 프로필 기본 정보를 반환하는 메서드입니다.
+	 * 유저가 등록해둔 프로필 사진이 있다면 S3에 Presigned URL을 요청해서 userProfilePic에 할당하고,
+	 * 그렇지 않다면 userProfilePic은 null을 할당합니다.
+	 * @param userId  유저 ID
+	 * @return 유저 프로필 정보를 담은 DTO
+	 */
 	public UserProfileDto getUserProfile(Long userId) {
 		User user = userMapper.findByUserId(userId)
 			.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+
+		String userProfilePicPresignedUrl = null;
+
+		if (user.getUserProfile() != null) {
+			userProfilePicPresignedUrl = imageS3Service.generatePreSignedGetUrl(user.getUserProfile());
+		}
 
 		return new UserProfileDto(
 			user.getUserId(),
 			user.getUserName(),
 			user.getNickname(),
-			user.getUserProfile()
+			userProfilePicPresignedUrl
 		);
 	}
 }

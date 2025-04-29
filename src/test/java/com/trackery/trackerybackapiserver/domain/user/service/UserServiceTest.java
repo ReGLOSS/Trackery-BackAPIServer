@@ -269,7 +269,7 @@ class UserServiceTest {
 			assertEquals(expect.getUserId(), result.getUserId());
 			assertEquals(expect.getUserName(), result.getUserName());
 			assertEquals(expect.getNickname(), result.getNickname());
-			assertEquals(expect.getUserProfile(), result.getUserProfile());
+			assertEquals(expect.getUserProfilePic(), result.getUserProfilePic());
 
 			verify(userMapper, times(1)).findByUserId(1L);
 		}
