@@ -5,11 +5,15 @@ import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -46,6 +50,8 @@ public class ImageS3Service {
 	 * @return PresignedGetUrl
 	 */
 	public String generatePreSignedGetUrl(String objectKey) {
+		isObjectExist(objectKey);
+
 		GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
 			.signatureDuration(java.time.Duration.ofMinutes(10))
 			.getObjectRequest(getObjectRequest -> getObjectRequest.bucket(bucketName).key(objectKey))
@@ -80,11 +86,16 @@ public class ImageS3Service {
 	 * @param objectKey 이동할 objectKey
 	 */
 	public void moveObjectTempToImageFolder(String objectKey) {
+		String sourceKey = TEMP_FOLDER + objectKey;
+		String destinationKey = IMAGES_FOLDER + objectKey;
+
+		isObjectExist(sourceKey);
+
 		CopyObjectRequest copyObjectRequest = CopyObjectRequest.builder()
 			.sourceBucket(bucketName)
-			.sourceKey(TEMP_FOLDER + objectKey)
+			.sourceKey(sourceKey)
 			.destinationBucket(bucketName)
-			.destinationKey(IMAGES_FOLDER + objectKey)
+			.destinationKey(destinationKey)
 			.build();
 
 		s3Client.copyObject(copyObjectRequest);
@@ -95,5 +106,22 @@ public class ImageS3Service {
 			.build();
 
 		s3Client.deleteObject(deleteObjectRequest);
+	}
+
+	/**
+	 * Key 값을 가지는 객체가 있는지 확인합니다.
+	 * @param objectKey 객체 Key 값
+	 */
+	private void isObjectExist(String objectKey) {
+		try {
+			s3Client.headObject(headObjectRequest -> headObjectRequest.bucket(bucketName).key(objectKey));
+
+		} catch (NoSuchKeyException noSuchKeyException) {
+			throw new ApiException(ErrorCode.NOT_FOUND_IMAGE_OBJECT_KEY);
+
+		} catch (Exception e) {
+			log.info(e.getMessage());
+			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
 	}
 }
