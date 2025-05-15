@@ -9,7 +9,12 @@ import org.springframework.stereotype.Service;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
+import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
+import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
+import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class ImageService {
 	private final ImageMapper imageMapper;
+	private final ImageS3Service imageS3Service;
 
 	/**
 	 * 공개된 이미지 URL 목록을 조회합니다.
@@ -59,5 +65,40 @@ public class ImageService {
 	@CacheEvict(value = "publicImageUrls", allEntries = true)
 	public void evictImageCache() {
 		log.info("공개된 이미지 주소들을 삭제합니다.");
+	}
+
+	public ImageDto getImageByImageId(Long imageId) {
+		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
+
+		return convertImageToImageDto(image);
+	}
+
+	public List<ImageDto> getImageListByUserId(Long userId) {
+		return imageMapper.findImagesByUserId(userId).stream()
+			.map(this::convertImageToImageDto)
+			.toList();
+	}
+
+	private ImageDto convertImageToImageDto(Image image) {
+		String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageFile());
+
+		CoordinatePoint coordPoint = image.getCoordPoint();
+		LocationInfoDto locationInfoDto = LocationUtil.getLocationInfoByCoordinatePoint(coordPoint);
+
+		return ImageDto.builder()
+			.imageId(image.getImageId())
+			.userId(image.getUserId())
+			.imageRegDate(image.getImageRegDate())
+			.sdName(locationInfoDto.sidoName())
+			.sggName(locationInfoDto.sigunguName())
+			.latitude(locationInfoDto.latitude())
+			.longitude(locationInfoDto.longitude())
+			.imageName(image.getImageName())
+			.imageContent(image.getImageContent())
+			.imageDate(image.getImageDate())
+			.isPublic(image.getIsPublic())
+			.imageUrl(imagePresignedUrl)
+			.build();
 	}
 }

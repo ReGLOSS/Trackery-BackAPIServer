@@ -1,15 +1,16 @@
 package com.trackery.trackerybackapiserver.domain.album.dto;
 
-import jakarta.validation.constraints.NotBlank;
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.album.dto
- * fileName       : AlbumRegisterDto
+ * fileName       : AlbumImageListDto
  * author         : durururuk
  * date           : 25. 5. 14.
- * description    : 앨범 생성에 필요한 정보를 담는 DTO
+ * description    : 
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -17,14 +18,7 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @NoArgsConstructor
-public class AlbumRegisterDto {
-	/**
-	 * albumTitle : 앨범 제목
-	 * albumDescription : 앨범 설명
-	 * isPublic : 공개 여부
-	 */
-	@NotBlank
-	private String albumTitle;
-	private String albumDescription;
-	private boolean isPublic;
+public class AlbumImageListDto {
+	private List<Long> imageIdList;
+	private Long thumbnailImageId;
 }

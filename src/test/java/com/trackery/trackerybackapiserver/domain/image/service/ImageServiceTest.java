@@ -35,7 +35,8 @@ class ImageServiceTest {
 	@BeforeEach
 	void setUp() {
 		imageMapper = mock(ImageMapper.class);
-		imageService = new ImageService(imageMapper);
+		ImageS3Service imageS3Service = mock(ImageS3Service.class);
+		imageService = new ImageService(imageMapper, imageS3Service);
 	}
 
 	@Test
