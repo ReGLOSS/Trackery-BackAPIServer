@@ -50,11 +50,13 @@ public class ImageS3Service {
 	 * @return PresignedGetUrl
 	 */
 	public String generatePreSignedGetUrl(String objectKey) {
-		isObjectExist(objectKey);
+		String imageObjectKeyWithImageFolder = IMAGES_FOLDER + objectKey;
+		isObjectExist(imageObjectKeyWithImageFolder);
 
 		GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
 			.signatureDuration(java.time.Duration.ofMinutes(10))
-			.getObjectRequest(getObjectRequest -> getObjectRequest.bucket(bucketName).key(objectKey))
+			.getObjectRequest(
+				getObjectRequest -> getObjectRequest.bucket(bucketName).key(imageObjectKeyWithImageFolder))
 			.build();
 
 		PresignedGetObjectRequest pregisnedRequest = s3Presigner.presignGetObject(presignRequest);

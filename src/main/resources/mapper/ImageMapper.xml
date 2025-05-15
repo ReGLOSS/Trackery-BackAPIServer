@@ -11,17 +11,26 @@
         <result property="isPublic" column="is_public"/>
         <result property="isDeleted" column="is_deleted"/>
         <result property="imageType" column="image_type"/>
-        <result property="imageContents" column="image_contents"/>
+        <result property="imageContent" column="image_contents"/>
         <result property="imageDate" column="image_date"/>
         <result property="imageRegDate" column="image_reg_date"/>
-        <association property="coordPoint"
-                     javaType="com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint">
-            <id property="coordinatePointId" column="coord_point_id"/>
-            <result property="coordinatePointDetail" column="coord_point_detail"/>
-            <result property="coordinatePointPoint" column="coord_point_point"/>
-        </association>
-        <association property="user" javaType="com.trackery.trackerybackapiserver.domain.user.entity.User">
-            <id property="userId" column="user_id"/>
+        <result property="userId" column="user_id"/>
+        <association property="coordPoint" javaType="com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint">
+            <id property="coordinatePointId" column="coord_point_id" />
+            <result property="coordinatePointName" column="coord_point_name" />
+            <result property="coordinatePointDetail" column="coord_point_detail" />
+            <result property="coordinatePointPoint" column="coord_point_point" />
+            <result property="coordinatePointType" column="coord_point_type" />
+            <result property="firstRegisteredDate" column="first_reg_dt" />
+            <result property="lastModifiedDate" column="last_mod_dt" />
+            <association property="sigungu" javaType="com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu">
+                <id property="sigunguId" column="sgg_id" />
+                <result property="sigunguName" column="sgg_name" />
+                <association property="sido" javaType="com.trackery.trackerybackapiserver.domain.location.entity.JusoSido">
+                    <id property="sidoId" column="sd_id" />
+                    <result property="sidoName" column="sd_name" />
+                </association>
+            </association>
         </association>
     </resultMap>
 
@@ -35,7 +44,8 @@
         LIMIT 30
     </select>
 
-    <insert id="insertImage" parameterType="com.trackery.trackerybackapiserver.domain.image.entity.Image" useGeneratedKeys="true" keyProperty="imageId">
+    <insert id="insertImage" parameterType="com.trackery.trackerybackapiserver.domain.image.entity.Image"
+            useGeneratedKeys="true" keyProperty="imageId">
         INSERT INTO image (image_name,
                            image_file,
                            is_public,
@@ -57,4 +67,34 @@
                 #{coordPoint.coordinatePointId},
                 #{userId})
     </insert>
+
+    <select id="findImageByImageId" resultMap="ImageMap">
+        SELECT i.*,
+               cp.*,
+               sgg.sgg_id,
+               sgg.sgg_name,
+               sd.sd_id,
+               sd.sd_name
+        FROM image i
+                 LEFT JOIN coord_poi cp ON i.coord_point_id = cp.coord_point_id
+                 LEFT JOIN juso_sigungu sgg ON cp.sgg_id = sgg.sgg_id
+                 LEFT JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE i.image_id = #{imageId}
+          AND i.is_deleted = 0
+    </select>
+
+    <select id="findImagesByUserId" resultMap="ImageMap">
+        SELECT i.*,
+               cp.*,
+               sgg.sgg_id,
+               sgg.sgg_name,
+               sd.sd_id,
+               sd.sd_name
+        FROM image i
+                 LEFT JOIN coord_poi cp ON i.coord_point_id = cp.coord_point_id
+                 LEFT JOIN juso_sigungu sgg ON cp.sgg_id = sgg.sgg_id
+                 LEFT JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE i.user_id = #{userId}
+          AND i.is_deleted = 0
+    </select>
 </mapper>

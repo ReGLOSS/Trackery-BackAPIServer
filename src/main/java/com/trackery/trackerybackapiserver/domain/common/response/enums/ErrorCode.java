@@ -140,7 +140,7 @@ public enum ErrorCode {
 
 	BAD_REQUEST_INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, 400, "허용된 이미지 파일이 아닙니다."),
 
-	NOT_FOUND_IMAGE_OBJECT_KEY(HttpStatus.NOT_FOUND, 404, "해당 이미지를 찾을 수 없습니다.");
+	NOT_FOUND_IMAGE_OBJECT_KEY(HttpStatus.NOT_FOUND, 404, "S3에서 해당 이미지를 찾을 수 없습니다.");
 
 	/**
 	 * HTTP 상태 코드

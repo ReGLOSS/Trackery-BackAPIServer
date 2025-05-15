@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 
@@ -33,7 +34,7 @@ public interface ImageMapper {
 	 */
 	void insertImage(Image image);
 
-	Optional<Image> findImageByImageId(Long imageId);
+	Optional<Image> findImageByImageId(@Param("imageId") Long imageId);
 
-	List<Image> findImagesByUserId(Long userId);
+	List<Image> findImagesByUserId(@Param("userId") Long userId);
 }
