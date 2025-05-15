@@ -19,5 +19,6 @@ import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 @Mapper
 public interface AlbumMapper {
 	public Album saveAlbum(Album album);
+
 	public AlbumImage saveAlbumImage(AlbumImage albumImage);
 }

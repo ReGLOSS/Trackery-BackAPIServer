@@ -42,7 +42,8 @@ public class ImageController {
 	}
 
 	@GetMapping("/me")
-	public ResponseEntity<ApiResponse<List<ImageDto>>> getMyImages(@AuthenticationPrincipal CustomUserDetails userDetails) {
+	public ResponseEntity<ApiResponse<List<ImageDto>>> getMyImages(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		List<ImageDto> imageDtoList = imageService.getImageListByUserId(userDetails.getUserId());
 
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDtoList));

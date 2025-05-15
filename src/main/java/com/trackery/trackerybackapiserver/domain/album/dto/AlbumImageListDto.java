@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * fileName       : AlbumImageListDto
  * author         : durururuk
  * date           : 25. 5. 14.
- * description    : 
+ * description    : 앨범 이미지 리스트 DTO
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
