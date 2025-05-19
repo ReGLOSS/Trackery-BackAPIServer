@@ -34,6 +34,11 @@ import lombok.RequiredArgsConstructor;
 public class ImageController {
 	private final ImageService imageService;
 
+	/**
+	 * 이미지 단건 조회 API
+	 * @param imageId 이미지 ID
+	 * @return 이미지 정보 DTO
+	 */
 	@GetMapping
 	public ResponseEntity<ApiResponse<ImageDto>> getImageDto(@RequestParam Long imageId) {
 		ImageDto imageDto = imageService.getImageByImageId(imageId);
@@ -41,6 +46,11 @@ public class ImageController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDto));
 	}
 
+	/**
+	 * 현재 인증된 유저가 업로드한 이미지 다건 조회 API
+	 * @param userDetails 인증 유저 정보
+	 * @return 이미지 정보 DTO
+	 */
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<List<ImageDto>>> getMyImages(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
