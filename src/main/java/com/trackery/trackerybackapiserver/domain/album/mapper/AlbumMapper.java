@@ -3,7 +3,6 @@ package com.trackery.trackerybackapiserver.domain.album.mapper;
 import org.apache.ibatis.annotations.Mapper;
 
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
-import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.album.mapper
@@ -18,7 +17,5 @@ import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
  */
 @Mapper
 public interface AlbumMapper {
-	public Album saveAlbum(Album album);
-
-	public AlbumImage saveAlbumImage(AlbumImage albumImage);
+	void insertAlbum(Album album);
 }

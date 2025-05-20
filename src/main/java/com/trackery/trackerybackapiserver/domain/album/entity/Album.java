@@ -37,11 +37,11 @@ public class Album {
 	private Long thumbnailImageId;
 	private LocalDateTime albumRegDate;
 	private LocalDateTime albumModDate;
-	private boolean isPublic;
+	private Integer isPublic;
 
 	@Builder
 	public Album(Long userId, String albumTitle, String albumDescription, Long thumbnailImageId,
-		LocalDateTime albumRegDate, LocalDateTime albumModDate, boolean isPublic) {
+		LocalDateTime albumRegDate, LocalDateTime albumModDate, Integer isPublic) {
 		this.userId = userId;
 		this.albumTitle = albumTitle;
 		this.albumDescription = albumDescription;

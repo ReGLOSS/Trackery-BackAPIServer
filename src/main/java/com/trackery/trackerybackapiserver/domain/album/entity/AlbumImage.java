@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.album.entity;
 
+import com.trackery.trackerybackapiserver.domain.image.entity.Image;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -18,6 +20,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AlbumImage {
 	private Long albumImageId;
-	private Long albumId;
-	private Long imageId;
+	private Album album;
+	private Image image;
 }

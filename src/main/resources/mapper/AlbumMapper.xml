@@ -4,4 +4,20 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper">
+    <insert id="insertAlbum" parameterType="com.trackery.trackerybackapiserver.domain.album.entity.Album" useGeneratedKeys="true" keyProperty="albumId">
+        INSERT INTO album (user_id,
+                           album_title,
+                           album_description,
+                           thumbnail_image_id,
+                           album_reg_date,
+                           album_mod_date,
+                           is_public)
+        VALUES (#{userId},
+                #{albumTitle},
+                #{albumDescription},
+                #{thumbnailImageId},
+                #{albumRegDate},
+                #{albumModDate},
+                #{isPublic});
+    </insert>
 </mapper>

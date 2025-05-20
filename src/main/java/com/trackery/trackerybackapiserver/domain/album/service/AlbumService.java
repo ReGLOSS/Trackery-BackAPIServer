@@ -5,8 +5,7 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trackery.trackerybackapiserver.domain.album.dto.AlbumImageListDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.AlbumRegisterDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.AlbumCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 
@@ -31,24 +30,18 @@ import lombok.extern.slf4j.Slf4j;
 public class AlbumService {
 	private final AlbumMapper albumMapper;
 
-	public Long createAlbum(Long userId, AlbumRegisterDto albumRegisterDto) {
+	public void insertAlbum(Long userId, AlbumCreateRequestDto albumCreateRequestDto) {
 		Album album = Album.builder()
 			.userId(userId)
-			.albumTitle(albumRegisterDto.getAlbumTitle())
-			.albumDescription(albumRegisterDto.getAlbumDescription())
+			.albumTitle(albumCreateRequestDto.getAlbumTitle())
+			.albumDescription(albumCreateRequestDto.getAlbumDescription())
 			.albumRegDate(LocalDateTime.now())
 			.albumModDate(LocalDateTime.now())
-			.isPublic(albumRegisterDto.isPublic())
+			.isPublic(albumCreateRequestDto.getIsPublic())
 			.build();
 
-		albumMapper.saveAlbum(album);
+		albumMapper.insertAlbum(album);
 
 		log.info("앨범 생성 완료 userId : {}, albumId : {}", userId, album.getAlbumId());
-
-		return album.getAlbumId();
-	}
-
-	public void createAlbumImage(Long userId, Long albumId, AlbumImageListDto albumImageListDto) {
-
 	}
 }
