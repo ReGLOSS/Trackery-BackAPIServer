@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.album.dto;
+package com.trackery.trackerybackapiserver.domain.album.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
  * fileName       : AlbumRegisterDto
  * author         : durururuk
  * date           : 25. 5. 14.
- * description    : 앨범 생성에 필요한 정보를 담는 DTO
+ * description    : 앨범 생성 요청 DTO
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------

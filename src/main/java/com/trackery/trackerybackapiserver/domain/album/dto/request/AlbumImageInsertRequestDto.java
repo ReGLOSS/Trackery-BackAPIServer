@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.album.dto;
+package com.trackery.trackerybackapiserver.domain.album.dto.request;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
  * fileName       : AlbumImageInsertRequestDto
  * author         : durururuk
  * date           : 25. 5. 21.
- * description    : 
+ * description    : 앨범 이미지 추가 요청 DTO
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -20,6 +20,10 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class AlbumImageInsertRequestDto {
+	/**
+	 * albumId 앨범 ID
+	 * imageIdList 이미지 ID 리스트
+	 */
 	@NotNull
 	private Long albumId;
 	private List<Long> imageIdList;

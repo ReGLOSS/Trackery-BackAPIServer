@@ -18,6 +18,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class AlbumImage {
+	/**
+	 * albumImageId 앨범 이미지 ID
+	 * albumId : 앨범 ID
+	 * imageId : 이미지 ID
+	 */
 	private Long albumImageId;
 	private Long albumId;
 	private Long imageId;

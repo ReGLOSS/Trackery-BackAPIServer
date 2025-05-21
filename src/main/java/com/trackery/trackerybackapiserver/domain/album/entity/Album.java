@@ -28,7 +28,8 @@ public class Album {
 	 * thumnailImageId : 대표이미지 ID
 	 * albumRegDate : 앨범 등록 날짜
 	 * albumModDate : 앨범 최종 수정 날짜
-	 * isPublic : 공개 여부
+	 * isPublic : 공개 여부 (0 : 비공개, 1 : 공개)
+	 * isDeleted : 삭제 여부 (0 : 활성, 1 : 삭제)
 	 */
 	private Long albumId;
 	private Long userId;

@@ -7,9 +7,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.trackery.trackerybackapiserver.domain.album.dto.AlbumCreateRequestDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.AlbumImageInsertRequestDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.AlbumImageInsertResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageInsertRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;

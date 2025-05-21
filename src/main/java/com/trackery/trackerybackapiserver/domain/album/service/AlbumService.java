@@ -11,8 +11,8 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trackery.trackerybackapiserver.domain.album.dto.AlbumCreateRequestDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.AlbumImageInsertResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
@@ -43,6 +43,11 @@ public class AlbumService {
 	private final AlbumMapper albumMapper;
 	private final ImageMapper imageMapper;
 
+	/**
+	 * 앨범 생성 기능
+	 * @param userId 인증된 사용자 ID
+	 * @param albumCreateRequestDto 생성될 앨범 정보 DTO
+	 */
 	public void insertAlbum(Long userId, AlbumCreateRequestDto albumCreateRequestDto) {
 		Album album = Album.builder()
 			.userId(userId)
@@ -58,6 +63,19 @@ public class AlbumService {
 		log.info("앨범 생성 완료 userId : {}, albumId : {}", userId, album.getAlbumId());
 	}
 
+	/**
+	 * 앨범에 이미지 추가 기능
+	 * 1.ID로 앨범이 있는지 확인
+	 * 2.앨범 생성 유저와 요청 유저가 같은지 확인
+	 * 3.이미지가 존재하는지 확인
+	 * 4.이미지를 업로드한 유저와 요청한 유저가 같은지 확인
+	 * 5.이미지 추가
+	 * 6.DTO 반환
+	 * @param userId 인증된 사용자 ID
+	 * @param albumId 이미지를 추가할 앨범 ID
+	 * @param imageIdList 추가할 이미지 ID 리스트
+	 * @return 앨범 ID, 추가 성공한 이미지 ID, 실패한 이미지 ID, 이유를 담은 DTO
+	 */
 	public AlbumImageInsertResponseDto addImageIntoAlbum(Long userId, Long albumId, List<Long> imageIdList) {
 		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)

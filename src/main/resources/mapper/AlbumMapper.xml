@@ -42,6 +42,6 @@
     </insert>
 
     <select id="findByAlbumId" resultMap="AlbumResultMap">
-        SELECT * FROM album WHERE album_id = #{albumId}
+        SELECT * FROM album WHERE album_id = #{albumId} AND album.is_deleted = 0
     </select>
 </mapper>
