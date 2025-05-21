@@ -1,3 +1,4 @@
+
 package com.trackery.trackerybackapiserver.domain.album.entity;
 
 import lombok.Builder;

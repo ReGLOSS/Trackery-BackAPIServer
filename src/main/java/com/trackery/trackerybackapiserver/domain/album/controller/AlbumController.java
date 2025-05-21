@@ -1,3 +1,4 @@
+
 package com.trackery.trackerybackapiserver.domain.album.controller;
 
 import org.springframework.http.ResponseEntity;

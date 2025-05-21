@@ -1,3 +1,4 @@
+
 package com.trackery.trackerybackapiserver.domain.album.dto.response;
 
 import java.util.Map;
