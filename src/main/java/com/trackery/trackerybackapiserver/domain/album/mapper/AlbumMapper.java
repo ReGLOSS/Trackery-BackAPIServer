@@ -1,8 +1,11 @@
 package com.trackery.trackerybackapiserver.domain.album.mapper;
 
+import java.util.Optional;
+
 import org.apache.ibatis.annotations.Mapper;
 
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
+import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.album.mapper
@@ -18,4 +21,8 @@ import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 @Mapper
 public interface AlbumMapper {
 	void insertAlbum(Album album);
+
+	void insertAlbumImage(AlbumImage albumImage);
+
+	Optional<Album> findByAlbumId(Long albumId);
 }

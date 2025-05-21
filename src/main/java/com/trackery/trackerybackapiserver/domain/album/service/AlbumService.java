@@ -1,13 +1,20 @@
 package com.trackery.trackerybackapiserver.domain.album.service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Objects;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.AlbumCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
+import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.image.entity.Image;
+import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 @RequiredArgsConstructor
 public class AlbumService {
 	private final AlbumMapper albumMapper;
+	private final ImageMapper imageMapper;
 
 	public void insertAlbum(Long userId, AlbumCreateRequestDto albumCreateRequestDto) {
 		Album album = Album.builder()
@@ -43,5 +51,29 @@ public class AlbumService {
 		albumMapper.insertAlbum(album);
 
 		log.info("앨범 생성 완료 userId : {}, albumId : {}", userId, album.getAlbumId());
+	}
+
+	public void addImageIntoAlbum(Long userId, Long albumId, List<Long> imageIdList) {
+		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
+		);
+
+		if (!Objects.equals(album.getUserId(), userId)) {
+			throw new ApiException(ErrorCode.FORBIDDEN);
+		}
+
+		imageIdList.forEach(imageId -> {
+			Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
+				() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
+			);
+
+			if (!image.getUserId().equals(userId)) {
+				throw new ApiException(ErrorCode.FORBIDDEN);
+			}
+
+			AlbumImage albumImage = AlbumImage.builder().albumId(albumId).imageId(imageId).build();
+
+			albumMapper.insertAlbumImage(albumImage);
+		});
 	}
 }

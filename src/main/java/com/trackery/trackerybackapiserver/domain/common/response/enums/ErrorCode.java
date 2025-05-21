@@ -98,7 +98,7 @@ public enum ErrorCode {
 	/**
 	 * 요청한 이미지를 불러올 수 없음 (HttpStatus.NOT_FOUND, 404, "이미지를 불러올 수 없습니다.")
 	 */
-	NOT_FOUND_IMAGE(HttpStatus.NOT_FOUND, 404, "이미지를 불러올 수 없습니다."),
+	NOT_FOUND_IMAGE(HttpStatus.NOT_FOUND, 404, "이미지를 찾지 못했습니다."),
 
 	/**
 	 * JWT 토큰 생성 실패 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "JWT 토큰 생성에 실패했습니다.")
@@ -140,7 +140,9 @@ public enum ErrorCode {
 
 	BAD_REQUEST_INVALID_IMAGE_FILE(HttpStatus.BAD_REQUEST, 400, "허용된 이미지 파일이 아닙니다."),
 
-	NOT_FOUND_IMAGE_OBJECT_KEY(HttpStatus.NOT_FOUND, 404, "S3에서 해당 이미지를 찾을 수 없습니다.");
+	NOT_FOUND_IMAGE_OBJECT_KEY(HttpStatus.NOT_FOUND, 404, "S3에서 해당 이미지를 찾을 수 없습니다."),
+
+	NOT_FOUND_ALBUM(HttpStatus.NOT_FOUND, 404, "앨범을 찾지 못했습니다..");
 
 	/**
 	 * HTTP 상태 코드

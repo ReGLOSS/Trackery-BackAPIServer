@@ -38,6 +38,7 @@ public class Album {
 	private LocalDateTime albumRegDate;
 	private LocalDateTime albumModDate;
 	private Integer isPublic;
+	private Integer isDeleted;
 
 	@Builder
 	public Album(Long userId, String albumTitle, String albumDescription, Long thumbnailImageId,

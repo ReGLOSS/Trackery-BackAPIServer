@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.AlbumCreateRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.AlbumImageInsertRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
@@ -34,10 +35,17 @@ public class AlbumController {
 	private final AlbumService albumService;
 
 	@PostMapping
-	public ResponseEntity<ApiResponse<String>> createAlbum(@AuthenticationPrincipal CustomUserDetails customUserdetails,
+	public ResponseEntity<ApiResponse<String>> createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid AlbumCreateRequestDto albumCreateRequestDto) {
-		albumService.insertAlbum(customUserdetails.getUserId(), albumCreateRequestDto);
+		albumService.insertAlbum(userDetails.getUserId(), albumCreateRequestDto);
 
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
+	}
+
+	@PostMapping("/images")
+	public ResponseEntity<ApiResponse<String>> addImagesIntoAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestBody @Valid AlbumImageInsertRequestDto requestDto) {
+		albumService.addImageIntoAlbum(userDetails.getUserId(), requestDto.getAlbumId(), requestDto.getImageIdList());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 }

@@ -37,4 +37,6 @@ public interface ImageMapper {
 	Optional<Image> findImageByImageId(@Param("imageId") Long imageId);
 
 	List<Image> findImagesByUserId(@Param("userId") Long userId);
+
+	boolean isImageExist(Long imageId);
 }
