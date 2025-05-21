@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.album.dto.response;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -15,7 +17,9 @@ import lombok.NoArgsConstructor;
  * 25. 5. 20.		durururuk		최초 생성
  */
 @Getter
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class AlbumCreateResponseDto {
 	/**
 	 * albumId 앨범 ID

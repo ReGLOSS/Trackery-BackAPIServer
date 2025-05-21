@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
@@ -48,7 +49,7 @@ public class AlbumService {
 	 * @param userId 인증된 사용자 ID
 	 * @param albumCreateRequestDto 생성될 앨범 정보 DTO
 	 */
-	public void insertAlbum(Long userId, AlbumCreateRequestDto albumCreateRequestDto) {
+	public AlbumCreateResponseDto insertAlbum(Long userId, AlbumCreateRequestDto albumCreateRequestDto) {
 		Album album = Album.builder()
 			.userId(userId)
 			.albumTitle(albumCreateRequestDto.getAlbumTitle())
@@ -60,7 +61,11 @@ public class AlbumService {
 
 		albumMapper.insertAlbum(album);
 
-		log.info("앨범 생성 완료 userId : {}, albumId : {}", userId, album.getAlbumId());
+		return AlbumCreateResponseDto.builder()
+			.albumId(album.getAlbumId())
+			.albumTitle(album.getAlbumTitle())
+			.albumDescription(album.getAlbumDescription())
+			.build();
 	}
 
 	/**

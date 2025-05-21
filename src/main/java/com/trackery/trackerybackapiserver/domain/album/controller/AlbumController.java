@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageInsertRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
@@ -23,7 +24,7 @@ import lombok.RequiredArgsConstructor;
  * fileName       : AlbumController
  * author         : durururuk
  * date           : 25. 5. 19.
- * description    : 
+ * description    : 앨범 기능 컨트롤러
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -35,15 +36,28 @@ import lombok.RequiredArgsConstructor;
 public class AlbumController {
 	private final AlbumService albumService;
 
+	/**
+	 * 앨범 생성 API
+	 * @param userDetails 유저 인증 정보
+	 * @param albumCreateRequestDto 앨범 생성 정보 DTO
+	 * @return 앨범 ID, 제목, 설명을 담은 DTO
+	 */
 	@PostMapping
-	public ResponseEntity<ApiResponse<String>> createAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+	public ResponseEntity<ApiResponse<AlbumCreateResponseDto>> createAlbum(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestBody @Valid AlbumCreateRequestDto albumCreateRequestDto) {
 
-		albumService.insertAlbum(userDetails.getUserId(), albumCreateRequestDto);
+		AlbumCreateResponseDto result = albumService.insertAlbum(userDetails.getUserId(), albumCreateRequestDto);
 
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 
+	/**
+	 * 앨범에 이미지 추가 API
+	 * @param userDetails 유저 인증 정보
+	 * @param requestDto 앨범 ID, 이미지 ID 리스트를 담은 DTO
+	 * @return 결과 정보를 담은 DTO
+	 */
 	@PostMapping("/images")
 	public ResponseEntity<ApiResponse<AlbumImageInsertResponseDto>> addImagesIntoAlbum(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
