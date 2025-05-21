@@ -1,13 +1,18 @@
 package com.trackery.trackerybackapiserver.domain.album.service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.AlbumCreateRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.AlbumImageInsertResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
@@ -53,7 +58,7 @@ public class AlbumService {
 		log.info("앨범 생성 완료 userId : {}, albumId : {}", userId, album.getAlbumId());
 	}
 
-	public void addImageIntoAlbum(Long userId, Long albumId, List<Long> imageIdList) {
+	public AlbumImageInsertResponseDto addImageIntoAlbum(Long userId, Long albumId, List<Long> imageIdList) {
 		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
 		);
@@ -62,18 +67,36 @@ public class AlbumService {
 			throw new ApiException(ErrorCode.FORBIDDEN);
 		}
 
+		Set<Long> succeededImageIds = new HashSet<>();
+		Map<Long, String> failedImageIds = new HashMap<>();
+
 		imageIdList.forEach(imageId -> {
-			Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
-				() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
-			);
+			try {
+				Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
+					() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
+				);
 
-			if (!image.getUserId().equals(userId)) {
-				throw new ApiException(ErrorCode.FORBIDDEN);
+				if (!image.getUserId().equals(userId)) {
+					throw new ApiException(ErrorCode.FORBIDDEN);
+				}
+
+				AlbumImage albumImage = AlbumImage.builder().albumId(albumId).imageId(imageId).build();
+
+				albumMapper.insertAlbumImage(albumImage);
+
+				succeededImageIds.add(imageId);
+			} catch (ApiException e) {
+				log.error("{} userId : {}, albumId : {}, imageId : {}", e.getMessage(), userId, albumId, imageId);
+				failedImageIds.put(imageId, e.getMessage());
 			}
-
-			AlbumImage albumImage = AlbumImage.builder().albumId(albumId).imageId(imageId).build();
-
-			albumMapper.insertAlbumImage(albumImage);
 		});
+
+		return AlbumImageInsertResponseDto.builder()
+			.albumId(albumId)
+			.succeededImageCount(succeededImageIds.size())
+			.failedImageCount(failedImageIds.size())
+			.succeededImageIds(succeededImageIds)
+			.failedImageIds(failedImageIds)
+			.build();
 	}
 }
