@@ -12,10 +12,11 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
@@ -138,7 +139,6 @@ public class AlbumService {
 	4. 이미지 ID 리스트 조회
 	5. s3서비스에서 가져오기
 	 */
-
 	public AlbumDetailedResponseDto getAlbumDetailedInfo(Long userId, Long albumId) {
 		log.info("userId : {}, albumId : {}", userId, albumId);
 		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
@@ -182,6 +182,20 @@ public class AlbumService {
 		).toList();
 
 		return AlbumDetailedResponseDto.of(album, imageDtoList);
+	}
+
+	public void updateAlbumInfo(Long userId, AlbumUpdateRequestDto albumUpdateRequestDto) {
+		Long albumID = albumUpdateRequestDto.getAlbumId();
+
+		Album album = albumMapper.findByAlbumId(albumID).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
+		);
+
+		if (!album.getUserId().equals(userId)) {
+			throw new ApiException(ErrorCode.FORBIDDEN);
+		}
+
+		albumMapper.updateAlbumInfo(albumUpdateRequestDto);
 	}
 
 }

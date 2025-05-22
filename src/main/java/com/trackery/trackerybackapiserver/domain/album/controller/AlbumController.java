@@ -4,6 +4,7 @@ package com.trackery.trackerybackapiserver.domain.album.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageInsertRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
@@ -78,5 +80,12 @@ public class AlbumController {
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		AlbumDetailedResponseDto result = albumService.getAlbumDetailedInfo(userDetails.getUserId(), albumId);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
+	}
+
+	@PatchMapping
+	public ResponseEntity<ApiResponse<String>> updateAlbumInfo(@RequestBody AlbumUpdateRequestDto requestDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
+		albumService.updateAlbumInfo(userDetails.getUserId(), requestDto);
+
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 }

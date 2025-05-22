@@ -48,4 +48,22 @@
     <select id="findAlbumImagesByAlbumId" resultType="com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage">
         SELECT * FROM album_image WHERE album_id = #{albumId}
     </select>
+
+    <update id="updateAlbumInfo" parameterType="com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto">
+        UPDATE album
+        <set>
+            album_mod_date = CONVERT_TZ(NOW(), 'UTC', 'Asia/Seoul'),
+
+            <if test="albumTitle != null and albumTitle != ''">
+                album_title = #{albumTitle},
+            </if>
+            <if test="albumDescription != null">
+                album_description = #{albumDescription},
+            </if>
+            <if test="isPublic != null">
+                is_public = #{isPublic},
+            </if>
+        </set>
+        WHERE album_id = #{albumId}
+    </update>
 </mapper>
