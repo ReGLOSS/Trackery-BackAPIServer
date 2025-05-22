@@ -44,4 +44,8 @@
     <select id="findByAlbumId" resultMap="AlbumResultMap">
         SELECT * FROM album WHERE album_id = #{albumId} AND album.is_deleted = 0
     </select>
+
+    <select id="findAlbumImagesByAlbumId" resultType="com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage">
+        SELECT * FROM album_image WHERE album_id = #{albumId}
+    </select>
 </mapper>

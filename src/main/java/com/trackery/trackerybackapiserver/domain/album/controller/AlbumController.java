@@ -3,14 +3,17 @@ package com.trackery.trackerybackapiserver.domain.album.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageInsertRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
@@ -67,6 +70,13 @@ public class AlbumController {
 		AlbumImageInsertResponseDto result = albumService.addImageIntoAlbum(userDetails.getUserId(),
 			requestDto.getAlbumId(), requestDto.getImageIdList());
 
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
+	}
+
+	@GetMapping
+	public ResponseEntity<ApiResponse<AlbumDetailedResponseDto>> getAlbumDetailedInfo(@RequestParam Long albumId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		AlbumDetailedResponseDto result = albumService.getAlbumDetailedInfo(userDetails.getUserId(), albumId);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 }

@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.album.mapper;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -38,4 +39,6 @@ public interface AlbumMapper {
 	 * @return 앨범 엔티티
 	 */
 	Optional<Album> findByAlbumId(Long albumId);
+
+	List<AlbumImage> findAlbumImagesByAlbumId(Long albumId);
 }

@@ -14,14 +14,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
+import com.trackery.trackerybackapiserver.domain.image.service.ImageS3Service;
+import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
+import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AlbumService {
 	private final AlbumMapper albumMapper;
 	private final ImageMapper imageMapper;
+	private final ImageS3Service imageS3Service;
 
 	/**
 	 * 앨범 생성 기능
@@ -123,4 +129,59 @@ public class AlbumService {
 			.failedImageIds(failedImageIds)
 			.build();
 	}
+
+	/*
+	앨범 조회 기능
+	1. 앨범 ID로 앨범 조회
+	2. isPublic인지, isPublic이 0이면 album.userId가 요청한 유저인지
+	3. 앨범 이미지 조회
+	4. 이미지 ID 리스트 조회
+	5. s3서비스에서 가져오기
+	 */
+
+	public AlbumDetailedResponseDto getAlbumDetailedInfo(Long userId, Long albumId) {
+		log.info("userId : {}, albumId : {}", userId, albumId);
+		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
+		);
+
+		if (album.getIsPublic() == 0 && !userId.equals(album.getUserId())) {
+			throw new ApiException(ErrorCode.FORBIDDEN);
+		}
+
+		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(albumId);
+
+		List<Image> imageList = albumImageList.stream()
+			.map(albumImage -> {
+				return imageMapper.findImageByImageId(albumImage.getImageId()).orElseThrow(
+					() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
+				);
+			}).toList();
+
+		List<ImageDto> imageDtoList = imageList.stream().map(
+			image -> {
+				String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageFile());
+
+				LocationInfoDto locationInfoDto = LocationUtil.getLocationInfoByCoordinatePoint(image.getCoordPoint());
+
+				return ImageDto.builder()
+					.imageId(image.getImageId())
+					.userId(image.getUserId())
+					.imageRegDate(image.getImageRegDate())
+					.sdName(locationInfoDto.sidoName())
+					.sggName(locationInfoDto.sigunguName())
+					.latitude(locationInfoDto.latitude())
+					.longitude(locationInfoDto.longitude())
+					.imageName(image.getImageName())
+					.imageContent(image.getImageContent())
+					.imageDate(image.getImageDate())
+					.isPublic(image.getIsPublic())
+					.imageUrl(imagePresignedUrl)
+					.build();
+			}
+		).toList();
+
+		return AlbumDetailedResponseDto.of(album, imageDtoList);
+	}
+
 }
