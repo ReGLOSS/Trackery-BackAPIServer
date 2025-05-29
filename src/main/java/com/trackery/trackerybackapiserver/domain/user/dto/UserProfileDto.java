@@ -36,5 +36,5 @@ public class UserProfileDto {
 	/**
 	 * 사용자의 프로필 사진
 	 */
-	private String userProfile;
+	private String userProfilePic;
 }

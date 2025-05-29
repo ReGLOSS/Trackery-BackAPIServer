@@ -34,7 +34,7 @@
         </association>
     </resultMap>
 
-    <select id="findByCoord" parameterType="com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto" resultMap="JusoSigunguMap">
+    <select id="findSigunguByCoordinate" parameterType="com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto" resultMap="JusoSigunguMap">
         SELECT
             sgg.sgg_id,
             sgg.sgg_name,
@@ -49,7 +49,7 @@
         LIMIT 1
     </select>
 
-    <select id="findByPoint" parameterType="org.locationtech.jts.geom.Point" resultMap="JusoSigunguMap">
+    <select id="findSigunguByPoint" parameterType="org.locationtech.jts.geom.Point" resultMap="JusoSigunguMap">
         SELECT
             sgg.sgg_id,
             sgg.sgg_name,

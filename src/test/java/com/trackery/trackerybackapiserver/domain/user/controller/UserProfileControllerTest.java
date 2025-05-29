@@ -2,6 +2,7 @@ package com.trackery.trackerybackapiserver.domain.user.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -76,7 +77,8 @@ class UserProfileControllerTest {
 
 		// when & then
 		mockMvc.perform(MockMvcRequestBuilders.get("/api/users/profile/me")
-				.contentType(MediaType.APPLICATION_JSON))
+				.contentType(MediaType.APPLICATION_JSON)
+				.with(user(customUserDetails)))
 			.andDo(MockMvcResultHandlers.print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value("200"))
@@ -84,7 +86,7 @@ class UserProfileControllerTest {
 			.andExpect(jsonPath("$.data.userId").value(1L))
 			.andExpect(jsonPath("$.data.userName").value("testuser"))
 			.andExpect(jsonPath("$.data.nickname").value("테스트유저"))
-			.andExpect(jsonPath("$.data.userProfile").value("profile-image-url"));
+			.andExpect(jsonPath("$.data.userProfilePic").value("profile-image-url"));
 
 		verify(userService, times(1)).getUserProfile(1L);
 	}
@@ -138,7 +140,7 @@ class UserProfileControllerTest {
 			.andExpect(jsonPath("$.data.userId").value(1L))
 			.andExpect(jsonPath("$.data.userName").value("testuser"))
 			.andExpect(jsonPath("$.data.nickname").value("테스트유저"))
-			.andExpect(jsonPath("$.data.userProfile").isEmpty());
+			.andExpect(jsonPath("$.data.userProfilePic").isEmpty());
 
 		verify(userService, times(1)).getUserProfile(1L);
 	}

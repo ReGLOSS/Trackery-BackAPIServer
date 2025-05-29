@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper">
+    <!--앨범 엔티티 리절트맵-->
+    <resultMap id="AlbumResultMap" type="com.trackery.trackerybackapiserver.domain.album.entity.Album">
+        <id property="albumId" column="album_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="albumTitle" column="album_title"/>
+        <result property="albumDescription" column="album_description"/>
+        <result property="thumbnailImageId" column="thumbnail_image_id"/>
+        <result property="albumRegDate" column="album_reg_date"/>
+        <result property="albumModDate" column="album_mod_date"/>
+        <result property="isPublic" column="is_public"/>
+        <result property="isDeleted" column="is_deleted" />
+    </resultMap>
+
+    <insert id="insertAlbum" parameterType="com.trackery.trackerybackapiserver.domain.album.entity.Album" useGeneratedKeys="true" keyProperty="albumId">
+        INSERT INTO album (user_id,
+                           album_title,
+                           album_description,
+                           thumbnail_image_id,
+                           album_reg_date,
+                           album_mod_date,
+                           is_public,
+                           is_deleted)
+        VALUES (#{userId},
+                #{albumTitle},
+                #{albumDescription},
+                #{thumbnailImageId},
+                #{albumRegDate},
+                #{albumModDate},
+                #{isPublic},
+                0);
+    </insert>
+
+    <insert id="insertAlbumImage" parameterType="com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage" useGeneratedKeys="true" keyProperty="albumImageId">
+        INSERT INTO album_image(album_id, image_id)
+        VALUES (#{albumId}, #{imageId})
+    </insert>
+
+    <select id="findByAlbumId" resultMap="AlbumResultMap">
+        SELECT * FROM album WHERE album_id = #{albumId} AND album.is_deleted = 0
+    </select>
+
+    <select id="findAlbumImagesByAlbumId" resultType="com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage">
+        SELECT * FROM album_image WHERE album_id = #{albumId}
+    </select>
+
+    <update id="updateAlbumInfo" parameterType="com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto">
+        UPDATE album
+        <set>
+            album_mod_date = CONVERT_TZ(NOW(), 'UTC', 'Asia/Seoul'),
+
+            <if test="albumTitle != null and albumTitle != ''">
+                album_title = #{albumTitle},
+            </if>
+            <if test="albumDescription != null">
+                album_description = #{albumDescription},
+            </if>
+            <if test="isPublic != null">
+                is_public = #{isPublic},
+            </if>
+        </set>
+        WHERE album_id = #{albumId}
+    </update>
+</mapper>

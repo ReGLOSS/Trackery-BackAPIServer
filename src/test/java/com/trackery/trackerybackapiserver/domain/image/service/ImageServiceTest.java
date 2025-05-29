@@ -1,19 +1,37 @@
 package com.trackery.trackerybackapiserver.domain.image.service;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.CacheManager;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
+import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
+import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
+import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
+import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 
 /**
  *packageName    : com.trackery.trackerybackapiserver.domain.home.service
@@ -25,18 +43,19 @@ import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 14.        inari       최초 생성
+ * 25. 5. 19.		durururul	이미지 조회 단위 테스트 작성
  */
+@ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
 
+	@Mock
 	private ImageMapper imageMapper;
+	@Mock
 	private CacheManager cacheManager;
+	@Mock
+	private ImageS3Service imageS3Service;
+	@InjectMocks
 	private ImageService imageService;
-
-	@BeforeEach
-	void setUp() {
-		imageMapper = mock(ImageMapper.class);
-		imageService = new ImageService(imageMapper);
-	}
 
 	@Test
 	@DisplayName("공개 이미지 URL 목록을 정상적으로 조회하는지 테스트")
@@ -66,7 +85,7 @@ class ImageServiceTest {
 
 		// When & Then
 		assertThatThrownBy(() -> imageService.getPublicImageUrls())
-		.isInstanceOf(ApiException.class)
+			.isInstanceOf(ApiException.class)
 			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_IMAGE);
 
 		verify(imageMapper).selectPublicImageFiles();
@@ -90,5 +109,122 @@ class ImageServiceTest {
 		// Then
 		// selectPublicImageFiles가 두 번 호출되었는지 확인
 		verify(imageMapper, times(2)).selectPublicImageFiles();
+	}
+
+	@Nested
+	class getImagesTest {
+		private Image testImage1;
+
+		private final Long testUserId = 1L;
+		private final Long testSidoId = 2L;
+		private final Long testSigunguId = 3L;
+		private final Long testCoordinatePointId = 4L;
+		private final Long testImageId = 5L;
+		private final String testPresignedUrl = "testPresignedUrl";
+		private final LocationInfoDto testLocationInfo = new LocationInfoDto(127.0495556, 37.5398056, "서울특별시", "강남구");
+
+		@BeforeEach
+		void setUp() {
+			JusoSido sido = new JusoSido();
+			ReflectionTestUtils.setField(sido, "sidoId", testSidoId);
+			ReflectionTestUtils.setField(sido, "sidoName", "서울특별시");
+
+			JusoSigungu sigungu = new JusoSigungu();
+			ReflectionTestUtils.setField(sigungu, "sigunguId", testSigunguId);
+			ReflectionTestUtils.setField(sigungu, "sigunguName", "강남구");
+			ReflectionTestUtils.setField(sigungu, "sido", sido);
+
+			Coordinate coordinate = new Coordinate(127.0495556, 37.5398056);
+			PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
+			Point testPoint = new Point(coordinate, precisionModel, 4321);
+
+			CoordinatePoint coordPoint = new CoordinatePoint();
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointId", testCoordinatePointId);
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointName", "테스트 좌표");
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointPoint", testPoint);
+			ReflectionTestUtils.setField(coordPoint, "sigungu", sigungu);
+
+			testImage1 = Image.builder()
+				.coordPoint(coordPoint)
+				.imageName("테스트 이미지")
+				.imageFile("images/test.jpg")
+				.isPublic(1)
+				.isDeleted(false)
+				.imageType("jpg")
+				.imageContent("테스트 이미지 설명")
+				.imageDate(LocalDateTime.now())
+				.imageRegDate(LocalDateTime.now())
+				.userId(testUserId)
+				.build();
+
+			ReflectionTestUtils.setField(testImage1, "imageId", testImageId);
+
+		}
+
+		@Test
+		@DisplayName("이미지 ID로 단건 조회 테스트 - 성공")
+		void getImageByImageId_success() {
+			when(imageS3Service.generatePreSignedGetUrl(anyString())).thenReturn(testPresignedUrl);
+			when(imageMapper.findImageByImageId(5L)).thenReturn(Optional.of(testImage1));
+
+			ImageDto result = imageService.getImageByImageId(5L);
+
+			assertNotNull(result);
+			assertEquals(testImageId, result.getImageId());
+			assertEquals(testUserId, result.getUserId());
+			assertEquals("테스트 이미지", result.getImageName());
+			assertEquals("테스트 이미지 설명", result.getImageContent());
+			assertEquals(testPresignedUrl, result.getImageUrl());
+			assertEquals("서울특별시", result.getSdName());
+			assertEquals("강남구", result.getSggName());
+
+			verify(imageMapper).findImageByImageId(testImageId);
+			verify(imageS3Service).generatePreSignedGetUrl(testImage1.getImageFile());
+		}
+
+		@Test
+		@DisplayName("이미지 ID로 단건 조회 테스트 - 실패 - 이미지를 찾지 못했을 경우")
+		void getImageByImageId_failure_1() {
+			when(imageMapper.findImageByImageId(5L)).thenReturn(Optional.empty());
+
+			ApiException expect = new ApiException(ErrorCode.NOT_FOUND_IMAGE);
+
+			ApiException result = assertThrows(ApiException.class, () -> imageService.getImageByImageId(5L));
+
+			assertEquals(expect.getMessage(), result.getMessage());
+
+			verify(imageMapper).findImageByImageId(testImageId);
+			verify(imageS3Service, never()).generatePreSignedGetUrl(anyString());
+		}
+
+		@Test
+		@DisplayName("유저 ID로 다건 조회 테스트 - 성공")
+		void getImagesByUserId_success() {
+			when(imageS3Service.generatePreSignedGetUrl(anyString())).thenReturn(testPresignedUrl);
+			when(imageMapper.findImagesByUserId(testUserId)).thenReturn(List.of(testImage1));
+
+			List<ImageDto> resultList = imageService.getImageListByUserId(testUserId);
+
+			ImageDto result = resultList.get(0);
+
+			assertNotNull(result);
+			assertEquals(testImageId, result.getImageId());
+			assertEquals(testUserId, result.getUserId());
+			assertEquals("테스트 이미지", result.getImageName());
+			assertEquals("테스트 이미지 설명", result.getImageContent());
+			assertEquals(testPresignedUrl, result.getImageUrl());
+			assertEquals("서울특별시", result.getSdName());
+			assertEquals("강남구", result.getSggName());
+		}
+
+		@Test
+		@DisplayName("유저 ID로 다건 조회 테스트 - 성공 - 유저가 아직 이미지를 올리지 않았을 때")
+		void getImagesByUserId_success_2() {
+			when(imageMapper.findImagesByUserId(testUserId)).thenReturn(List.of());
+
+			List<ImageDto> resultList = imageService.getImageListByUserId(testUserId);
+
+			assertTrue(resultList.isEmpty());
+		}
 	}
 }

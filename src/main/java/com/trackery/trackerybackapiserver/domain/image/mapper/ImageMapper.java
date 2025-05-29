@@ -1,8 +1,10 @@
 package com.trackery.trackerybackapiserver.domain.image.mapper;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 
@@ -31,4 +33,10 @@ public interface ImageMapper {
 	 * @param image 이미지 엔티티 객체
 	 */
 	void insertImage(Image image);
+
+	Optional<Image> findImageByImageId(@Param("imageId") Long imageId);
+
+	List<Image> findImagesByUserId(@Param("userId") Long userId);
+
+	boolean isImageExist(Long imageId);
 }

@@ -9,7 +9,12 @@ import org.springframework.stereotype.Service;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
+import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
+import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
+import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,12 +30,14 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 2. 14.        inari       최초 생성
  * 25. 2. 19.        inari       이미지를 불러오지 못했을시 예외 처리
+ * 25. 5. 15.		durururuk	 이미지 단건/다건 조회 기능 작성
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class ImageService {
 	private final ImageMapper imageMapper;
+	private final ImageS3Service imageS3Service;
 
 	/**
 	 * 공개된 이미지 URL 목록을 조회합니다.
@@ -59,5 +66,55 @@ public class ImageService {
 	@CacheEvict(value = "publicImageUrls", allEntries = true)
 	public void evictImageCache() {
 		log.info("공개된 이미지 주소들을 삭제합니다.");
+	}
+
+	/**
+	 * 이미지 ID로 단건 조회
+	 * @param imageId 이미지 Id
+	 * @return 이미지 정보를 담은 DTO
+	 */
+	public ImageDto getImageByImageId(Long imageId) {
+		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
+
+		return convertImageToImageDto(image);
+	}
+
+	/**
+	 * 유저 ID로 이미지 다건 조회
+	 * @param userId 조회할 유저 ID
+	 * @return 이미지 정보를 담은 DTO
+	 */
+	public List<ImageDto> getImageListByUserId(Long userId) {
+		return imageMapper.findImagesByUserId(userId).stream()
+			.map(this::convertImageToImageDto)
+			.toList();
+	}
+
+	/**
+	 * 이미지 객체를 이미지 DTO로 가공하는 메서드
+	 * @param image 이미지 객체
+	 * @return 이미지 정보를 담고있는 DTO
+	 */
+	private ImageDto convertImageToImageDto(Image image) {
+		String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageFile());
+
+		CoordinatePoint coordPoint = image.getCoordPoint();
+		LocationInfoDto locationInfoDto = LocationUtil.getLocationInfoByCoordinatePoint(coordPoint);
+
+		return ImageDto.builder()
+			.imageId(image.getImageId())
+			.userId(image.getUserId())
+			.imageRegDate(image.getImageRegDate())
+			.sdName(locationInfoDto.sidoName())
+			.sggName(locationInfoDto.sigunguName())
+			.latitude(locationInfoDto.latitude())
+			.longitude(locationInfoDto.longitude())
+			.imageName(image.getImageName())
+			.imageContent(image.getImageContent())
+			.imageDate(image.getImageDate())
+			.isPublic(image.getIsPublic())
+			.imageUrl(imagePresignedUrl)
+			.build();
 	}
 }

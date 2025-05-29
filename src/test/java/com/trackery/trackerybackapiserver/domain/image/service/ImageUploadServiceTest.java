@@ -15,7 +15,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
-import com.trackery.trackerybackapiserver.domain.aws.service.S3Service;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.dto.upload.ImageUploadDto;
@@ -48,7 +47,7 @@ class ImageUploadServiceTest {
 	private LocationService locationService;
 
 	@Mock
-	private S3Service imageUploadS3ServiceImpl;
+	private ImageS3Service imageS3Service;
 
 
 	@Nested
@@ -60,7 +59,7 @@ class ImageUploadServiceTest {
 			String imageFileName = "image.jpg";
 			String expected = "Presigned Put URL";
 
-			when(imageUploadS3ServiceImpl.generatePreSignedPutUrl(imageFileName)).thenReturn("Presigned Put URL");
+			when(imageS3Service.generatePreSignedPutUrl(imageFileName)).thenReturn("Presigned Put URL");
 
 			String result = imageUploadService.getPresignedPutUrl(imageFileName);
 
@@ -103,6 +102,7 @@ class ImageUploadServiceTest {
 		void success() {
 			doNothing().when(imageMapper).insertImage(any(Image.class));
 			when(locationService.insertCoordinatePoint(any(CoordinateDto.class))).thenReturn(coordinatePoint);
+			doNothing().when(imageS3Service).moveObjectTempToImageFolder(anyString());
 
 			Image result = imageUploadService.saveImage(1L, imageUploadDto);
 

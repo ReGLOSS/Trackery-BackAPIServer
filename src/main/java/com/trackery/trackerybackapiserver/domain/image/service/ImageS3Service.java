@@ -1,12 +1,19 @@
-package com.trackery.trackerybackapiserver.domain.aws.service;
+package com.trackery.trackerybackapiserver.domain.image.service;
 
 import java.time.Duration;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -25,24 +32,31 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
  * 25. 4. 21.		durururuk		최초 생성
  */
 @Slf4j
-@Service("imageUploadS3ServiceImpl")
+@Service
 @RequiredArgsConstructor
-public class ImageUploadS3ServiceImpl implements S3Service {
+public class ImageS3Service {
 	private final S3Presigner s3Presigner;
+	private final S3Client s3Client;
 
 	@Value("${aws.bucketName}")
 	private String bucketName;
+
+	private static final String TEMP_FOLDER = "temp/";
+	private static final String IMAGES_FOLDER = "images/";
 
 	/**
 	 * Object Get Presigned URL을 요청하는 메서드
 	 * @param objectKey 조회할 Object Key
 	 * @return PresignedGetUrl
 	 */
-	@Override
 	public String generatePreSignedGetUrl(String objectKey) {
+		String imageObjectKeyWithImageFolder = IMAGES_FOLDER + objectKey;
+		isObjectExist(imageObjectKeyWithImageFolder);
+
 		GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
 			.signatureDuration(java.time.Duration.ofMinutes(10))
-			.getObjectRequest(getObjectRequest -> getObjectRequest.bucket(bucketName).key(objectKey))
+			.getObjectRequest(
+				getObjectRequest -> getObjectRequest.bucket(bucketName).key(imageObjectKeyWithImageFolder))
 			.build();
 
 		PresignedGetObjectRequest pregisnedRequest = s3Presigner.presignGetObject(presignRequest);
@@ -56,9 +70,8 @@ public class ImageUploadS3ServiceImpl implements S3Service {
 	 * @param objectKey 추가될 Object의 key
 	 * @return PresignedPutURL
 	 */
-	@Override
 	public String generatePreSignedPutUrl(String objectKey) {
-		String keyWithTempFolder = "temp/" + objectKey;
+		String keyWithTempFolder = TEMP_FOLDER + objectKey;
 
 		PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
 			.signatureDuration(Duration.ofMinutes(10))
@@ -67,5 +80,50 @@ public class ImageUploadS3ServiceImpl implements S3Service {
 
 		PresignedPutObjectRequest pregisnedRequest = s3Presigner.presignPutObject(presignRequest);
 		return pregisnedRequest.url().toString();
+	}
+
+	/**
+	 * 이미지를 임시 폴더에서 이미지 폴더로 옮기는 메서드입니다.
+	 * 직접적인 이동이 불가능하기 때문에 images 폴더로 복사 후 temp 폴더의 객체를 지우는 방식으로 되어있습니다.
+	 * @param objectKey 이동할 objectKey
+	 */
+	public void moveObjectTempToImageFolder(String objectKey) {
+		String sourceKey = TEMP_FOLDER + objectKey;
+		String destinationKey = IMAGES_FOLDER + objectKey;
+
+		isObjectExist(sourceKey);
+
+		CopyObjectRequest copyObjectRequest = CopyObjectRequest.builder()
+			.sourceBucket(bucketName)
+			.sourceKey(sourceKey)
+			.destinationBucket(bucketName)
+			.destinationKey(destinationKey)
+			.build();
+
+		s3Client.copyObject(copyObjectRequest);
+
+		DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
+			.bucket(bucketName)
+			.key(TEMP_FOLDER + objectKey)
+			.build();
+
+		s3Client.deleteObject(deleteObjectRequest);
+	}
+
+	/**
+	 * Key 값을 가지는 객체가 있는지 확인합니다.
+	 * @param objectKey 객체 Key 값
+	 */
+	private void isObjectExist(String objectKey) {
+		try {
+			s3Client.headObject(headObjectRequest -> headObjectRequest.bucket(bucketName).key(objectKey));
+
+		} catch (NoSuchKeyException noSuchKeyException) {
+			throw new ApiException(ErrorCode.NOT_FOUND_IMAGE_OBJECT_KEY);
+
+		} catch (Exception e) {
+			log.info(e.getMessage());
+			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
 	}
 }
