@@ -17,6 +17,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRe
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
@@ -99,5 +100,11 @@ public class AlbumController {
 		albumService.updateAlbumInfo(userDetails.getUserId(), requestDto);
 
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
+	}
+
+	@GetMapping("/me")
+	public ResponseEntity<ApiResponse<MyAlbumResponseDto>> getMyAlbumSimpleInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+		MyAlbumResponseDto result = albumService.getMyAlbumSimpleInfo(userDetails.getUserId());
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 }

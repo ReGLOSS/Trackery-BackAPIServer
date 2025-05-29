@@ -18,6 +18,8 @@ import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRe
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumSimpledResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
@@ -200,4 +202,23 @@ public class AlbumService {
 		albumMapper.updateAlbumInfo(albumUpdateRequestDto);
 	}
 
+	public MyAlbumResponseDto getMyAlbumSimpleInfo(Long userId) {
+		List<Album> albumList = albumMapper.findAlbumsByUserId(userId);
+
+		List<AlbumSimpledResponseDto> albumSimpledResponseDtoList = albumList.stream().map(album -> {
+			List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(album.getAlbumId());
+
+			return AlbumSimpledResponseDto.builder()
+				.albumId(album.getAlbumId())
+				.albumTitle(album.getAlbumTitle())
+				.albumImageCount(albumImageList.size())
+				.build();
+		}).toList();
+
+		return MyAlbumResponseDto.builder()
+			.userId(userId)
+			.albumCount(albumList.size())
+			.albumList(albumSimpledResponseDtoList)
+			.build();
+	}
 }
