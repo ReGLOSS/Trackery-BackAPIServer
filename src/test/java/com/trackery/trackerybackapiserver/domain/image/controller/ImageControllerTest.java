@@ -105,15 +105,12 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Test
 	@DisplayName("인증된 사용자의 이미지 목록 조회 성공")
 	void getMyImagesSuccess() throws Exception {
-		// given
 		List<ImageDto> imageDtoList = List.of(imageDto);
 		when(imageService.getImageListByUserId(userDetails.getUserId())).thenReturn(imageDtoList);
 
-		// when
 		ResultActions result = mockMvc.perform(get("/api/images/me")
 			.with(user(userDetails)));
 
-		// then
 		result
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value(200))

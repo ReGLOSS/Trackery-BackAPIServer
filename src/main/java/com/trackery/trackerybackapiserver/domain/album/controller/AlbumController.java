@@ -76,7 +76,7 @@ public class AlbumController {
 	}
 
 	/**
-	 * 앨범 상세 정보 조회
+	 * 앨범 상세 정보 조회 API
 	 * @param albumId 앨범 ID
 	 * @param userDetails 인증된 유저 정보
 	 * @return 앨범 정보, 앨범에 있는 이미지를 담은 상세 정보 DTO
@@ -89,7 +89,7 @@ public class AlbumController {
 	}
 
 	/**
-	 * 앨범 정보 수정
+	 * 앨범 정보 수정 API
 	 * @param requestDto 수정할 앨범 정보 Request DTO
 	 * @param userDetails 인증된 사용자 정보
 	 * @return 성공 시 200, 그 외 상황에 맞는 에러코드
