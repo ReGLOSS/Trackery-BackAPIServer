@@ -22,6 +22,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AlbumUpdateRequestDto {
+	/*
+	albumId 앨범 ID(필수)
+	albumTitle 앨범 제목
+	albumDescription 앨범 설명
+	isPublic 공개 여부
+	 */
 	@NotBlank
 	private Long albumId;
 	private String albumTitle;

@@ -75,6 +75,12 @@ public class AlbumController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 
+	/**
+	 * 앨범 상세 정보 조회
+	 * @param albumId 앨범 ID
+	 * @param userDetails 인증된 유저 정보
+	 * @return 앨범 정보, 앨범에 있는 이미지를 담은 상세 정보 DTO
+	 */
 	@GetMapping
 	public ResponseEntity<ApiResponse<AlbumDetailedResponseDto>> getAlbumDetailedInfo(@RequestParam Long albumId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -82,6 +88,12 @@ public class AlbumController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 
+	/**
+	 * 앨범 정보 수정
+	 * @param requestDto 수정할 앨범 정보 Request DTO
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 성공 시 200, 그 외 상황에 맞는 에러코드
+	 */
 	@PatchMapping
 	public ResponseEntity<ApiResponse<String>> updateAlbumInfo(@RequestBody AlbumUpdateRequestDto requestDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
 		albumService.updateAlbumInfo(userDetails.getUserId(), requestDto);

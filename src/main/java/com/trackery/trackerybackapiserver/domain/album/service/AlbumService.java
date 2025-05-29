@@ -131,13 +131,11 @@ public class AlbumService {
 			.build();
 	}
 
-	/*
-	앨범 조회 기능
-	1. 앨범 ID로 앨범 조회
-	2. isPublic인지, isPublic이 0이면 album.userId가 요청한 유저인지
-	3. 앨범 이미지 조회
-	4. 이미지 ID 리스트 조회
-	5. s3서비스에서 가져오기
+	/**
+	 * 앨범 상세 정보 조회
+	 * @param userId 유저 ID
+	 * @param albumId 앨범 ID
+	 * @return 앨범 정보, 앨범에 포함돼있는 이미지 정보를 담은 DTO
 	 */
 	public AlbumDetailedResponseDto getAlbumDetailedInfo(Long userId, Long albumId) {
 		log.info("userId : {}, albumId : {}", userId, albumId);
@@ -152,11 +150,9 @@ public class AlbumService {
 		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(albumId);
 
 		List<Image> imageList = albumImageList.stream()
-			.map(albumImage -> {
-				return imageMapper.findImageByImageId(albumImage.getImageId()).orElseThrow(
-					() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
-				);
-			}).toList();
+			.map(albumImage -> imageMapper.findImageByImageId(albumImage.getImageId()).orElseThrow(
+				() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
+			)).toList();
 
 		List<ImageDto> imageDtoList = imageList.stream().map(
 			image -> {
@@ -184,6 +180,11 @@ public class AlbumService {
 		return AlbumDetailedResponseDto.of(album, imageDtoList);
 	}
 
+	/**
+	 * 앨범 정보 수정
+	 * @param userId 유저 ID
+	 * @param albumUpdateRequestDto 앨범 정보 수정 Request DTO
+	 */
 	public void updateAlbumInfo(Long userId, AlbumUpdateRequestDto albumUpdateRequestDto) {
 		Long albumID = albumUpdateRequestDto.getAlbumId();
 
