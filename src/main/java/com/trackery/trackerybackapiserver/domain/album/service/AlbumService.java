@@ -2,6 +2,7 @@
 package com.trackery.trackerybackapiserver.domain.album.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -12,11 +13,11 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
@@ -58,12 +59,13 @@ public class AlbumService {
 	 * @param albumCreateRequestDto 생성될 앨범 정보 DTO
 	 */
 	public AlbumCreateResponseDto insertAlbum(Long userId, AlbumCreateRequestDto albumCreateRequestDto) {
+		ZoneId seoulZoneId = ZoneId.of("Asia/Seoul");
 		Album album = Album.builder()
 			.userId(userId)
 			.albumTitle(albumCreateRequestDto.getAlbumTitle())
 			.albumDescription(albumCreateRequestDto.getAlbumDescription())
-			.albumRegDate(LocalDateTime.now())
-			.albumModDate(LocalDateTime.now())
+			.albumRegDate(LocalDateTime.now(seoulZoneId))
+			.albumModDate(LocalDateTime.now(seoulZoneId))
 			.isPublic(albumCreateRequestDto.getIsPublic())
 			.build();
 
@@ -138,7 +140,6 @@ public class AlbumService {
 	 * @return 앨범 정보, 앨범에 포함돼있는 이미지 정보를 담은 DTO
 	 */
 	public AlbumDetailedResponseDto getAlbumDetailedInfo(Long userId, Long albumId) {
-		log.info("userId : {}, albumId : {}", userId, albumId);
 		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
 		);
