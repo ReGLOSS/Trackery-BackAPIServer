@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.trackery.trackerybackapiserver.domain.map.mapper.MapMapper">
+
+    <resultMap id="SidoMap" type="com.trackery.trackerybackapiserver.domain.map.entity.Sido">
+        <id property="sidoId" column="sd_id" />
+        <result property="sidoName" column="sd_name" />
+    </resultMap>
+
+    <resultMap id="SigunguMap" type="com.trackery.trackerybackapiserver.domain.map.entity.Sigungu">
+        <id property="sigunguId" column="sgg_id" />
+        <result property="sigunguName" column="sgg_name" />
+
+        <association property="sido" javaType="com.trackery.trackerybackapiserver.domain.map.entity.Sido">
+            <id property="sidoId" column="sd_id" />
+            <result property="sidoName" column="sd_name" />
+        </association>
+    </resultMap>
+
+    <select id="findAllSido" resultMap="SidoMap">
+        SELECT sd_id, sd_name
+        FROM juso_sido
+        ORDER BY sd_name
+    </select>
+
+    <select id="findSigunguBySido" parameterType="Long" resultMap="SigunguMap">
+        SELECT
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM juso_sigungu sgg
+                 JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE sgg.sd_id = #{sidoId}
+        ORDER BY sgg.sgg_name
+    </select>
+
+    <select id="findSigunguByCoordinate" resultMap="SigunguMap">
+        SELECT
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM juso_sigungu sgg
+                 JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE ST_Contains(
+                      sgg.sgg_border,
+                      ST_GeomFromText(CONCAT('POINT(', #{latitude}, ' ', #{longitude}, ')'), 4326)
+              )
+        LIMIT 1
+    </select>
+
+    <select id="findSidoBorderAsGeoJson" parameterType="Long" resultType="String">
+        SELECT ST_AsGeoJSON(sd_border) as geojson
+        FROM juso_sido
+        WHERE sd_id = #{sidoId}
+    </select>
+
+    <select id="findSigunguBorderAsGeoJson" parameterType="Long" resultType="String">
+        SELECT ST_AsGeoJSON(sgg_border) as geojson
+        FROM juso_sigungu
+        WHERE sgg_id = #{sigunguId}
+    </select>
+
+</mapper>
