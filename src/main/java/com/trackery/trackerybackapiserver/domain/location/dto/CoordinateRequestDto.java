@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.map.dto;
+package com.trackery.trackerybackapiserver.domain.location.dto;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -7,7 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.map.dto
+ * packageName    : com.trackery.trackerybackapiserver.domain.location.dto
  * fileName       : CoordinateRequestDto
  * author         : inari
  * date           : 25. 5. 30.
