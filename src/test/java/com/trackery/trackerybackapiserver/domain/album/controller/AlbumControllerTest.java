@@ -18,11 +18,11 @@ import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageInsertRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageEditRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
@@ -81,14 +81,14 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 	@Test
 	void addImagesIntoAlbumSuccess() throws Exception {
-		AlbumImageInsertRequestDto requestDto = new AlbumImageInsertRequestDto();
+		AlbumImageEditRequestDto requestDto = new AlbumImageEditRequestDto();
 		ReflectionTestUtils.setField(requestDto, "albumId", 1L);
 		ReflectionTestUtils.setField(requestDto, "imageIdList", List.of(10L, 20L));
 
 		HashMap<Long, String> failedImageMap = new HashMap<>();
 		failedImageMap.put(20L, "이미지를 찾지 못했습니다.");
 
-		AlbumImageInsertResponseDto responseDto = AlbumImageInsertResponseDto.builder()
+		AlbumImageEditResponseDto responseDto = AlbumImageEditResponseDto.builder()
 			.albumId(1L)
 			.succeededImageCount(1)
 			.failedImageCount(1)

@@ -68,6 +68,7 @@ public class LocationService {
 	public JusoSigungu getSigunguByPoint(Point point) {
 		return locationMapper.findSigunguByPoint(point).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND)
+
 		);
 	}
 
@@ -80,12 +81,12 @@ public class LocationService {
 	public CoordinatePoint insertCoordinatePoint(CoordinateDto coordinateDto) {
 		Point point = getPointByCoord(coordinateDto);
 		JusoSigungu sigungu = getSigunguByPoint(point);
-		String pointName = String.format("%s %s",sigungu.getSido().getSidoName(), sigungu.getSigunguName());
+		String pointName = String.format("%s %s", sigungu.getSido().getSidoName(), sigungu.getSigunguName());
 
-		CoordinatePoint coordinatePoint =  CoordinatePoint.builder()
+		CoordinatePoint coordinatePoint = CoordinatePoint.builder()
 			.coordinatePointName(pointName)
 			.coordinatePointPoint(point)
-			.coordinatePointType((byte) 1)
+			.coordinatePointType((byte)1)
 			.firstRegisteredDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
 			.lastModifiedDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
 			.sigungu(sigungu)

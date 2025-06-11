@@ -24,7 +24,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRe
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
@@ -124,7 +124,7 @@ class AlbumServiceTest {
 			when(imageMapper.findImageByImageId(2L)).thenReturn(Optional.of(image2));
 			when(imageMapper.findImageByImageId(3L)).thenReturn(Optional.of(image3));
 
-			AlbumImageInsertResponseDto response = albumService.addImageIntoAlbum(USER_ID, ALBUM_ID, IMAGE_IDS);
+			AlbumImageEditResponseDto response = albumService.addImageIntoAlbum(USER_ID, ALBUM_ID, IMAGE_IDS);
 
 			assertEquals(ALBUM_ID, response.getAlbumId());
 			assertEquals(3, response.getSucceededImageCount());
@@ -173,7 +173,7 @@ class AlbumServiceTest {
 			when(imageMapper.findImageByImageId(2L)).thenReturn(Optional.of(image2));
 			when(imageMapper.findImageByImageId(3L)).thenReturn(Optional.empty());
 
-			AlbumImageInsertResponseDto response = albumService.addImageIntoAlbum(USER_ID, ALBUM_ID, IMAGE_IDS);
+			AlbumImageEditResponseDto response = albumService.addImageIntoAlbum(USER_ID, ALBUM_ID, IMAGE_IDS);
 
 			assertEquals(ALBUM_ID, response.getAlbumId());
 			assertEquals(2, response.getSucceededImageCount());
@@ -194,7 +194,7 @@ class AlbumServiceTest {
 			when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.of(album));
 			when(imageMapper.findImageByImageId(5L)).thenReturn(Optional.of(forbiddenImage));
 
-			AlbumImageInsertResponseDto response = albumService.addImageIntoAlbum(USER_ID, ALBUM_ID, List.of(5L));
+			AlbumImageEditResponseDto response = albumService.addImageIntoAlbum(USER_ID, ALBUM_ID, List.of(5L));
 
 			assertEquals(ALBUM_ID, response.getAlbumId());
 			assertEquals(0, response.getSucceededImageCount());

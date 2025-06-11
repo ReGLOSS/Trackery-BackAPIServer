@@ -1,4 +1,3 @@
-
 package com.trackery.trackerybackapiserver.domain.album.service;
 
 import java.time.LocalDateTime;
@@ -7,7 +6,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.stereotype.Service;
@@ -17,7 +15,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRe
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumSimpledResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
@@ -80,6 +78,15 @@ public class AlbumService {
 			.build();
 	}
 
+	//앨범을 찾고 요청한 유저가 앨범의 수정 권한이 있는지 확인하는 메서드
+	public void findAlbumAndCheckPermission(Long userId, Long albumId) {
+		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM));
+
+		if (!album.getUserId().equals(userId)) {
+			throw new ApiException(ErrorCode.FORBIDDEN);
+		}
+	}
+
 	/**
 	 * 앨범에 이미지 추가 기능
 	 * 1.ID로 앨범이 있는지 확인
@@ -93,23 +100,16 @@ public class AlbumService {
 	 * @param imageIdList 추가할 이미지 ID 리스트
 	 * @return 앨범 ID, 추가 성공한 이미지 ID, 실패한 이미지 ID, 이유를 담은 DTO
 	 */
-	public AlbumImageInsertResponseDto addImageIntoAlbum(Long userId, Long albumId, List<Long> imageIdList) {
-		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
-			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
-		);
-
-		if (!Objects.equals(album.getUserId(), userId)) {
-			throw new ApiException(ErrorCode.FORBIDDEN);
-		}
+	public AlbumImageEditResponseDto addImageIntoAlbum(Long userId, Long albumId, List<Long> imageIdList) {
+		findAlbumAndCheckPermission(userId, albumId);
 
 		Set<Long> succeededImageIds = new HashSet<>();
 		Map<Long, String> failedImageIds = new HashMap<>();
 
 		imageIdList.forEach(imageId -> {
 			try {
-				Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
-					() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
-				);
+				Image image = imageMapper.findImageByImageId(imageId)
+					.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
 
 				if (!image.getUserId().equals(userId)) {
 					throw new ApiException(ErrorCode.FORBIDDEN);
@@ -126,7 +126,49 @@ public class AlbumService {
 			}
 		});
 
-		return AlbumImageInsertResponseDto.builder()
+		return AlbumImageEditResponseDto.builder()
+			.albumId(albumId)
+			.succeededImageCount(succeededImageIds.size())
+			.failedImageCount(failedImageIds.size())
+			.succeededImageIds(succeededImageIds)
+			.failedImageIds(failedImageIds)
+			.build();
+	}
+
+	/**
+	 * 앨범 이미지 삭제 기능
+	 * 1.ID로 앨범이 있는지 확인
+	 * 2.앨범 생성 유저와 요청 유저가 같은지 확인
+	 * 3.앨범에 해당 이미지가 존재하는지 확인
+	 * 4.이미지 삭제
+	 * 5.DTO 반환
+	 * @param userId 인증된 사용자 ID
+	 * @param albumId 이미지를 삭제할 앨범 ID
+	 * @param imageIdList 삭제할 이미지 ID 리스트
+	 * @return 앨범 ID, 삭제 성공한 이미지 ID, 실패한 이미지 ID, 이유를 담은 DTO
+	 */
+	public AlbumImageEditResponseDto deleteImageFromAlbum(Long userId, Long albumId, List<Long> imageIdList) {
+		findAlbumAndCheckPermission(userId, albumId);
+
+		Set<Long> succeededImageIds = new HashSet<>();
+		Map<Long, String> failedImageIds = new HashMap<>();
+
+		imageIdList.forEach(imageId -> {
+			try {
+				AlbumImage albumImage = albumMapper.findAlbumImageByAlbumIdAndImageId(albumId, imageId)
+					.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+
+				albumMapper.deleteAlbumImageByAlbumImageId(albumImage.getAlbumImageId());
+
+				succeededImageIds.add(imageId);
+			} catch (ApiException e) {
+				log.error("앨범 이미지 삭제 실패: {}, userId: {}, albumId: {}, imageId: {}", e.getMessage(), userId, albumId,
+					imageId);
+				failedImageIds.put(imageId, e.getMessage());
+			}
+		});
+
+		return AlbumImageEditResponseDto.builder()
 			.albumId(albumId)
 			.succeededImageCount(succeededImageIds.size())
 			.failedImageCount(failedImageIds.size())
@@ -142,9 +184,7 @@ public class AlbumService {
 	 * @return 앨범 정보, 앨범에 포함돼있는 이미지 정보를 담은 DTO
 	 */
 	public AlbumDetailedResponseDto getAlbumDetailedInfo(Long userId, Long albumId) {
-		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
-			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
-		);
+		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM));
 
 		if (album.getIsPublic() == 0 && !userId.equals(album.getUserId())) {
 			throw new ApiException(ErrorCode.FORBIDDEN);
@@ -153,32 +193,30 @@ public class AlbumService {
 		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(albumId);
 
 		List<Image> imageList = albumImageList.stream()
-			.map(albumImage -> imageMapper.findImageByImageId(albumImage.getImageId()).orElseThrow(
-				() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
-			)).toList();
+			.map(albumImage -> imageMapper.findImageByImageId(albumImage.getImageId())
+				.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)))
+			.toList();
 
-		List<ImageDto> imageDtoList = imageList.stream().map(
-			image -> {
-				String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageFile());
+		List<ImageDto> imageDtoList = imageList.stream().map(image -> {
+			String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageFile());
 
-				LocationInfoDto locationInfoDto = LocationUtil.getLocationInfoByCoordinatePoint(image.getCoordPoint());
+			LocationInfoDto locationInfoDto = LocationUtil.getLocationInfoByCoordinatePoint(image.getCoordPoint());
 
-				return ImageDto.builder()
-					.imageId(image.getImageId())
-					.userId(image.getUserId())
-					.imageRegDate(image.getImageRegDate())
-					.sdName(locationInfoDto.sidoName())
-					.sggName(locationInfoDto.sigunguName())
-					.latitude(locationInfoDto.latitude())
-					.longitude(locationInfoDto.longitude())
-					.imageName(image.getImageName())
-					.imageContent(image.getImageContent())
-					.imageDate(image.getImageDate())
-					.isPublic(image.getIsPublic())
-					.imageUrl(imagePresignedUrl)
-					.build();
-			}
-		).toList();
+			return ImageDto.builder()
+				.imageId(image.getImageId())
+				.userId(image.getUserId())
+				.imageRegDate(image.getImageRegDate())
+				.sdName(locationInfoDto.sidoName())
+				.sggName(locationInfoDto.sigunguName())
+				.latitude(locationInfoDto.latitude())
+				.longitude(locationInfoDto.longitude())
+				.imageName(image.getImageName())
+				.imageContent(image.getImageContent())
+				.imageDate(image.getImageDate())
+				.isPublic(image.getIsPublic())
+				.imageUrl(imagePresignedUrl)
+				.build();
+		}).toList();
 
 		return AlbumDetailedResponseDto.of(album, imageDtoList);
 	}
@@ -189,19 +227,19 @@ public class AlbumService {
 	 * @param albumUpdateRequestDto 앨범 정보 수정 Request DTO
 	 */
 	public void updateAlbumInfo(Long userId, AlbumUpdateRequestDto albumUpdateRequestDto) {
-		Long albumID = albumUpdateRequestDto.getAlbumId();
+		Long albumId = albumUpdateRequestDto.getAlbumId();
 
-		Album album = albumMapper.findByAlbumId(albumID).orElseThrow(
-			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
-		);
-
-		if (!album.getUserId().equals(userId)) {
-			throw new ApiException(ErrorCode.FORBIDDEN);
-		}
+		findAlbumAndCheckPermission(userId, albumId);
 
 		albumMapper.updateAlbumInfo(albumUpdateRequestDto);
 	}
 
+	/**
+	 * 내 앨범 간단 조회
+	 * 내가 만든 앨범의 제목, 앨범에 포함된 이미지 수, 공개 여부를 알려주는 메서드입니다.
+	 * @param userId 조회하고자 하는 유저 ID
+	 * @return DTO
+	 */
 	public MyAlbumResponseDto getMyAlbumSimpleInfo(Long userId) {
 		List<Album> albumList = albumMapper.findAlbumsByUserId(userId);
 
@@ -212,6 +250,7 @@ public class AlbumService {
 				.albumId(album.getAlbumId())
 				.albumTitle(album.getAlbumTitle())
 				.albumImageCount(albumImageList.size())
+				.isPublic(album.getIsPublic())
 				.build();
 		}).toList();
 

@@ -46,4 +46,8 @@ public interface AlbumMapper {
 	void updateAlbumInfo(AlbumUpdateRequestDto albumUpdateRequestDto);
 
 	List<Album> findAlbumsByUserId(Long userId);
+
+	Optional<AlbumImage> findAlbumImageByAlbumIdAndImageId(Long albumId, Long imageId);
+
+	void deleteAlbumImageByAlbumImageId(Long albumImageId);
 }

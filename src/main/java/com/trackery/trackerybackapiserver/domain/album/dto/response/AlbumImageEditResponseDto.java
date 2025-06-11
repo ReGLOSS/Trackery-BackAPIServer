@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AlbumImageInsertResponseDto {
+public class AlbumImageEditResponseDto {
 	/**
 	 * albumId 앨범 ID
 	 * succeededImageCount 추가에 성공한 이미지 개수

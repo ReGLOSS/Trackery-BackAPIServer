@@ -24,4 +24,5 @@ public class AlbumSimpledResponseDto {
 	private Long albumId;
 	private String albumTitle;
 	private Integer albumImageCount;
+	private Integer isPublic;
 }

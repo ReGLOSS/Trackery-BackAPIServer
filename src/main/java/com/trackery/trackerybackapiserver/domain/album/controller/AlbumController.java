@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.album.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageInsertRequestDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageEditRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageInsertResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
@@ -66,13 +67,23 @@ public class AlbumController {
 	 * @return 결과 정보를 담은 DTO
 	 */
 	@PostMapping("/images")
-	public ResponseEntity<ApiResponse<AlbumImageInsertResponseDto>> addImagesIntoAlbum(
+	public ResponseEntity<ApiResponse<AlbumImageEditResponseDto>> addImagesIntoAlbum(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestBody @Valid AlbumImageInsertRequestDto requestDto) {
+		@RequestBody @Valid AlbumImageEditRequestDto requestDto) {
 
-		AlbumImageInsertResponseDto result = albumService.addImageIntoAlbum(userDetails.getUserId(),
+		AlbumImageEditResponseDto result = albumService.addImageIntoAlbum(userDetails.getUserId(),
 			requestDto.getAlbumId(), requestDto.getImageIdList());
 
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
+	}
+
+	@DeleteMapping("/images")
+	public ResponseEntity<ApiResponse<AlbumImageEditResponseDto>> deleteImagesFromAlbum(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestBody @Valid AlbumImageEditRequestDto requestDto
+	) {
+		AlbumImageEditResponseDto result = albumService.deleteImageFromAlbum(userDetails.getUserId(),
+			requestDto.getAlbumId(), requestDto.getImageIdList());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 
@@ -96,14 +107,16 @@ public class AlbumController {
 	 * @return 성공 시 200, 그 외 상황에 맞는 에러코드
 	 */
 	@PatchMapping
-	public ResponseEntity<ApiResponse<String>> updateAlbumInfo(@RequestBody AlbumUpdateRequestDto requestDto, @AuthenticationPrincipal CustomUserDetails userDetails) {
+	public ResponseEntity<ApiResponse<String>> updateAlbumInfo(@RequestBody AlbumUpdateRequestDto requestDto,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		albumService.updateAlbumInfo(userDetails.getUserId(), requestDto);
 
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 
 	@GetMapping("/me")
-	public ResponseEntity<ApiResponse<MyAlbumResponseDto>> getMyAlbumSimpleInfo(@AuthenticationPrincipal CustomUserDetails userDetails) {
+	public ResponseEntity<ApiResponse<MyAlbumResponseDto>> getMyAlbumSimpleInfo(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		MyAlbumResponseDto result = albumService.getMyAlbumSimpleInfo(userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
