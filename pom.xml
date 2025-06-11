@@ -30,6 +30,8 @@
 		<java.version>17</java.version>
 		<sonar.organization>regloss</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<spring-restdocs.version>3.0.3</spring-restdocs.version>
+
 	</properties>
 	<dependencies>
 		<dependency>
@@ -144,6 +146,12 @@
 			<version>2.31.25</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.restdocs</groupId>
+			<artifactId>spring-restdocs-asciidoctor</artifactId>
+			<version>${spring-restdocs.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -179,11 +187,6 @@
 					</execution>
 				</executions>
 				<dependencies>
-					<dependency>
-						<groupId>org.springframework.restdocs</groupId>
-						<artifactId>spring-restdocs-asciidoctor</artifactId>
-						<version>${spring-restdocs.version}</version>
-					</dependency>
 				</dependencies>
 			</plugin>
 			<plugin>
