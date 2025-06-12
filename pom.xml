@@ -30,6 +30,8 @@
 		<java.version>17</java.version>
 		<sonar.organization>regloss</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<spring-restdocs.version>3.0.3</spring-restdocs.version>
+
 	</properties>
 	<dependencies>
 		<dependency>
@@ -144,6 +146,12 @@
 			<version>2.31.25</version>
 			<scope>compile</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.restdocs</groupId>
+			<artifactId>spring-restdocs-asciidoctor</artifactId>
+			<version>${spring-restdocs.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -175,15 +183,21 @@
 						<configuration>
 							<backend>html</backend>
 							<doctype>book</doctype>
+							<sourceDirectory>src/docs/asciidoc</sourceDirectory>
+							<outputDirectory>${project.build.directory}/generated-docs</outputDirectory>
+							<attributes>
+								<snippets>${project.build.directory}/generated-snippets</snippets>
+								<source-highlighter>highlightjs</source-highlighter>
+								<toc>left</toc>
+								<toclevels>2</toclevels>
+								<sectanchors>true</sectanchors>
+								<sectlinks>true</sectlinks>
+								<encoding>UTF-8</encoding>
+							</attributes>
 						</configuration>
 					</execution>
 				</executions>
 				<dependencies>
-					<dependency>
-						<groupId>org.springframework.restdocs</groupId>
-						<artifactId>spring-restdocs-asciidoctor</artifactId>
-						<version>${spring-restdocs.version}</version>
-					</dependency>
 				</dependencies>
 			</plugin>
 			<plugin>
@@ -197,6 +211,27 @@
 						</exclude>
 					</excludes>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-docs</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>${project.build.outputDirectory}/static/docs</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${project.build.directory}/generated-docs</directory>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 			<!--JaCoCo 설정-->
 			<plugin>

@@ -1,7 +1,9 @@
 package com.trackery.trackerybackapiserver.domain.image.controller;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.Arrays;
@@ -10,6 +12,9 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.restdocs.RestDocumentationContextProvider;
+import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -25,7 +30,9 @@ import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 14.        inari       최초 생성
+ * 25. 6. 11.        inari       adoc 문서 추가
  */
+@ExtendWith(RestDocumentationExtension.class)
 class LandingImagesControllerTest {
 
 	private MockMvc mockMvc;
@@ -33,11 +40,12 @@ class LandingImagesControllerTest {
 	private LandingImagesController landingImagesController;
 
 	@BeforeEach
-	void setUp() {
+	void setUp(RestDocumentationContextProvider restDocumentation) {
 		imageService = mock(ImageService.class);
 		landingImagesController = new LandingImagesController(imageService);
 		mockMvc = MockMvcBuilders
 			.standaloneSetup(landingImagesController)
+			.apply(documentationConfiguration(restDocumentation))
 			.build();
 	}
 
@@ -58,6 +66,13 @@ class LandingImagesControllerTest {
 			.andExpect(jsonPath("$.message").value("Ok"))
 			.andExpect(jsonPath("$.data.imageUrls").isArray())
 			.andExpect(jsonPath("$.data.imageUrls[0]").value("http://example.com/image1.jpg"))
-			.andExpect(jsonPath("$.data.imageUrls[1]").value("http://example.com/image2.jpg"));
+			.andExpect(jsonPath("$.data.imageUrls[1]").value("http://example.com/image2.jpg"))
+			.andDo(document("get-public-images",
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.imageUrls[]").description("공개 이미지 URL 목록")
+				)
+			));
 	}
 }
