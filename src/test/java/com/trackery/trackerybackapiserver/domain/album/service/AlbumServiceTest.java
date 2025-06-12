@@ -25,6 +25,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRe
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
@@ -97,7 +98,7 @@ class AlbumServiceTest {
 
 			doAnswer((Answer<Void>)invocation -> {
 				Object[] args = invocation.getArguments();
-				Album album = (Album) args[0];
+				Album album = (Album)args[0];
 				ReflectionTestUtils.setField(album, "albumId", ALBUM_ID);
 				return null;
 			}).when(albumMapper).insertAlbum(any(Album.class));
@@ -116,6 +117,76 @@ class AlbumServiceTest {
 	@Nested
 	@DisplayName("앨범에 이미지 추가 테스트")
 	class AddImageIntoAlbumTest {
+
+		@Nested
+		@DisplayName("앨범에서 이미지 삭제 테스트")
+		class DeleteImageFromAlbumTest {
+
+			@Test
+			@DisplayName("성공 - 앨범의 이미지가 성공적으로 삭제됨")
+			void testDeleteImageFromAlbum_Success() {
+				AlbumImage albumImage1 = AlbumImage.builder().albumId(ALBUM_ID).imageId(1L).build();
+				ReflectionTestUtils.setField(albumImage1, "albumImageId", 101L);
+
+				AlbumImage albumImage2 = AlbumImage.builder().albumId(ALBUM_ID).imageId(2L).build();
+				ReflectionTestUtils.setField(albumImage2, "albumImageId", 102L);
+
+				when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.of(album));
+				when(albumMapper.findAlbumImageByAlbumIdAndImageId(ALBUM_ID, 1L))
+					.thenReturn(Optional.of(albumImage1));
+				when(albumMapper.findAlbumImageByAlbumIdAndImageId(ALBUM_ID, 2L))
+					.thenReturn(Optional.of(albumImage2));
+
+				AlbumImageEditResponseDto response = albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID,
+					List.of(1L, 2L));
+
+				assertEquals(ALBUM_ID, response.getAlbumId());
+				assertEquals(2, response.getSucceededImageCount());
+				assertTrue(response.getFailedImageIds().isEmpty());
+				verify(albumMapper, times(2)).deleteAlbumImageByAlbumImageId(anyLong());
+			}
+
+			@Test
+			@DisplayName("실패 - 앨범을 찾을 수 없음")
+			void testDeleteImageFromAlbum_AlbumNotFound() {
+				when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.empty());
+
+				ApiException exception = assertThrows(ApiException.class,
+					() -> albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID, List.of(1L)));
+
+				assertEquals(ErrorCode.NOT_FOUND_ALBUM, exception.getErrorCode());
+				verify(albumMapper, never()).deleteAlbumImageByAlbumImageId(anyLong());
+			}
+
+			@Test
+			@DisplayName("실패 - 유저가 앨범에 접근 권한이 없음")
+			void testDeleteImageFromAlbum_ForbiddenAccess() {
+				Album forbiddenAlbum = Album.builder().userId(2L).build();
+				when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.of(forbiddenAlbum));
+
+				ApiException exception = assertThrows(ApiException.class,
+					() -> albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID, List.of(1L)));
+
+				assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
+				verify(albumMapper, never()).deleteAlbumImageByAlbumImageId(anyLong());
+			}
+
+			@Test
+			@DisplayName("실패 - 앨범 이미지가 앨범에 존재하지 않음")
+			void testDeleteImageFromAlbum_ImageNotFoundInAlbum() {
+				when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.of(album));
+				when(albumMapper.findAlbumImageByAlbumIdAndImageId(ALBUM_ID, 1L)).thenReturn(Optional.empty());
+
+				AlbumImageEditResponseDto response = albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID, List.of(1L));
+
+				assertEquals(ALBUM_ID, response.getAlbumId());
+				assertEquals(0, response.getSucceededImageCount());
+				assertEquals(1, response.getFailedImageCount());
+				assertTrue(response.getFailedImageIds().containsKey(1L));
+				verify(albumMapper, never()).deleteAlbumImageByAlbumImageId(anyLong());
+			}
+		}
+
 		@Test
 		@DisplayName("성공")
 		void testAddImageIntoAlbum_Success() {
@@ -334,6 +405,108 @@ class AlbumServiceTest {
 			assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
 
 			verify(albumMapper, never()).updateAlbumInfo(any());
+		}
+	}
+
+	@Nested
+	@DisplayName("getMyAlbumSimpleInfo 메소드 테스트")
+	class GetMyAlbumSimpleInfoTest {
+
+		@Test
+		@DisplayName("성공 - 사용자의 앨범 목록을 성공적으로 가져옴")
+		void testGetMyAlbumSimpleInfo_Success() {
+			Album album1 = Album.builder().userId(USER_ID).isPublic(1).build();
+			ReflectionTestUtils.setField(album1, "albumId", 101L);
+			ReflectionTestUtils.setField(album1, "albumTitle", "Album 1");
+
+			Album album2 = Album.builder().userId(USER_ID).isPublic(0).build();
+			ReflectionTestUtils.setField(album2, "albumId", 102L);
+			ReflectionTestUtils.setField(album2, "albumTitle", "Album 2");
+
+			when(albumMapper.findAlbumsByUserId(USER_ID)).thenReturn(List.of(album1, album2));
+			when(albumMapper.findAlbumImagesByAlbumId(101L)).thenReturn(List.of(
+				AlbumImage.builder().albumId(101L).imageId(1L).build(),
+				AlbumImage.builder().albumId(101L).imageId(2L).build()
+			));
+			when(albumMapper.findAlbumImagesByAlbumId(102L)).thenReturn(List.of());
+
+			MyAlbumResponseDto response = albumService.getMyAlbumSimpleInfo(USER_ID);
+
+			assertNotNull(response);
+			assertEquals(USER_ID, response.getUserId());
+			assertEquals(2, response.getAlbumCount());
+			assertEquals(2, response.getAlbumList().size());
+			assertEquals(101L, response.getAlbumList().get(0).getAlbumId());
+			assertEquals("Album 1", response.getAlbumList().get(0).getAlbumTitle());
+			assertEquals(2, response.getAlbumList().get(0).getAlbumImageCount());
+			assertEquals(1, response.getAlbumList().get(0).getIsPublic());
+			assertEquals(102L, response.getAlbumList().get(1).getAlbumId());
+			assertEquals("Album 2", response.getAlbumList().get(1).getAlbumTitle());
+			assertEquals(0, response.getAlbumList().get(1).getAlbumImageCount());
+			assertEquals(0, response.getAlbumList().get(1).getIsPublic());
+
+			verify(albumMapper).findAlbumsByUserId(USER_ID);
+			verify(albumMapper).findAlbumImagesByAlbumId(101L);
+			verify(albumMapper).findAlbumImagesByAlbumId(102L);
+		}
+
+		@Test
+		@DisplayName("성공 - 사용자가 가지고 있는 앨범이 없는 경우 빈 목록 반환")
+		void testGetMyAlbumSimpleInfo_NoAlbums() {
+			when(albumMapper.findAlbumsByUserId(USER_ID)).thenReturn(List.of());
+
+			MyAlbumResponseDto response = albumService.getMyAlbumSimpleInfo(USER_ID);
+
+			assertNotNull(response);
+			assertEquals(USER_ID, response.getUserId());
+			assertEquals(0, response.getAlbumCount());
+			assertTrue(response.getAlbumList().isEmpty());
+
+			verify(albumMapper).findAlbumsByUserId(USER_ID);
+		}
+	}
+
+	@Nested
+	@DisplayName("앨범 삭제 테스트")
+	class DeleteAlbumTest {
+
+		@Test
+		@DisplayName("성공 - 앨범이 성공적으로 삭제됨")
+		void testDeleteAlbum_Success() {
+			when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.of(album));
+			doNothing().when(albumMapper).deleteAlbumByAlbumId(ALBUM_ID);
+
+			assertDoesNotThrow(() -> albumService.deleteAlbum(USER_ID, ALBUM_ID));
+
+			verify(albumMapper).findByAlbumId(ALBUM_ID);
+			verify(albumMapper).deleteAlbumByAlbumId(ALBUM_ID);
+		}
+
+		@Test
+		@DisplayName("실패 - 앨범을 찾을 수 없음")
+		void testDeleteAlbum_AlbumNotFound() {
+			when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.empty());
+
+			ApiException exception = assertThrows(ApiException.class,
+				() -> albumService.deleteAlbum(USER_ID, ALBUM_ID));
+
+			assertEquals(ErrorCode.NOT_FOUND_ALBUM, exception.getErrorCode());
+			verify(albumMapper).findByAlbumId(ALBUM_ID);
+			verify(albumMapper, never()).deleteAlbumByAlbumId(anyLong());
+		}
+
+		@Test
+		@DisplayName("실패 - 유저가 앨범에 접근 권한이 없음")
+		void testDeleteAlbum_ForbiddenAccess() {
+			Album forbiddenAlbum = Album.builder().userId(2L).build();
+			when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.of(forbiddenAlbum));
+
+			ApiException exception = assertThrows(ApiException.class,
+				() -> albumService.deleteAlbum(USER_ID, ALBUM_ID));
+
+			assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
+			verify(albumMapper).findByAlbumId(ALBUM_ID);
+			verify(albumMapper, never()).deleteAlbumByAlbumId(anyLong());
 		}
 	}
 }
