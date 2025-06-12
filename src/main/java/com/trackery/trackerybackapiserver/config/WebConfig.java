@@ -3,7 +3,6 @@ package com.trackery.trackerybackapiserver.config;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.format.FormatterRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
@@ -19,7 +18,6 @@ import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 3. 26.        inari       최초 생성
- * 25. 6. 12.        inari       spring rest docs로 접근 가능한 api 추가
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
@@ -32,16 +30,6 @@ public class WebConfig implements WebMvcConfigurer {
 	@Override
 	public void addFormatters(FormatterRegistry registry) {
 		registry.addConverter(new StringToOAthProviderConverter());
-	}
-
-	/**
-	 * classpath:/static/docs/에 존재하는 파일을 /api/docs/**로 접근가능하게 해주는 핸들러입니다.
-	 * @param registry 패스 주소
-	 */
-	@Override
-	public void addResourceHandlers(ResourceHandlerRegistry registry) {
-		registry.addResourceHandler("/api/docs/**")
-			.addResourceLocations("classpath:/static/docs/");
 	}
 
 	/**
