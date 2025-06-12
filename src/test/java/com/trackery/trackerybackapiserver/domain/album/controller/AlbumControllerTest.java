@@ -3,7 +3,6 @@ package com.trackery.trackerybackapiserver.domain.album.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import java.util.HashMap;
@@ -23,6 +22,8 @@ import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRe
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumSimpledResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
@@ -71,7 +72,6 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.content(objectMapper.writeValueAsString(requestDto)));
 
 		result
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").exists())
 			.andExpect(jsonPath("$.data.albumId").value(1))
@@ -105,7 +105,6 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.content(objectMapper.writeValueAsString(requestDto)));
 
 		result
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").exists())
 			.andExpect(jsonPath("$.data.albumId").value(1))
@@ -137,7 +136,6 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.param("albumId", String.valueOf(1L)));
 
 		result
-			.andDo(print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").exists())
 			.andExpect(jsonPath("$.data.albumId").value(1))
@@ -162,7 +160,91 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.content(objectMapper.writeValueAsString(requestDto)));
 
 		result
-			.andDo(print())
 			.andExpect(status().isOk());
+	}
+
+	@Test
+	void deleteImagesFromAlbumSuccess() throws Exception {
+		AlbumImageEditRequestDto requestDto = new AlbumImageEditRequestDto();
+		ReflectionTestUtils.setField(requestDto, "albumId", 1L);
+		ReflectionTestUtils.setField(requestDto, "imageIdList", List.of(10L, 20L));
+
+		HashMap<Long, String> failedImageMap = new HashMap<>();
+		failedImageMap.put(20L, "이미지를 찾지 못했습니다.");
+
+		AlbumImageEditResponseDto responseDto = AlbumImageEditResponseDto.builder()
+			.albumId(1L)
+			.succeededImageCount(1)
+			.failedImageCount(1)
+			.succeededImageIds(new HashSet<>(List.of(10L)))
+			.failedImageIds(failedImageMap)
+			.build();
+
+		when(albumService.deleteImageFromAlbum(any(), any(), any())).thenReturn(responseDto);
+
+		ResultActions result = mockMvc.perform(delete("/api/albums/images")
+			.with(user(customUserDetails))
+			.with(csrf())
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(requestDto)));
+
+		result
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data").exists())
+			.andExpect(jsonPath("$.data.albumId").value(1))
+			.andExpect(jsonPath("$.data.succeededImageCount").value(1))
+			.andExpect(jsonPath("$.data.failedImageCount").value(1))
+			.andExpect(jsonPath("$.data.succeededImageIds").isArray())
+			.andExpect(jsonPath("$.data.succeededImageIds").isNotEmpty())
+			.andExpect(jsonPath("$.data.failedImageIds").exists())
+			.andExpect(jsonPath("$.data.failedImageIds").isNotEmpty());
+	}
+
+	@Test
+	void getMyAlbumSimpleInfoSuccess() throws Exception {
+		AlbumSimpledResponseDto albumSimpledResponseDto = AlbumSimpledResponseDto.builder()
+			.albumId(1L)
+			.albumTitle("앨범 제목")
+			.albumImageCount(3)
+			.isPublic(1)
+			.build();
+
+		MyAlbumResponseDto myAlbumResponseDto = MyAlbumResponseDto.builder()
+			.userId(1L)
+			.albumCount(1)
+			.albumList(List.of(albumSimpledResponseDto))
+			.build();
+
+		when(albumService.getMyAlbumSimpleInfo(any())).thenReturn(myAlbumResponseDto);
+
+		ResultActions result = mockMvc.perform(get("/api/albums/me")
+			.with(user(customUserDetails))
+			.with(csrf()));
+
+		result
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data").exists())
+			.andExpect(jsonPath("$.data.albumCount").value(1))
+			.andExpect(jsonPath("$.data.albumList").isArray())
+			.andExpect(jsonPath("$.data.albumList").isNotEmpty())
+			.andExpect(jsonPath("$.data.albumList[0].albumId").value(1))
+			.andExpect(jsonPath("$.data.albumList[0].albumImageCount").value(3))
+			.andExpect(jsonPath("$.data.albumList[0].isPublic").value(1));
+	}
+
+	@Test
+	void deleteAlbumSuccess() throws Exception {
+		Long albumId = 1L;
+
+		doNothing().when(albumService).deleteAlbum(any(), eq(albumId));
+
+		ResultActions result = mockMvc.perform(delete("/api/albums")
+			.with(user(customUserDetails))
+			.with(csrf())
+			.param("albumId", String.valueOf(albumId)));
+
+		result
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data").doesNotExist());
 	}
 }
