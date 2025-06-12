@@ -78,7 +78,12 @@ public class AlbumService {
 			.build();
 	}
 
-	//앨범을 찾고 요청한 유저가 앨범의 수정 권한이 있는지 확인하는 메서드
+	/**
+	 * 앨범이 있는지, 요청한 유저가 앨범을 생성한 유저와 동일한지 체크하는 메서드
+	 * 앨범 수정 권한을 추가할 일이 있을 때 메서드 수정 필요
+	 * @param userId : 유저 ID
+	 * @param albumId : 앨범 ID
+	 */
 	public void findAlbumAndCheckPermission(Long userId, Long albumId) {
 		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM));
 
@@ -259,5 +264,16 @@ public class AlbumService {
 			.albumCount(albumList.size())
 			.albumList(albumSimpledResponseDtoList)
 			.build();
+	}
+
+	/**
+	 * 앨범을 삭제(비활성)하는 메서드
+	 * @param userId 유저 ID
+	 * @param albumId 앨범 ID
+	 */
+	public void deleteAlbum(Long userId, Long albumId) {
+		findAlbumAndCheckPermission(userId, albumId);
+
+		albumMapper.deleteAlbumByAlbumId(albumId);
 	}
 }

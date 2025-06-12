@@ -50,4 +50,6 @@ public interface AlbumMapper {
 	Optional<AlbumImage> findAlbumImageByAlbumIdAndImageId(Long albumId, Long imageId);
 
 	void deleteAlbumImageByAlbumImageId(Long albumImageId);
+
+	void deleteAlbumByAlbumId(Long albumId);
 }

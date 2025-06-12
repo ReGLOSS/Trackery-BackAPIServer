@@ -84,4 +84,10 @@
         </set>
         WHERE album_id = #{albumId}
     </update>
+
+    <update id="deleteAlbumByAlbumId">
+        UPDATE album
+        SET is_deleted = 1
+        WHERE album_id = #{albumId}
+    </update>
 </mapper>

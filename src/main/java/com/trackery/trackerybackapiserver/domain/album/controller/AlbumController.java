@@ -77,6 +77,12 @@ public class AlbumController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 
+	/**
+	 * 앨범 이미지 삭제
+	 * @param userDetails 인증된 사용자 정보
+	 * @param requestDto 앨범 ID와 삭제할 이미지 리스트를 담은 DTO
+	 * @return 삭제된 이미지 정보, 실패한 이미지 정보를 담은 DTO
+	 */
 	@DeleteMapping("/images")
 	public ResponseEntity<ApiResponse<AlbumImageEditResponseDto>> deleteImagesFromAlbum(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
@@ -114,10 +120,28 @@ public class AlbumController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 
+	/**
+	 * 내 앨범 정보 간단 조회
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 유저 ID, 앨범 갯수, 앨범 제목, 앨범 이미지 수, 공개 정보를 담은 DTO
+	 */
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<MyAlbumResponseDto>> getMyAlbumSimpleInfo(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		MyAlbumResponseDto result = albumService.getMyAlbumSimpleInfo(userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
+	}
+
+	/**
+	 * 앨범을 삭제(비활성화)하는 API
+	 * @param userDetails 인증된 사용자 정보
+	 * @param albumId 앨범 ID
+	 * @return 추가로 반환되는 데이터는 없습니다.
+	 */
+	@DeleteMapping
+	public ResponseEntity<ApiResponse<String>> deleteAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestParam Long albumId) {
+		albumService.deleteAlbum(userDetails.getUserId(), albumId);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 }
