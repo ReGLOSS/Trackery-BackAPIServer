@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
  * fileName       : AlbumDetailedResponseDto
  * author         : durururuk
  * date           : 25. 5. 22.
- * description    : 
+ * description    : 앨범 상세 조회 응답 DTO
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -30,6 +30,8 @@ public class AlbumDetailedResponseDto {
 	private Long createdUserId;
 	private String albumTitle;
 	private String albumDescription;
+	private Integer isPublic;
+	private Integer imageCount;
 
 	private List<ImageDto> imageList;
 
@@ -40,6 +42,8 @@ public class AlbumDetailedResponseDto {
 			.albumTitle(album.getAlbumTitle())
 			.albumDescription(album.getAlbumDescription())
 			.imageList(imageList)
+			.isPublic(album.getIsPublic())
+			.imageCount(imageList.size())
 			.build();
 	}
 }

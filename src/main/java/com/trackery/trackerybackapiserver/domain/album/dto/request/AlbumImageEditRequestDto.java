@@ -19,7 +19,7 @@ import lombok.NoArgsConstructor;
  */
 @Getter
 @NoArgsConstructor
-public class AlbumImageInsertRequestDto {
+public class AlbumImageEditRequestDto {
 	/**
 	 * albumId 앨범 ID
 	 * imageIdList 이미지 ID 리스트

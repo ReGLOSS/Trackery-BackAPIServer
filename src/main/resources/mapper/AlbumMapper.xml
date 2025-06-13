@@ -17,6 +17,12 @@
         <result property="isDeleted" column="is_deleted" />
     </resultMap>
 
+    <resultMap id="AlbumImageResultMap" type="com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage">
+        <id property="albumImageId" column="album_image_id" />
+        <result property="albumId" column="album_id" />
+        <result property="imageId" column="image_id" />
+    </resultMap>
+
     <insert id="insertAlbum" parameterType="com.trackery.trackerybackapiserver.domain.album.entity.Album" useGeneratedKeys="true" keyProperty="albumId">
         INSERT INTO album (user_id,
                            album_title,
@@ -41,8 +47,20 @@
         VALUES (#{albumId}, #{imageId})
     </insert>
 
+    <select id="findAlbumImageByAlbumIdAndImageId" resultMap="AlbumImageResultMap">
+        SELECT * FROM album_image WHERE album_id = #{albumId} AND image_id = #{imageId}
+    </select>
+
+    <delete id="deleteAlbumImageByAlbumImageId">
+        DELETE FROM album_image WHERE album_image_id = #{albumImageId}
+    </delete>
+
     <select id="findByAlbumId" resultMap="AlbumResultMap">
         SELECT * FROM album WHERE album_id = #{albumId} AND album.is_deleted = 0
+    </select>
+
+    <select id="findAlbumsByUserId" resultMap="AlbumResultMap">
+        SELECT * FROM album WHERE user_id = #{userId} AND album.is_deleted = 0
     </select>
 
     <select id="findAlbumImagesByAlbumId" resultType="com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage">
@@ -64,6 +82,12 @@
                 is_public = #{isPublic},
             </if>
         </set>
+        WHERE album_id = #{albumId}
+    </update>
+
+    <update id="deleteAlbumByAlbumId">
+        UPDATE album
+        SET is_deleted = 1
         WHERE album_id = #{albumId}
     </update>
 </mapper>
