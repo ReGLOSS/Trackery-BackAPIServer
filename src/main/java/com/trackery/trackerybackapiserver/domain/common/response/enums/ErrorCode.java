@@ -20,6 +20,7 @@ import lombok.Getter;
  * 25. 2. 25.        inari			 Duplicate_EMAIL 추가
  * 25. 2. 26.        inari			 UNAUTHORIZED_OAUTH_FAILED, BAD_REQUEST_INVALID_OAUTH_PROVIDER 추가
  * 25. 3. 20.        inari			 BAD_REQUEST_INVALID_INPUT 추가
+ * 25. 5. 30.        inari			 지도관련 NOT_FOUND 추가
  */
 @Getter
 @AllArgsConstructor
@@ -142,7 +143,25 @@ public enum ErrorCode {
 
 	NOT_FOUND_IMAGE_OBJECT_KEY(HttpStatus.NOT_FOUND, 404, "S3에서 해당 이미지를 찾을 수 없습니다."),
 
-	NOT_FOUND_ALBUM(HttpStatus.NOT_FOUND, 404, "앨범을 찾지 못했습니다..");
+	NOT_FOUND_ALBUM(HttpStatus.NOT_FOUND, 404, "앨범을 찾지 못했습니다.."),
+
+	/**
+	 * 시도를 찾을 수 없음 (HttpStatus.NOT_FOUND, 404, "시도를 찾을 수 없습니다.")
+	 * 존재하지 않는 시도 ID로 조회 시도할 때 발생
+	 */
+	NOT_FOUND_SIDO(HttpStatus.NOT_FOUND, 404, "시도를 찾을 수 없습니다."),
+
+	/**
+	 * 시군구를 찾을 수 없음 (HttpStatus.NOT_FOUND, 404, "시군구를 찾을 수 없습니다.")
+	 * 존재하지 않는 시군구 ID로 조회하거나, 좌표에 해당하는 시군구가 없을 때 발생
+	 */
+	NOT_FOUND_SIGUNGU(HttpStatus.NOT_FOUND, 404, "시군구를 찾을 수 없습니다."),
+
+	/**
+	 * 유효하지 않은 좌표 (HttpStatus.BAD_REQUEST, 400, "유효하지 않은 좌표입니다.")
+	 * 한국 영토 범위를 벗어난 좌표로 조회 시도할 때 발생
+	 */
+	BAD_REQUEST_INVALID_COORDINATE(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 좌표입니다.");
 
 	/**
 	 * HTTP 상태 코드

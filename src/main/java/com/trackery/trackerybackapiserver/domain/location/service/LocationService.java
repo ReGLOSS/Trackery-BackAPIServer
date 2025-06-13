@@ -12,9 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
+import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.mapper.LocationMapper;
+
+import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -95,5 +100,76 @@ public class LocationService {
 		locationMapper.insertCoordinatePoint(coordinatePoint);
 
 		return coordinatePoint;
+	}
+
+	/**
+	 * 대한민국의 모든 시도 목록을 조회합니다.
+	 */
+	public List<JusoSido> getAllSido() {
+		log.debug("전체 시도 목록 조회");
+		return locationMapper.findAllSido();
+	}
+
+	/**
+	 * 특정 시도에 속한 모든 시군구 목록을 조회합니다.
+	 */
+	public List<JusoSigungu> getSigunguBySido(Long sidoId) {
+		log.debug("시도 ID {}의 시군구 목록 조회", sidoId);
+		List<JusoSigungu> sigunguList = locationMapper.findSigunguBySido(sidoId);
+
+		if (sigunguList.isEmpty()) {
+			log.warn("시도 ID {}에 해당하는 시군구가 없습니다.", sidoId);
+		}
+
+		return sigunguList;
+	}
+
+	/**
+	 * 지리 좌표를 기반으로 해당 위치의 시군구 정보를 DTO로 반환합니다.
+	 */
+	public MapResponseDto getSigunguByCoordinateDto(CoordinateRequestDto request) {
+		log.debug("좌표로 시군구 조회 (DTO 반환): latitude={}, longitude={}",
+			request.getLatitude(), request.getLongitude());
+
+		JusoSigungu sigungu = locationMapper.findSigunguByCoordinateRequest(request);
+
+		if (sigungu == null) {
+			log.error("좌표에 해당하는 시군구를 찾을 수 없음: {}", request);
+			throw new ApiException(ErrorCode.NOT_FOUND_SIGUNGU);
+		}
+
+		return MapResponseDto.from(sigungu);
+	}
+
+	/**
+	 * 특정 시도의 경계선을 GeoJSON 형식으로 조회합니다.
+	 */
+	public String getSidoBorderAsGeoJson(Long sidoId) {
+		log.debug("시도 ID {}의 경계선 GeoJSON 조회", sidoId);
+
+		String geoJson = locationMapper.findSidoBorderAsGeoJson(sidoId);
+
+		if (geoJson == null) {
+			log.error("시도 ID {}를 찾을 수 없습니다.", sidoId);
+			throw new ApiException(ErrorCode.NOT_FOUND_SIDO);
+		}
+
+		return geoJson;
+	}
+
+	/**
+	 * 특정 시군구의 경계선을 GeoJSON 형식으로 조회합니다.
+	 */
+	public String getSigunguBorderAsGeoJson(Long sigunguId) {
+		log.debug("시군구 ID {}의 경계선 GeoJSON 조회", sigunguId);
+
+		String geoJson = locationMapper.findSigunguBorderAsGeoJson(sigunguId);
+
+		if (geoJson == null) {
+			log.error("시군구 ID {}를 찾을 수 없습니다.", sigunguId);
+			throw new ApiException(ErrorCode.NOT_FOUND_SIGUNGU);
+		}
+
+		return geoJson;
 	}
 }
