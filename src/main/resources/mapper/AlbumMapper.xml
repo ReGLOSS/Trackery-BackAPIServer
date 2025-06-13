@@ -48,7 +48,7 @@
     </insert>
 
     <select id="findAlbumImageByAlbumIdAndImageId" resultMap="AlbumImageResultMap">
-        SELECT * FROM album_image WHERE album_id = #{albumId} AND image_id = ${imageId}
+        SELECT * FROM album_image WHERE album_id = #{albumId} AND image_id = #{imageId}
     </select>
 
     <delete id="deleteAlbumImageByAlbumImageId">
