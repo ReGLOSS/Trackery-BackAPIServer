@@ -17,11 +17,12 @@ import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
  * fileName       : LocationMapper
  * author         : durururuk
  * date           : 25. 4. 15.
- * description    : 
+ * description    : 지도 데이터 처리를 위한 MyBatis Mapper 인터페이스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 15.		durururuk		최초 생성
+ * 25. 6. 13.		inari			시군구 ID로 시군구 정보를 조회 매퍼 추가
  */
 @Mapper
 public interface LocationMapper{
@@ -69,4 +70,9 @@ public interface LocationMapper{
 	 * 특정 시군구의 경계선을 GeoJSON 형식으로 조회합니다.
 	 */
 	String findSigunguBorderAsGeoJson(Long sigunguId);
+
+	/**
+	 * 시군구 ID로 시군구 정보를 조회합니다.
+	 */
+	Optional<JusoSigungu> findSigunguById(Long sigunguId);
 }

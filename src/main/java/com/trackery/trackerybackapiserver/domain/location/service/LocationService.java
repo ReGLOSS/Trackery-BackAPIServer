@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 15.		durururuk		최초 생성
+ * 25. 6. 13.		inari			시군구 ID로 시군구 정보를 조회 메서드 추가
  */
 @Slf4j
 @Service
@@ -171,5 +172,15 @@ public class LocationService {
 		}
 
 		return geoJson;
+	}
+
+	/**
+	 * 시군구 ID로 시군구 정보를 조회합니다.
+	 */
+	public JusoSigungu getSigunguById(Long sigunguId) {
+		log.debug("시군구 ID {}로 시군구 정보 조회", sigunguId);
+		return locationMapper.findSigunguById(sigunguId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_SIGUNGU)
+		);
 	}
 }

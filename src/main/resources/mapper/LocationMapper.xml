@@ -133,4 +133,15 @@
         WHERE sgg_id = #{sigunguId}
     </select>
 
+    <select id="findSigunguById" parameterType="Long" resultMap="JusoSigunguMap">
+        SELECT
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM juso_sigungu sgg
+                 JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE sgg.sgg_id = #{sigunguId}
+    </select>
+
 </mapper>

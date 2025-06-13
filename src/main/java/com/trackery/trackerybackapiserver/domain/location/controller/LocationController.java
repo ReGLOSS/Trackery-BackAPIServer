@@ -15,6 +15,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCo
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.SigunguResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
@@ -32,6 +33,7 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 15.		durururuk		최초 생성
+ * 25. 6. 13.		narilee         시군구 ID로 시군구 정보를 조회 메서드 추가
  */
 @RestController
 @RequestMapping("/api/location")
@@ -109,5 +111,18 @@ public class LocationController {
 	public ResponseEntity<ApiResponse<String>> getSigunguBorder(@PathVariable Long sigunguId) {
 		String border = locationService.getSigunguBorderAsGeoJson(sigunguId);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, border));
+	}
+
+	/**
+	 * 시군구 ID로 시군구 정보를 조회합니다.
+	 *
+	 * @param sigunguId 조회할 시군구의 ID
+	 * @return 시군구 정보를 포함한 API 응답
+	 */
+	@GetMapping("/sigungu/{sigunguId}")
+	public ResponseEntity<ApiResponse<SigunguResponseDto>> getSigungu(@PathVariable Long sigunguId) {
+		JusoSigungu sigungu = locationService.getSigunguById(sigunguId);
+		SigunguResponseDto response = SigunguResponseDto.from(sigungu);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 }
