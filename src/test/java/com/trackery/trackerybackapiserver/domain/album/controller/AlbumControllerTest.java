@@ -1,7 +1,9 @@
 package com.trackery.trackerybackapiserver.domain.album.controller;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -77,6 +79,21 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data.albumId").value(1))
 			.andExpect(jsonPath("$.data.albumTitle").value("강릉 여행"))
 			.andExpect(jsonPath("$.data.albumDescription").value("강릉 여행 기록"));
+
+		result.andDo(document("create-album",
+			requestFields(
+				fieldWithPath("albumTitle").description("앨범 제목(필수)"),
+				fieldWithPath("albumDescription").description("앨범 설명").optional(),
+				fieldWithPath("isPublic").description("공개 여부(필수)")
+			),
+
+			responseFields(
+				fieldWithPath("code").description("응답 코드"),
+				fieldWithPath("message").description("응답 메시지"),
+				fieldWithPath("data.albumId").description("생성된 앨범 ID"),
+				fieldWithPath("data.albumTitle").description("앨범 제목"),
+				fieldWithPath("data.albumDescription").description("앨범 설명")
+			)));
 	}
 
 	@Test
@@ -114,6 +131,26 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data.succeededImageIds").isNotEmpty())
 			.andExpect(jsonPath("$.data.failedImageIds").exists())
 			.andExpect(jsonPath("$.data.failedImageIds").isNotEmpty());
+
+		result
+			.andDo(document("add-images-into-album",
+					requestFields(
+						fieldWithPath("albumId").description("이미지를 추가할 앨범 ID"),
+						fieldWithPath("imageIdList").description("앨범에 추가할 이미지 ID 리스트")
+					),
+
+					responseFields(
+						fieldWithPath("code").description("응답 코드"),
+						fieldWithPath("message").description("응답 메시지"),
+						fieldWithPath("data.albumId").description("앨범 ID"),
+						fieldWithPath("data.succeededImageCount").description("성공한 이미지 개수"),
+						fieldWithPath("data.failedImageCount").description("실패한 이미지 개수"),
+						fieldWithPath("data.succeededImageIds").description("성공한 이미지 ID 리스트"),
+						fieldWithPath("data.failedImageIds").description("실패한 이미지 ID 맵"),
+						fieldWithPath("data.failedImageIds.*").description("실패한 이미지 ID별 오류 메시지")
+					)
+				)
+			);
 	}
 
 	@Test

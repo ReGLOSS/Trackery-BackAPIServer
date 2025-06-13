@@ -1,0 +1,26 @@
+== 앨범 API
+'''
+
+=== *앨범 생성 API*
+==== POST /api/albums
+
+===== 요청
+include::{snippets}/create-album/http-request.adoc[]
+include::{snippets}/create-album/request-fields.adoc[]
+
+===== 응답
+include::{snippets}/create-album/http-response.adoc[]
+include::{snippets}/create-album/response-fields.adoc[]
+'''
+
+=== *앨범에 이미지 추가 API*
+==== POST /api/albums/images
+
+===== 요청
+include::{snippets}/add-images-into-album/http-request.adoc[]
+include::{snippets}/add-images-into-album/request-fields.adoc[]
+
+===== 응답
+include::{snippets}/add-images-into-album/http-response.adoc[]
+include::{snippets}/add-images-into-album/response-fields.adoc[]
+'''
