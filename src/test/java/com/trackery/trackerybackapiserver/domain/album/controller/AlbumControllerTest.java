@@ -4,6 +4,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -169,7 +170,6 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		ResultActions result = mockMvc.perform(get("/api/albums")
 			.with(user(customUserDetails))
-			.with(csrf())
 			.param("albumId", String.valueOf(1L)));
 
 		result
@@ -181,6 +181,26 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data.albumDescription").value("강릉 여행 기록"))
 			.andExpect(jsonPath("$.data.imageList").isArray())
 			.andExpect(jsonPath("$.data.imageList").exists());
+
+		result
+			.andDo(document("get-album-detailed-info",
+					queryParameters(
+						parameterWithName("albumId").description("앨범 ID")
+					),
+
+					responseFields(
+						fieldWithPath("code").description("응답 코드"),
+						fieldWithPath("message").description("응답 메시지"),
+						fieldWithPath("data.albumId").description("앨범 ID"),
+						fieldWithPath("data.createdUserId").description("앨벙을 생성한 유저 ID"),
+						fieldWithPath("data.albumTitle").description("앨범 제목"),
+						fieldWithPath("data.albumDescription").description("앨범 설명"),
+						fieldWithPath("data.isPublic").description("공개 여부"),
+						fieldWithPath("data.imageCount").description("이미지 개수"),
+						fieldWithPath("data.imageList").description("앨범 이미지 리스트")
+					)
+				)
+			);
 	}
 
 	@Test
@@ -198,6 +218,20 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		result
 			.andExpect(status().isOk());
+
+		result.andDo(document("update-album-info",
+			requestFields(
+				fieldWithPath("albumId").description("앨범 ID"),
+				fieldWithPath("albumTitle").description("앨범 제목"),
+				fieldWithPath("albumDescription").description("앨범 설명"),
+				fieldWithPath("isPublic").description("공개 여부")
+			),
+
+			responseFields(
+				fieldWithPath("code").description("응답 코드"),
+				fieldWithPath("message").description("응답 메시지")
+			)
+		));
 	}
 
 	@Test
@@ -235,6 +269,25 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data.succeededImageIds").isNotEmpty())
 			.andExpect(jsonPath("$.data.failedImageIds").exists())
 			.andExpect(jsonPath("$.data.failedImageIds").isNotEmpty());
+
+		result.andDo(document("delete-images-from-album",
+				requestFields(
+					fieldWithPath("albumId").description("앨범 ID"),
+					fieldWithPath("imageIdList").description("앨범 ID 리스트")
+				),
+
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.albumId").description("앨범 ID"),
+					fieldWithPath("data.succeededImageCount").description("성공한 이미지 개수"),
+					fieldWithPath("data.failedImageCount").description("실패한 이미지 개수"),
+					fieldWithPath("data.succeededImageIds").description("성공한 이미지 ID 리스트"),
+					fieldWithPath("data.failedImageIds").description("실패한 이미지 ID 맵"),
+					fieldWithPath("data.failedImageIds.*").description("실패한 이미지 ID별 오류 메시지")
+				)
+			)
+		);
 	}
 
 	@Test
@@ -267,6 +320,21 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data.albumList[0].albumId").value(1))
 			.andExpect(jsonPath("$.data.albumList[0].albumImageCount").value(3))
 			.andExpect(jsonPath("$.data.albumList[0].isPublic").value(1));
+
+		result.andDo(document("get-my-album-simple-info",
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.userId").description("요청 유저 ID"),
+					fieldWithPath("data.albumCount").description("앨범 개수"),
+					fieldWithPath("data.albumList").description("앨범 리스트"),
+					fieldWithPath("data.albumList[].albumId").description("앨범 ID"),
+					fieldWithPath("data.albumList[].albumTitle").description("앨범 제목"),
+					fieldWithPath("data.albumList[].albumImageCount").description("앨범 이미지 개수"),
+					fieldWithPath("data.albumList[].isPublic").description("공개 여부")
+				)
+			)
+		);
 	}
 
 	@Test
@@ -278,10 +346,23 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 		ResultActions result = mockMvc.perform(delete("/api/albums")
 			.with(user(customUserDetails))
 			.with(csrf())
-			.param("albumId", String.valueOf(albumId)));
+			.queryParam("albumId", String.valueOf(albumId)));
 
 		result
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data").doesNotExist());
+
+		result
+			.andDo(document("delete-album",
+					queryParameters(
+						parameterWithName("albumId").description("앨범 ID")
+					),
+
+					responseFields(
+						fieldWithPath("code").description("응답 코드"),
+						fieldWithPath("message").description("응답 메시지")
+					)
+				)
+			);
 	}
 }
