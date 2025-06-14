@@ -1,7 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.location.dto;
 
-import java.util.Objects;
-
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 
 import lombok.Builder;

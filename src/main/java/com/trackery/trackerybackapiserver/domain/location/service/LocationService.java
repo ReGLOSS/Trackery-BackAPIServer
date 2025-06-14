@@ -2,6 +2,7 @@ package com.trackery.trackerybackapiserver.domain.location.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -18,8 +19,6 @@ import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.mapper.LocationMapper;
-
-import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -122,7 +121,7 @@ public class LocationService {
 			log.warn("시도 ID {}에 해당하는 시군구가 없습니다.", sidoId);
 		} else {
 			log.debug("시도 ID {}의 시군구 목록 조회 결과: {} 개", sidoId, sigunguList.size());
-			sigunguList.forEach(sigungu -> 
+			sigunguList.forEach(sigungu ->
 				log.debug("- {} (ID: {})", sigungu.getSigunguName(), sigungu.getSigunguId())
 			);
 		}
@@ -187,10 +186,8 @@ public class LocationService {
 		JusoSigungu sigungu = locationMapper.findSigunguById(sigunguId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_SIGUNGU)
 		);
-		
-		log.debug("시군구 정보 조회 결과: {} {} (ID: {})", 
+		log.debug("시군구 정보 조회 결과: {} {} (ID: {})",
 			sigungu.getSido().getSidoName(), sigungu.getSigunguName(), sigungu.getSigunguId());
-		
 		return sigungu;
 	}
 }

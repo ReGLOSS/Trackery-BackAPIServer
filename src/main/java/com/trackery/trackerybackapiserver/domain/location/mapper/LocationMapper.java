@@ -1,10 +1,10 @@
 package com.trackery.trackerybackapiserver.domain.location.mapper;
 
-import org.apache.ibatis.annotations.Mapper;
-import org.locationtech.jts.geom.Point;
-
 import java.util.List;
 import java.util.Optional;
+
+import org.apache.ibatis.annotations.Mapper;
+import org.locationtech.jts.geom.Point;
 
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
@@ -25,7 +25,7 @@ import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
  * 25. 6. 13.		inari			시군구 ID로 시군구 정보를 조회 매퍼 추가
  */
 @Mapper
-public interface LocationMapper{
+public interface LocationMapper {
 	/**
 	 * 좌표로 시군구 엔티티를 DB에서 조회하고 반환하는 메서드입니다.
 	 * @param coordinateDto 좌표 DTO
