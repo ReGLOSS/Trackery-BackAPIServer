@@ -80,4 +80,68 @@
         #{sigungu.sigunguId}
         );
     </insert>
+
+    <!-- Map domain integration queries -->
+
+    <resultMap id="JusoSidoMap" type="com.trackery.trackerybackapiserver.domain.location.entity.JusoSido">
+        <id property="sidoId" column="sd_id" />
+        <result property="sidoName" column="sd_name" />
+    </resultMap>
+
+    <select id="findAllSido" resultMap="JusoSidoMap">
+        SELECT sd_id, sd_name
+        FROM juso_sido
+        ORDER BY sd_name
+    </select>
+
+    <select id="findSigunguBySido" parameterType="Long" resultMap="JusoSigunguMap">
+        SELECT
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM juso_sigungu sgg
+                 JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE sgg.sd_id = #{sidoId}
+        ORDER BY sgg.sgg_name
+    </select>
+
+    <select id="findSigunguByCoordinateRequest" resultMap="JusoSigunguMap">
+        SELECT
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM juso_sigungu sgg
+                 JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE ST_Contains(
+                      sgg.sgg_border,
+                      ST_GeomFromText(CONCAT('POINT(', #{latitude}, ' ', #{longitude}, ')'), 4326)
+              )
+        LIMIT 1
+    </select>
+
+    <select id="findSidoBorderAsGeoJson" parameterType="Long" resultType="String">
+        SELECT ST_AsGeoJSON(sd_border) as geojson
+        FROM juso_sido
+        WHERE sd_id = #{sidoId}
+    </select>
+
+    <select id="findSigunguBorderAsGeoJson" parameterType="Long" resultType="String">
+        SELECT ST_AsGeoJSON(sgg_border) as geojson
+        FROM juso_sigungu
+        WHERE sgg_id = #{sigunguId}
+    </select>
+
+    <select id="findSigunguById" parameterType="Long" resultMap="JusoSigunguMap">
+        SELECT
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM juso_sigungu sgg
+                 JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE sgg.sgg_id = #{sigunguId}
+    </select>
+
 </mapper>
