@@ -128,11 +128,8 @@ public class ImageService {
 	 */
 	public List<ImageDto> getImagesBySido(Long sidoId, Long userId) {
 		log.debug("시도 ID {}의 사용자 ID {} 이미지 목록 조회", sidoId, userId);
-		
 		List<Image> images = imageMapper.findImagesBySidoIdAndUserId(sidoId, userId);
-		
 		log.debug("시도 ID {}의 사용자 ID {} 이미지 조회 완료 - {} 개", sidoId, userId, images.size());
-		
 		return images.stream()
 			.map(this::convertImageToImageDto)
 			.toList();
@@ -143,11 +140,8 @@ public class ImageService {
 	 */
 	public List<ImageDto> getImagesBySigungu(Long sigunguId, Long userId) {
 		log.debug("시군구 ID {}의 사용자 ID {} 이미지 목록 조회", sigunguId, userId);
-		
 		List<Image> images = imageMapper.findImagesBySigunguIdAndUserId(sigunguId, userId);
-		
 		log.debug("시군구 ID {}의 사용자 ID {} 이미지 조회 완료 - {} 개", sigunguId, userId, images.size());
-		
 		return images.stream()
 			.map(this::convertImageToImageDto)
 			.toList();
