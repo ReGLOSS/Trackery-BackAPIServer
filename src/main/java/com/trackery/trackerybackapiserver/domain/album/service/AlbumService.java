@@ -210,12 +210,10 @@ public class AlbumService {
 	 * @param userId 유저 ID
 	 * @param albumUpdateRequestDto 앨범 정보 수정 Request DTO
 	 */
-	public void updateAlbumInfo(Long userId, AlbumUpdateRequestDto albumUpdateRequestDto) {
-		Long albumId = albumUpdateRequestDto.getAlbumId();
-
+	public void updateAlbumInfo(Long userId, Long albumId, AlbumUpdateRequestDto albumUpdateRequestDto) {
 		findAlbumAndCheckPermission(userId, albumId);
 
-		albumMapper.updateAlbumInfo(albumUpdateRequestDto);
+		albumMapper.updateAlbumInfo(albumId, albumUpdateRequestDto);
 	}
 
 	/**

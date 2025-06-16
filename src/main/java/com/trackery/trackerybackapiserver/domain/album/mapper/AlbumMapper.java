@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
@@ -43,7 +44,7 @@ public interface AlbumMapper {
 
 	List<AlbumImage> findAlbumImagesByAlbumId(Long albumId);
 
-	void updateAlbumInfo(AlbumUpdateRequestDto albumUpdateRequestDto);
+	void updateAlbumInfo(@Param("albumId") Long albumId, @Param("dto") AlbumUpdateRequestDto albumUpdateRequestDto);
 
 	List<Album> findAlbumsByUserId(Long userId);
 

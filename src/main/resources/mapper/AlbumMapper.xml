@@ -67,19 +67,19 @@
         SELECT * FROM album_image WHERE album_id = #{albumId}
     </select>
 
-    <update id="updateAlbumInfo" parameterType="com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto">
+    <update id="updateAlbumInfo">
         UPDATE album
         <set>
             album_mod_date = CONVERT_TZ(NOW(), 'UTC', 'Asia/Seoul'),
 
-            <if test="albumTitle != null and albumTitle != ''">
-                album_title = #{albumTitle},
+            <if test="dto.albumTitle != null and dto.albumTitle != ''">
+                album_title = #{dto.albumTitle},
             </if>
-            <if test="albumDescription != null">
-                album_description = #{albumDescription},
+            <if test="dto.albumDescription != null">
+                album_description = #{dto.albumDescription},
             </if>
-            <if test="isPublic != null">
-                is_public = #{isPublic},
+            <if test="dto.isPublic != null">
+                is_public = #{dto.isPublic},
             </if>
         </set>
         WHERE album_id = #{albumId}

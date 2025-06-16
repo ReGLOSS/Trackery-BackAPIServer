@@ -6,10 +6,10 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
@@ -66,13 +66,14 @@ public class AlbumController {
 	 * @param requestDto 앨범 ID, 이미지 ID 리스트를 담은 DTO
 	 * @return 결과 정보를 담은 DTO
 	 */
-	@PostMapping("/images")
+	@PostMapping("/{albumId}/images")
 	public ResponseEntity<ApiResponse<AlbumImageEditResponseDto>> addImagesIntoAlbum(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable("albumId") Long albumId,
 		@RequestBody @Valid AlbumImageEditRequestDto requestDto) {
 
 		AlbumImageEditResponseDto result = albumService.addImageIntoAlbum(userDetails.getUserId(),
-			requestDto.getAlbumId(), requestDto.getImageIdList());
+			albumId, requestDto.getImageIdList());
 
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
@@ -83,13 +84,14 @@ public class AlbumController {
 	 * @param requestDto 앨범 ID와 삭제할 이미지 리스트를 담은 DTO
 	 * @return 삭제된 이미지 정보, 실패한 이미지 정보를 담은 DTO
 	 */
-	@DeleteMapping("/images")
+	@DeleteMapping("/{albumId}/images")
 	public ResponseEntity<ApiResponse<AlbumImageEditResponseDto>> deleteImagesFromAlbum(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@PathVariable("albumId") Long albumId,
 		@RequestBody @Valid AlbumImageEditRequestDto requestDto
 	) {
 		AlbumImageEditResponseDto result = albumService.deleteImageFromAlbum(userDetails.getUserId(),
-			requestDto.getAlbumId(), requestDto.getImageIdList());
+			albumId, requestDto.getImageIdList());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 
@@ -99,8 +101,8 @@ public class AlbumController {
 	 * @param userDetails 인증된 유저 정보
 	 * @return 앨범 정보, 앨범에 있는 이미지를 담은 상세 정보 DTO
 	 */
-	@GetMapping
-	public ResponseEntity<ApiResponse<AlbumDetailedResponseDto>> getAlbumDetailedInfo(@RequestParam Long albumId,
+	@GetMapping("/{albumId}")
+	public ResponseEntity<ApiResponse<AlbumDetailedResponseDto>> getAlbumDetailedInfo(@PathVariable Long albumId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		AlbumDetailedResponseDto result = albumService.getAlbumDetailedInfo(userDetails.getUserId(), albumId);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
@@ -112,10 +114,12 @@ public class AlbumController {
 	 * @param userDetails 인증된 사용자 정보
 	 * @return 성공 시 200, 그 외 상황에 맞는 에러코드
 	 */
-	@PatchMapping
-	public ResponseEntity<ApiResponse<String>> updateAlbumInfo(@RequestBody AlbumUpdateRequestDto requestDto,
+	@PatchMapping("/{albumId}")
+	public ResponseEntity<ApiResponse<String>> updateAlbumInfo(
+		@PathVariable Long albumId,
+		@RequestBody AlbumUpdateRequestDto requestDto,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		albumService.updateAlbumInfo(userDetails.getUserId(), requestDto);
+		albumService.updateAlbumInfo(userDetails.getUserId(), albumId, requestDto);
 
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
@@ -138,9 +142,9 @@ public class AlbumController {
 	 * @param albumId 앨범 ID
 	 * @return 추가로 반환되는 데이터는 없습니다.
 	 */
-	@DeleteMapping
+	@DeleteMapping("/{albumId}")
 	public ResponseEntity<ApiResponse<String>> deleteAlbum(@AuthenticationPrincipal CustomUserDetails userDetails,
-		@RequestParam Long albumId) {
+		@PathVariable Long albumId) {
 		albumService.deleteAlbum(userDetails.getUserId(), albumId);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
