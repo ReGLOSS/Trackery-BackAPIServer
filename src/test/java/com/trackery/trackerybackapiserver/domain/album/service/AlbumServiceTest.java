@@ -151,8 +151,10 @@ class AlbumServiceTest {
 			void testDeleteImageFromAlbum_AlbumNotFound() {
 				when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.empty());
 
+				List<Long> imageIds = List.of(1L);
+
 				ApiException exception = assertThrows(ApiException.class,
-					() -> albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID, List.of(1L)));
+					() -> albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID, imageIds));
 
 				assertEquals(ErrorCode.NOT_FOUND_ALBUM, exception.getErrorCode());
 				verify(albumMapper, never()).deleteAlbumImageByAlbumImageId(anyLong());
@@ -164,8 +166,10 @@ class AlbumServiceTest {
 				Album forbiddenAlbum = Album.builder().userId(2L).build();
 				when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.of(forbiddenAlbum));
 
+				List<Long> imageIds = List.of(1L);
+
 				ApiException exception = assertThrows(ApiException.class,
-					() -> albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID, List.of(1L)));
+					() -> albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID, imageIds));
 
 				assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
 				verify(albumMapper, never()).deleteAlbumImageByAlbumImageId(anyLong());
@@ -315,6 +319,7 @@ class AlbumServiceTest {
 				verify(albumMapper).findByAlbumId(ALBUM_ID);
 				verify(albumMapper).findAlbumImagesByAlbumId(ALBUM_ID);
 				verify(imageMapper, times(2)).findImageByImageId(anyLong());
+				verify(imageService, times(2)).convertImageToImageDto(any(Image.class));
 			}
 		}
 
