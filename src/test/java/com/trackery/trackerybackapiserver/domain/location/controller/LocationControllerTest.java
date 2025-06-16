@@ -25,6 +25,7 @@ import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.SigunguResponseDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
@@ -292,6 +293,27 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.data").isArray())
 				.andExpect(jsonPath("$.data.length()").value(0));
+		}
+	}
+
+	@Nested
+	@DisplayName("홈 화면 사용자 통계 조회 API 테스트")
+	class getHomeStatsTest {
+		@Test
+		@DisplayName("홈 화면 사용자 통계 조회 성공")
+		void success() throws Exception {
+			UserStatsDto stats = new UserStatsDto(5L, 3L, 2L);
+
+			when(locationService.getUserStats(1L)).thenReturn(stats);
+
+			ResultActions result = mockMvc.perform(get("/api/location/home/stats")
+				.with(user(customUserDetails)));
+
+			result
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.imageCount").value(5L))
+				.andExpect(jsonPath("$.data.albumCount").value(3L))
+				.andExpect(jsonPath("$.data.sigunguCount").value(2L));
 		}
 	}
 }

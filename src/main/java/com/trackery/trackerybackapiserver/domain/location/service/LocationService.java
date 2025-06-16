@@ -195,17 +195,13 @@ public class LocationService {
 	}
 
 	/**
-	 * 홈 화면용 시도 목록과 사용자 통계를 함께 조회합니다.
+	 * 사용자 통계 정보를 조회합니다.
 	 */
-	public HomeStatsResponseDto getHomeStatsData(Long userId) {
-		log.debug("홈 화면 데이터 조회 - 사용자 ID: {}", userId);
-
-		List<JusoSido> sidoList = getAllSido();
+	public UserStatsDto getUserStats(Long userId) {
+		log.debug("사용자 통계 조회 - 사용자 ID: {}", userId);
 		UserStatsDto stats = locationMapper.getUserStats(userId);
-
-		log.debug("홈 화면 데이터 조회 완료 - 시도 {}개, 이미지 {}개, 앨범 {}개, 시군구 {}개",
-			sidoList.size(), stats.getImageCount(), stats.getAlbumCount(), stats.getSigunguCount());
-
-		return new HomeStatsResponseDto(sidoList, stats);
+		log.debug("사용자 통계 조회 완료 - 이미지 {}개, 앨범 {}개, 시군구 {}개",
+			stats.getImageCount(), stats.getAlbumCount(), stats.getSigunguCount());
+		return stats;
 	}
 }

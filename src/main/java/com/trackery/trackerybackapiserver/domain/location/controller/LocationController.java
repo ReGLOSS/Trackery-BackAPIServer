@@ -17,9 +17,9 @@ import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
-import com.trackery.trackerybackapiserver.domain.location.dto.HomeStatsResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.SigunguResponseDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
@@ -135,15 +135,15 @@ public class LocationController {
 	}
 
 	/**
-	 * 홈 화면용 시도 지도와 사용자 통계 정보를 함께 조회합니다.
+	 * 홈 화면용 사용자 통계 정보를 조회합니다.
 	 *
 	 * @param userDetails 인증된 사용자 정보
-	 * @return 시도 목록과 사용자 통계를 포함한 API 응답
+	 * @return 사용자 통계를 포함한 API 응답
 	 */
 	@GetMapping("/home/stats")
-	public ResponseEntity<ApiResponse<HomeStatsResponseDto>> getHomeStats(
+	public ResponseEntity<ApiResponse<UserStatsDto>> getHomeStats(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		HomeStatsResponseDto response = locationService.getHomeStatsData(userDetails.getUserId());
+		UserStatsDto response = locationService.getUserStats(userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 
