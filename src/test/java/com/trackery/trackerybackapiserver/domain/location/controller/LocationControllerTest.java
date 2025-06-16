@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -79,6 +80,18 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 			result
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.data").value("서울특별시 동작구"));
+
+			result.andDo(document("get-location-name-by-coordinate-success",
+				requestFields(
+					fieldWithPath("latitude").description("위도").type(JsonFieldType.NUMBER),
+					fieldWithPath("longitude").description("경도").type(JsonFieldType.NUMBER)
+				),
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("주소명")
+				)
+			));
 		}
 	}
 
@@ -104,6 +117,16 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(jsonPath("$.data[0].sidoName").value("서울특별시"))
 				.andExpect(jsonPath("$.data[1].sidoId").value(26L))
 				.andExpect(jsonPath("$.data[1].sidoName").value("부산광역시"));
+
+			result.andDo(document("get-all-sido-success",
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("시도 목록").type(JsonFieldType.ARRAY),
+					fieldWithPath("data[].sidoId").description("시도 ID"),
+					fieldWithPath("data[].sidoName").description("시도명")
+				)
+			));
 		}
 	}
 
@@ -130,6 +153,21 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(jsonPath("$.data[0].sigunguName").value("강남구"))
 				.andExpect(jsonPath("$.data[1].sigunguId").value(11200L))
 				.andExpect(jsonPath("$.data[1].sigunguName").value("동작구"));
+
+			result.andDo(document("get-sigungu-by-sido-success",
+				pathParameters(
+					parameterWithName("sidoId").description("시도 ID")
+				),
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("시군구 목록").type(JsonFieldType.ARRAY),
+					fieldWithPath("data[].sigunguId").description("시군구 ID"),
+					fieldWithPath("data[].sigunguName").description("시군구명"),
+					fieldWithPath("data[].sido.sidoId").description("시도 ID"),
+					fieldWithPath("data[].sido.sidoName").description("시도명")
+				)
+			));
 		}
 	}
 
@@ -161,6 +199,21 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(jsonPath("$.data.sigunguName").value("동작구"))
 				.andExpect(jsonPath("$.data.sidoId").value(11L))
 				.andExpect(jsonPath("$.data.sigunguId").value(11200L));
+
+			result.andDo(document("get-sigungu-by-coordinate-success",
+				requestFields(
+					fieldWithPath("latitude").description("위도").type(JsonFieldType.NUMBER),
+					fieldWithPath("longitude").description("경도").type(JsonFieldType.NUMBER)
+				),
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.sidoName").description("시도명"),
+					fieldWithPath("data.sigunguName").description("시군구명"),
+					fieldWithPath("data.sidoId").description("시도 ID"),
+					fieldWithPath("data.sigunguId").description("시군구 ID")
+				)
+			));
 		}
 
 		@Test
@@ -195,6 +248,17 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 			result
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.data").isString());
+
+			result.andDo(document("get-sido-border-success",
+				pathParameters(
+					parameterWithName("sidoId").description("시도 ID")
+				),
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("시도 경계선 GeoJSON")
+				)
+			));
 		}
 	}
 
@@ -214,6 +278,17 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 			result
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.data").isString());
+
+			result.andDo(document("get-sigungu-border-success",
+				pathParameters(
+					parameterWithName("sigunguId").description("시군구 ID")
+				),
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("시군구 경계선 GeoJSON")
+				)
+			));
 		}
 	}
 
@@ -238,6 +313,20 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(jsonPath("$.data.sigunguName").value("동작구"))
 				.andExpect(jsonPath("$.data.sidoId").value(11L))
 				.andExpect(jsonPath("$.data.sidoName").value("서울특별시"));
+
+			result.andDo(document("get-sigungu-by-id-success",
+				pathParameters(
+					parameterWithName("sigunguId").description("시군구 ID")
+				),
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.sigunguId").description("시군구 ID"),
+					fieldWithPath("data.sigunguName").description("시군구명"),
+					fieldWithPath("data.sidoId").description("시도 ID"),
+					fieldWithPath("data.sidoName").description("시도명")
+				)
+			));
 		}
 	}
 
@@ -273,6 +362,17 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.data").isArray())
 				.andExpect(jsonPath("$.data.length()").value(0));
+
+			result.andDo(document("get-images-by-sido-success",
+				pathParameters(
+					parameterWithName("sidoId").description("시도 ID")
+				),
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("이미지 목록").type(JsonFieldType.ARRAY)
+				)
+			));
 		}
 	}
 
@@ -293,6 +393,17 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.data").isArray())
 				.andExpect(jsonPath("$.data.length()").value(0));
+
+			result.andDo(document("get-images-by-sigungu-success",
+				pathParameters(
+					parameterWithName("sigunguId").description("시군구 ID")
+				),
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("이미지 목록").type(JsonFieldType.ARRAY)
+				)
+			));
 		}
 	}
 
@@ -314,6 +425,16 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(jsonPath("$.data.imageCount").value(5L))
 				.andExpect(jsonPath("$.data.albumCount").value(3L))
 				.andExpect(jsonPath("$.data.sigunguCount").value(2L));
+
+			result.andDo(document("get-home-stats-success",
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.imageCount").description("총 이미지 수"),
+					fieldWithPath("data.albumCount").description("총 앨범 수"),
+					fieldWithPath("data.sigunguCount").description("방문한 시군구 수")
+				)
+			));
 		}
 	}
 }
