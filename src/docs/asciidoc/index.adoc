@@ -1,5 +1,4 @@
 = Trackery API 문서
-:sectnums
 :toc: left
 :toclevels: 2
 

@@ -16,7 +16,7 @@ include::{snippets}/create-album/http-response.adoc[]
 include::{snippets}/create-album/response-fields.adoc[]
 '''
 === 앨범 삭제 API
-==== DELETE /api/albums?albumId={앨범 ID}
+==== DELETE /api/albums/{앨범 ID}
 
 앨범 ID로 앨범을 삭제할 수 있는 API입니다. 추가로 반환되는 데이터는 없습니다.
 
@@ -29,7 +29,7 @@ include::{snippets}/delete-album/response-fields.adoc[]
 '''
 
 === 앨범에 이미지 추가 API
-==== POST /api/albums/images
+==== POST /api/albums/{앨범 ID}/images
 
 앨범 ID와 앨범에 추가할 이미지 ID 리스트를 받아서 앨범에 이미지를 추가하는 API입니다. 응답은 성공한 이미지 개수, 실패한 이미지 개수, 성공한 이미지는 성공한 이미지 ID 리스트, 실패한 이미지는 사유를 포함해서 데이터를 반환합니다.
 
@@ -43,7 +43,7 @@ include::{snippets}/add-images-into-album/response-fields.adoc[]
 '''
 
 === 앨범에서 이미지 삭제 API
-==== DELETE /api/albums/images
+==== DELETE /api/albums/{앨범 ID}/images
 
 앨범 ID와 이미지 ID 리스트로 앨범에 있는 이미지를 삭제하는 기능입니다.
 앨범에 해당 ID를 가진 이미지가 없을 경우 건너뛰어집니다. 응답은 성공한 이미지 개수, 실패한 이미지 개수, 성공한 이미지는 성공한 이미지 ID 리스트, 실패한 이미지는 사유를 포함해서 데이터를 반환합니다.
@@ -58,7 +58,7 @@ include::{snippets}/delete-images-from-album/response-fields.adoc[]
 '''
 
 === 앨범 상세 정보 조회 API
-==== GET /api/albums?albumId={앨범 ID}
+==== GET /api/albums/{앨범 ID}
 
 앨범의 정보와 앨범에 포함돼있는 이미지를 불러오는 API입니다. 이미지 응답 데이터 형식은 이미지 API 문서를 참고 바랍니다.
 
@@ -71,7 +71,7 @@ include::{snippets}/get-album-detailed-info/response-fields.adoc[]
 '''
 
 === 앨범 정보 수정 API
-==== PATCH /api/albums
+==== PATCH /api/albums/{앨범 ID}
 
 앨범 정보를 수정하는 API입니다. 각 필드 중 입력이 들어온 필드만 업데이트가 이뤄집니다.
 

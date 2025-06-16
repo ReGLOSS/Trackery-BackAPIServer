@@ -101,7 +101,6 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Test
 	void addImagesIntoAlbumSuccess() throws Exception {
 		AlbumImageEditRequestDto requestDto = new AlbumImageEditRequestDto();
-		ReflectionTestUtils.setField(requestDto, "albumId", 1L);
 		ReflectionTestUtils.setField(requestDto, "imageIdList", List.of(10L, 20L));
 
 		HashMap<Long, String> failedImageMap = new HashMap<>();
@@ -117,7 +116,7 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		when(albumService.addImageIntoAlbum(any(), any(), any())).thenReturn(responseDto);
 
-		ResultActions result = mockMvc.perform(post("/api/albums/images")
+		ResultActions result = mockMvc.perform(post("/api/albums/{albumId}/images", 1L)
 			.with(user(customUserDetails))
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
@@ -136,8 +135,10 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		result
 			.andDo(document("add-images-into-album",
+					pathParameters(
+						parameterWithName("albumId").description("앨범 ID")
+					),
 					requestFields(
-						fieldWithPath("albumId").description("이미지를 추가할 앨범 ID"),
 						fieldWithPath("imageIdList").description("앨범에 추가할 이미지 ID 리스트")
 					),
 
@@ -171,9 +172,8 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		when(albumService.getAlbumDetailedInfo(any(), eq(albumId))).thenReturn(responseDto);
 
-		ResultActions result = mockMvc.perform(get("/api/albums")
-			.with(user(customUserDetails))
-			.param("albumId", String.valueOf(1L)));
+		ResultActions result = mockMvc.perform(get("/api/albums/{albumId}", albumId)
+			.with(user(customUserDetails)));
 
 		result
 			.andExpect(status().isOk())
@@ -187,10 +187,9 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		result
 			.andDo(document("get-album-detailed-info",
-					queryParameters(
+					pathParameters(
 						parameterWithName("albumId").description("앨범 ID")
 					),
-
 					responseFields(
 						fieldWithPath("code").description("응답 코드"),
 						fieldWithPath("message").description("응답 메시지"),
@@ -209,15 +208,14 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Test
 	void updateAlbumInfoSuccess() throws Exception {
 		AlbumUpdateRequestDto requestDto = AlbumUpdateRequestDto.builder()
-			.albumId(1L)
 			.albumTitle("앨범 제목 수정")
 			.albumDescription("앨범 설명 수정")
 			.isPublic(1)
 			.build();
 
-		doNothing().when(albumService).updateAlbumInfo(any(), any());
+		doNothing().when(albumService).updateAlbumInfo(any(), any(), any());
 
-		ResultActions result = mockMvc.perform(patch("/api/albums")
+		ResultActions result = mockMvc.perform(patch("/api/albums/{albumId}", 1L)
 			.with(user(customUserDetails))
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
@@ -227,8 +225,10 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isOk());
 
 		result.andDo(document("update-album-info",
+			pathParameters(
+				parameterWithName("albumId").description("앨범 ID")
+			),
 			requestFields(
-				fieldWithPath("albumId").description("앨범 ID").type(JsonFieldType.NUMBER),
 				fieldWithPath("albumTitle").description("앨범 제목").type(JsonFieldType.STRING),
 				fieldWithPath("albumDescription").description("앨범 설명").type(JsonFieldType.STRING),
 				fieldWithPath("isPublic").description("공개 여부").type(JsonFieldType.NUMBER)
@@ -244,7 +244,6 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Test
 	void deleteImagesFromAlbumSuccess() throws Exception {
 		AlbumImageEditRequestDto requestDto = new AlbumImageEditRequestDto();
-		ReflectionTestUtils.setField(requestDto, "albumId", 1L);
 		ReflectionTestUtils.setField(requestDto, "imageIdList", List.of(10L, 20L));
 
 		HashMap<Long, String> failedImageMap = new HashMap<>();
@@ -260,7 +259,7 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		when(albumService.deleteImageFromAlbum(any(), any(), any())).thenReturn(responseDto);
 
-		ResultActions result = mockMvc.perform(delete("/api/albums/images")
+		ResultActions result = mockMvc.perform(delete("/api/albums/{albumId}/images", 1L)
 			.with(user(customUserDetails))
 			.with(csrf())
 			.contentType(MediaType.APPLICATION_JSON)
@@ -278,8 +277,10 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data.failedImageIds").isNotEmpty());
 
 		result.andDo(document("delete-images-from-album",
+				pathParameters(
+					parameterWithName("albumId").description("앨범 ID")
+				),
 				requestFields(
-					fieldWithPath("albumId").description("앨범 ID"),
 					fieldWithPath("imageIdList").description("앨범 ID 리스트")
 				),
 
@@ -350,10 +351,9 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		doNothing().when(albumService).deleteAlbum(any(), eq(albumId));
 
-		ResultActions result = mockMvc.perform(delete("/api/albums")
+		ResultActions result = mockMvc.perform(delete("/api/albums/{albumId}", albumId)
 			.with(user(customUserDetails))
-			.with(csrf())
-			.queryParam("albumId", String.valueOf(albumId)));
+			.with(csrf()));
 
 		result
 			.andExpect(status().isOk())
@@ -361,10 +361,9 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		result
 			.andDo(document("delete-album",
-					queryParameters(
+					pathParameters(
 						parameterWithName("albumId").description("앨범 ID")
 					),
-
 					responseFields(
 						fieldWithPath("code").description("응답 코드"),
 						fieldWithPath("message").description("응답 메시지")
