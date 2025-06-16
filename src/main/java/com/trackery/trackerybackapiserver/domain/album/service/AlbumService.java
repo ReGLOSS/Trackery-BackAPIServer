@@ -26,9 +26,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
-import com.trackery.trackerybackapiserver.domain.image.service.ImageS3Service;
-import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
-import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
+import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +49,7 @@ import lombok.extern.slf4j.Slf4j;
 public class AlbumService {
 	private final AlbumMapper albumMapper;
 	private final ImageMapper imageMapper;
-	private final ImageS3Service imageS3Service;
+	private final ImageService imageService;
 
 	/**
 	 * 앨범 생성 기능
@@ -202,26 +200,7 @@ public class AlbumService {
 				.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)))
 			.toList();
 
-		List<ImageDto> imageDtoList = imageList.stream().map(image -> {
-			String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageFile());
-
-			LocationInfoDto locationInfoDto = LocationUtil.getLocationInfoByCoordinatePoint(image.getCoordPoint());
-
-			return ImageDto.builder()
-				.imageId(image.getImageId())
-				.userId(image.getUserId())
-				.imageRegDate(image.getImageRegDate())
-				.sdName(locationInfoDto.sidoName())
-				.sggName(locationInfoDto.sigunguName())
-				.latitude(locationInfoDto.latitude())
-				.longitude(locationInfoDto.longitude())
-				.imageName(image.getImageName())
-				.imageContent(image.getImageContent())
-				.imageDate(image.getImageDate())
-				.isPublic(image.getIsPublic())
-				.imageUrl(imagePresignedUrl)
-				.build();
-		}).toList();
+		List<ImageDto> imageDtoList = imageList.stream().map(imageService::convertImageToImageDto).toList();
 
 		return AlbumDetailedResponseDto.of(album, imageDtoList);
 	}
