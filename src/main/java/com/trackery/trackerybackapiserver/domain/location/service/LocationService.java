@@ -199,13 +199,13 @@ public class LocationService {
 	 */
 	public HomeStatsResponseDto getHomeStatsData(Long userId) {
 		log.debug("홈 화면 데이터 조회 - 사용자 ID: {}", userId);
-		
+
 		List<JusoSido> sidoList = getAllSido();
 		UserStatsDto stats = locationMapper.getUserStats(userId);
-		
-		log.debug("홈 화면 데이터 조회 완료 - 시도 {}개, 이미지 {}개, 앨범 {}개, 시군구 {}개", 
+
+		log.debug("홈 화면 데이터 조회 완료 - 시도 {}개, 이미지 {}개, 앨범 {}개, 시군구 {}개",
 			sidoList.size(), stats.getImageCount(), stats.getAlbumCount(), stats.getSigunguCount());
-		
+
 		return new HomeStatsResponseDto(sidoList, stats);
 	}
 }

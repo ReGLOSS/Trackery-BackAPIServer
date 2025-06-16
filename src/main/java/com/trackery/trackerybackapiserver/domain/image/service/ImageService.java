@@ -14,6 +14,9 @@ import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
+import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
+import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
+import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
 
 import lombok.RequiredArgsConstructor;
@@ -31,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 14.        inari       최초 생성
  * 25. 2. 19.        inari       이미지를 불러오지 못했을시 예외 처리
  * 25. 5. 15.		durururuk	 이미지 단건/다건 조회 기능 작성
+ * 25. 6. 16.		 inari		 지도를 통한 이미지 조회 기능 추가
  */
 @Slf4j
 @Service
@@ -38,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
 public class ImageService {
 	private final ImageMapper imageMapper;
 	private final ImageS3Service imageS3Service;
+	private final LocationService locationService;
 
 	/**
 	 * 공개된 이미지 URL 목록을 조회합니다.
@@ -116,5 +121,35 @@ public class ImageService {
 			.isPublic(image.getIsPublic())
 			.imageUrl(imagePresignedUrl)
 			.build();
+	}
+
+	/**
+	 * 특정 시도에 등록된 사용자의 이미지를 조회합니다.
+	 */
+	public List<ImageDto> getImagesBySido(Long sidoId, Long userId) {
+		log.debug("시도 ID {}의 사용자 ID {} 이미지 목록 조회", sidoId, userId);
+		
+		List<Image> images = imageMapper.findImagesBySidoIdAndUserId(sidoId, userId);
+		
+		log.debug("시도 ID {}의 사용자 ID {} 이미지 조회 완료 - {} 개", sidoId, userId, images.size());
+		
+		return images.stream()
+			.map(this::convertImageToImageDto)
+			.toList();
+	}
+
+	/**
+	 * 특정 시군구에 등록된 사용자의 이미지를 조회합니다.
+	 */
+	public List<ImageDto> getImagesBySigungu(Long sigunguId, Long userId) {
+		log.debug("시군구 ID {}의 사용자 ID {} 이미지 목록 조회", sigunguId, userId);
+		
+		List<Image> images = imageMapper.findImagesBySigunguIdAndUserId(sigunguId, userId);
+		
+		log.debug("시군구 ID {}의 사용자 ID {} 이미지 조회 완료 - {} 개", sigunguId, userId, images.size());
+		
+		return images.stream()
+			.map(this::convertImageToImageDto)
+			.toList();
 	}
 }

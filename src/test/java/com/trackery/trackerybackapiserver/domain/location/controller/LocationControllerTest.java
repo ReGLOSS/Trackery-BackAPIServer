@@ -28,6 +28,8 @@ import com.trackery.trackerybackapiserver.domain.location.dto.SigunguResponseDto
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 /**
@@ -46,6 +48,9 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 	@MockitoBean
 	LocationService locationService;
+	
+	@MockitoBean
+	ImageService imageService;
 
 	CustomUserDetails customUserDetails;
 
@@ -248,5 +253,45 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 		sigungu.setSigunguName(sigunguName);
 		sigungu.setSido(sido);
 		return sigungu;
+	}
+
+	@Nested
+	@DisplayName("시도별 사용자 이미지 조회 API 테스트")
+	class getImagesBySidoTest {
+		@Test
+		@DisplayName("시도별 사용자 이미지 조회 성공")
+		void success() throws Exception {
+			List<ImageDto> response = Arrays.asList();
+
+			when(imageService.getImagesBySido(11L, 1L)).thenReturn(response);
+
+			ResultActions result = mockMvc.perform(get("/api/location/sido/{sidoId}/images", 11L)
+				.with(user(customUserDetails)));
+
+			result
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data").isArray())
+				.andExpect(jsonPath("$.data.length()").value(0));
+		}
+	}
+
+	@Nested
+	@DisplayName("시군구별 사용자 이미지 조회 API 테스트")
+	class getImagesBySigunguTest {
+		@Test
+		@DisplayName("시군구별 사용자 이미지 조회 성공")
+		void success() throws Exception {
+			List<ImageDto> response = Arrays.asList();
+
+			when(imageService.getImagesBySigungu(11200L, 1L)).thenReturn(response);
+
+			ResultActions result = mockMvc.perform(get("/api/location/sigungu/{sigunguId}/images", 11200L)
+				.with(user(customUserDetails)));
+
+			result
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data").isArray())
+				.andExpect(jsonPath("$.data.length()").value(0));
+		}
 	}
 }
