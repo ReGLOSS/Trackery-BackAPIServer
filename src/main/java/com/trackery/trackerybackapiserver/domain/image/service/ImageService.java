@@ -101,7 +101,7 @@ public class ImageService {
 	 * @param image 이미지 객체
 	 * @return 이미지 정보를 담고있는 DTO
 	 */
-	private ImageDto convertImageToImageDto(Image image) {
+	public ImageDto convertImageToImageDto(Image image) {
 		String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageFile());
 
 		CoordinatePoint coordPoint = image.getCoordPoint();
