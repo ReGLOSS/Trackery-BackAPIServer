@@ -8,6 +8,7 @@ import org.locationtech.jts.geom.Point;
 
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
@@ -23,6 +24,7 @@ import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
  * -----------------------------------------------------------
  * 25. 4. 15.		durururuk		최초 생성
  * 25. 6. 13.		inari			시군구 ID로 시군구 정보를 조회 매퍼 추가
+ * 25. 6. 14.		inari			홈화면 전국지도용 통계 추가
  */
 @Mapper
 public interface LocationMapper {
@@ -75,4 +77,11 @@ public interface LocationMapper {
 	 * 시군구 ID로 시군구 정보를 조회합니다.
 	 */
 	Optional<JusoSigungu> findSigunguById(Long sigunguId);
+
+	/**
+	 * 특정 사용자의 통계 정보를 조회합니다.
+	 * @param userId 사용자 ID
+	 * @return 사용자 통계 정보
+	 */
+	UserStatsDto getUserStats(Long userId);
 }

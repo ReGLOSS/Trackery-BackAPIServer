@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.location.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,11 +15,13 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.HomeStatsResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.SigunguResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
+import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,7 +36,8 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 15.		durururuk		최초 생성
- * 25. 6. 13.		narilee         시군구 ID로 시군구 정보를 조회 메서드 추가
+ * 25. 6. 13.		inari         	시군구 ID로 시군구 정보를 조회 메서드 추가
+ * 25. 6. 14.		inari       	홈화면 전국지도용 통계 추가
  */
 @RestController
 @RequestMapping("/api/location")
@@ -123,6 +127,19 @@ public class LocationController {
 	public ResponseEntity<ApiResponse<SigunguResponseDto>> getSigungu(@PathVariable Long sigunguId) {
 		JusoSigungu sigungu = locationService.getSigunguById(sigunguId);
 		SigunguResponseDto response = SigunguResponseDto.from(sigungu);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
+	}
+
+	/**
+	 * 홈 화면용 시도 지도와 사용자 통계 정보를 함께 조회합니다.
+	 *
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 시도 목록과 사용자 통계를 포함한 API 응답
+	 */
+	@GetMapping("/home/stats")
+	public ResponseEntity<ApiResponse<HomeStatsResponseDto>> getHomeStats(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		HomeStatsResponseDto response = locationService.getHomeStatsData(userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 }
