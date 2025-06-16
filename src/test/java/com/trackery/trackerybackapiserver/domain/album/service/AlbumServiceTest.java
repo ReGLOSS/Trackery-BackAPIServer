@@ -33,7 +33,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
-import com.trackery.trackerybackapiserver.domain.image.service.ImageS3Service;
+import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
@@ -47,7 +47,7 @@ class AlbumServiceTest {
 	private ImageMapper imageMapper;
 
 	@Mock
-	private ImageS3Service imageS3Service;
+	private ImageService imageService;
 
 	@InjectMocks
 	private AlbumService albumService;
@@ -302,8 +302,6 @@ class AlbumServiceTest {
 			when(imageMapper.findImageByImageId(1L)).thenReturn(Optional.of(image1));
 			when(imageMapper.findImageByImageId(2L)).thenReturn(Optional.of(image2));
 
-			when(imageS3Service.generatePreSignedGetUrl(anyString())).thenReturn("http://image-url.com/presigned");
-
 			try (MockedStatic<LocationUtil> mockedLocationUtil = mockStatic(LocationUtil.class)) {
 				mockedLocationUtil.when(() -> LocationUtil.getLocationInfoByCoordinatePoint(any(CoordinatePoint.class)))
 					.thenReturn(new LocationInfoDto(37.497942, 127.027621, "서울특별시", "강남구"));
@@ -317,7 +315,6 @@ class AlbumServiceTest {
 				verify(albumMapper).findByAlbumId(ALBUM_ID);
 				verify(albumMapper).findAlbumImagesByAlbumId(ALBUM_ID);
 				verify(imageMapper, times(2)).findImageByImageId(anyLong());
-				verify(imageS3Service, times(2)).generatePreSignedGetUrl(anyString());
 			}
 		}
 

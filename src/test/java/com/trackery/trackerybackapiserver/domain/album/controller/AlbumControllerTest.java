@@ -15,6 +15,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.restdocs.payload.JsonFieldType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.ResultActions;
@@ -83,9 +84,9 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		result.andDo(document("create-album",
 			requestFields(
-				fieldWithPath("albumTitle").description("앨범 제목(필수)"),
-				fieldWithPath("albumDescription").description("앨범 설명").optional(),
-				fieldWithPath("isPublic").description("공개 여부(필수)")
+				fieldWithPath("albumTitle").description("앨범 제목(필수)").type(JsonFieldType.STRING),
+				fieldWithPath("albumDescription").description("앨범 설명").type(JsonFieldType.STRING).optional(),
+				fieldWithPath("isPublic").description("공개 여부(필수)").type(JsonFieldType.NUMBER)
 			),
 
 			responseFields(
@@ -164,6 +165,8 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.albumTitle("강릉 여행")
 			.albumDescription("강릉 여행 기록")
 			.imageList(List.of())
+			.isPublic(0)
+			.imageCount(0)
 			.build();
 
 		when(albumService.getAlbumDetailedInfo(any(), eq(albumId))).thenReturn(responseDto);
@@ -195,8 +198,8 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 						fieldWithPath("data.createdUserId").description("앨벙을 생성한 유저 ID"),
 						fieldWithPath("data.albumTitle").description("앨범 제목"),
 						fieldWithPath("data.albumDescription").description("앨범 설명"),
-						fieldWithPath("data.isPublic").description("공개 여부"),
-						fieldWithPath("data.imageCount").description("이미지 개수"),
+						fieldWithPath("data.isPublic").description("공개 여부").type(JsonFieldType.NUMBER),
+						fieldWithPath("data.imageCount").description("이미지 개수").type(JsonFieldType.NUMBER),
 						fieldWithPath("data.imageList").description("앨범 이미지 리스트")
 					)
 				)
@@ -205,8 +208,12 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 	@Test
 	void updateAlbumInfoSuccess() throws Exception {
-		AlbumUpdateRequestDto requestDto = new AlbumUpdateRequestDto();
-		ReflectionTestUtils.setField(requestDto, "albumId", 1L);
+		AlbumUpdateRequestDto requestDto = AlbumUpdateRequestDto.builder()
+			.albumId(1L)
+			.albumTitle("앨범 제목 수정")
+			.albumDescription("앨범 설명 수정")
+			.isPublic(1)
+			.build();
 
 		doNothing().when(albumService).updateAlbumInfo(any(), any());
 
@@ -221,10 +228,10 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		result.andDo(document("update-album-info",
 			requestFields(
-				fieldWithPath("albumId").description("앨범 ID"),
-				fieldWithPath("albumTitle").description("앨범 제목"),
-				fieldWithPath("albumDescription").description("앨범 설명"),
-				fieldWithPath("isPublic").description("공개 여부")
+				fieldWithPath("albumId").description("앨범 ID").type(JsonFieldType.NUMBER),
+				fieldWithPath("albumTitle").description("앨범 제목").type(JsonFieldType.STRING),
+				fieldWithPath("albumDescription").description("앨범 설명").type(JsonFieldType.STRING),
+				fieldWithPath("isPublic").description("공개 여부").type(JsonFieldType.NUMBER)
 			),
 
 			responseFields(
