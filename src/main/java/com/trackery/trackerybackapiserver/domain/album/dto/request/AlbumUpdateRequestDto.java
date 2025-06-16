@@ -1,6 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.album.dto.request;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,13 +22,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AlbumUpdateRequestDto {
 	/*
-	albumId 앨범 ID(필수)
 	albumTitle 앨범 제목
 	albumDescription 앨범 설명
 	isPublic 공개 여부
 	 */
-	@NotNull
-	private Long albumId;
 	private String albumTitle;
 	private String albumDescription;
 	private Integer isPublic;

@@ -2,7 +2,6 @@ package com.trackery.trackerybackapiserver.domain.album.dto.request;
 
 import java.util.List;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -21,10 +20,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class AlbumImageEditRequestDto {
 	/**
-	 * albumId 앨범 ID
-	 * imageIdList 이미지 ID 리스트
+	 * 이미지 ID 리스트
 	 */
-	@NotNull
-	private Long albumId;
 	private List<Long> imageIdList;
 }

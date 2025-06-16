@@ -151,8 +151,10 @@ class AlbumServiceTest {
 			void testDeleteImageFromAlbum_AlbumNotFound() {
 				when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.empty());
 
+				List<Long> imageIds = List.of(1L);
+
 				ApiException exception = assertThrows(ApiException.class,
-					() -> albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID, List.of(1L)));
+					() -> albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID, imageIds));
 
 				assertEquals(ErrorCode.NOT_FOUND_ALBUM, exception.getErrorCode());
 				verify(albumMapper, never()).deleteAlbumImageByAlbumImageId(anyLong());
@@ -164,8 +166,10 @@ class AlbumServiceTest {
 				Album forbiddenAlbum = Album.builder().userId(2L).build();
 				when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.of(forbiddenAlbum));
 
+				List<Long> imageIds = List.of(1L);
+
 				ApiException exception = assertThrows(ApiException.class,
-					() -> albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID, List.of(1L)));
+					() -> albumService.deleteImageFromAlbum(USER_ID, ALBUM_ID, imageIds));
 
 				assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
 				verify(albumMapper, never()).deleteAlbumImageByAlbumImageId(anyLong());
@@ -315,6 +319,7 @@ class AlbumServiceTest {
 				verify(albumMapper).findByAlbumId(ALBUM_ID);
 				verify(albumMapper).findAlbumImagesByAlbumId(ALBUM_ID);
 				verify(imageMapper, times(2)).findImageByImageId(anyLong());
+				verify(imageService, times(2)).convertImageToImageDto(any(Image.class));
 			}
 		}
 
@@ -353,40 +358,37 @@ class AlbumServiceTest {
 		@DisplayName("성공")
 		void testUpdateAlbumInfo_Success() {
 			AlbumUpdateRequestDto requestDto = AlbumUpdateRequestDto.builder()
-				.albumId(ALBUM_ID)
 				.build();
 
 			when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.of(album));
 
-			doNothing().when(albumMapper).updateAlbumInfo(requestDto);
+			doNothing().when(albumMapper).updateAlbumInfo(ALBUM_ID, requestDto);
 
-			assertDoesNotThrow(() -> albumService.updateAlbumInfo(USER_ID, requestDto));
+			assertDoesNotThrow(() -> albumService.updateAlbumInfo(USER_ID, ALBUM_ID, requestDto));
 
-			verify(albumMapper).updateAlbumInfo(requestDto);
+			verify(albumMapper).updateAlbumInfo(ALBUM_ID, requestDto);
 		}
 
 		@Test
 		@DisplayName("실패 - 앨범을 찾을 수 없음")
 		void testUpdateAlbumInfo_AlbumNotFound() {
 			AlbumUpdateRequestDto requestDto = AlbumUpdateRequestDto.builder()
-				.albumId(ALBUM_ID)
 				.build();
 
 			when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.empty());
 
 			ApiException exception = assertThrows(ApiException.class,
-				() -> albumService.updateAlbumInfo(USER_ID, requestDto));
+				() -> albumService.updateAlbumInfo(USER_ID, ALBUM_ID, requestDto));
 
 			assertEquals(ErrorCode.NOT_FOUND_ALBUM, exception.getErrorCode());
 
-			verify(albumMapper, never()).updateAlbumInfo(any());
+			verify(albumMapper, never()).updateAlbumInfo(any(), any());
 		}
 
 		@Test
 		@DisplayName("실패 - 유저가 앨범에 접근 권한이 없음")
 		void testUpdateAlbumInfo_ForbiddenAccess() {
 			AlbumUpdateRequestDto requestDto = AlbumUpdateRequestDto.builder()
-				.albumId(5L)
 				.build();
 
 			Album forbiddenAlbum = Album.builder()
@@ -397,11 +399,11 @@ class AlbumServiceTest {
 			when(albumMapper.findByAlbumId(5L)).thenReturn(Optional.of(forbiddenAlbum));
 
 			ApiException exception = assertThrows(ApiException.class,
-				() -> albumService.updateAlbumInfo(USER_ID, requestDto));
+				() -> albumService.updateAlbumInfo(USER_ID, 5L, requestDto));
 
 			assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
 
-			verify(albumMapper, never()).updateAlbumInfo(any());
+			verify(albumMapper, never()).updateAlbumInfo(any(), any());
 		}
 	}
 
