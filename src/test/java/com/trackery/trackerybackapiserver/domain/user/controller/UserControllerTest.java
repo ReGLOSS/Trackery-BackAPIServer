@@ -2,6 +2,10 @@ package com.trackery.trackerybackapiserver.domain.user.controller;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.relaxedResponseFields;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -33,21 +37,20 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 
 /**
- *packageName    : com.trackery.trackerybackapiserver.domain.user.controller
-
- fileName       : UserControllerTest
- author         : durururuk
- date           : 25. 2. 14.
- description    : UserController 테스트코드
- ===========================================================
- DATE              AUTHOR             NOTE
- -----------------------------------------------------------
- 25. 2. 14.        durururuk       최초 생성
- 25. 2. 14.        durururuk       로그인 컨트롤러 테스트 코드 작성
- 25. 4. 09.		   durururuk	   유저 상세정보 조회 API 단위테스트 코드 작성
- 25. 4. 10.		   durururuk	   인증 기반 비밀번호 변경 컨트롤러 mockMvc 테스트 작성
+ * packageName    : com.trackery.trackerybackapiserver.domain.user.controller
+ * fileName       : UserControllerTest
+ * author         : durururuk
+ * date           : 25. 2. 14.
+ * description    : 유저 컨트롤러의 테스트 클래스입니다.
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 2. 14.        durururuk      최초 생성
+ * 25. 2. 14.        durururuk      로그인 컨트롤러 테스트 코드 작성
+ * 25. 4. 09.		 durururuk	   	유저 상세정보 조회 API 단위테스트 코드 작성
+ * 25. 4. 10.		 durururuk	    인증 기반 비밀번호 변경 컨트롤러 mockMvc 테스트 작성
+ * 25. 6. 17.		 inari		    Spring-Rest-Docs api문서 추가
  */
-
 @WebMvcTest(UserController.class)
 class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Autowired
@@ -92,7 +95,18 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(cookie().value("accessToken", accessToken))
 			.andExpect(cookie().exists("refreshToken"))
 			.andExpect(cookie().httpOnly("refreshToken", true))
-			.andExpect(cookie().value("refreshToken", refreshToken));
+			.andExpect(cookie().value("refreshToken", refreshToken))
+			.andDo(document("register-user-success",
+				requestFields(
+					fieldWithPath("nickname").description("사용자 닉네임"),
+					fieldWithPath("password").description("사용자 비밀번호"),
+					fieldWithPath("userProfile").description("사용자 프로필 이미지").optional()
+				),
+				relaxedResponseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지")
+				)
+			));
 	}
 
 	@Test
@@ -107,7 +121,17 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 		result.andExpect(status().isOk())
 			.andExpect(cookie().exists("userNameToken"))
 			.andExpect(cookie().value("userNameToken", "jwt"))
-			.andExpect(jsonPath("$.data").value(true));
+			.andExpect(jsonPath("$.data").value(true))
+			.andDo(document("check-username-availability-success",
+				queryParameters(
+					parameterWithName("value").description("확인할 사용자명")
+				),
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("사용자명 사용 가능 여부")
+				)
+			));
 	}
 
 	@Test
@@ -134,7 +158,17 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(cookie().value("accessToken", accessToken))
 			.andExpect(cookie().exists("refreshToken"))
 			.andExpect(cookie().httpOnly("refreshToken", true))
-			.andExpect(cookie().value("refreshToken", refreshToken));
+			.andExpect(cookie().value("refreshToken", refreshToken))
+			.andDo(document("login-user-success",
+				requestFields(
+					fieldWithPath("userName").description("사용자명"),
+					fieldWithPath("password").description("비밀번호")
+				),
+				relaxedResponseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지")
+				)
+			));
 	}
 
 	@Nested
@@ -177,7 +211,22 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(jsonPath("$.data.OAuthList[0].oauthId").value(1))
 				.andExpect(jsonPath("$.data.OAuthList[0].userId").value(1))
 				.andExpect(jsonPath("$.data.OAuthList[0].provider").value("KAKAO"))
-				.andExpect(jsonPath("$.data.OAuthList[0].providerUserId").value("155788848"));
+				.andExpect(jsonPath("$.data.OAuthList[0].providerUserId").value("155788848"))
+				.andDo(document("get-user-detailed-info-success",
+					responseFields(
+						fieldWithPath("code").description("상태 코드"),
+						fieldWithPath("message").description("응답 메시지"),
+						fieldWithPath("data.userId").description("사용자 ID"),
+						fieldWithPath("data.userRoleId").description("사용자 역할 ID"),
+						fieldWithPath("data.userName").description("사용자명"),
+						fieldWithPath("data.nickname").description("닉네임"),
+						fieldWithPath("data.email").description("이메일"),
+						fieldWithPath("data.OAuthList[].oauthId").description("OAuth ID"),
+						fieldWithPath("data.OAuthList[].userId").description("연결된 사용자 ID"),
+						fieldWithPath("data.OAuthList[].provider").description("OAuth 제공자"),
+						fieldWithPath("data.OAuthList[].providerUserId").description("제공자 사용자 ID")
+					)
+				));
 		}
 	}
 }

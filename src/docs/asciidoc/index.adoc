@@ -11,4 +11,5 @@ include::{snippets}/get-public-images/http-response.adoc[]
 include::{snippets}/get-public-images/response-fields.adoc[]
 
 include::album-api.adoc[]
-
+include::location-api.adoc[]
+include::user-api.adoc[]

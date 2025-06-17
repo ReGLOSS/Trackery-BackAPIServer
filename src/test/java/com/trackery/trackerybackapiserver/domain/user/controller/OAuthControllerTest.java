@@ -2,6 +2,9 @@ package com.trackery.trackerybackapiserver.domain.user.controller;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.DisplayName;
@@ -36,6 +39,7 @@ import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
  * -----------------------------------------------------------
  * 25. 3. 3.        inari       최초 생성
  * 25. 3. 26.       inari       계정 연동 토큰 테스트 추가
+ * 25. 6. 17.		inari		Spring-Rest-Docs api문서 추가
  */
 @WithMockUser
 @WebMvcTest({OAuthController.class, GlobalExceptionHandler.class})
@@ -101,7 +105,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		// when
 		ResultActions resultActions = mockMvc
-			.perform(get("/api/users/oauth/login/naver")
+			.perform(get("/api/users/oauth/login/{provider}", "naver")
 				.queryParam("code", "auth_code")
 				.queryParam("state", "state")
 				.contentType(MediaType.APPLICATION_JSON));
@@ -112,7 +116,22 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(cookie().exists("accessToken"))
 			.andExpect(cookie().httpOnly("accessToken", true))
 			.andExpect(cookie().value("accessToken", "jwt"))
-			.andExpect(jsonPath("$.data.existingEmail").value(false));
+			.andExpect(jsonPath("$.data.existingEmail").value(false))
+			.andDo(document("oauth-login-success",
+				pathParameters(
+					parameterWithName("provider").description("OAuth 제공자 (naver, kakao, google, github)")
+				),
+				queryParameters(
+					parameterWithName("code").description("인증 코드"),
+					parameterWithName("state").description("상태 값").optional()
+				),
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.email").description("사용자 이메일").optional(),
+					fieldWithPath("data.existingEmail").description("기존 이메일 존재 여부")
+				)
+			));
 	}
 
 	@Test
@@ -209,7 +228,20 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 		resultActions
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.data.token").value(TOKEN))
-			.andExpect(jsonPath("$.data.provider").value(PROVIDER));
+			.andExpect(jsonPath("$.data.provider").value(PROVIDER))
+			.andDo(document("oauth-link-success",
+				requestFields(
+					fieldWithPath("provider").description("OAuth 제공자"),
+					fieldWithPath("email").description("연결할 이메일"),
+					fieldWithPath("linkAccount").description("계정 연동 여부").optional()
+				),
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.token").description("연결 토큰"),
+					fieldWithPath("data.provider").description("OAuth 제공자")
+				)
+			));
 
 		verify(oAuthLinkService).createLinkToken(PROVIDER, EMAIL);
 	}
