@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
@@ -56,6 +57,17 @@ public class ImageController {
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		List<ImageDto> imageDtoList = imageService.getImageListByUserId(userDetails.getUserId());
 
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDtoList));
+	}
+
+	@GetMapping("/v2/me")
+	public ResponseEntity<ApiResponse<PageInfo<ImageDto>>> getMyImagesV2(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+			@RequestParam(defaultValue = "1") int pageNum,
+			@RequestParam(defaultValue = "10") int pageSize
+	) {
+		PageInfo<ImageDto> imageDtoList = imageService.getImageListByUserIdV2(userDetails.getUserId(), pageNum,
+			pageSize);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDtoList));
 	}
 }

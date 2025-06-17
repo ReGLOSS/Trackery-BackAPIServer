@@ -7,6 +7,8 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
@@ -14,8 +16,6 @@ import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
-import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
-import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
 
@@ -94,6 +94,23 @@ public class ImageService {
 		return imageMapper.findImagesByUserId(userId).stream()
 			.map(this::convertImageToImageDto)
 			.toList();
+	}
+
+	/**
+	 * 유저 ID로 이미지 다건 조회 페이지네이션 버전
+	 * @param userId 유저 ID
+	 * @param pageNum 페이지 번호
+	 * @param pageSize 페이지 사이즈
+	 * @return 페이지네이션된 이미지 DTO 리스트
+	 */
+	public PageInfo<ImageDto> getImageListByUserIdV2(Long userId, int pageNum, int pageSize) {
+		PageHelper.startPage(pageNum, pageSize);
+
+		List<ImageDto> imageDtoList = imageMapper.findImagesByUserId(userId).stream()
+			.map(this::convertImageToImageDto)
+			.toList();
+
+		return new PageInfo<>(imageDtoList);
 	}
 
 	/**
