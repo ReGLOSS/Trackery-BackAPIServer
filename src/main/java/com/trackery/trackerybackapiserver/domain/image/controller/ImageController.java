@@ -49,9 +49,11 @@ public class ImageController {
 
 	/**
 	 * 현재 인증된 유저가 업로드한 이미지 다건 조회 API
+	 * @deprecated 페이지네이션 사용 버전으로 프론트 수정 후 삭제 예정 {@link #getMyImagesV2(CustomUserDetails, int, int)}
 	 * @param userDetails 인증 유저 정보
 	 * @return 이미지 정보 DTO
 	 */
+	@Deprecated(forRemoval = true)
 	@GetMapping("/me")
 	public ResponseEntity<ApiResponse<List<ImageDto>>> getMyImages(
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -63,8 +65,8 @@ public class ImageController {
 	@GetMapping("/v2/me")
 	public ResponseEntity<ApiResponse<PageInfo<ImageDto>>> getMyImagesV2(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-			@RequestParam(defaultValue = "1") int pageNum,
-			@RequestParam(defaultValue = "10") int pageSize
+		@RequestParam(defaultValue = "1") int pageNum,
+		@RequestParam(defaultValue = "10") int pageSize
 	) {
 		PageInfo<ImageDto> imageDtoList = imageService.getImageListByUserIdV2(userDetails.getUserId(), pageNum,
 			pageSize);

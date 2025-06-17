@@ -23,6 +23,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.cache.CacheManager;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
@@ -197,34 +198,42 @@ class ImageServiceTest {
 			verify(imageS3Service, never()).generatePreSignedGetUrl(anyString());
 		}
 
-		@Test
-		@DisplayName("유저 ID로 다건 조회 테스트 - 성공")
-		void getImagesByUserId_success() {
-			when(imageS3Service.generatePreSignedGetUrl(anyString())).thenReturn(testPresignedUrl);
-			when(imageMapper.findImagesByUserId(testUserId)).thenReturn(List.of(testImage1));
+		@Nested
+		@DisplayName("유저 ID로 다건 조회 테스트")
+		class getImagesByUserIdV2Test {
+			@Test
+			@DisplayName("성공")
+			void getImageListByUserIdV2_success() {
+				when(imageMapper.findImagesByUserId(testUserId)).thenReturn(List.of(testImage1));
+				when(imageS3Service.generatePreSignedGetUrl(anyString())).thenReturn(testPresignedUrl);
 
-			List<ImageDto> resultList = imageService.getImageListByUserId(testUserId);
+				PageInfo<ImageDto> pageInfo = imageService.getImageListByUserIdV2(testUserId, 1, 10);
 
-			ImageDto result = resultList.get(0);
+				assertNotNull(pageInfo);
+				assertFalse(pageInfo.getList().isEmpty());
+				ImageDto result = pageInfo.getList().get(0);
 
-			assertNotNull(result);
-			assertEquals(testImageId, result.getImageId());
-			assertEquals(testUserId, result.getUserId());
-			assertEquals("테스트 이미지", result.getImageName());
-			assertEquals("테스트 이미지 설명", result.getImageContent());
-			assertEquals(testPresignedUrl, result.getImageUrl());
-			assertEquals("서울특별시", result.getSdName());
-			assertEquals("강남구", result.getSggName());
-		}
+				assertEquals(testImageId, result.getImageId());
+				assertEquals(testUserId, result.getUserId());
+				assertEquals(testPresignedUrl, result.getImageUrl());
+				assertEquals("서울특별시", result.getSdName());
+				assertEquals("강남구", result.getSggName());
 
-		@Test
-		@DisplayName("유저 ID로 다건 조회 테스트 - 성공 - 유저가 아직 이미지를 올리지 않았을 때")
-		void getImagesByUserId_success_2() {
-			when(imageMapper.findImagesByUserId(testUserId)).thenReturn(List.of());
+				verify(imageMapper).findImagesByUserId(testUserId);
+			}
 
-			List<ImageDto> resultList = imageService.getImageListByUserId(testUserId);
+			@Test
+			@DisplayName("성공 - 결과 데이터 없음")
+			void getImageListByUserIdV2_emptyResult() {
+				when(imageMapper.findImagesByUserId(testUserId)).thenReturn(List.of());
 
-			assertTrue(resultList.isEmpty());
+				PageInfo<ImageDto> pageInfo = imageService.getImageListByUserIdV2(testUserId, 1, 10);
+
+				assertNotNull(pageInfo);
+				assertTrue(pageInfo.getList().isEmpty());
+
+				verify(imageMapper).findImagesByUserId(testUserId);
+			}
 		}
 	}
 }

@@ -87,9 +87,11 @@ public class ImageService {
 
 	/**
 	 * 유저 ID로 이미지 다건 조회
+	 * @deprecated 페이지네이션 버전으로 변경 후 삭제 예정
 	 * @param userId 조회할 유저 ID
 	 * @return 이미지 정보를 담은 DTO
 	 */
+	@Deprecated(forRemoval = true)
 	public List<ImageDto> getImageListByUserId(Long userId) {
 		return imageMapper.findImagesByUserId(userId).stream()
 			.map(this::convertImageToImageDto)
