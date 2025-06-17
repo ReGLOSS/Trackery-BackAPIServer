@@ -44,7 +44,8 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 23.		durururuk		최초 생성
- * 25. 6. 13.		Narilee			테스트 추가
+ * 25. 6. 13.		inari			테스트 추가
+ * 25. 6. 15.		inari			Spring-Rest-Docs api문서 추가
  */
 @WebMvcTest(LocationController.class)
 public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {

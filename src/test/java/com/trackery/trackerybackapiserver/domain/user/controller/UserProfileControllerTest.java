@@ -2,24 +2,28 @@ package com.trackery.trackerybackapiserver.domain.user.controller;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
-import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
+import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserProfileDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
@@ -33,60 +37,54 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 4. 28.        inari       최초 생성
+ * 25. 4. 28.        inari      	 최초 생성
+ * 25. 6. 17.		 inari		   Spring-Rest-Docs api문서 추가
  */
-@ExtendWith(MockitoExtension.class)
-class UserProfileControllerTest {
+@WebMvcTest(UserProfileController.class)
+class UserProfileControllerTest extends CommonMockMvcControllerTestSetUp {
 
-	private MockMvc mockMvc;
-
-	@Mock
+	@MockitoBean
 	private UserService userService;
-	private UserProfileDto userProfileDto;
+
 	private CustomUserDetails customUserDetails;
-	private TestUserProfileController testController;
+	private UserProfileDto userProfileDto;
 
 	@BeforeEach
 	void setUp() {
-		// CustomUserDetails 모의 객체 생성
-		customUserDetails = mock(CustomUserDetails.class);
-		lenient().when(customUserDetails.getUserId()).thenReturn(1L); // 명시적으로 ID 설정
-
-		// 불필요한 스터빙 제거 또는 lenient 모드로 변경
-		// username은 실제 테스트에서 사용되지 않지만 테스트 가독성을 위해 유지하고 lenient 설정
-		lenient().when(customUserDetails.getUsername()).thenReturn("testuser");
-
-		// 테스트용 컨트롤러 생성
-		testController = new TestUserProfileController(userService, customUserDetails);
-
-		// MockMvc 설정
-		mockMvc = MockMvcBuilders
-			.standaloneSetup(testController)
-			.addFilter(new CharacterEncodingFilter("UTF-8", true))
+		customUserDetails = CustomUserDetails.builder()
+			.userId(1L)
+			.roleId(1L)
+			.userName("testuser")
 			.build();
 
-		// 테스트 데이터 설정
 		userProfileDto = new UserProfileDto(1L, "testuser", "테스트유저", "profile-image-url");
 	}
 
 	@Test
 	@DisplayName("내 프로필 조회 성공")
 	void getMyProfile_success() throws Exception {
-		// given
 		when(userService.getUserProfile(1L)).thenReturn(userProfileDto);
 
-		// when & then
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/users/profile/me")
-				.contentType(MediaType.APPLICATION_JSON)
-				.with(user(customUserDetails)))
-			.andDo(MockMvcResultHandlers.print())
+		ResultActions result = mockMvc.perform(get("/api/users/profile/me")
+			.with(user(customUserDetails)));
+
+		result
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").value("200"))
 			.andExpect(jsonPath("$.message").value("Ok"))
 			.andExpect(jsonPath("$.data.userId").value(1L))
 			.andExpect(jsonPath("$.data.userName").value("testuser"))
 			.andExpect(jsonPath("$.data.nickname").value("테스트유저"))
-			.andExpect(jsonPath("$.data.userProfilePic").value("profile-image-url"));
+			.andExpect(jsonPath("$.data.userProfilePic").value("profile-image-url"))
+			.andDo(document("get-user-profile-success",
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.userId").description("사용자 ID"),
+					fieldWithPath("data.userName").description("사용자명"),
+					fieldWithPath("data.nickname").description("닉네임"),
+					fieldWithPath("data.userProfilePic").description("프로필 이미지 URL")
+				)
+			));
 
 		verify(userService, times(1)).getUserProfile(1L);
 	}
@@ -97,19 +95,10 @@ class UserProfileControllerTest {
 		// given
 		when(userService.getUserProfile(1L)).thenThrow(new ApiException(ErrorCode.NOT_FOUND));
 
-		// Controller.getMyProfile은 예외를 던지도록 되어 있음
-		// 예외는 일반적으로 전역 예외 핸들러에 의해 처리되지만 테스트에서는 제대로 설정되지 않았음
-		// 따라서 예외가 발생하는지 직접 테스트
-		try {
-			mockMvc.perform(MockMvcRequestBuilders.get("/api/users/profile/me")
-				.contentType(MediaType.APPLICATION_JSON));
-			fail("예외가 발생해야 합니다");
-		} catch (Exception e) {
-			// 근본 원인인 ApiException을 확인
-			Throwable rootCause = getRootCause(e);
-			assertTrue(rootCause instanceof ApiException);
-			assertEquals(ErrorCode.NOT_FOUND, ((ApiException) rootCause).getErrorCode());
-		}
+		// when & then - 전역 예외 핸들러가 있으므로 404 상태 코드 반환
+		mockMvc.perform(get("/api/users/profile/me")
+			.with(user(customUserDetails)))
+			.andExpect(status().isNotFound());
 
 		verify(userService, times(1)).getUserProfile(1L);
 	}
@@ -131,8 +120,8 @@ class UserProfileControllerTest {
 		when(userService.getUserProfile(1L)).thenReturn(profileWithoutImage);
 
 		// when & then
-		mockMvc.perform(MockMvcRequestBuilders.get("/api/users/profile/me")
-				.contentType(MediaType.APPLICATION_JSON))
+		mockMvc.perform(get("/api/users/profile/me")
+				.with(user(customUserDetails)))
 			.andDo(MockMvcResultHandlers.print())
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value("200"))

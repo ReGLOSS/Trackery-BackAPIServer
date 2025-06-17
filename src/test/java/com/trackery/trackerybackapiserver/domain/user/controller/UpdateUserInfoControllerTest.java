@@ -3,6 +3,8 @@ package com.trackery.trackerybackapiserver.domain.user.controller;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -26,6 +28,18 @@ import com.trackery.trackerybackapiserver.domain.user.service.UpdateUserInfoServ
 
 import jakarta.servlet.http.Cookie;
 
+/**
+ * packageName    : com.trackery.trackerybackapiserver.domain.user.controller
+ * fileName       : UpdateUserInfoControllerTest
+ * author         : inari
+ * date           : 25. 4. 14.
+ * description    : 유저 정보 수정 컨트롤러의 테스트 클래스입니다.
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 2. 14.       durururuk       최초 생성
+ * 25. 6. 17.		inari		Spring-Rest-Docs api문서 추가
+ */
 @WebMvcTest(UpdateUserInfoController.class)
 class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
 
@@ -137,7 +151,18 @@ class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
 					.content(objectMapper.writeValueAsString(dto))
 					.with(user(customUserDetails)))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.message").value("Ok"));
+				.andExpect(jsonPath("$.message").value("Ok"))
+				.andDo(document("update-user-password-success",
+					requestFields(
+						fieldWithPath("oldPassword").description("기존 비밀번호"),
+						fieldWithPath("newPassword").description("새 비밀번호")
+					),
+					responseFields(
+						fieldWithPath("code").description("상태 코드"),
+						fieldWithPath("message").description("응답 메시지"),
+						fieldWithPath("data").type(Object.class).description("응답 데이터").optional()
+					)
+				));
 
 			verify(updateUserInfoService, times(1))
 				.updatePasswordByAuthentication(eq(1L), any(UpdatePasswordDto.class));
@@ -162,6 +187,38 @@ class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			verify(updateUserInfoService, times(1))
 				.updateEmail(1L, "test-email-token");
+		}
+	}
+	
+	@Nested
+	@DisplayName("사용자 정보 수정 API MockMvc 테스트")
+	class UpdateUserInfoTest {
+		@Test
+		@DisplayName("성공")
+		void success() throws Exception {
+			UpdateNicknameDto updateNicknameDto = new UpdateNicknameDto();
+			ReflectionTestUtils.setField(updateNicknameDto, "nickname", "김커피");
+
+			doNothing().when(updateUserInfoService).updateUserNickname(1L, "김커피");
+
+			mockMvc.perform(patch("/api/users/me/nickname")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(updateNicknameDto))
+					.with(user(customUserDetails)))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.message").value("Ok"))
+				.andDo(document("update-user-info-success",
+					requestFields(
+						fieldWithPath("nickname").description("수정할 닉네임").optional()
+					),
+					responseFields(
+						fieldWithPath("code").description("상태 코드"),
+						fieldWithPath("message").description("응답 메시지"),
+						fieldWithPath("data").type(Object.class).description("응답 데이터").optional()
+					)
+				));
+
+			verify(updateUserInfoService, times(1)).updateUserNickname(anyLong(), any());
 		}
 	}
 }
