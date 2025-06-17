@@ -24,6 +24,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
@@ -377,5 +378,43 @@ class LocationServiceTest {
 		sigungu.setSigunguName(sigunguName);
 		sigungu.setSido(sido);
 		return sigungu;
+	}
+
+	@Nested
+	@DisplayName("사용자 통계 조회 테스트")
+	class getUserStatsTest {
+		@Test
+		@DisplayName("성공 - 사용자 통계 데이터 반환")
+		void success() {
+			Long userId = 1L;
+			UserStatsDto expectedStats = new UserStatsDto(10L, 5L, 3L);
+
+			when(locationMapper.getUserStats(userId)).thenReturn(expectedStats);
+
+			UserStatsDto result = locationService.getUserStats(userId);
+
+			assertNotNull(result);
+			assertEquals(10L, result.getImageCount());
+			assertEquals(5L, result.getAlbumCount());
+			assertEquals(3L, result.getSigunguCount());
+			verify(locationMapper, times(1)).getUserStats(userId);
+		}
+
+		@Test
+		@DisplayName("성공 - 모든 통계가 0인 경우")
+		void zeroStats() {
+			Long userId = 2L;
+			UserStatsDto expectedStats = new UserStatsDto(0L, 0L, 0L);
+
+			when(locationMapper.getUserStats(userId)).thenReturn(expectedStats);
+
+			UserStatsDto result = locationService.getUserStats(userId);
+
+			assertNotNull(result);
+			assertEquals(0L, result.getImageCount());
+			assertEquals(0L, result.getAlbumCount());
+			assertEquals(0L, result.getSigunguCount());
+			verify(locationMapper, times(1)).getUserStats(userId);
+		}
 	}
 }

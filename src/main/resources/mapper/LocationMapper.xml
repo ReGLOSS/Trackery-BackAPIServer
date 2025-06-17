@@ -144,4 +144,47 @@
         WHERE sgg.sgg_id = #{sigunguId}
     </select>
 
+    <resultMap id="UserStatsMap" type="com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto">
+        <result property="imageCount" column="image_count" />
+        <result property="albumCount" column="album_count" />
+        <result property="sigunguCount" column="sigungu_count" />
+    </resultMap>
+
+    <select id="getUserStats" parameterType="Long" resultMap="UserStatsMap">
+        SELECT 
+            COALESCE(i.image_count, 0) as image_count,
+            COALESCE(a.album_count, 0) as album_count,
+            COALESCE(s.sigungu_count, 0) as sigungu_count
+        FROM 
+            (SELECT #{userId} as user_id) u
+        LEFT JOIN (
+            SELECT 
+                user_id,
+                COUNT(*) as image_count
+            FROM image 
+            WHERE user_id = #{userId} 
+              AND is_deleted = 0
+            GROUP BY user_id
+        ) i ON u.user_id = i.user_id
+        LEFT JOIN (
+            SELECT 
+                user_id,
+                COUNT(*) as album_count
+            FROM album 
+            WHERE user_id = #{userId} 
+              AND is_deleted = 0
+            GROUP BY user_id
+        ) a ON u.user_id = a.user_id
+        LEFT JOIN (
+            SELECT 
+                i.user_id,
+                COUNT(DISTINCT cp.sgg_id) as sigungu_count
+            FROM image i
+            JOIN coord_poi cp ON i.coord_point_id = cp.coord_point_id
+            WHERE i.user_id = #{userId} 
+              AND i.is_deleted = 0
+            GROUP BY i.user_id
+        ) s ON u.user_id = s.user_id
+    </select>
+
 </mapper>

@@ -45,7 +45,8 @@ public class CoordinatePoint {
 
 	@Builder
 	public CoordinatePoint(String coordinatePointName, String coordinatePointDetail, byte coordinatePointType,
-		LocalDateTime firstRegisteredDate, LocalDateTime lastModifiedDate, JusoSigungu sigungu, Point coordinatePointPoint) {
+		LocalDateTime firstRegisteredDate, LocalDateTime lastModifiedDate, JusoSigungu sigungu,
+		Point coordinatePointPoint) {
 		this.coordinatePointName = coordinatePointName;
 		this.coordinatePointDetail = coordinatePointDetail;
 		this.coordinatePointType = coordinatePointType;

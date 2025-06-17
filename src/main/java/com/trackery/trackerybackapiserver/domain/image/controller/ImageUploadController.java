@@ -52,7 +52,8 @@ public class ImageUploadController {
 	 * @return 성공 시 추가로 반환되는 데이터는 없습니다.
 	 */
 	@PostMapping
-	public ResponseEntity<ApiResponse<Void>> saveImageMetaData(@AuthenticationPrincipal CustomUserDetails userDetails, @RequestBody ImageUploadDto imageUploadDto) {
+	public ResponseEntity<ApiResponse<Void>> saveImageMetaData(@AuthenticationPrincipal CustomUserDetails userDetails,
+		@RequestBody ImageUploadDto imageUploadDto) {
 		imageUploadService.saveImage(userDetails.getUserId(), imageUploadDto);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}

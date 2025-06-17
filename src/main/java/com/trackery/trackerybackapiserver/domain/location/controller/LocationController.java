@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.location.controller;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,13 +13,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.SigunguResponseDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
+import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -33,13 +38,16 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 15.		durururuk		최초 생성
- * 25. 6. 13.		narilee         시군구 ID로 시군구 정보를 조회 메서드 추가
+ * 25. 6. 13.		inari         	시군구 ID로 시군구 정보를 조회 메서드 추가
+ * 25. 6. 14.		inari       	홈화면 전국지도용 통계 추가
+ * 25. 6. 16.		inari       	지도에서 사용자 이미지 조회 추가
  */
 @RestController
 @RequestMapping("/api/location")
 @RequiredArgsConstructor
 public class LocationController {
 	private final LocationService locationService;
+	private final ImageService imageService;
 
 	/**
 	 * 좌표로 시/도 + 시군구 주소명을 받을 수 있는 API입니다.
@@ -123,6 +131,49 @@ public class LocationController {
 	public ResponseEntity<ApiResponse<SigunguResponseDto>> getSigungu(@PathVariable Long sigunguId) {
 		JusoSigungu sigungu = locationService.getSigunguById(sigunguId);
 		SigunguResponseDto response = SigunguResponseDto.from(sigungu);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
+	}
+
+	/**
+	 * 홈 화면용 사용자 통계 정보를 조회합니다.
+	 *
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 사용자 통계를 포함한 API 응답
+	 */
+	@GetMapping("/home/stats")
+	public ResponseEntity<ApiResponse<UserStatsDto>> getHomeStats(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		UserStatsDto response = locationService.getUserStats(userDetails.getUserId());
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
+	}
+
+	/**
+	 * 특정 시도에 등록된 사용자의 이미지 목록을 조회합니다.
+	 *
+	 * @param sidoId 조회할 시도의 ID
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 해당 시도의 사용자 이미지 목록을 포함한 API 응답
+	 */
+	@GetMapping("/sido/{sidoId}/images")
+	public ResponseEntity<ApiResponse<List<ImageDto>>> getImagesBySido(
+		@PathVariable Long sidoId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		List<ImageDto> response = imageService.getImagesBySido(sidoId, userDetails.getUserId());
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
+	}
+
+	/**
+	 * 특정 시군구에 등록된 사용자의 이미지 목록을 조회합니다.
+	 *
+	 * @param sigunguId 조회할 시군구의 ID
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 해당 시군구의 사용자 이미지 목록을 포함한 API 응답
+	 */
+	@GetMapping("/sigungu/{sigunguId}/images")
+	public ResponseEntity<ApiResponse<List<ImageDto>>> getImagesBySigungu(
+		@PathVariable Long sigunguId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		List<ImageDto> response = imageService.getImagesBySigungu(sigunguId, userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 }

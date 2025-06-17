@@ -18,6 +18,7 @@ import com.trackery.trackerybackapiserver.domain.image.entity.Image;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 14.        inari       최초 생성
+ * 25. 6. 16.        inari       지도를 통한 이미지 조회 기능 추가
  */
 @Mapper
 public interface ImageMapper {
@@ -39,4 +40,20 @@ public interface ImageMapper {
 	List<Image> findImagesByUserId(@Param("userId") Long userId);
 
 	boolean isImageExist(Long imageId);
+
+	/**
+	 * 특정 시도에 등록된 특정 사용자의 이미지를 조회합니다.
+	 * @param sidoId 시도 ID
+	 * @param userId 사용자 ID
+	 * @return 해당 시도의 사용자 이미지 목록
+	 */
+	List<Image> findImagesBySidoIdAndUserId(@Param("sidoId") Long sidoId, @Param("userId") Long userId);
+
+	/**
+	 * 특정 시군구에 등록된 특정 사용자의 이미지를 조회합니다.
+	 * @param sigunguId 시군구 ID
+	 * @param userId 사용자 ID
+	 * @return 해당 시군구의 사용자 이미지 목록
+	 */
+	List<Image> findImagesBySigunguIdAndUserId(@Param("sigunguId") Long sigunguId, @Param("userId") Long userId);
 }

@@ -97,4 +97,72 @@
         WHERE i.user_id = #{userId}
           AND i.is_deleted = 0
     </select>
+
+    <!-- 지역별 이미지 조회 쿼리 -->
+    <select id="findImagesBySidoIdAndUserId" resultMap="ImageMap">
+        SELECT 
+            i.image_id,
+            i.image_name,
+            i.image_file,
+            i.is_public,
+            i.is_deleted,
+            i.image_type,
+            i.image_contents,
+            i.image_date,
+            i.image_reg_date,
+            i.user_id,
+            cp.coord_point_id,
+            cp.coord_point_name,
+            cp.coord_point_detail,
+            cp.coord_point_point,
+            cp.coord_point_type,
+            cp.first_reg_dt,
+            cp.last_mod_dt,
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM image i
+        JOIN coord_poi cp ON i.coord_point_id = cp.coord_point_id
+        JOIN juso_sigungu sgg ON cp.sgg_id = sgg.sgg_id
+        JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE sgg.sd_id = #{sidoId}
+          AND i.user_id = #{userId}
+          AND i.is_deleted = 0
+        ORDER BY i.image_reg_date DESC
+    </select>
+
+    <select id="findImagesBySigunguIdAndUserId" resultMap="ImageMap">
+        SELECT 
+            i.image_id,
+            i.image_name,
+            i.image_file,
+            i.is_public,
+            i.is_deleted,
+            i.image_type,
+            i.image_contents,
+            i.image_date,
+            i.image_reg_date,
+            i.user_id,
+            cp.coord_point_id,
+            cp.coord_point_name,
+            cp.coord_point_detail,
+            cp.coord_point_point,
+            cp.coord_point_type,
+            cp.first_reg_dt,
+            cp.last_mod_dt,
+            sgg.sgg_id,
+            sgg.sgg_name,
+            sd.sd_id,
+            sd.sd_name
+        FROM image i
+        JOIN coord_poi cp ON i.coord_point_id = cp.coord_point_id
+        JOIN juso_sigungu sgg ON cp.sgg_id = sgg.sgg_id
+        JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
+        WHERE cp.sgg_id = #{sigunguId}
+          AND i.user_id = #{userId}
+          AND i.is_deleted = 0
+        ORDER BY i.image_reg_date DESC
+    </select>
+
 </mapper>
