@@ -62,6 +62,13 @@ public class ImageController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDtoList));
 	}
 
+	/**
+	 * 현재 인증된 유저가 업로드한 이미지 조회 API 페이지네이션 버전
+	 * @param userDetails 인증 유저 정보
+	 * @param pageNum 페이지 번호 (기본값 : 1)
+	 * @param pageSize 페이지 크기 (기본값 : 10)
+	 * @return 페이지네이션된 이미지 DTO 리스트
+	 */
 	@GetMapping("/v2/me")
 	public ResponseEntity<ApiResponse<PageInfo<ImageDto>>> getMyImagesV2(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
