@@ -3,7 +3,11 @@ package com.trackery.trackerybackapiserver.domain.image.controller;
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -16,6 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
@@ -66,6 +71,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.imageContent(IMAGE_CONTENT)
 			.imageDate(IMAGE_DATE)
 			.imageUrl(IMAGE_URL)
+			.isPublic(0)
 			.build();
 
 		userDetails = CustomUserDetails.builder()
@@ -129,5 +135,69 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data[0].imageUrl").value(imageDto.getImageUrl()));
 
 		verify(imageService, times(1)).getImageListByUserId(userDetails.getUserId());
+	}
+
+	@Test
+	@DisplayName("인증된 사용자의 이미지 목록 조회 페이지네이션 성공")
+	void getMyImagesV2Success() throws Exception {
+		List<ImageDto> imageDtoList = List.of(imageDto);
+		PageInfo<ImageDto> pageInfo = new PageInfo<>(imageDtoList);
+		when(imageService.getImageListByUserIdV2(USER_ID, 1, 10)).thenReturn(pageInfo);
+
+		ResultActions result = mockMvc.perform(get("/api/images/v2/me")
+				.with(user(userDetails))
+				.queryParam("pageNum", "1")
+				.queryParam("pageSize", "10")
+			);
+
+		result
+			.andDo(print())
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("Ok"))
+			.andDo(document("get-my-images-v2",
+				queryParameters(
+					parameterWithName("pageNum").description("페이지 번호 (1부터 시작, 기본값 : 1)"),
+					parameterWithName("pageSize").description("페이지 크기 (기본값 : 10)")
+				),
+
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("페이지네이션된 이미지 데이터"),
+					fieldWithPath("data.total").description("전체 이미지 개수"),
+					fieldWithPath("data.list").description("이미지 목록"),
+					fieldWithPath("data.list[].imageId").description("이미지 ID"),
+					fieldWithPath("data.list[].userId").description("사용자 ID"),
+					fieldWithPath("data.list[].imageRegDate").description("이미지 등록일시"),
+					fieldWithPath("data.list[].sdName").description("시도명"),
+					fieldWithPath("data.list[].sggName").description("시군구명"),
+					fieldWithPath("data.list[].latitude").description("위도"),
+					fieldWithPath("data.list[].longitude").description("경도"),
+					fieldWithPath("data.list[].imageName").description("이미지 파일명"),
+					fieldWithPath("data.list[].imageContent").description("이미지 설명"),
+					fieldWithPath("data.list[].imageDate").description("이미지 촬영일시"),
+					fieldWithPath("data.list[].isPublic").description("공개 여부").optional(),
+					fieldWithPath("data.list[].imageUrl").description("이미지 URL"),
+					fieldWithPath("data.pageNum").description("현재 페이지 번호"),
+					fieldWithPath("data.pageSize").description("페이지 크기"),
+					fieldWithPath("data.size").description("현재 페이지의 데이터 개수"),
+					fieldWithPath("data.startRow").description("시작 행 번호"),
+					fieldWithPath("data.endRow").description("끝 행 번호"),
+					fieldWithPath("data.pages").description("전체 페이지 수"),
+					fieldWithPath("data.prePage").description("이전 페이지 번호"),
+					fieldWithPath("data.nextPage").description("다음 페이지 번호"),
+					fieldWithPath("data.isFirstPage").description("첫 번째 페이지 여부"),
+					fieldWithPath("data.isLastPage").description("마지막 페이지 여부"),
+					fieldWithPath("data.hasPreviousPage").description("이전 페이지 존재 여부"),
+					fieldWithPath("data.hasNextPage").description("다음 페이지 존재 여부"),
+					fieldWithPath("data.navigatePages").description("네비게이션 페이지 수"),
+					fieldWithPath("data.navigatepageNums").description("네비게이션 페이지 번호 배열"),
+					fieldWithPath("data.navigateFirstPage").description("네비게이션 첫 페이지"),
+					fieldWithPath("data.navigateLastPage").description("네비게이션 마지막 페이지")
+				)
+			));
+
+		verify(imageService, times(1)).getImageListByUserIdV2(USER_ID, 1, 10);
 	}
 }
