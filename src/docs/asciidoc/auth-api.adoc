@@ -1,0 +1,27 @@
+== 인증 API
+'''
+
+=== 인증 정보 확인 API
+==== GET /api/auth/me
+
+현재 로그인한 사용자의 인증 정보를 조회하는 API입니다.
+JWT 토큰을 통해 인증된 사용자의 기본 정보를 반환합니다.
+
+===== 요청
+include::{snippets}/auth-check-success/http-request.adoc[]
+
+===== 응답
+include::{snippets}/auth-check-success/http-response.adoc[]
+include::{snippets}/auth-check-success/response-fields.adoc[]
+
+===== 예외 상황
+- 인증되지 않은 사용자의 경우: `ApiException(ErrorCode.UNAUTHORIZED)` 발생
+- 유효하지 않은 JWT 토큰의 경우: `ApiException(ErrorCode.INVALID_TOKEN)` 발생
+- 만료된 JWT 토큰의 경우: `ApiException(ErrorCode.EXPIRED_TOKEN)` 발생
+
+===== 테스트 케이스
+- 정상적인 인증 정보 조회 (JWT 토큰 유효)
+- 인증되지 않은 사용자의 접근 시도
+- 유효하지 않은 토큰으로 접근 시도
+- 만료된 토큰으로 접근 시도
+'''
