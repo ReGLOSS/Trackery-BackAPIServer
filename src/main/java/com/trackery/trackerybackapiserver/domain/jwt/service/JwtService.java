@@ -16,6 +16,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
+import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -35,11 +36,6 @@ import lombok.extern.slf4j.Slf4j;
 @Component
 public class JwtService {
 	private final JwtRedisService jwtRedisService;
-
-	//액세스 토큰 만료시간 1시간, 리프레시 토큰 만료시간 7일, 단위 : 초(s)
-	//TODO JWT 만료시간 일괄 설정되게 수정
-	private static final int ACCESS_TOKEN_EXPIRATION_TIME = 3600;
-	private static final int REFRESH_TOKEN_EXPIRATION_TIME = 604800;
 
 	private final String projectDomain;
 	private final Algorithm algorithm;
@@ -68,7 +64,7 @@ public class JwtService {
 				.withClaim("role", roleId)
 				.withNotBefore(Instant.now())
 				.withIssuedAt(Instant.now())
-				.withExpiresAt(Instant.now().plusSeconds(ACCESS_TOKEN_EXPIRATION_TIME))
+				.withExpiresAt(Instant.now().plusSeconds(JwtExpirationTime.ACCESS_TOKEN.getExpirationTime()))
 				.withJWTId(UUID.randomUUID().toString())
 				.sign(algorithm);
 		} catch (JWTCreationException e) {
@@ -94,7 +90,7 @@ public class JwtService {
 				.withSubject(userId.toString())
 				.withNotBefore(Instant.now())
 				.withIssuedAt(Instant.now())
-				.withExpiresAt(Instant.now().plusSeconds(REFRESH_TOKEN_EXPIRATION_TIME))
+				.withExpiresAt(Instant.now().plusSeconds(JwtExpirationTime.REFRESH_TOKEN.getExpirationTime()))
 				.sign(algorithm);
 		} catch (JWTCreationException e) {
 			log.error(e.getMessage());
@@ -144,16 +140,17 @@ public class JwtService {
 	/**
 	 * 특정 Subject 가지는 JWT 토큰 생성 메서드
 	 * @param subject : 설정할 Subject
+	 * @param jwtExpirationTime : 만료시간 설정을 위한 JwtExpirationTime enum
 	 * @return : jwt 토큰
 	 */
-	public String generateTokenWithSubject(String subject) {
+	public String generateTokenWithSubject(String subject, JwtExpirationTime jwtExpirationTime) {
 		try {
 			return JWT.create()
 				.withIssuer(projectDomain)
 				.withSubject(subject)
 				.withNotBefore(Instant.now())
 				.withIssuedAt(Instant.now())
-				.withExpiresAt(Instant.now().plusSeconds(ACCESS_TOKEN_EXPIRATION_TIME))
+				.withExpiresAt(Instant.now().plusSeconds(jwtExpirationTime.getExpirationTime()))
 				.sign(algorithm);
 		} catch (JWTCreationException e) {
 			log.error(e.getMessage());

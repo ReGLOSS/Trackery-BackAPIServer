@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
@@ -87,7 +88,7 @@ public class MailService {
 
 		redisTemplate.delete(EMAIL_VERIFICATION_REDIS_KEY + emailAddress);
 
-		return jwtService.generateTokenWithSubject(emailAddress);
+		return jwtService.generateTokenWithSubject(emailAddress, JwtExpirationTime.MAIL_VERIFICATION_TOKEN);
 	}
 
 	/**

@@ -13,6 +13,7 @@ import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageS3Service;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
+import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
@@ -121,7 +122,7 @@ public class UserService {
 	 */
 	public UserNameAvailabilityResponseDto checkUsernameAvailability(String userName) {
 		if (!userMapper.isExistsUserName(userName)) {
-			String jwt = jwtService.generateTokenWithSubject(userName);
+			String jwt = jwtService.generateTokenWithSubject(userName, JwtExpirationTime.USER_NAME_VERIFICATION_TOKEN);
 			return new UserNameAvailabilityResponseDto(true, jwt);
 		} else {
 			return new UserNameAvailabilityResponseDto(false, null);

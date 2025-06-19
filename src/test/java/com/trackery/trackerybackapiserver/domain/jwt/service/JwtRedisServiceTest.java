@@ -19,6 +19,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
+import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.jwt.service
@@ -58,12 +59,14 @@ class JwtRedisServiceTest {
 			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 			String expectedJson = "refreshTokenDtoJson";
 			when(objectMapper.writeValueAsString(refreshTokenDto)).thenReturn(expectedJson);
-			doNothing().when(valueOperations).set(redisKey, expectedJson);
+			doNothing().when(valueOperations)
+				.set(redisKey, expectedJson, JwtExpirationTime.REFRESH_TOKEN.getExpirationTime());
 
 			jwtRedisService.saveRefreshToken(refreshTokenDto);
 
 			verify(objectMapper, times(1)).writeValueAsString(refreshTokenDto);
-			verify(redisTemplate.opsForValue(), times(1)).set(redisKey, expectedJson);
+			verify(redisTemplate.opsForValue(), times(1)).set(redisKey, expectedJson,
+				JwtExpirationTime.REFRESH_TOKEN.getExpirationTime());
 		}
 
 		@Test
@@ -117,11 +120,11 @@ class JwtRedisServiceTest {
 		void success() {
 			String refreshToken = "<PASSWORD>";
 			String redisKey = "jwtRefreshToken:" + refreshToken;
-			when(redisTemplate.delete(redisKey)).thenReturn(true);
+			when(redisTemplate.unlink(redisKey)).thenReturn(true);
 
 			jwtRedisService.deleteRefreshToken(refreshToken);
 
-			verify(redisTemplate, times(1)).delete(redisKey);
+			verify(redisTemplate, times(1)).unlink(redisKey);
 		}
 
 	}
