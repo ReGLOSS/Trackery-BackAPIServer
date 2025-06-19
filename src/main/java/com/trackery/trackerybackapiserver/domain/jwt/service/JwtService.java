@@ -147,14 +147,14 @@ public class JwtService {
 	 * @param subject : 설정할 Subject
 	 * @return : jwt 토큰
 	 */
-	public String generateTokenWithSubject(String subject) {
+	public String generateTokenWithSubject(String subject, JwtExpirationTime jwtExpirationTime) {
 		try {
 			return JWT.create()
 				.withIssuer(projectDomain)
 				.withSubject(subject)
 				.withNotBefore(Instant.now())
 				.withIssuedAt(Instant.now())
-				.withExpiresAt(Instant.now().plusSeconds(ACCESS_TOKEN_EXPIRATION_TIME))
+				.withExpiresAt(Instant.now().plusSeconds(jwtExpirationTime.getExpirationTime()))
 				.sign(algorithm);
 		} catch (JWTCreationException e) {
 			log.error(e.getMessage());

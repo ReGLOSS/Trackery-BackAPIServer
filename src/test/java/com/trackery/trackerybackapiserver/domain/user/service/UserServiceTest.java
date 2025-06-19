@@ -25,6 +25,7 @@ import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageS3Service;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
+import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
@@ -128,7 +129,7 @@ class UserServiceTest {
 	@Test
 	void 유저명_중복_확인_성공() {
 		when(userMapper.isExistsUserName(anyString())).thenReturn(false);
-		when(jwtService.generateTokenWithSubject("abcdefg")).thenReturn("jwt");
+		when(jwtService.generateTokenWithSubject("abcdefg", JwtExpirationTime.USER_NAME_VERIFICATION_TOKEN)).thenReturn("jwt");
 
 		UserNameAvailabilityResponseDto result = userService.checkUsernameAvailability("abcdefg");
 

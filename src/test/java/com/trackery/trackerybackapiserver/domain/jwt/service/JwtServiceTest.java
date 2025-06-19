@@ -17,6 +17,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
+import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -107,7 +108,7 @@ class JwtServiceTest {
 	@Test
 	void JWT_이메일_토큰_생성_테스트() {
 		String email = "a@a.com";
-		String token = jwtService.generateTokenWithSubject(email);
+		String token = jwtService.generateTokenWithSubject(email, JwtExpirationTime.MAIL_VERIFICATION_TOKEN);
 
 		DecodedJWT decodedJWT = jwtService.verifyJwt(token);
 

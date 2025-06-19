@@ -19,7 +19,8 @@ import lombok.Getter;
 public enum JwtExpirationTime {
 	ACCESS_TOKEN(60 * 60),
 	REFRESH_TOKEN(60 * 60 * 24 * 7),
-	COMMON_1HOUR_TOKEN(60 * 60);
+	MAIL_VERIFICATION_TOKEN(60 * 60),
+	USER_NAME_VERIFICATION_TOKEN(60 * 60);
 
 	private final int expirationTime;
 }
