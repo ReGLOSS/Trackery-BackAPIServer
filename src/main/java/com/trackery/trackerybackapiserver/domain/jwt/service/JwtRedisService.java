@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.jwt.service;
 
+import java.util.Optional;
+
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -59,7 +61,8 @@ public class JwtRedisService {
 	 */
 	public RefreshTokenDto getRefreshTokenInfo(String refreshToken) {
 		String redisKey = REFRESH_TOKEN_REDIS_KEY + refreshToken;
-		String jsonRefreshTokenDto = redisTemplate.opsForValue().get(redisKey);
+		String jsonRefreshTokenDto = Optional.ofNullable(redisTemplate.opsForValue().get(redisKey))
+			.orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED));
 		try {
 			return objectMapper.readValue(jsonRefreshTokenDto, RefreshTokenDto.class);
 		} catch (JsonProcessingException e) {
