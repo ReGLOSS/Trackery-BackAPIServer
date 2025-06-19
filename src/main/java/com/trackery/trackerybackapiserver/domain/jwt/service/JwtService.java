@@ -16,6 +16,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
+import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -68,7 +69,7 @@ public class JwtService {
 				.withClaim("role", roleId)
 				.withNotBefore(Instant.now())
 				.withIssuedAt(Instant.now())
-				.withExpiresAt(Instant.now().plusSeconds(ACCESS_TOKEN_EXPIRATION_TIME))
+				.withExpiresAt(Instant.now().plusSeconds(JwtExpirationTime.ACCESS_TOKEN.getExpirationTime()))
 				.withJWTId(UUID.randomUUID().toString())
 				.sign(algorithm);
 		} catch (JWTCreationException e) {
@@ -94,7 +95,7 @@ public class JwtService {
 				.withSubject(userId.toString())
 				.withNotBefore(Instant.now())
 				.withIssuedAt(Instant.now())
-				.withExpiresAt(Instant.now().plusSeconds(REFRESH_TOKEN_EXPIRATION_TIME))
+				.withExpiresAt(Instant.now().plusSeconds(JwtExpirationTime.REFRESH_TOKEN.getExpirationTime()))
 				.sign(algorithm);
 		} catch (JWTCreationException e) {
 			log.error(e.getMessage());

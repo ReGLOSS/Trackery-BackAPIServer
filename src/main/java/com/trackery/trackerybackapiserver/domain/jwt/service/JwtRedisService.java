@@ -10,6 +10,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
+import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +47,8 @@ public class JwtRedisService {
 			String redisKey = REFRESH_TOKEN_REDIS_KEY + refreshTokenDto.refreshToken();
 			String jsonRefreshTokenDto = objectMapper.writeValueAsString(refreshTokenDto);
 
-			redisTemplate.opsForValue().set(redisKey, jsonRefreshTokenDto);
+			redisTemplate.opsForValue()
+				.set(redisKey, jsonRefreshTokenDto, JwtExpirationTime.REFRESH_TOKEN.getExpirationTime());
 		} catch (JsonProcessingException e) {
 			log.error("Json 파싱 중 에러 발생 : ", e);
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
