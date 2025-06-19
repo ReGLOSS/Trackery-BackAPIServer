@@ -145,6 +145,7 @@ public class JwtService {
 	/**
 	 * 특정 Subject 가지는 JWT 토큰 생성 메서드
 	 * @param subject : 설정할 Subject
+	 * @param jwtExpirationTime : 만료시간 설정을 위한 JwtExpirationTime enum
 	 * @return : jwt 토큰
 	 */
 	public String generateTokenWithSubject(String subject, JwtExpirationTime jwtExpirationTime) {
