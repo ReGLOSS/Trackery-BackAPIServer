@@ -120,11 +120,11 @@ class JwtRedisServiceTest {
 		void success() {
 			String refreshToken = "<PASSWORD>";
 			String redisKey = "jwtRefreshToken:" + refreshToken;
-			when(redisTemplate.delete(redisKey)).thenReturn(true);
+			when(redisTemplate.unlink(redisKey)).thenReturn(true);
 
 			jwtRedisService.deleteRefreshToken(refreshToken);
 
-			verify(redisTemplate, times(1)).delete(redisKey);
+			verify(redisTemplate, times(1)).unlink(redisKey);
 		}
 
 	}
