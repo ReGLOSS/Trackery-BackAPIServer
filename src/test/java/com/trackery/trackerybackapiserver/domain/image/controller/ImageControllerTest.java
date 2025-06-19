@@ -2,6 +2,9 @@ package com.trackery.trackerybackapiserver.domain.image.controller;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
+import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -31,6 +34,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 22.		durururuk		최초 생성
+ * 25. 6. 18.		inari		    Spring-Rest-Docs api문서 추가
  */
 @WebMvcTest(ImageController.class)
 class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -97,7 +101,28 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data.imageName").value(IMAGE_NAME))
 			.andExpect(jsonPath("$.data.imageContent").value(IMAGE_CONTENT))
 			.andExpect(jsonPath("$.data.imageDate").value(IMAGE_DATE.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-			.andExpect(jsonPath("$.data.imageUrl").value(IMAGE_URL));
+			.andExpect(jsonPath("$.data.imageUrl").value(IMAGE_URL))
+			.andDo(document("get-image-by-id-success",
+				queryParameters(
+					parameterWithName("imageId").description("조회할 이미지 ID")
+				),
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.imageId").description("이미지 ID"),
+					fieldWithPath("data.userId").description("이미지 업로드 사용자 ID"),
+					fieldWithPath("data.imageRegDate").description("이미지 등록 일시"),
+					fieldWithPath("data.sdName").description("시도명"),
+					fieldWithPath("data.sggName").description("시군구명"),
+					fieldWithPath("data.latitude").description("위도"),
+					fieldWithPath("data.longitude").description("경도"),
+					fieldWithPath("data.imageName").description("이미지 파일명"),
+					fieldWithPath("data.imageContent").description("이미지 설명"),
+					fieldWithPath("data.imageDate").description("이미지 촬영 일시"),
+					fieldWithPath("data.isPublic").description("공개 여부 (true: 공개, false: 비공개, null: 미설정)"),
+					fieldWithPath("data.imageUrl").description("이미지 URL")
+				)
+			));
 
 		verify(imageService, times(1)).getImageByImageId(IMAGE_ID);
 	}
@@ -126,7 +151,26 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data[0].imageName").value(imageDto.getImageName()))
 			.andExpect(jsonPath("$.data[0].imageContent").value(imageDto.getImageContent()))
 			.andExpect(jsonPath("$.data[0].imageDate").value(imageDto.getImageDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-			.andExpect(jsonPath("$.data[0].imageUrl").value(imageDto.getImageUrl()));
+			.andExpect(jsonPath("$.data[0].imageUrl").value(imageDto.getImageUrl()))
+			.andDo(document("get-my-images-success",
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data[]").description("이미지 목록"),
+					fieldWithPath("data[].imageId").description("이미지 ID"),
+					fieldWithPath("data[].userId").description("이미지 업로드 사용자 ID"),
+					fieldWithPath("data[].imageRegDate").description("이미지 등록 일시"),
+					fieldWithPath("data[].sdName").description("시도명"),
+					fieldWithPath("data[].sggName").description("시군구명"),
+					fieldWithPath("data[].latitude").description("위도"),
+					fieldWithPath("data[].longitude").description("경도"),
+					fieldWithPath("data[].imageName").description("이미지 파일명"),
+					fieldWithPath("data[].imageContent").description("이미지 설명"),
+					fieldWithPath("data[].imageDate").description("이미지 촬영 일시"),
+					fieldWithPath("data[].isPublic").description("공개 여부 (true: 공개, false: 비공개, null: 미설정)"),
+					fieldWithPath("data[].imageUrl").description("이미지 URL")
+				)
+			));
 
 		verify(imageService, times(1)).getImageListByUserId(userDetails.getUserId());
 	}

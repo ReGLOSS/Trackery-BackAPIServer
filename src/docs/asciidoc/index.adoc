@@ -2,14 +2,14 @@
 :toc: left
 :toclevels: 2
 
-== 공개 이미지 목록 API
-
-=== GET /api/home/images
-
-include::{snippets}/get-public-images/http-request.adoc[]
-include::{snippets}/get-public-images/http-response.adoc[]
-include::{snippets}/get-public-images/response-fields.adoc[]
-
 include::album-api.adoc[]
+
+include::auth-api.adoc[]
+
+include::image-api.adoc[]
+
 include::location-api.adoc[]
+
+include::mail-api.adoc[]
+
 include::user-api.adoc[]
