@@ -75,10 +75,9 @@ public class JwtRedisService {
 	 * 한 번 사용된 리프레시 토큰을 레디스에서 제거하는 메서드입니다.
 	 * @param refreshToken : 사용된 리프레시 토큰
 	 */
-	//Todo 추후 unlink로 변경
 	public void deleteRefreshToken(String refreshToken) {
 		String redisKey = REFRESH_TOKEN_REDIS_KEY + refreshToken;
-		redisTemplate.delete(redisKey);
+		redisTemplate.unlink(redisKey);
 	}
 
 }
