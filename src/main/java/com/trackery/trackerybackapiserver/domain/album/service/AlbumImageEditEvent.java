@@ -3,9 +3,6 @@ package com.trackery.trackerybackapiserver.domain.album.service;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.enums.AlbumImageEditOperation;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.album.service
  * fileName       : AlbumImageEditEvent
@@ -17,9 +14,9 @@ import lombok.Getter;
  * -----------------------------------------------------------
  * 25. 6. 20.		durururuk		최초 생성
  */
-@Getter
-@AllArgsConstructor
-public class AlbumImageEditEvent {
-	private final AlbumImageEditResponseDto albumImageEditResponseDto;
-	private final AlbumImageEditOperation albumImageEditOperation;
+public record AlbumImageEditEvent(
+	AlbumImageEditResponseDto albumImageEditResponseDto,
+	AlbumImageEditOperation albumImageEditOperation
+) {
 }
+

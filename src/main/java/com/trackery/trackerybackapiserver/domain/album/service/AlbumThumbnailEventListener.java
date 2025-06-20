@@ -23,7 +23,7 @@ public class AlbumThumbnailEventListener {
 
 	@EventListener
 	public void handleAlbumEditEvent(AlbumImageEditEvent event) {
-		albumThumbnailService.handleAlbumThumbnailChange(event.getAlbumImageEditResponseDto(),
-			event.getAlbumImageEditOperation());
+		albumThumbnailService.handleAlbumThumbnailChange(event.albumImageEditResponseDto(),
+			event.albumImageEditOperation());
 	}
 }
