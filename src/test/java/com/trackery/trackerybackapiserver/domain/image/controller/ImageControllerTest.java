@@ -23,6 +23,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.rest.webmvc.json.patch.Patch;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -279,7 +280,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-		ResultActions result = mockMvc.perform(put("/api/images/{imageId}", IMAGE_ID)
+		ResultActions result = mockMvc.perform(patch("/api/images/{imageId}", IMAGE_ID)
 			.with(user(userDetails))
 			.contentType(APPLICATION_JSON)
 			.content(requestJson));
@@ -357,7 +358,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String requestJson = objectMapper.writeValueAsString(updateRequest);
 
-		ResultActions result = mockMvc.perform(put("/api/images/{imageId}", IMAGE_ID)
+		ResultActions result = mockMvc.perform(patch("/api/images/{imageId}", IMAGE_ID)
 			.with(user(userDetails))
 			.contentType(APPLICATION_JSON)
 			.content(requestJson));
