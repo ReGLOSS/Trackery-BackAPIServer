@@ -91,10 +91,10 @@ include::{snippets}/get-public-images/response-fields.adoc[]
 '''
 
 === 이미지 메타데이터 수정 API
-==== PUT /api/images/{imageId}
+==== PATCH /api/images/{imageId}
 
-업로드된 이미지의 메타데이터를 수정하는 API입니다.
-이미지 이름, 설명, 촬영 날짜, 공개 여부, 위치 정보를 수정할 수 있습니다.
+업로드된 이미지의 메타데이터를 부분 수정하는 API입니다.
+이미지 이름, 설명, 촬영 날짜, 공개 여부, 위치 정보를 선택적으로 수정할 수 있습니다.
 
 ===== 요청
 include::{snippets}/update-image-metadata-success/http-request.adoc[]
@@ -112,13 +112,14 @@ include::{snippets}/update-image-metadata-success/response-fields.adoc[]
 - 잘못된 위도/경도 값: `ApiException(ErrorCode.BAD_REQUEST)` 발생
 
 ===== 참고 사항
-- 모든 필드는 선택사항이며, 제공된 필드만 수정됩니다
-- 위도는 33.0~43.0 범위, 경도는 124.0~132.0 범위로 제한됩니다 (한국 지역)
-- 위치 정보 수정 시 새로운 좌표 포인트가 생성되고 행정구역 정보가 자동으로 업데이트됩니다
+- **PATCH 메서드**: 부분 수정을 위한 HTTP 메서드로, 모든 필드는 선택사항입니다
+- **필드별 수정**: 요청에 포함된 필드만 수정되며, 누락된 필드는 기존 값이 유지됩니다
+- **위도/경도 범위**: 위도 33.0~43.0, 경도 124.0~132.0 (한국 지역 내)
+- **위치 정보 수정**: 좌표 제공 시 새로운 CoordinatePoint 생성 및 행정구역 자동 업데이트
 '''
 
 === 이미지 지역 정보 포함 메타데이터 수정 API
-==== PUT /api/images/{imageId} (위치 정보 포함)
+==== PATCH /api/images/{imageId} (위치 정보 포함)
 
 이미지의 메타데이터와 함께 위치 정보도 수정하는 API입니다.
 위도와 경도를 함께 제공하면 해당 좌표의 행정구역 정보가 자동으로 업데이트됩니다.

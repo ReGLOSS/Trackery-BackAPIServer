@@ -186,7 +186,7 @@ public class ImageService {
 		}
 
 		// 기본 메타데이터 수정
-		int updatedRows = imageMapper.updateImageMetadata(
+		imageMapper.updateImageMetadata(
 			imageId,
 			updateRequest.imageName(),
 			updateRequest.imageContent(),
@@ -194,27 +194,24 @@ public class ImageService {
 			updateRequest.isPublic()
 		);
 
-		if (updatedRows == 0) {
-			throw new ApiException(ErrorCode.UPDATE_FAILED_META);
-		}
-
 		// 위치 정보가 제공된 경우 위치 정보도 수정
 		if (updateRequest.latitude() != null && updateRequest.longitude() != null) {
-			CoordinateDto coordinateDto = new CoordinateDto(
-				updateRequest.latitude(),
-				updateRequest.longitude()
-			);
+			try {
+				CoordinateDto coordinateDto = new CoordinateDto(
+					updateRequest.latitude(),
+					updateRequest.longitude()
+				);
 
-			CoordinatePoint newCoordinatePoint = locationService.insertCoordinatePoint(coordinateDto);
-			
-			int locationUpdatedRows = imageMapper.updateImageLocation(imageId, newCoordinatePoint.getCoordinatePointId());
-			
-			if (locationUpdatedRows == 0) {
+				CoordinatePoint newCoordinatePoint = locationService.insertCoordinatePoint(coordinateDto);
+				
+				imageMapper.updateImageLocation(imageId, newCoordinatePoint.getCoordinatePointId());
+
+				log.info("이미지 위치 정보 수정 완료 - imageId: {}, 새로운 위치: {}, {}", 
+					imageId, updateRequest.latitude(), updateRequest.longitude());
+			} catch (Exception e) {
+				log.error("이미지 위치 정보 수정 실패 - imageId: {}, 에러: {}", imageId, e.getMessage());
 				throw new ApiException(ErrorCode.UPDATE_FAILED_LOCATION);
 			}
-
-			log.info("이미지 위치 정보 수정 완료 - imageId: {}, 새로운 위치: {}, {}", 
-				imageId, updateRequest.latitude(), updateRequest.longitude());
 		}
 
 		return getImageByImageId(imageId);
