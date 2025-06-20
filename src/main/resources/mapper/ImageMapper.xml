@@ -165,4 +165,32 @@
         ORDER BY i.image_reg_date DESC
     </select>
 
+    <!-- 이미지 메타데이터 수정 -->
+    <update id="updateImageMetadata">
+        UPDATE image 
+        SET 
+            <if test="imageName != null">image_name = #{imageName},</if>
+            <if test="imageContent != null">image_contents = #{imageContent},</if>
+            <if test="imageDate != null">image_date = #{imageDate},</if>
+            <if test="isPublic != null">is_public = #{isPublic}</if>
+        WHERE image_id = #{imageId}
+          AND is_deleted = 0
+    </update>
+
+    <!-- 이미지 논리적 삭제 -->
+    <update id="deleteImage">
+        UPDATE image 
+        SET is_deleted = 1
+        WHERE image_id = #{imageId}
+          AND is_deleted = 0
+    </update>
+
+    <!-- 이미지 위치 정보 수정 -->
+    <update id="updateImageLocation">
+        UPDATE image 
+        SET coord_point_id = #{coordinatePointId}
+        WHERE image_id = #{imageId}
+          AND is_deleted = 0
+    </update>
+
 </mapper>

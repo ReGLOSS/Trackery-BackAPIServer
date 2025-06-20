@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.home.dto
+ * packageName    : com.trackery.trackerybackapiserver.domain.image.dto
  * fileName       : LandingImagesResponse
  * author         : inari
  * date           : 25. 2. 14.

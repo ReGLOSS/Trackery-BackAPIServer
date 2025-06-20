@@ -11,6 +11,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.http.MediaType.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -26,6 +29,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
@@ -243,5 +247,185 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			));
 
 		verify(imageService, times(1)).getImageListByUserIdV2(USER_ID, 1, 10);
+	}
+
+	@Test
+	@DisplayName("이미지 메타데이터 수정 성공")
+	void updateImageMetadataSuccess() throws Exception {
+		ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
+			.imageName("수정된 이미지")
+			.imageContent("수정된 설명")
+			.isPublic(1)
+			.build();
+
+		ImageDto updatedImageDto = ImageDto.builder()
+			.imageId(IMAGE_ID)
+			.userId(USER_ID)
+			.imageRegDate(IMAGE_REG_DATE)
+			.sdName(SD_NAME)
+			.sggName(SGG_NAME)
+			.latitude(LATITUDE)
+			.longitude(LONGITUDE)
+			.imageName("수정된 이미지")
+			.imageContent("수정된 설명")
+			.imageDate(IMAGE_DATE)
+			.imageUrl(IMAGE_URL)
+			.isPublic(1)
+			.build();
+
+		when(imageService.updateImageMetadata(eq(IMAGE_ID), eq(USER_ID), any(ImageUpdateRequestDto.class)))
+			.thenReturn(updatedImageDto);
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String requestJson = objectMapper.writeValueAsString(updateRequest);
+
+		ResultActions result = mockMvc.perform(put("/api/images/{imageId}", IMAGE_ID)
+			.with(user(userDetails))
+			.contentType(APPLICATION_JSON)
+			.content(requestJson));
+
+		result
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("Ok"))
+			.andExpect(jsonPath("$.data.imageId").value(IMAGE_ID))
+			.andExpect(jsonPath("$.data.imageName").value("수정된 이미지"))
+			.andExpect(jsonPath("$.data.imageContent").value("수정된 설명"))
+			.andExpect(jsonPath("$.data.isPublic").value(1))
+			.andDo(document("update-image-metadata-success",
+				pathParameters(
+					parameterWithName("imageId").description("수정할 이미지 ID")
+				),
+				requestFields(
+					fieldWithPath("imageName").description("수정할 이미지 이름 (선택사항)").optional(),
+					fieldWithPath("imageContent").description("수정할 이미지 설명 (선택사항)").optional(),
+					fieldWithPath("imageDate").description("수정할 이미지 촬영 날짜 (선택사항)").optional(),
+					fieldWithPath("isPublic").description("수정할 공개 여부 (0: 비공개, 1: 공개, 선택사항)").optional(),
+					fieldWithPath("latitude").description("수정할 위도 (33.0-43.0, 선택사항)").optional(),
+					fieldWithPath("longitude").description("수정할 경도 (124.0-132.0, 선택사항)").optional()
+				),
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.imageId").description("이미지 ID"),
+					fieldWithPath("data.userId").description("이미지 업로드 사용자 ID"),
+					fieldWithPath("data.imageRegDate").description("이미지 등록 일시"),
+					fieldWithPath("data.sdName").description("시도명"),
+					fieldWithPath("data.sggName").description("시군구명"),
+					fieldWithPath("data.latitude").description("위도"),
+					fieldWithPath("data.longitude").description("경도"),
+					fieldWithPath("data.imageName").description("이미지 파일명"),
+					fieldWithPath("data.imageContent").description("이미지 설명"),
+					fieldWithPath("data.imageDate").description("이미지 촬영 일시"),
+					fieldWithPath("data.isPublic").description("공개 여부"),
+					fieldWithPath("data.imageUrl").description("이미지 URL")
+				)
+			));
+
+		verify(imageService, times(1)).updateImageMetadata(eq(IMAGE_ID), eq(USER_ID), any(ImageUpdateRequestDto.class));
+	}
+
+	@Test
+	@DisplayName("이미지 지역 정보 포함 메타데이터 수정 성공")
+	void updateImageMetadataWithLocationSuccess() throws Exception {
+		ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
+			.imageName("수정된 이미지")
+			.imageContent("수정된 설명")
+			.isPublic(1)
+			.latitude(37.5665)
+			.longitude(126.978)
+			.build();
+
+		ImageDto updatedImageDto = ImageDto.builder()
+			.imageId(IMAGE_ID)
+			.userId(USER_ID)
+			.imageRegDate(IMAGE_REG_DATE)
+			.sdName("서울특별시")
+			.sggName("중구")
+			.latitude(37.5665)
+			.longitude(126.978)
+			.imageName("수정된 이미지")
+			.imageContent("수정된 설명")
+			.imageDate(IMAGE_DATE)
+			.imageUrl(IMAGE_URL)
+			.isPublic(1)
+			.build();
+
+		when(imageService.updateImageMetadata(eq(IMAGE_ID), eq(USER_ID), any(ImageUpdateRequestDto.class)))
+			.thenReturn(updatedImageDto);
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		String requestJson = objectMapper.writeValueAsString(updateRequest);
+
+		ResultActions result = mockMvc.perform(put("/api/images/{imageId}", IMAGE_ID)
+			.with(user(userDetails))
+			.contentType(APPLICATION_JSON)
+			.content(requestJson));
+
+		result
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("Ok"))
+			.andExpect(jsonPath("$.data.imageId").value(IMAGE_ID))
+			.andExpect(jsonPath("$.data.latitude").value(37.5665))
+			.andExpect(jsonPath("$.data.longitude").value(126.978))
+			.andExpect(jsonPath("$.data.sggName").value("중구"))
+			.andDo(document("update-image-metadata-with-location-success",
+				pathParameters(
+					parameterWithName("imageId").description("수정할 이미지 ID")
+				),
+				requestFields(
+					fieldWithPath("imageName").description("수정할 이미지 이름"),
+					fieldWithPath("imageContent").description("수정할 이미지 설명"),
+					fieldWithPath("imageDate").description("수정할 이미지 촬영 날짜").optional(),
+					fieldWithPath("isPublic").description("수정할 공개 여부 (0: 비공개, 1: 공개)"),
+					fieldWithPath("latitude").description("수정할 위도 (33.0-43.0)"),
+					fieldWithPath("longitude").description("수정할 경도 (124.0-132.0)")
+				),
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.imageId").description("이미지 ID"),
+					fieldWithPath("data.userId").description("이미지 업로드 사용자 ID"),
+					fieldWithPath("data.imageRegDate").description("이미지 등록 일시"),
+					fieldWithPath("data.sdName").description("시도명 (수정된 위치 기준)"),
+					fieldWithPath("data.sggName").description("시군구명 (수정된 위치 기준)"),
+					fieldWithPath("data.latitude").description("수정된 위도"),
+					fieldWithPath("data.longitude").description("수정된 경도"),
+					fieldWithPath("data.imageName").description("수정된 이미지 파일명"),
+					fieldWithPath("data.imageContent").description("수정된 이미지 설명"),
+					fieldWithPath("data.imageDate").description("이미지 촬영 일시"),
+					fieldWithPath("data.isPublic").description("수정된 공개 여부"),
+					fieldWithPath("data.imageUrl").description("이미지 URL")
+				)
+			));
+
+		verify(imageService, times(1)).updateImageMetadata(eq(IMAGE_ID), eq(USER_ID), any(ImageUpdateRequestDto.class));
+	}
+
+	@Test
+	@DisplayName("이미지 삭제 성공")
+	void deleteImageSuccess() throws Exception {
+		doNothing().when(imageService).deleteImage(IMAGE_ID, USER_ID);
+
+		ResultActions result = mockMvc.perform(delete("/api/images/{imageId}", IMAGE_ID)
+			.with(user(userDetails)));
+
+		result
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("Ok"))
+			.andExpect(jsonPath("$.data").doesNotExist())
+			.andDo(document("delete-image-success",
+				pathParameters(
+					parameterWithName("imageId").description("삭제할 이미지 ID")
+				),
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지")
+				)
+			));
+
+		verify(imageService, times(1)).deleteImage(IMAGE_ID, USER_ID);
 	}
 }
