@@ -1,6 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.album.event;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.enums.AlbumImageEditOperation;
 
 /**
@@ -15,6 +16,7 @@ import com.trackery.trackerybackapiserver.domain.album.enums.AlbumImageEditOpera
  * 25. 6. 20.		durururuk		최초 생성
  */
 public record AlbumImageEditEvent(
+	Album album,
 	AlbumImageEditResponseDto albumImageEditResponseDto,
 	AlbumImageEditOperation albumImageEditOperation
 ) {

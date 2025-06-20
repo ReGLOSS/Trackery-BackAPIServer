@@ -86,12 +86,14 @@ public class AlbumService {
 	 * @param userId : 유저 ID
 	 * @param albumId : 앨범 ID
 	 */
-	public void findAlbumAndCheckPermission(Long userId, Long albumId) {
+	public Album findAlbumAndCheckPermission(Long userId, Long albumId) {
 		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM));
 
 		if (!album.getUserId().equals(userId)) {
 			throw new ApiException(ErrorCode.FORBIDDEN);
 		}
+
+		return album;
 	}
 
 	/**
@@ -108,7 +110,7 @@ public class AlbumService {
 	 * @return 앨범 ID, 추가 성공한 이미지 ID, 실패한 이미지 ID, 이유를 담은 DTO
 	 */
 	public AlbumImageEditResponseDto addImageIntoAlbum(Long userId, Long albumId, List<Long> imageIdList) {
-		findAlbumAndCheckPermission(userId, albumId);
+		Album album = findAlbumAndCheckPermission(userId, albumId);
 
 		Set<Long> succeededImageIds = new HashSet<>();
 		Map<Long, String> failedImageIds = new HashMap<>();
@@ -142,7 +144,7 @@ public class AlbumService {
 			.build();
 
 		applicationEventPublisher.publishEvent(
-			new AlbumImageEditEvent(result, AlbumImageEditOperation.ADD)
+			new AlbumImageEditEvent(album, result, AlbumImageEditOperation.ADD)
 		);
 
 		return result;
@@ -161,7 +163,7 @@ public class AlbumService {
 	 * @return 앨범 ID, 삭제 성공한 이미지 ID, 실패한 이미지 ID, 이유를 담은 DTO
 	 */
 	public AlbumImageEditResponseDto deleteImageFromAlbum(Long userId, Long albumId, List<Long> imageIdList) {
-		findAlbumAndCheckPermission(userId, albumId);
+		Album album = findAlbumAndCheckPermission(userId, albumId);
 
 		Set<Long> succeededImageIds = new HashSet<>();
 		Map<Long, String> failedImageIds = new HashMap<>();
@@ -189,7 +191,7 @@ public class AlbumService {
 			.failedImageIds(failedImageIds)
 			.build();
 
-		applicationEventPublisher.publishEvent(new AlbumImageEditEvent(result, AlbumImageEditOperation.DELETE));
+		applicationEventPublisher.publishEvent(new AlbumImageEditEvent(album, result, AlbumImageEditOperation.DELETE));
 
 		return result;
 	}
