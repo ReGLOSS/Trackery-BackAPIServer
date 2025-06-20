@@ -199,6 +199,7 @@ public class AlbumService {
 	 * @param albumId 앨범 ID
 	 * @return 앨범 정보, 앨범에 포함돼있는 이미지 정보를 담은 DTO
 	 */
+	@Transactional(readOnly = true)
 	public AlbumDetailedResponseDto getAlbumDetailedInfo(Long userId, Long albumId) {
 		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM));
 
@@ -235,6 +236,7 @@ public class AlbumService {
 	 * @param userId 조회하고자 하는 유저 ID
 	 * @return DTO
 	 */
+	@Transactional(readOnly = true)
 	public MyAlbumResponseDto getMyAlbumSimpleInfo(Long userId) {
 		List<Album> albumList = albumMapper.findAlbumsByUserId(userId);
 
