@@ -53,6 +53,7 @@ public class AlbumThumbnailService {
 	/**
 	 * 앨범에 썸네일을 설정하는 메서드입니다.
 	 * 앨범에 이미지를 추가할 때 이미 앨범의 썸네일이 존재하지 않는다면 추가된 이미지의 첫번째 이미지를 자동으로 썸네일로 설정합니다.
+	 * @param album 앨범 엔티티
 	 * @param dto 앨범 이미지 추가 후 반환받은 dto
 	 */
 	public void setAlbumThumbnailForAddImagesIntoAlbum(Album album, AlbumImageEditResponseDto dto) {
@@ -69,6 +70,7 @@ public class AlbumThumbnailService {
 
 	/**
 	 * 앨범에서 썸네일인 이미지가 삭제됐을 경우 다른 이미지로 교체하거나 모든 이미지를 삭제했을 때 썸네일을 null로 설정합니다.
+	 * @param album 앨범 엔티티
 	 * @param dto 이미지 삭제 후 반환받은 DTO
 	 */
 	public void changeAlbumThumbnailForDeleteImagesFromAlbum(Album album, AlbumImageEditResponseDto dto) {
@@ -77,8 +79,6 @@ public class AlbumThumbnailService {
 		}
 
 		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(album.getAlbumId());
-
-		log.info("albumImageList size : {}", albumImageList.size());
 
 		Long newThumbnailImageId = albumImageList.stream().findFirst().map(AlbumImage::getImageId).orElse(null);
 

@@ -12,7 +12,7 @@ import lombok.RequiredArgsConstructor;
  * fileName       : AlbumThumbnailEventListener
  * author         : durururuk
  * date           : 25. 6. 20.
- * description    : 
+ * description    : 앨범 썸네일 이벤트 리스너
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -23,6 +23,10 @@ import lombok.RequiredArgsConstructor;
 public class AlbumThumbnailEventListener {
 	private final AlbumThumbnailService albumThumbnailService;
 
+	/**
+	 * 앨범 이미지가 추가/삭제됐을 때 썸네일 서비스로 이벤트를 전달해주는 이벤트리스너
+	 * @param event 앨범 이미지 추가/삭제 이벤트
+	 */
 	@EventListener
 	public void handleAlbumEditEvent(AlbumImageEditEvent event) {
 		albumThumbnailService.handleAlbumThumbnailChange(event.album(), event.albumImageEditResponseDto(),
