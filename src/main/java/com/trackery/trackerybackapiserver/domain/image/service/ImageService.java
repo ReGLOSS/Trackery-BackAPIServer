@@ -12,8 +12,10 @@ import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
+import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
@@ -35,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 19.        inari       이미지를 불러오지 못했을시 예외 처리
  * 25. 5. 15.		durururuk	 이미지 단건/다건 조회 기능 작성
  * 25. 6. 16.		 inari		 지도를 통한 이미지 조회 기능 추가
+ * 25. 6. 20.		 inari		 이미지 수정 및 삭제 추가
  */
 @Slf4j
 @Service
@@ -164,5 +167,76 @@ public class ImageService {
 		return images.stream()
 			.map(this::convertImageToImageDto)
 			.toList();
+	}
+
+	/**
+	 * 이미지 메타데이터를 수정합니다.
+	 * @param imageId 이미지 ID
+	 * @param userId 요청하는 사용자 ID (권한 확인용)
+	 * @param updateRequest 수정할 데이터
+	 * @return 수정된 이미지 정보
+	 */
+	@CacheEvict(value = "publicImageUrls", allEntries = true)
+	public ImageDto updateImageMetadata(Long imageId, Long userId, ImageUpdateRequestDto updateRequest) {
+		Image existingImage = imageMapper.findImageByImageId(imageId)
+			.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
+
+		if (!existingImage.getUserId().equals(userId)) {
+			throw new ApiException(ErrorCode.FORBIDDEN);
+		}
+
+		// 기본 메타데이터 수정
+		imageMapper.updateImageMetadata(
+			imageId,
+			updateRequest.imageName(),
+			updateRequest.imageContent(),
+			updateRequest.imageDate(),
+			updateRequest.isPublic()
+		);
+
+		// 위치 정보가 제공된 경우 위치 정보도 수정
+		if (updateRequest.latitude() != null && updateRequest.longitude() != null) {
+			try {
+				CoordinateDto coordinateDto = new CoordinateDto(
+					updateRequest.latitude(),
+					updateRequest.longitude()
+				);
+
+				CoordinatePoint newCoordinatePoint = locationService.insertCoordinatePoint(coordinateDto);
+				
+				imageMapper.updateImageLocation(imageId, newCoordinatePoint.getCoordinatePointId());
+
+				log.info("이미지 위치 정보 수정 완료 - imageId: {}, 새로운 위치: {}, {}", 
+					imageId, updateRequest.latitude(), updateRequest.longitude());
+			} catch (Exception e) {
+				log.error("이미지 위치 정보 수정 실패 - imageId: {}, 에러: {}", imageId, e.getMessage());
+				throw new ApiException(ErrorCode.UPDATE_FAILED_LOCATION);
+			}
+		}
+
+		return getImageByImageId(imageId);
+	}
+
+	/**
+	 * 이미지를 삭제합니다 (논리적 삭제).
+	 * @param imageId 삭제할 이미지 ID
+	 * @param userId 요청하는 사용자 ID (권한 확인용)
+	 */
+	@CacheEvict(value = "publicImageUrls", allEntries = true)
+	public void deleteImage(Long imageId, Long userId) {
+		Image existingImage = imageMapper.findImageByImageId(imageId)
+			.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
+
+		if (!existingImage.getUserId().equals(userId)) {
+			throw new ApiException(ErrorCode.FORBIDDEN);
+		}
+
+		int deletedRows = imageMapper.deleteImage(imageId);
+
+		if (deletedRows == 0) {
+			throw new ApiException(ErrorCode.NOT_FOUND_IMAGE);
+		}
+
+		log.info("이미지 삭제 완료 - imageId: {}, userId: {}", imageId, userId);
 	}
 }

@@ -27,10 +27,12 @@ import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
+import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 
@@ -44,7 +46,8 @@ import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 14.        inari       최초 생성
- * 25. 5. 19.		durururul	이미지 조회 단위 테스트 작성
+ * 25. 5. 19.		durururuk	이미지 조회 단위 테스트 작성
+ * 25. 6. 20.		inari		이미지 삭제 및 수정 테스트 작성
  */
 @ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
@@ -55,6 +58,8 @@ class ImageServiceTest {
 	private CacheManager cacheManager;
 	@Mock
 	private ImageS3Service imageS3Service;
+	@Mock
+	private LocationService locationService;
 	@InjectMocks
 	private ImageService imageService;
 
@@ -234,6 +239,188 @@ class ImageServiceTest {
 
 				verify(imageMapper).findImagesByUserId(testUserId);
 			}
+		}
+	}
+
+	@Nested
+	@DisplayName("이미지 메타데이터 수정 테스트")
+	class UpdateImageMetadataTest {
+		private Image existingImage;
+		private final Long imageId = 1L;
+		private final Long userId = 2L;
+		private final Long otherUserId = 3L;
+
+		@BeforeEach
+		void setUp() {
+			JusoSido sido = new JusoSido();
+			ReflectionTestUtils.setField(sido, "sidoId", 1L);
+			ReflectionTestUtils.setField(sido, "sidoName", "서울특별시");
+
+			JusoSigungu sigungu = new JusoSigungu();
+			ReflectionTestUtils.setField(sigungu, "sigunguId", 1L);
+			ReflectionTestUtils.setField(sigungu, "sigunguName", "강남구");
+			ReflectionTestUtils.setField(sigungu, "sido", sido);
+
+			Coordinate coordinate = new Coordinate(127.0495556, 37.5398056);
+			PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
+			Point testPoint = new Point(coordinate, precisionModel, 4321);
+
+			CoordinatePoint coordPoint = new CoordinatePoint();
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointId", 1L);
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointName", "테스트 좌표");
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointPoint", testPoint);
+			ReflectionTestUtils.setField(coordPoint, "sigungu", sigungu);
+
+			existingImage = Image.builder()
+				.coordPoint(coordPoint)
+				.imageName("기존 이미지")
+				.imageFile("images/test.jpg")
+				.imageContent("기존 설명")
+				.isPublic(0)
+				.userId(userId)
+				.build();
+			ReflectionTestUtils.setField(existingImage, "imageId", imageId);
+		}
+
+		@Test
+		@DisplayName("성공 - 메타데이터 수정")
+		void updateImageMetadata_success() {
+			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
+				.imageName("수정된 이미지")
+				.imageContent("수정된 설명")
+				.isPublic(1)
+				.build();
+
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
+			when(imageMapper.updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1)))
+				.thenReturn(1);
+			when(imageS3Service.generatePreSignedGetUrl(anyString())).thenReturn("test-url");
+
+			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
+
+			assertNotNull(result);
+			verify(imageMapper, times(2)).findImageByImageId(imageId);
+			verify(imageMapper).updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1));
+		}
+
+		@Test
+		@DisplayName("실패 - 이미지 존재하지 않음")
+		void updateImageMetadata_imageNotFound() {
+			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
+				.imageName("수정된 이미지")
+				.build();
+
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.empty());
+
+			assertThatThrownBy(() -> imageService.updateImageMetadata(imageId, userId, updateRequest))
+				.isInstanceOf(ApiException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_IMAGE);
+
+			verify(imageMapper).findImageByImageId(imageId);
+			verify(imageMapper, never()).updateImageMetadata(any(), any(), any(), any(), any());
+		}
+
+		@Test
+		@DisplayName("실패 - 권한 없음 (다른 사용자)")
+		void updateImageMetadata_forbidden() {
+			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
+				.imageName("수정된 이미지")
+				.build();
+
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
+
+			assertThatThrownBy(() -> imageService.updateImageMetadata(imageId, otherUserId, updateRequest))
+				.isInstanceOf(ApiException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN);
+
+			verify(imageMapper).findImageByImageId(imageId);
+			verify(imageMapper, never()).updateImageMetadata(any(), any(), any(), any(), any());
+		}
+
+		@Test
+		@DisplayName("성공 - 지역 정보 포함 메타데이터 수정")
+		void updateImageMetadata_withLocation_success() {
+			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
+				.imageName("수정된 이미지")
+				.imageContent("수정된 설명")
+				.isPublic(1)
+				.latitude(37.5665)
+				.longitude(126.978)
+				.build();
+
+			CoordinatePoint newCoordinatePoint = new CoordinatePoint();
+			ReflectionTestUtils.setField(newCoordinatePoint, "coordinatePointId", 100L);
+
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
+			when(imageMapper.updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1)))
+				.thenReturn(1);
+			when(locationService.insertCoordinatePoint(any())).thenReturn(newCoordinatePoint);
+			when(imageMapper.updateImageLocation(imageId, 100L)).thenReturn(1);
+			when(imageS3Service.generatePreSignedGetUrl(anyString())).thenReturn("test-url");
+
+			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
+
+			assertNotNull(result);
+			verify(imageMapper, times(2)).findImageByImageId(imageId);
+			verify(imageMapper).updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1));
+			verify(locationService).insertCoordinatePoint(any());
+			verify(imageMapper).updateImageLocation(imageId, 100L);
+		}
+	}
+
+	@Nested
+	@DisplayName("이미지 삭제 테스트")
+	class DeleteImageTest {
+		private Image existingImage;
+		private final Long imageId = 1L;
+		private final Long userId = 2L;
+		private final Long otherUserId = 3L;
+
+		@BeforeEach
+		void setUp() {
+			existingImage = Image.builder()
+				.imageName("삭제할 이미지")
+				.userId(userId)
+				.build();
+			ReflectionTestUtils.setField(existingImage, "imageId", imageId);
+		}
+
+		@Test
+		@DisplayName("성공 - 이미지 삭제")
+		void deleteImage_success() {
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
+			when(imageMapper.deleteImage(imageId)).thenReturn(1);
+
+			assertDoesNotThrow(() -> imageService.deleteImage(imageId, userId));
+
+			verify(imageMapper).findImageByImageId(imageId);
+			verify(imageMapper).deleteImage(imageId);
+		}
+
+		@Test
+		@DisplayName("실패 - 이미지 존재하지 않음")
+		void deleteImage_imageNotFound() {
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.empty());
+
+			assertThatThrownBy(() -> imageService.deleteImage(imageId, userId))
+				.isInstanceOf(ApiException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_IMAGE);
+
+			verify(imageMapper).findImageByImageId(imageId);
+			verify(imageMapper, never()).deleteImage(any());
+		}
+
+		@Test
+		@DisplayName("실패 - 권한 없음 (다른 사용자)")
+		void deleteImage_forbidden() {
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
+
+			assertThatThrownBy(() -> imageService.deleteImage(imageId, otherUserId))
+				.isInstanceOf(ApiException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN);
+
+			verify(imageMapper).findImageByImageId(imageId);
+			verify(imageMapper, never()).deleteImage(any());
 		}
 	}
 }
