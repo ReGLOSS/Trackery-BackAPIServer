@@ -22,6 +22,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumRespo
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
 import com.trackery.trackerybackapiserver.domain.album.enums.AlbumImageEditOperation;
+import com.trackery.trackerybackapiserver.domain.album.event.AlbumImageEditEvent;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;

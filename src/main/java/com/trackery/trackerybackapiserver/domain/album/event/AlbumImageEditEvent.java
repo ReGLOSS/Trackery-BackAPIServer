@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.domain.album.service;
+package com.trackery.trackerybackapiserver.domain.album.event;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.enums.AlbumImageEditOperation;

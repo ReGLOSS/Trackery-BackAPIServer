@@ -1,7 +1,9 @@
-package com.trackery.trackerybackapiserver.domain.album.service;
+package com.trackery.trackerybackapiserver.domain.album.event;
 
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
+
+import com.trackery.trackerybackapiserver.domain.album.service.AlbumThumbnailService;
 
 import lombok.RequiredArgsConstructor;
 

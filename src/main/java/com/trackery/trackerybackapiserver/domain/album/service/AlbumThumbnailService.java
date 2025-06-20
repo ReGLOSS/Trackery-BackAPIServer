@@ -13,6 +13,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.album.service
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
  * -----------------------------------------------------------
  * 25. 6. 20.		durururuk		최초 생성
  */
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AlbumThumbnailService {
@@ -69,6 +71,8 @@ public class AlbumThumbnailService {
 		}
 
 		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(album.getAlbumId());
+
+		log.info("albumImageList size : {}", albumImageList.size());
 
 		Long newThumbnailImageId = albumImageList.stream().findFirst().map(AlbumImage::getImageId).orElse(null);
 
