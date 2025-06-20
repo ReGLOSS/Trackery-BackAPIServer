@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumSimpled
 import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
+import com.trackery.trackerybackapiserver.domain.album.enums.AlbumImageEditOperation;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
@@ -50,6 +52,7 @@ public class AlbumService {
 	private final AlbumMapper albumMapper;
 	private final ImageMapper imageMapper;
 	private final ImageService imageService;
+	private final ApplicationEventPublisher applicationEventPublisher;
 
 	/**
 	 * 앨범 생성 기능
@@ -129,13 +132,19 @@ public class AlbumService {
 			}
 		});
 
-		return AlbumImageEditResponseDto.builder()
+		AlbumImageEditResponseDto result = AlbumImageEditResponseDto.builder()
 			.albumId(albumId)
 			.succeededImageCount(succeededImageIds.size())
 			.failedImageCount(failedImageIds.size())
 			.succeededImageIds(succeededImageIds)
 			.failedImageIds(failedImageIds)
 			.build();
+
+		applicationEventPublisher.publishEvent(
+			new AlbumImageEditEvent(result, AlbumImageEditOperation.ADD)
+		);
+
+		return result;
 	}
 
 	/**
@@ -171,13 +180,17 @@ public class AlbumService {
 			}
 		});
 
-		return AlbumImageEditResponseDto.builder()
+		AlbumImageEditResponseDto result = AlbumImageEditResponseDto.builder()
 			.albumId(albumId)
 			.succeededImageCount(succeededImageIds.size())
 			.failedImageCount(failedImageIds.size())
 			.succeededImageIds(succeededImageIds)
 			.failedImageIds(failedImageIds)
 			.build();
+
+		applicationEventPublisher.publishEvent(new AlbumImageEditEvent(result, AlbumImageEditOperation.DELETE));
+
+		return result;
 	}
 
 	/**
