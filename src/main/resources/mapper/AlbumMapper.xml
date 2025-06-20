@@ -90,4 +90,10 @@
         SET is_deleted = 1
         WHERE album_id = #{albumId}
     </update>
+
+    <update id="setThumbnail">
+        UPDATE album
+        SET thumbnail_image_id = #{imageId}
+        WHERE album_id = #{albumId}
+    </update>
 </mapper>
