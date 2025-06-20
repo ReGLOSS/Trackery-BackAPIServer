@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
@@ -48,6 +49,9 @@ class AlbumServiceTest {
 
 	@Mock
 	private ImageService imageService;
+
+	@Mock
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	@InjectMocks
 	private AlbumService albumService;
