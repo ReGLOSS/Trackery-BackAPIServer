@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -95,7 +96,7 @@ public class ImageController {
 	 * @param userDetails 인증된 사용자 정보
 	 * @return 수정된 이미지 정보
 	 */
-	@PutMapping("/{imageId}")
+	@PatchMapping("/{imageId}")
 	public ResponseEntity<ApiResponse<ImageDto>> updateImageMetadata(
 		@PathVariable Long imageId,
 		@Valid @RequestBody ImageUpdateRequestDto updateRequest,

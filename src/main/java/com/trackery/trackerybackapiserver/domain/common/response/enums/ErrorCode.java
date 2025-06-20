@@ -21,6 +21,7 @@ import lombok.Getter;
  * 25. 2. 26.        inari			 UNAUTHORIZED_OAUTH_FAILED, BAD_REQUEST_INVALID_OAUTH_PROVIDER 추가
  * 25. 3. 20.        inari			 BAD_REQUEST_INVALID_INPUT 추가
  * 25. 5. 30.        inari			 지도관련 NOT_FOUND 추가
+ * 25. 6. 20.        inari			 이미지 수정 관련 UPDATE_FAILED 추가
  */
 @Getter
 @AllArgsConstructor
@@ -161,7 +162,11 @@ public enum ErrorCode {
 	 * 유효하지 않은 좌표 (HttpStatus.BAD_REQUEST, 400, "유효하지 않은 좌표입니다.")
 	 * 한국 영토 범위를 벗어난 좌표로 조회 시도할 때 발생
 	 */
-	BAD_REQUEST_INVALID_COORDINATE(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 좌표입니다.");
+	BAD_REQUEST_INVALID_COORDINATE(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 좌표입니다."),
+
+	UPDATE_FAILED_META(HttpStatus.INTERNAL_SERVER_ERROR, 500, "이미지 메타데이터 업데이트에 실패했습니다. 다른 요청에 의해 리소스가 변경되었을 수 있습니다."),
+
+	UPDATE_FAILED_LOCATION(HttpStatus.INTERNAL_SERVER_ERROR, 500, "이미지 위치 정보 업데이트에 실패했습니다. 다른 요청에 의해 리소스가 변경되었을 수 있습니다.");
 
 	/**
 	 * HTTP 상태 코드

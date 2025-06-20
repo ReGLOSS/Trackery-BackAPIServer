@@ -195,7 +195,7 @@ public class ImageService {
 		);
 
 		if (updatedRows == 0) {
-			throw new ApiException(ErrorCode.NOT_FOUND_IMAGE);
+			throw new ApiException(ErrorCode.UPDATE_FAILED_META);
 		}
 
 		// 위치 정보가 제공된 경우 위치 정보도 수정
@@ -210,7 +210,7 @@ public class ImageService {
 			int locationUpdatedRows = imageMapper.updateImageLocation(imageId, newCoordinatePoint.getCoordinatePointId());
 			
 			if (locationUpdatedRows == 0) {
-				throw new ApiException(ErrorCode.NOT_FOUND_IMAGE);
+				throw new ApiException(ErrorCode.UPDATE_FAILED_LOCATION);
 			}
 
 			log.info("이미지 위치 정보 수정 완료 - imageId: {}, 새로운 위치: {}, {}", 
