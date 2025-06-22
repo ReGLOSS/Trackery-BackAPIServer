@@ -81,6 +81,26 @@
         );
     </insert>
 
+    <update id="updateCoordinatePoint" parameterType="com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint">
+        UPDATE coord_poi 
+        SET coord_point_name = #{coordinatePointName},
+            coord_point_point = #{coordinatePointPoint},
+            coord_point_type = #{coordinatePointType},
+            last_mod_dt = #{lastModifiedDate},
+            sgg_id = #{sigungu.sigunguId}
+        WHERE coord_point_id = #{coordinatePointId}
+    </update>
+
+    <update id="updateCoordinatePointById">
+        UPDATE coord_poi 
+        SET coord_point_name = #{coordinatePointName},
+            coord_point_point = #{coordinatePointPoint},
+            coord_point_type = 1,
+            last_mod_dt = #{lastModifiedDate},
+            sgg_id = #{sigunguId}
+        WHERE coord_point_id = #{coordinatePointId}
+    </update>
+
     <!-- Map domain integration queries -->
 
     <resultMap id="JusoSidoMap" type="com.trackery.trackerybackapiserver.domain.location.entity.JusoSido">

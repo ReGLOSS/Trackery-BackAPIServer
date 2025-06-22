@@ -14,7 +14,6 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
-import com.trackery.trackerybackapiserver.domain.location.dto.HomeStatsResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
@@ -37,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 4. 15.		durururuk		최초 생성
  * 25. 6. 13.		inari			시군구 ID로 시군구 정보를 조회 메서드 추가
  * 25. 6. 14.		inari			홈화면 전국지도용 통계 추가
+ * 25. 6. 22.		inari			좌표 업데이트 메서드 추가
  */
 @Slf4j
 @Service
@@ -103,6 +103,22 @@ public class LocationService {
 		locationMapper.insertCoordinatePoint(coordinatePoint);
 
 		return coordinatePoint;
+	}
+
+	/**
+	 * 기존 CoordinatePoint 객체의 좌표 정보를 업데이트하는 메서드입니다.
+	 * @param coordinatePointId 업데이트할 좌표 포인트 ID
+	 * @param coordinateDto 새로운 좌표 DTO
+	 * @return 업데이트된 행 수
+	 */
+	@Transactional
+	public int updateCoordinatePoint(Long coordinatePointId, CoordinateDto coordinateDto) {
+		Point point = getPointByCoord(coordinateDto);
+		JusoSigungu sigungu = getSigunguByPoint(point);
+		String pointName = String.format("%s %s", sigungu.getSido().getSidoName(), sigungu.getSigunguName());
+
+		return locationMapper.updateCoordinatePointById(coordinatePointId, pointName, point, sigungu.getSigunguId(),
+			LocalDateTime.now(ZoneId.of("Asia/Seoul")));
 	}
 
 	/**

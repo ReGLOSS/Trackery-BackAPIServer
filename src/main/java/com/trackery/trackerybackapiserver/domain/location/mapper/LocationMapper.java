@@ -1,9 +1,11 @@
 package com.trackery.trackerybackapiserver.domain.location.mapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.locationtech.jts.geom.Point;
 
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
@@ -25,6 +27,7 @@ import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
  * 25. 4. 15.		durururuk		최초 생성
  * 25. 6. 13.		inari			시군구 ID로 시군구 정보를 조회 매퍼 추가
  * 25. 6. 14.		inari			홈화면 전국지도용 통계 추가
+ * 25. 6. 22.		inari			좌표 업데이트 메서드 추가
  */
 @Mapper
 public interface LocationMapper {
@@ -47,6 +50,18 @@ public interface LocationMapper {
 	 * @param coordinatePoint CoordinatePoint 객체
 	 */
 	void insertCoordinatePoint(CoordinatePoint coordinatePoint);
+
+	/**
+	 * ID로 CoordinatePoint 정보를 수정합니다.
+	 * @param coordinatePointId 좌표 포인트 ID
+	 * @param coordinatePointName 좌표 포인트 이름
+	 * @param coordinatePointPoint 좌표 포인트
+	 * @param sigunguId 시군구 ID
+	 * @param lastModifiedDate 수정 시간
+	 * @return 수정된 행 수
+	 */
+	int updateCoordinatePointById(Long coordinatePointId, String coordinatePointName, Point coordinatePointPoint, 
+		Long sigunguId, LocalDateTime lastModifiedDate);
 
 	/**
 	 * 대한민국의 모든 시도 목록을 조회합니다.

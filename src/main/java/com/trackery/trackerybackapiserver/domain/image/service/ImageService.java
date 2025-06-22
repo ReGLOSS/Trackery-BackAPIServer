@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 5. 15.		durururuk	 이미지 단건/다건 조회 기능 작성
  * 25. 6. 16.		 inari		 지도를 통한 이미지 조회 기능 추가
  * 25. 6. 20.		 inari		 이미지 수정 및 삭제 추가
+ * 25. 6. 22.		 inari		 이미지 수정시 좌표 인서트가 아닌 업데이트로 변경
  */
 @Slf4j
 @Service
@@ -202,12 +203,12 @@ public class ImageService {
 					updateRequest.longitude()
 				);
 
-				CoordinatePoint newCoordinatePoint = locationService.insertCoordinatePoint(coordinateDto);
-				
-				imageMapper.updateImageLocation(imageId, newCoordinatePoint.getCoordinatePointId());
+				// 기존 이미지의 coord_point_id를 사용하여 업데이트
+				Long existingCoordPointId = existingImage.getCoordPoint().getCoordinatePointId();
+				locationService.updateCoordinatePoint(existingCoordPointId, coordinateDto);
 
-				log.info("이미지 위치 정보 수정 완료 - imageId: {}, 새로운 위치: {}, {}", 
-					imageId, updateRequest.latitude(), updateRequest.longitude());
+				log.info("이미지 위치 정보 수정 완료 - imageId: {}, coord_point_id: {}, 새로운 위치: {}, {}", 
+					imageId, existingCoordPointId, updateRequest.latitude(), updateRequest.longitude());
 			} catch (Exception e) {
 				log.error("이미지 위치 정보 수정 실패 - imageId: {}, 에러: {}", imageId, e.getMessage());
 				throw new ApiException(ErrorCode.UPDATE_FAILED_LOCATION);

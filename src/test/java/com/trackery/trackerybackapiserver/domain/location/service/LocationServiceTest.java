@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.location.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -40,6 +41,7 @@ import com.trackery.trackerybackapiserver.domain.location.mapper.LocationMapper;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 6. 13.		Narilee			최초 생성
+ * 25. 6. 22.		Narilee			좌표 업데이트 테스트 추가
  */
 
 @ExtendWith(MockitoExtension.class)
@@ -153,6 +155,75 @@ class LocationServiceTest {
 			verify(locationMapper, times(1)).insertCoordinatePoint(any(CoordinatePoint.class));
 
 			assertEquals("서울특별시 동작구", coordinatePoint.getCoordinatePointName());
+		}
+	}
+
+	@Nested
+	@DisplayName("CoordinatePoint 업데이트 테스트")
+	class updateCoordinatePointTest {
+		Long coordinatePointId;
+		CoordinateDto coordinateDto;
+		Point point;
+		JusoSigungu sigungu;
+		JusoSido sido;
+
+		@BeforeEach
+		void setUp() {
+			coordinatePointId = 1L;
+			coordinateDto = new CoordinateDto(37.5665, 126.9780);
+			point = mock(Point.class);
+			sigungu = mock(JusoSigungu.class);
+			sido = mock(JusoSido.class);
+		}
+
+		@Test
+		@DisplayName("성공 - 좌표 포인트 업데이트 성공")
+		void success() {
+			when(locationMapper.findSigunguByPoint(any(Point.class))).thenReturn(Optional.of(sigungu));
+			when(sigungu.getSigunguName()).thenReturn("강남구");
+			when(sigungu.getSido()).thenReturn(sido);
+			when(sido.getSidoName()).thenReturn("서울특별시");
+			when(sigungu.getSigunguId()).thenReturn(11680L);
+			when(locationMapper.updateCoordinatePointById(eq(coordinatePointId), eq("서울특별시 강남구"), 
+				any(Point.class), eq(11680L), any(LocalDateTime.class))).thenReturn(1);
+
+			int result = locationService.updateCoordinatePoint(coordinatePointId, coordinateDto);
+
+			assertEquals(1, result);
+			verify(locationMapper, times(1)).findSigunguByPoint(any(Point.class));
+			verify(locationMapper, times(1)).updateCoordinatePointById(eq(coordinatePointId), eq("서울특별시 강남구"), 
+				any(Point.class), eq(11680L), any(LocalDateTime.class));
+		}
+
+		@Test
+		@DisplayName("실패 - 좌표로 시군구를 찾을 수 없는 경우")
+		void failureNotFoundSigungu() {
+			when(locationMapper.findSigunguByPoint(any(Point.class))).thenReturn(Optional.empty());
+
+			ApiException exception = assertThrows(ApiException.class,
+				() -> locationService.updateCoordinatePoint(coordinatePointId, coordinateDto));
+
+			assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+			verify(locationMapper, times(1)).findSigunguByPoint(any(Point.class));
+			verify(locationMapper, never()).updateCoordinatePointById(any(), any(), any(), any(), any());
+		}
+
+		@Test
+		@DisplayName("성공 - 업데이트된 행이 0개인 경우")
+		void successZeroRowsUpdated() {
+			when(locationMapper.findSigunguByPoint(any(Point.class))).thenReturn(Optional.of(sigungu));
+			when(sigungu.getSigunguName()).thenReturn("동작구");
+			when(sigungu.getSido()).thenReturn(sido);
+			when(sido.getSidoName()).thenReturn("서울특별시");
+			when(sigungu.getSigunguId()).thenReturn(11200L);
+			when(locationMapper.updateCoordinatePointById(eq(coordinatePointId), eq("서울특별시 동작구"), 
+				any(Point.class), eq(11200L), any(LocalDateTime.class))).thenReturn(0);
+
+			int result = locationService.updateCoordinatePoint(coordinatePointId, coordinateDto);
+
+			assertEquals(0, result);
+			verify(locationMapper, times(1)).updateCoordinatePointById(eq(coordinatePointId), eq("서울특별시 동작구"), 
+				any(Point.class), eq(11200L), any(LocalDateTime.class));
 		}
 	}
 
