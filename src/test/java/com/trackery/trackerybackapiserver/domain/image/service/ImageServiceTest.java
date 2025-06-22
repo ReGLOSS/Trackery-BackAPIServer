@@ -348,14 +348,10 @@ class ImageServiceTest {
 				.longitude(126.978)
 				.build();
 
-			CoordinatePoint newCoordinatePoint = new CoordinatePoint();
-			ReflectionTestUtils.setField(newCoordinatePoint, "coordinatePointId", 100L);
-
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
 			when(imageMapper.updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1)))
 				.thenReturn(1);
-			when(locationService.insertCoordinatePoint(any())).thenReturn(newCoordinatePoint);
-			when(imageMapper.updateImageLocation(imageId, 100L)).thenReturn(1);
+			when(locationService.updateCoordinatePoint(eq(1L), any())).thenReturn(1);
 			when(imageS3Service.generatePreSignedGetUrl(anyString())).thenReturn("test-url");
 
 			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
@@ -363,8 +359,7 @@ class ImageServiceTest {
 			assertNotNull(result);
 			verify(imageMapper, times(2)).findImageByImageId(imageId);
 			verify(imageMapper).updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1));
-			verify(locationService).insertCoordinatePoint(any());
-			verify(imageMapper).updateImageLocation(imageId, 100L);
+			verify(locationService).updateCoordinatePoint(eq(1L), any());
 		}
 	}
 
