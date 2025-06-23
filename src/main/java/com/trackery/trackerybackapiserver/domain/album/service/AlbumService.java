@@ -226,8 +226,11 @@ public class AlbumService {
 		return AlbumDetailedResponseDto.of(album, imageDtoList);
 	}
 
-	/*
-	앨범 상세 정보 조회
+	/**
+	 * 앨범 메타데이터 조회
+	 * @param userId 요청한 유저 ID
+	 * @param albumId 조회할 앨범 ID
+	 * @return 앨범의 정보를 담은 DTO
 	 */
 	public AlbumDetailedResponseDto getAlbumMetadata(Long userId, Long albumId) {
 		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
@@ -250,18 +253,16 @@ public class AlbumService {
 			.build();
 	}
 
-	/*
-	앨범 이미지 조회
+	/**
+	 * 앨범 이미지 조회
+	 * @param albumId 조회할 이미지 ID
+	 * @param pageNum 페이지 번호
+	 * @param pageSize 페이지 크기
+	 * @return 페이지네이션된 이미지 DTO 리스트
 	 */
 	@SuppressWarnings("squid:S3252")
-	public PageInfo<ImageDto> getAlbumImages(Long userId, Long albumId, int pageNum, int pageSize) {
-		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
-			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
-		);
-
-		if (album.getIsPublic() == 0 && !userId.equals(album.getUserId())) {
-			throw new ApiException(ErrorCode.FORBIDDEN);
-		}
+	public PageInfo<ImageDto> getAlbumImages(Long albumId, int pageNum, int pageSize) {
+		PageHelper.startPage(pageNum, pageSize);
 
 		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(albumId);
 
@@ -271,8 +272,6 @@ public class AlbumService {
 			))
 			.map(imageService::convertImageToImageDto)
 			.toList();
-
-		PageHelper.startPage(pageNum, pageSize);
 
 		return new PageInfo<>(albumImageDtoList);
 	}
