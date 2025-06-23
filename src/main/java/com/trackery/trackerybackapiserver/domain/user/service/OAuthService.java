@@ -43,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 28.        inari       리프레시 토큰 제거
  * 25. 3. 14.        inari       주석 추가
  * 25. 3. 27.        inari		 provider를 enum으로 변경
+ * 25. 6. 23.        inari		 기존 유저에 간편 로그인 연동 추가
  */
 @Slf4j
 @Service
@@ -235,6 +236,44 @@ public class OAuthService {
 		}
 
 		return userName;
+	}
+
+	/**
+	 * 기존 사용자에게 OAuth 계정을 연동하는 메서드입니다.
+	 *
+	 * @param userId 연동할 사용자 ID
+	 * @param provider OAuth 제공자
+	 * @param code 인증 코드
+	 * @throws ApiException OAuth 계정이 이미 다른 사용자에게 연동된 경우
+	 */
+	@Transactional
+	public void linkOAuthAccount(Long userId, OAuthProvider provider, String code) {
+		// 인증 코드로 토큰 획득
+		String accessToken = oAuthClient.getAccessToken(code, provider);
+
+		// 액세스 토큰으로 사용자 정보 획득
+		OAuthUserInfoDto userInfo = oAuthClient.getUserInfo(accessToken, provider);
+
+		// 이미 다른 사용자에게 연동된 OAuth 계정인지 확인
+		Optional<OAuth> existingOAuth = oAuthMapper.findByProviderAndProviderId(provider.name(),
+			userInfo.getProviderUserId());
+
+		if (existingOAuth.isPresent()) {
+			if (!existingOAuth.get().getUserId().equals(userId)) {
+				throw new ApiException(ErrorCode.DUPLICATE_EMAIL);
+			}
+			// 이미 현재 사용자에게 연동된 경우 중복 연동 에러
+			throw new ApiException(ErrorCode.DUPLICATE_EMAIL);
+		}
+
+		// 현재 사용자에게 해당 provider로 이미 연동된 계정이 있는지 확인
+		Optional<OAuth> existingUserOAuth = oAuthMapper.findByUserIdAndProvider(userId, provider.name());
+		if (existingUserOAuth.isPresent()) {
+			throw new ApiException(ErrorCode.DUPLICATE_EMAIL);
+		}
+
+		// OAuth 계정 연동
+		linkOAuthToExistingUser(userId, userInfo);
 	}
 
 	/**

@@ -20,9 +20,11 @@ import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
+import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkService;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -42,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 27.        inari			provider를 enum으로 변경
  * 25. 3. 27.        inari			코드 스멜 수정
  * 25. 4. 08.        inari			GlobalExceptionHandle로 ApiException 위임
+ * 25. 6. 23.        inari		 	기존 유저에 간편 로그인 연동 추가
  */
 @Slf4j
 @RestController
@@ -144,5 +147,30 @@ public class OAuthController {
 		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
 			.body(ApiResponse.success(SuccessCode.OK, responseDto));
+	}
+
+	/**
+	 * 기존 사용자가 OAuth 계정을 연동하는 API 메서드입니다.
+	 *
+	 * @param provider OAuth 제공자(KAKAO, GOOGLE, GITHUB, NAVER)
+	 * @param code 인증 코드
+	 * @param userDetails 현재 인증된 사용자 정보
+	 * @return 연동 처리 결과
+	 */
+	@GetMapping("/link/{provider}")
+	public ResponseEntity<ApiResponse<String>> linkOAuthAccount(
+		@PathVariable("provider") OAuthProvider provider,
+		@RequestParam("code") String code,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+
+		log.info("OAuth 계정 연동 요청: provider={}, code={}", provider, code);
+
+		// 현재 인증된 사용자 ID 추출
+		Long userId = userDetails.getUserId();
+
+		// OAuth 계정 연동 처리
+		oAuthService.linkOAuthAccount(userId, provider, code);
+
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, "OAuth 계정이 성공적으로 연동되었습니다."));
 	}
 }
