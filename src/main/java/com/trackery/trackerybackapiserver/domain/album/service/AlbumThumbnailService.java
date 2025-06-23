@@ -37,7 +37,8 @@ public class AlbumThumbnailService {
 	 * @param dto 이미지 추가, 삭제 후 반환받은 DTO
 	 * @param operation 이미지 추가, 삭제를 나타내는 동작
 	 */
-	public void handleAlbumThumbnailChange(Album album, AlbumImageEditResponseDto dto, AlbumImageEditOperation operation) {
+	public void handleAlbumThumbnailChange(Album album, AlbumImageEditResponseDto dto,
+		AlbumImageEditOperation operation) {
 		switch (operation) {
 			case ADD:
 				setAlbumThumbnailForAddImagesIntoAlbum(album, dto);
@@ -57,13 +58,11 @@ public class AlbumThumbnailService {
 	 * @param dto 앨범 이미지 추가 후 반환받은 dto
 	 */
 	public void setAlbumThumbnailForAddImagesIntoAlbum(Album album, AlbumImageEditResponseDto dto) {
-		if (album.getThumbnailImageId() != null) {
+		if (album.getThumbnailImageId() != null || dto.getSucceededImageIds().isEmpty()) {
 			return;
 		}
 
-		Long firstRegisteredImageId = dto.getSucceededImageIds().stream().findFirst().orElseThrow(
-			() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR)
-		);
+		Long firstRegisteredImageId = dto.getSucceededImageIds().iterator().next();
 
 		albumMapper.setThumbnail(album.getAlbumId(), firstRegisteredImageId);
 	}
@@ -74,7 +73,7 @@ public class AlbumThumbnailService {
 	 * @param dto 이미지 삭제 후 반환받은 DTO
 	 */
 	public void changeAlbumThumbnailForDeleteImagesFromAlbum(Album album, AlbumImageEditResponseDto dto) {
-		if (!dto.getSucceededImageIds().contains(album.getThumbnailImageId())) {
+		if (album.getThumbnailImageId() == null || !dto.getSucceededImageIds().contains(album.getThumbnailImageId())) {
 			return;
 		}
 
