@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.locationtech.jts.geom.Point;
 
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
