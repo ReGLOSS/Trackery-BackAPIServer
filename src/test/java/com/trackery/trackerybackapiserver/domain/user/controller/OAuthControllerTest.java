@@ -5,13 +5,13 @@ import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuild
 import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
@@ -25,6 +25,8 @@ import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerT
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
+import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
+import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkService;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
 
@@ -40,10 +42,10 @@ import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
  * 25. 3. 3.        inari       최초 생성
  * 25. 3. 26.       inari       계정 연동 토큰 테스트 추가
  * 25. 6. 17.		inari		Spring-Rest-Docs api문서 추가
+ * 25. 6. 23.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
  */
 @WithMockUser
 @WebMvcTest({OAuthController.class, GlobalExceptionHandler.class})
-@AutoConfigureMockMvc(addFilters = false)
 class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 	@MockitoBean
@@ -332,5 +334,145 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 		verify(oAuthLinkService).validateToken(INVALID_LINK_TOKEN);
 		// 검증 실패 시에도 로그인 처리는 정상 진행
 		verify(oAuthService).processOAuthLogin(any(OAuthLoginDto.class));
+	}
+
+	@Test
+	@DisplayName("OAuth 계정 연동 성공")
+	void OAuth_계정_연동_성공() throws Exception {
+		// given
+		final String AUTH_CODE = "auth_code";
+		final String PROVIDER = "kakao";
+		final Long USER_ID = 1L;
+
+		CustomUserDetails customUserDetails = CustomUserDetails.builder()
+			.userId(USER_ID)
+			.userName("testuser")
+			.roleId(1L)
+			.build();
+
+		doNothing().when(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.KAKAO, AUTH_CODE);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(get("/api/users/oauth/link/{provider}", PROVIDER)
+				.queryParam("code", AUTH_CODE)
+				.contentType(MediaType.APPLICATION_JSON)
+				.with(user(customUserDetails)));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data").value("OAuth 계정이 성공적으로 연동되었습니다."))
+			.andDo(document("oauth-account-link-success",
+				pathParameters(
+					parameterWithName("provider").description("OAuth 제공자 (kakao, google, github, naver)")
+				),
+				queryParameters(
+					parameterWithName("code").description("OAuth 인증 코드")
+				),
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("연동 성공 메시지")
+				)
+			));
+
+		verify(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.KAKAO, AUTH_CODE);
+	}
+
+	@Test
+	@DisplayName("OAuth 계정 연동 실패 - 이미 연동된 계정")
+	void OAuth_계정_연동_실패_이미_연동된_계정() throws Exception {
+		// given
+		final String AUTH_CODE = "auth_code";
+		final String PROVIDER = "kakao";
+		final Long USER_ID = 1L;
+
+		CustomUserDetails customUserDetails = CustomUserDetails.builder()
+			.userId(USER_ID)
+			.userName("testuser")
+			.roleId(1L)
+			.build();
+
+		doThrow(new ApiException(ErrorCode.DUPLICATE_EMAIL))
+			.when(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.KAKAO, AUTH_CODE);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(get("/api/users/oauth/link/{provider}", PROVIDER)
+				.queryParam("code", AUTH_CODE)
+				.contentType(MediaType.APPLICATION_JSON)
+				.with(user(customUserDetails)));
+
+		// then
+		resultActions
+			.andExpect(status().isConflict())
+			.andExpect(jsonPath("$.message").value("이미 가입된 이메일입니다."));
+
+		verify(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.KAKAO, AUTH_CODE);
+	}
+
+	@Test
+	@DisplayName("OAuth 계정 연동 실패 - 다른 계정에 연결된 OAuth")
+	void OAuth_계정_연동_실패_다른_계정에_연결된_OAuth() throws Exception {
+		// given
+		final String AUTH_CODE = "auth_code";
+		final String PROVIDER = "google";
+		final Long USER_ID = 1L;
+
+		CustomUserDetails customUserDetails = CustomUserDetails.builder()
+			.userId(USER_ID)
+			.userName("testuser")
+			.roleId(1L)
+			.build();
+
+		doThrow(new ApiException(ErrorCode.DUPLICATE_EMAIL))
+			.when(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.GOOGLE, AUTH_CODE);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(get("/api/users/oauth/link/{provider}", PROVIDER)
+				.queryParam("code", AUTH_CODE)
+				.contentType(MediaType.APPLICATION_JSON)
+				.with(user(customUserDetails)));
+
+		// then
+		resultActions
+			.andExpect(status().isConflict())
+			.andExpect(jsonPath("$.message").value("이미 가입된 이메일입니다."));
+
+		verify(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.GOOGLE, AUTH_CODE);
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"kakao", "google", "github", "naver"})
+	@DisplayName("OAuth 계정 연동 - 모든 제공자 지원")
+	void OAuth_계정_연동_모든_제공자_지원(String provider) throws Exception {
+		// given
+		final String AUTH_CODE = "auth_code";
+		final Long USER_ID = 1L;
+		final OAuthProvider oAuthProvider = OAuthProvider.valueOf(provider.toUpperCase());
+
+		CustomUserDetails customUserDetails = CustomUserDetails.builder()
+			.userId(USER_ID)
+			.userName("testuser")
+			.roleId(1L)
+			.build();
+
+		doNothing().when(oAuthService).linkOAuthAccount(USER_ID, oAuthProvider, AUTH_CODE);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(get("/api/users/oauth/link/{provider}", provider)
+				.queryParam("code", AUTH_CODE)
+				.contentType(MediaType.APPLICATION_JSON)
+				.with(user(customUserDetails)));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data").value("OAuth 계정이 성공적으로 연동되었습니다."));
+
+		verify(oAuthService).linkOAuthAccount(USER_ID, oAuthProvider, AUTH_CODE);
 	}
 }

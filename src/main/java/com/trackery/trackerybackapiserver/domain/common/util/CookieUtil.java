@@ -101,6 +101,4 @@ public class CookieUtil {
 
 		return headers;
 	}
-
-
 }
