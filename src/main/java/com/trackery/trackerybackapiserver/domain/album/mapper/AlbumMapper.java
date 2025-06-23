@@ -53,4 +53,6 @@ public interface AlbumMapper {
 	void deleteAlbumImageByAlbumImageId(Long albumImageId);
 
 	void deleteAlbumByAlbumId(Long albumId);
+
+	void setThumbnail(@Param("albumId") Long albumId, @Param("imageId") Long imageId);
 }

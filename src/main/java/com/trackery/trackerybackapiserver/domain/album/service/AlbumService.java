@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,8 @@ import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumSimpled
 import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
+import com.trackery.trackerybackapiserver.domain.album.enums.AlbumImageEditOperation;
+import com.trackery.trackerybackapiserver.domain.album.event.AlbumImageEditEvent;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
@@ -50,6 +53,7 @@ public class AlbumService {
 	private final AlbumMapper albumMapper;
 	private final ImageMapper imageMapper;
 	private final ImageService imageService;
+	private final ApplicationEventPublisher applicationEventPublisher;
 
 	/**
 	 * 앨범 생성 기능
@@ -82,12 +86,14 @@ public class AlbumService {
 	 * @param userId : 유저 ID
 	 * @param albumId : 앨범 ID
 	 */
-	public void findAlbumAndCheckPermission(Long userId, Long albumId) {
+	public Album findAlbumAndCheckPermission(Long userId, Long albumId) {
 		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM));
 
 		if (!album.getUserId().equals(userId)) {
 			throw new ApiException(ErrorCode.FORBIDDEN);
 		}
+
+		return album;
 	}
 
 	/**
@@ -104,7 +110,7 @@ public class AlbumService {
 	 * @return 앨범 ID, 추가 성공한 이미지 ID, 실패한 이미지 ID, 이유를 담은 DTO
 	 */
 	public AlbumImageEditResponseDto addImageIntoAlbum(Long userId, Long albumId, List<Long> imageIdList) {
-		findAlbumAndCheckPermission(userId, albumId);
+		Album album = findAlbumAndCheckPermission(userId, albumId);
 
 		Set<Long> succeededImageIds = new HashSet<>();
 		Map<Long, String> failedImageIds = new HashMap<>();
@@ -129,13 +135,19 @@ public class AlbumService {
 			}
 		});
 
-		return AlbumImageEditResponseDto.builder()
+		AlbumImageEditResponseDto result = AlbumImageEditResponseDto.builder()
 			.albumId(albumId)
 			.succeededImageCount(succeededImageIds.size())
 			.failedImageCount(failedImageIds.size())
 			.succeededImageIds(succeededImageIds)
 			.failedImageIds(failedImageIds)
 			.build();
+
+		applicationEventPublisher.publishEvent(
+			new AlbumImageEditEvent(album, result, AlbumImageEditOperation.ADD)
+		);
+
+		return result;
 	}
 
 	/**
@@ -151,7 +163,7 @@ public class AlbumService {
 	 * @return 앨범 ID, 삭제 성공한 이미지 ID, 실패한 이미지 ID, 이유를 담은 DTO
 	 */
 	public AlbumImageEditResponseDto deleteImageFromAlbum(Long userId, Long albumId, List<Long> imageIdList) {
-		findAlbumAndCheckPermission(userId, albumId);
+		Album album = findAlbumAndCheckPermission(userId, albumId);
 
 		Set<Long> succeededImageIds = new HashSet<>();
 		Map<Long, String> failedImageIds = new HashMap<>();
@@ -171,13 +183,17 @@ public class AlbumService {
 			}
 		});
 
-		return AlbumImageEditResponseDto.builder()
+		AlbumImageEditResponseDto result = AlbumImageEditResponseDto.builder()
 			.albumId(albumId)
 			.succeededImageCount(succeededImageIds.size())
 			.failedImageCount(failedImageIds.size())
 			.succeededImageIds(succeededImageIds)
 			.failedImageIds(failedImageIds)
 			.build();
+
+		applicationEventPublisher.publishEvent(new AlbumImageEditEvent(album, result, AlbumImageEditOperation.DELETE));
+
+		return result;
 	}
 
 	/**
@@ -186,6 +202,7 @@ public class AlbumService {
 	 * @param albumId 앨범 ID
 	 * @return 앨범 정보, 앨범에 포함돼있는 이미지 정보를 담은 DTO
 	 */
+	@Transactional(readOnly = true)
 	public AlbumDetailedResponseDto getAlbumDetailedInfo(Long userId, Long albumId) {
 		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM));
 
@@ -218,21 +235,28 @@ public class AlbumService {
 
 	/**
 	 * 내 앨범 간단 조회
-	 * 내가 만든 앨범의 제목, 앨범에 포함된 이미지 수, 공개 여부를 알려주는 메서드입니다.
+	 * 내가 만든 앨범의 제목, 앨범에 포함된 이미지 수, 공개 여부, 썸네일 이미지를 알려주는 메서드입니다.
 	 * @param userId 조회하고자 하는 유저 ID
 	 * @return DTO
 	 */
+	@Transactional(readOnly = true)
 	public MyAlbumResponseDto getMyAlbumSimpleInfo(Long userId) {
 		List<Album> albumList = albumMapper.findAlbumsByUserId(userId);
 
 		List<AlbumSimpledResponseDto> albumSimpledResponseDtoList = albumList.stream().map(album -> {
 			List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(album.getAlbumId());
+			String thumbnailImageUrl = null;
+
+			if (album.getThumbnailImageId() != null) {
+				thumbnailImageUrl = imageService.fetchS3PresignedUrlByImageId(album.getThumbnailImageId());
+			}
 
 			return AlbumSimpledResponseDto.builder()
 				.albumId(album.getAlbumId())
 				.albumTitle(album.getAlbumTitle())
 				.albumImageCount(albumImageList.size())
 				.isPublic(album.getIsPublic())
+				.albumThumbnailUrl(thumbnailImageUrl)
 				.build();
 		}).toList();
 

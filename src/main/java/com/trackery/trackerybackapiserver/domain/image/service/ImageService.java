@@ -207,7 +207,7 @@ public class ImageService {
 				Long existingCoordPointId = existingImage.getCoordPoint().getCoordinatePointId();
 				locationService.updateCoordinatePoint(existingCoordPointId, coordinateDto);
 
-				log.info("이미지 위치 정보 수정 완료 - imageId: {}, coord_point_id: {}, 새로운 위치: {}, {}", 
+				log.info("이미지 위치 정보 수정 완료 - imageId: {}, coord_point_id: {}, 새로운 위치: {}, {}",
 					imageId, existingCoordPointId, updateRequest.latitude(), updateRequest.longitude());
 			} catch (Exception e) {
 				log.error("이미지 위치 정보 수정 실패 - imageId: {}, 에러: {}", imageId, e.getMessage());
@@ -239,5 +239,17 @@ public class ImageService {
 		}
 
 		log.info("이미지 삭제 완료 - imageId: {}, userId: {}", imageId, userId);
+	}
+
+	/**
+	 * 썸네일 이미지, 유저 프로필 사진과 같이 이미지 전체의 정보가 필요없고 이미지 S3 URL만 필요할 때 사용하는 메서드입니다.
+	 * @param imageId 이미지 ID
+	 * @return S3 Presigned URL
+	 */
+	public String fetchS3PresignedUrlByImageId(Long imageId) {
+		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
+
+		return imageS3Service.generatePreSignedGetUrl(image.getImageFile());
 	}
 }

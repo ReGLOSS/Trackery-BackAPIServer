@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
@@ -48,6 +49,9 @@ class AlbumServiceTest {
 
 	@Mock
 	private ImageService imageService;
+
+	@Mock
+	private ApplicationEventPublisher applicationEventPublisher;
 
 	@InjectMocks
 	private AlbumService albumService;
@@ -408,19 +412,24 @@ class AlbumServiceTest {
 	}
 
 	@Nested
-	@DisplayName("getMyAlbumSimpleInfo 메소드 테스트")
+	@DisplayName("앨범 목록 조회 테스트")
 	class GetMyAlbumSimpleInfoTest {
 
 		@Test
 		@DisplayName("성공 - 사용자의 앨범 목록을 성공적으로 가져옴")
 		void testGetMyAlbumSimpleInfo_Success() {
+			String album1ThumbnailUrl = "https://s3.album1.thumbnailImage.jpg";
+			String album2ThumbnailUrl = "https://s3.album2.thumbnailImage.jpg";
+
 			Album album1 = Album.builder().userId(USER_ID).isPublic(1).build();
 			ReflectionTestUtils.setField(album1, "albumId", 101L);
 			ReflectionTestUtils.setField(album1, "albumTitle", "Album 1");
+			ReflectionTestUtils.setField(album1, "thumbnailImageId", 1L);
 
 			Album album2 = Album.builder().userId(USER_ID).isPublic(0).build();
 			ReflectionTestUtils.setField(album2, "albumId", 102L);
 			ReflectionTestUtils.setField(album2, "albumTitle", "Album 2");
+			ReflectionTestUtils.setField(album2, "thumbnailImageId", 2L);
 
 			when(albumMapper.findAlbumsByUserId(USER_ID)).thenReturn(List.of(album1, album2));
 			when(albumMapper.findAlbumImagesByAlbumId(101L)).thenReturn(List.of(
@@ -428,6 +437,8 @@ class AlbumServiceTest {
 				AlbumImage.builder().albumId(101L).imageId(2L).build()
 			));
 			when(albumMapper.findAlbumImagesByAlbumId(102L)).thenReturn(List.of());
+			when(imageService.fetchS3PresignedUrlByImageId(album1.getThumbnailImageId())).thenReturn(album1ThumbnailUrl);
+			when(imageService.fetchS3PresignedUrlByImageId(album2.getThumbnailImageId())).thenReturn(album2ThumbnailUrl);
 
 			MyAlbumResponseDto response = albumService.getMyAlbumSimpleInfo(USER_ID);
 
@@ -439,10 +450,12 @@ class AlbumServiceTest {
 			assertEquals("Album 1", response.getAlbumList().get(0).getAlbumTitle());
 			assertEquals(2, response.getAlbumList().get(0).getAlbumImageCount());
 			assertEquals(1, response.getAlbumList().get(0).getIsPublic());
+			assertEquals(album1ThumbnailUrl, response.getAlbumList().get(0).getAlbumThumbnailUrl());
 			assertEquals(102L, response.getAlbumList().get(1).getAlbumId());
 			assertEquals("Album 2", response.getAlbumList().get(1).getAlbumTitle());
 			assertEquals(0, response.getAlbumList().get(1).getAlbumImageCount());
 			assertEquals(0, response.getAlbumList().get(1).getIsPublic());
+			assertEquals(album2ThumbnailUrl, response.getAlbumList().get(1).getAlbumThumbnailUrl());
 
 			verify(albumMapper).findAlbumsByUserId(USER_ID);
 			verify(albumMapper).findAlbumImagesByAlbumId(101L);

@@ -305,6 +305,7 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.albumTitle("앨범 제목")
 			.albumImageCount(3)
 			.isPublic(1)
+			.albumThumbnailUrl("https://s3.album1.thumbnailImage.jpg")
 			.build();
 
 		MyAlbumResponseDto myAlbumResponseDto = MyAlbumResponseDto.builder()
@@ -327,7 +328,8 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data.albumList").isNotEmpty())
 			.andExpect(jsonPath("$.data.albumList[0].albumId").value(1))
 			.andExpect(jsonPath("$.data.albumList[0].albumImageCount").value(3))
-			.andExpect(jsonPath("$.data.albumList[0].isPublic").value(1));
+			.andExpect(jsonPath("$.data.albumList[0].isPublic").value(1))
+			.andExpect(jsonPath("$.data.albumList[0].albumThumbnailUrl").value("https://s3.album1.thumbnailImage.jpg"));
 
 		result.andDo(document("get-my-album-simple-info",
 				responseFields(
@@ -339,7 +341,8 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("data.albumList[].albumId").description("앨범 ID"),
 					fieldWithPath("data.albumList[].albumTitle").description("앨범 제목"),
 					fieldWithPath("data.albumList[].albumImageCount").description("앨범 이미지 개수"),
-					fieldWithPath("data.albumList[].isPublic").description("공개 여부")
+					fieldWithPath("data.albumList[].isPublic").description("공개 여부"),
+					fieldWithPath("data.albumList[0].albumThumbnailUrl").description("앨범 썸네일 이미지 URL")
 				)
 			)
 		);
