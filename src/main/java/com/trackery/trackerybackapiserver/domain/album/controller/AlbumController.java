@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageEditRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
@@ -22,6 +24,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumRespo
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 import jakarta.validation.Valid;
@@ -97,14 +100,43 @@ public class AlbumController {
 
 	/**
 	 * 앨범 상세 정보 조회 API
+	 * @deprecated 앨범 이미지 페이지네이션을 구현하면서 메타데이터 조회 API, 이미지 조회 API로 분리했습니다. 프론트엔드 적용 후 삭제 예정입니다.
 	 * @param albumId 앨범 ID
 	 * @param userDetails 인증된 유저 정보
 	 * @return 앨범 정보, 앨범에 있는 이미지를 담은 상세 정보 DTO
 	 */
+	@Deprecated(forRemoval = true)
 	@GetMapping("/{albumId}")
 	public ResponseEntity<ApiResponse<AlbumDetailedResponseDto>> getAlbumDetailedInfo(@PathVariable Long albumId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		AlbumDetailedResponseDto result = albumService.getAlbumDetailedInfo(userDetails.getUserId(), albumId);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
+	}
+
+	/**
+	 * 앨범 상세 정보 메타데이터 조회 API
+	 * @param albumId 조회할 앨범 ID
+	 * @param userDetails 인증된 유저 정보
+	 * @return 앨범 정보를 담은 상세 정보 DTO
+	 */
+	@GetMapping("/v2/{albumId}")
+	public ResponseEntity<ApiResponse<AlbumDetailedResponseDto>> getAlbumMetadata(@PathVariable Long albumId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+		AlbumDetailedResponseDto result = albumService.getAlbumMetadata(userDetails.getUserId(), albumId);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
+	}
+
+	/**
+	 * 앨범 이미지 조회 API
+	 * @param albumId 조회할 앨범 ID
+	 * @param pageNum 페이지 번호 (기본값 : 1)
+	 * @param pageSize 페이지 크기 (기본값 : 10)
+	 * @return 페이지네이션된 이미지 DTO 리스트
+	 */
+	@GetMapping("/{albumId}/images")
+	public ResponseEntity<ApiResponse<PageInfo<ImageDto>>> getAlbumImages(@PathVariable Long albumId,
+		@RequestParam(defaultValue = "1") int pageNum, @RequestParam(defaultValue = "10") int pageSize) {
+		PageInfo<ImageDto> result = albumService.getAlbumImages(albumId, pageNum, pageSize);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 
