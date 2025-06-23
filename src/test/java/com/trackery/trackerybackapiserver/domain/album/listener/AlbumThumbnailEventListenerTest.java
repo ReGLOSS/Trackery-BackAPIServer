@@ -76,22 +76,17 @@ class AlbumThumbnailEventListenerTest {
 
 	@Test
 	void 이미지_삭제_이벤트_처리_성공() {
-		// given
 		doNothing().when(albumThumbnailService).handleAlbumThumbnailChange(album, dto, AlbumImageEditOperation.DELETE);
 
-		// when
 		albumThumbnailEventListener.handleAlbumEditEvent(deleteEvent);
 
-		// then
 		verify(albumThumbnailService, times(1)).handleAlbumThumbnailChange(album, dto, AlbumImageEditOperation.DELETE);
 	}
 
 	@Test
 	void 서비스_메서드에_올바른_파라미터_전달_확인() {
-		// when
 		albumThumbnailEventListener.handleAlbumEditEvent(addEvent);
 
-		// then
 		verify(albumThumbnailService).handleAlbumThumbnailChange(
 			eq(album),
 			eq(dto),
