@@ -109,6 +109,7 @@ public class ImageService {
 	 * @param pageSize 페이지 사이즈
 	 * @return 페이지네이션된 이미지 DTO 리스트
 	 */
+	@SuppressWarnings("squid:S3252")
 	public PageInfo<ImageDto> getImageListByUserIdV2(Long userId, int pageNum, int pageSize) {
 		PageHelper.startPage(pageNum, pageSize);
 

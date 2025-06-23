@@ -12,6 +12,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
@@ -198,11 +200,13 @@ public class AlbumService {
 
 	/**
 	 * 앨범 상세 정보 조회
+	 * @deprecated 앨범 메타데이터 조회 + 이미지 페이지네이션 조회 두 개로 나누기 위해 삭제 예정입니다.
 	 * @param userId 유저 ID
 	 * @param albumId 앨범 ID
 	 * @return 앨범 정보, 앨범에 포함돼있는 이미지 정보를 담은 DTO
 	 */
 	@Transactional(readOnly = true)
+	@Deprecated(since = "2025-06-23")
 	public AlbumDetailedResponseDto getAlbumDetailedInfo(Long userId, Long albumId) {
 		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM));
 
@@ -220,6 +224,57 @@ public class AlbumService {
 		List<ImageDto> imageDtoList = imageList.stream().map(imageService::convertImageToImageDto).toList();
 
 		return AlbumDetailedResponseDto.of(album, imageDtoList);
+	}
+
+	/*
+	앨범 상세 정보 조회
+	 */
+	public AlbumDetailedResponseDto getAlbumMetadata(Long userId, Long albumId) {
+		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
+		);
+
+		if (album.getIsPublic() == 0 && !userId.equals(album.getUserId())) {
+			throw new ApiException(ErrorCode.FORBIDDEN);
+		}
+
+		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(albumId);
+
+		return AlbumDetailedResponseDto.builder()
+			.albumId(album.getAlbumId())
+			.createdUserId(album.getUserId())
+			.albumTitle(album.getAlbumTitle())
+			.albumDescription(album.getAlbumDescription())
+			.isPublic(album.getIsPublic())
+			.imageCount(albumImageList.size())
+			.build();
+	}
+
+	/*
+	앨범 이미지 조회
+	 */
+	@SuppressWarnings("squid:S3252")
+	public PageInfo<ImageDto> getAlbumImages(Long userId, Long albumId, int pageNum, int pageSize) {
+		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
+		);
+
+		if (album.getIsPublic() == 0 && !userId.equals(album.getUserId())) {
+			throw new ApiException(ErrorCode.FORBIDDEN);
+		}
+
+		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(albumId);
+
+		List<ImageDto> albumImageDtoList = albumImageList.stream()
+			.map(albumImage -> imageMapper.findImageByImageId(albumImage.getImageId()).orElseThrow(
+				() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
+			))
+			.map(imageService::convertImageToImageDto)
+			.toList();
+
+		PageHelper.startPage(pageNum, pageSize);
+
+		return new PageInfo<>(albumImageDtoList);
 	}
 
 	/**
