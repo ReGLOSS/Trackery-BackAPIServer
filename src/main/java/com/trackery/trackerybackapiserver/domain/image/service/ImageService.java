@@ -14,8 +14,6 @@ import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
-import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
-import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
 
@@ -145,5 +143,17 @@ public class ImageService {
 		return images.stream()
 			.map(this::convertImageToImageDto)
 			.toList();
+	}
+
+	/**
+	 * 썸네일 이미지, 유저 프로필 사진과 같이 이미지 전체의 정보가 필요없고 이미지 S3 URL만 필요할 때 사용하는 메서드입니다.
+	 * @param imageId 이미지 ID
+	 * @return S3 Presigned URL
+	 */
+	public String fetchS3PresignedUrlByImageId(Long imageId) {
+		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
+
+		return imageS3Service.generatePreSignedGetUrl(image.getImageFile());
 	}
 }

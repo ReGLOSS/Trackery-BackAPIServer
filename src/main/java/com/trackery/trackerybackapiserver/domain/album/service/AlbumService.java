@@ -235,7 +235,7 @@ public class AlbumService {
 
 	/**
 	 * 내 앨범 간단 조회
-	 * 내가 만든 앨범의 제목, 앨범에 포함된 이미지 수, 공개 여부를 알려주는 메서드입니다.
+	 * 내가 만든 앨범의 제목, 앨범에 포함된 이미지 수, 공개 여부, 썸네일 이미지를 알려주는 메서드입니다.
 	 * @param userId 조회하고자 하는 유저 ID
 	 * @return DTO
 	 */
@@ -245,12 +245,18 @@ public class AlbumService {
 
 		List<AlbumSimpledResponseDto> albumSimpledResponseDtoList = albumList.stream().map(album -> {
 			List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(album.getAlbumId());
+			String thumbnailImageUrl = null;
+
+			if (album.getThumbnailImageId() != null) {
+				thumbnailImageUrl = imageService.fetchS3PresignedUrlByImageId(album.getThumbnailImageId());
+			}
 
 			return AlbumSimpledResponseDto.builder()
 				.albumId(album.getAlbumId())
 				.albumTitle(album.getAlbumTitle())
 				.albumImageCount(albumImageList.size())
 				.isPublic(album.getIsPublic())
+				.albumThumbnailUrl(thumbnailImageUrl)
 				.build();
 		}).toList();
 
