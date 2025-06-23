@@ -15,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.context.ApplicationEventPublisher;
@@ -24,7 +23,6 @@ import org.springframework.test.util.ReflectionTestUtils;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
@@ -35,9 +33,6 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
-import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
-import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
-import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
 
 @ExtendWith(MockitoExtension.class)
 class AlbumServiceTest {
@@ -282,76 +277,6 @@ class AlbumServiceTest {
 			assertTrue(response.getFailedImageIds().containsKey(5L));
 
 			verify(albumMapper, never()).insertAlbumImage(any(AlbumImage.class));
-		}
-	}
-
-	@Nested
-	@DisplayName("앨범 상세 정보 조회 테스트")
-	class GetAlbumDetailedInfoTest {
-		@Test
-		@DisplayName("성공")
-		void testGetAlbumDetailedInfo_Success() {
-			CoordinatePoint mockCoordPoint = mock(CoordinatePoint.class);
-
-			ReflectionTestUtils.setField(image1, "coordPoint", mockCoordPoint);
-			ReflectionTestUtils.setField(image2, "coordPoint", mockCoordPoint);
-
-			ReflectionTestUtils.setField(image1, "imageFile", "image1.jpg");
-			ReflectionTestUtils.setField(image2, "imageFile", "image2.jpg");
-
-			when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.of(album));
-			when(albumMapper.findAlbumImagesByAlbumId(ALBUM_ID)).thenReturn(
-				List.of(
-					AlbumImage.builder().albumId(ALBUM_ID).imageId(1L).build(),
-					AlbumImage.builder().albumId(ALBUM_ID).imageId(2L).build()
-				)
-			);
-
-			when(imageMapper.findImageByImageId(1L)).thenReturn(Optional.of(image1));
-			when(imageMapper.findImageByImageId(2L)).thenReturn(Optional.of(image2));
-
-			try (MockedStatic<LocationUtil> mockedLocationUtil = mockStatic(LocationUtil.class)) {
-				mockedLocationUtil.when(() -> LocationUtil.getLocationInfoByCoordinatePoint(any(CoordinatePoint.class)))
-					.thenReturn(new LocationInfoDto(37.497942, 127.027621, "서울특별시", "강남구"));
-
-				AlbumDetailedResponseDto response = albumService.getAlbumDetailedInfo(USER_ID, ALBUM_ID);
-
-				assertNotNull(response);
-				assertEquals(album.getAlbumId(), response.getAlbumId());
-				assertEquals(album.getAlbumTitle(), response.getAlbumTitle());
-				assertEquals(2, response.getImageList().size());
-				verify(albumMapper).findByAlbumId(ALBUM_ID);
-				verify(albumMapper).findAlbumImagesByAlbumId(ALBUM_ID);
-				verify(imageMapper, times(2)).findImageByImageId(anyLong());
-				verify(imageService, times(2)).convertImageToImageDto(any(Image.class));
-			}
-		}
-
-		@Test
-		@DisplayName("실패 - 앨범을 찾을 수 없음")
-		void testGetAlbumDetailedInfo_AlbumNotFound() {
-			when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.empty());
-
-			ApiException exception = assertThrows(ApiException.class,
-				() -> albumService.getAlbumDetailedInfo(USER_ID, ALBUM_ID));
-
-			assertEquals(ErrorCode.NOT_FOUND_ALBUM, exception.getErrorCode());
-			verify(albumMapper).findByAlbumId(ALBUM_ID);
-		}
-
-		@Test
-		@DisplayName("실패 - 유저가 앨범에 접근 권한이 없음")
-		void testGetAlbumDetailedInfo_ForbiddenAccessToPrivateAlbum() {
-			Album privateAlbum = Album.builder().userId(2L).isPublic(0).build();
-			ReflectionTestUtils.setField(privateAlbum, "albumId", ALBUM_ID);
-
-			when(albumMapper.findByAlbumId(ALBUM_ID)).thenReturn(Optional.of(privateAlbum));
-
-			ApiException exception = assertThrows(ApiException.class,
-				() -> albumService.getAlbumDetailedInfo(USER_ID, ALBUM_ID));
-
-			assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
-			verify(albumMapper).findByAlbumId(ALBUM_ID);
 		}
 	}
 

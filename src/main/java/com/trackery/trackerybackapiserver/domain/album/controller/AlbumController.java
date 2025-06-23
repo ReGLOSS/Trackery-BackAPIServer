@@ -1,4 +1,3 @@
-
 package com.trackery.trackerybackapiserver.domain.album.controller;
 
 import org.springframework.http.ResponseEntity;
@@ -99,27 +98,12 @@ public class AlbumController {
 	}
 
 	/**
-	 * 앨범 상세 정보 조회 API
-	 * @deprecated 앨범 이미지 페이지네이션을 구현하면서 메타데이터 조회 API, 이미지 조회 API로 분리했습니다. 프론트엔드 적용 후 삭제 예정입니다.
-	 * @param albumId 앨범 ID
-	 * @param userDetails 인증된 유저 정보
-	 * @return 앨범 정보, 앨범에 있는 이미지를 담은 상세 정보 DTO
-	 */
-	@Deprecated(forRemoval = true)
-	@GetMapping("/{albumId}")
-	public ResponseEntity<ApiResponse<AlbumDetailedResponseDto>> getAlbumDetailedInfo(@PathVariable Long albumId,
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		AlbumDetailedResponseDto result = albumService.getAlbumDetailedInfo(userDetails.getUserId(), albumId);
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
-	}
-
-	/**
 	 * 앨범 상세 정보 메타데이터 조회 API
 	 * @param albumId 조회할 앨범 ID
 	 * @param userDetails 인증된 유저 정보
 	 * @return 앨범 정보를 담은 상세 정보 DTO
 	 */
-	@GetMapping("/v2/{albumId}")
+	@GetMapping("/{albumId}")
 	public ResponseEntity<ApiResponse<AlbumDetailedResponseDto>> getAlbumMetadata(@PathVariable Long albumId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		AlbumDetailedResponseDto result = albumService.getAlbumMetadata(userDetails.getUserId(), albumId);

@@ -24,7 +24,6 @@ import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRe
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageEditRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
-import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumSimpledResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
@@ -151,55 +150,6 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 						fieldWithPath("data.succeededImageIds").description("성공한 이미지 ID 리스트"),
 						fieldWithPath("data.failedImageIds").description("실패한 이미지 ID 맵"),
 						fieldWithPath("data.failedImageIds.*").description("실패한 이미지 ID별 오류 메시지")
-					)
-				)
-			);
-	}
-
-	@Test
-	void getAlbumDetailedInfoSuccess() throws Exception {
-		Long albumId = 1L;
-
-		AlbumDetailedResponseDto responseDto = AlbumDetailedResponseDto.builder()
-			.albumId(albumId)
-			.createdUserId(customUserDetails.getUserId())
-			.albumTitle("강릉 여행")
-			.albumDescription("강릉 여행 기록")
-			.imageList(List.of())
-			.isPublic(0)
-			.imageCount(0)
-			.build();
-
-		when(albumService.getAlbumDetailedInfo(any(), eq(albumId))).thenReturn(responseDto);
-
-		ResultActions result = mockMvc.perform(get("/api/albums/{albumId}", albumId)
-			.with(user(customUserDetails)));
-
-		result
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data").exists())
-			.andExpect(jsonPath("$.data.albumId").value(1))
-			.andExpect(jsonPath("$.data.createdUserId").value(1))
-			.andExpect(jsonPath("$.data.albumTitle").value("강릉 여행"))
-			.andExpect(jsonPath("$.data.albumDescription").value("강릉 여행 기록"))
-			.andExpect(jsonPath("$.data.imageList").isArray())
-			.andExpect(jsonPath("$.data.imageList").exists());
-
-		result
-			.andDo(document("get-album-detailed-info",
-					pathParameters(
-						parameterWithName("albumId").description("앨범 ID")
-					),
-					responseFields(
-						fieldWithPath("code").description("응답 코드"),
-						fieldWithPath("message").description("응답 메시지"),
-						fieldWithPath("data.albumId").description("앨범 ID"),
-						fieldWithPath("data.createdUserId").description("앨벙을 생성한 유저 ID"),
-						fieldWithPath("data.albumTitle").description("앨범 제목"),
-						fieldWithPath("data.albumDescription").description("앨범 설명"),
-						fieldWithPath("data.isPublic").description("공개 여부").type(JsonFieldType.NUMBER),
-						fieldWithPath("data.imageCount").description("이미지 개수").type(JsonFieldType.NUMBER),
-						fieldWithPath("data.imageList").description("앨범 이미지 리스트")
 					)
 				)
 			);
