@@ -24,6 +24,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRe
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageEditRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
+import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumDetailedResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEditResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumSimpledResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
@@ -293,6 +294,50 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("data.albumList[].albumImageCount").description("앨범 이미지 개수"),
 					fieldWithPath("data.albumList[].isPublic").description("공개 여부"),
 					fieldWithPath("data.albumList[0].albumThumbnailUrl").description("앨범 썸네일 이미지 URL")
+				)
+			)
+		);
+	}
+
+	@Test
+	void getAlbumMetadataSuccess() throws Exception {
+		final Long ALBUM_ID = 16L;
+		final Long USER_ID = 1L;
+		final String TITLE = "부산 여행";
+		final String DESCRIPTION = "서면-광안리-해운대 여행";
+		final int IS_PUBLIC = 1;
+		final int IMAGE_COUNT = 3;
+		AlbumDetailedResponseDto albumDetailedResponseDto = AlbumDetailedResponseDto
+			.builder()
+			.albumId(ALBUM_ID)
+			.createdUserId(USER_ID)
+			.albumTitle(TITLE)
+			.albumDescription(DESCRIPTION)
+			.isPublic(IS_PUBLIC)
+			.imageCount(IMAGE_COUNT)
+			.build();
+
+		when(albumService.getAlbumMetadata(USER_ID, ALBUM_ID)).thenReturn(albumDetailedResponseDto);
+
+		ResultActions result = mockMvc.perform(get("/api/albums/{albumId}", ALBUM_ID)
+			.with(user(customUserDetails)));
+
+		result.andExpect(status().isOk());
+
+		result.andDo(document("get-album-metadata",
+				pathParameters(
+					parameterWithName("albumId").description("앨범 ID")
+				),
+
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.albumId").description("앨범 ID"),
+					fieldWithPath("data.createdUserId").description("앨범 생성한 유저 ID"),
+					fieldWithPath("data.albumTitle").description("앨범 제목"),
+					fieldWithPath("data.albumDescription").description("앨범 설명"),
+					fieldWithPath("data.isPublic").description("공개 여부"),
+					fieldWithPath("data.imageCount").description("이미지 장수")
 				)
 			)
 		);
