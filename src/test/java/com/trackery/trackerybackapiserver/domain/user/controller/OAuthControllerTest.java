@@ -27,6 +27,7 @@ import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
+import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUrlResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkService;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
 
@@ -62,12 +63,6 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 		final String API_PATH = "/api/users/oauth/login/";
 		final String JWT = "jwt";
 
-		OAuthLoginDto oAuthLoginDto = OAuthLoginDto.builder()
-			.provider(provider)
-			.code(AUTH_CODE)
-			.linkAccount(false)
-			.build();
-
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(false)
 			.build();
@@ -91,12 +86,6 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Test
 	void 네이버_로그인_성공() throws Exception {
 		// given
-		OAuthLoginDto oAuthLoginDto = OAuthLoginDto.builder()
-			.provider("NAVER")
-			.code("auth_code")
-			.linkAccount(false)
-			.build();
-
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(false)
 			.build();
@@ -167,15 +156,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 		// given
 		final String AUTH_CODE = "auth_code";
 		final String LINK_TOKEN = "valid-link-token";
-		final String PROVIDER = "KAKAO";
-		final String EMAIL = "test@example.com";
+		final Long USER_ID = 1L;
 		final String JWT = "jwt_token";
-
-		OAuthLinkRequestDto linkRequest = OAuthLinkRequestDto.builder()
-			.provider(PROVIDER)
-			.email(EMAIL)
-			.linkAccount(true)
-			.build();
 
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(false)
@@ -183,14 +165,14 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT);
 
-		when(oAuthLinkService.validateToken(LINK_TOKEN)).thenReturn(linkRequest);
+		when(oAuthLinkService.validateToken(LINK_TOKEN)).thenReturn(USER_ID);
 		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
 
 		// when
 		ResultActions resultActions = mockMvc
 			.perform(get("/api/users/oauth/login/kakao")
 				.queryParam("code", AUTH_CODE)
-				.queryParam("link_token", LINK_TOKEN)
+				.queryParam("linkToken", LINK_TOKEN)
 				.contentType(MediaType.APPLICATION_JSON));
 
 		// then
@@ -206,143 +188,13 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 	}
 
 	@Test
-	@DisplayName("계정 연동 토큰 생성 성공")
-	void 계정_연동_토큰_생성_성공() throws Exception {
+	@DisplayName("OAuth URL 생성 성공")
+	void OAuth_URL_생성_성공() throws Exception {
 		// given
-		final String PROVIDER = "KAKAO";
-		final String EMAIL = "test@example.com";
-		final String TOKEN = "generated-token";
-
-		OAuthLinkRequestDto requestDto = OAuthLinkRequestDto.builder()
-			.provider(PROVIDER)
-			.email(EMAIL)
-			.build();
-
-		when(oAuthLinkService.createLinkToken(PROVIDER, EMAIL)).thenReturn(TOKEN);
-
-		// when
-		ResultActions resultActions = mockMvc
-			.perform(post("/api/users/oauth/link-account")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(requestDto)));
-
-		// then
-		resultActions
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data.token").value(TOKEN))
-			.andExpect(jsonPath("$.data.provider").value(PROVIDER))
-			.andDo(document("oauth-link-success",
-				requestFields(
-					fieldWithPath("provider").description("OAuth 제공자"),
-					fieldWithPath("email").description("연결할 이메일"),
-					fieldWithPath("linkAccount").description("계정 연동 여부").optional()
-				),
-				responseFields(
-					fieldWithPath("code").description("상태 코드"),
-					fieldWithPath("message").description("응답 메시지"),
-					fieldWithPath("data.token").description("연결 토큰"),
-					fieldWithPath("data.provider").description("OAuth 제공자")
-				)
-			));
-
-		verify(oAuthLinkService).createLinkToken(PROVIDER, EMAIL);
-	}
-
-	@Test
-	@DisplayName("계정 연동 토큰 생성 실패 - 서버 오류")
-	void 계정_연동_토큰_생성_실패_서버_오류() throws Exception {
-		// given
-		final String PROVIDER = "KAKAO";
-		final String EMAIL = "test@example.com";
-
-		OAuthLinkRequestDto requestDto = OAuthLinkRequestDto.builder()
-			.provider(PROVIDER)
-			.email(EMAIL)
-			.build();
-
-		when(oAuthLinkService.createLinkToken(PROVIDER, EMAIL))
-			.thenThrow(new RuntimeException("서버 내부 오류"));
-
-		// when
-		ResultActions resultActions = mockMvc
-			.perform(post("/api/users/oauth/link-account")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(requestDto)));
-
-		// then
-		resultActions
-			.andExpect(status().isInternalServerError());
-	}
-
-	@Test
-	@DisplayName("계정 연동 토큰 생성 실패 - API 예외")
-	void 계정_연동_토큰_생성_실패_API_예외() throws Exception {
-		// given
-		final String PROVIDER = "INVALID_PROVIDER";
-		final String EMAIL = "test@example.com";
-
-		OAuthLinkRequestDto requestDto = OAuthLinkRequestDto.builder()
-			.provider(PROVIDER)
-			.email(EMAIL)
-			.build();
-
-		when(oAuthLinkService.createLinkToken(PROVIDER, EMAIL))
-			.thenThrow(new ApiException(ErrorCode.BAD_REQUEST));
-
-		// when
-		ResultActions resultActions = mockMvc
-			.perform(post("/api/users/oauth/link-account")
-				.contentType(MediaType.APPLICATION_JSON)
-				.content(objectMapper.writeValueAsString(requestDto)));
-
-		// then
-		resultActions
-			.andExpect(status().isBadRequest());
-	}
-
-	@Test
-	@DisplayName("링크 토큰 검증 실패시 일반 로그인 처리")
-	void 링크_토큰_검증_실패시_일반_로그인_처리() throws Exception {
-		// given
-		final String AUTH_CODE = "auth_code";
-		final String INVALID_LINK_TOKEN = "invalid-token";
-		final String JWT = "jwt_token";
-
-		OAuthResponseDto responseDto = OAuthResponseDto.builder()
-			.isExistingEmail(false)
-			.build();
-
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT);
-
-		when(oAuthLinkService.validateToken(INVALID_LINK_TOKEN))
-			.thenThrow(new ApiException(ErrorCode.UNAUTHORIZED));
-		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
-
-		// when
-		ResultActions resultActions = mockMvc
-			.perform(get("/api/users/oauth/login/kakao")
-				.queryParam("code", AUTH_CODE)
-				.queryParam("link_token", INVALID_LINK_TOKEN)
-				.contentType(MediaType.APPLICATION_JSON));
-
-		// then
-		resultActions
-			.andExpect(status().isOk())
-			.andExpect(cookie().exists("accessToken"))
-			.andExpect(jsonPath("$.data.existingEmail").value(false));
-
-		verify(oAuthLinkService).validateToken(INVALID_LINK_TOKEN);
-		// 검증 실패 시에도 로그인 처리는 정상 진행
-		verify(oAuthService).processOAuthLogin(any(OAuthLoginDto.class));
-	}
-
-	@Test
-	@DisplayName("OAuth 계정 연동 성공")
-	void OAuth_계정_연동_성공() throws Exception {
-		// given
-		final String AUTH_CODE = "auth_code";
 		final String PROVIDER = "kakao";
 		final Long USER_ID = 1L;
+		final String LINK_TOKEN = "generated-link-token";
+		final String AUTH_URL = "https://kauth.kakao.com/oauth/authorize?client_id=test&redirect_uri=test&state=link_" + LINK_TOKEN;
 
 		CustomUserDetails customUserDetails = CustomUserDetails.builder()
 			.userId(USER_ID)
@@ -350,129 +202,41 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.roleId(1L)
 			.build();
 
-		doNothing().when(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.KAKAO, AUTH_CODE);
+		OAuthUrlResponseDto urlResponse = OAuthUrlResponseDto.builder()
+			.authUrl(AUTH_URL)
+			.provider(PROVIDER.toUpperCase())
+			.state("link_" + LINK_TOKEN)
+			.build();
+
+		when(oAuthLinkService.createLinkToken(PROVIDER.toUpperCase(), USER_ID)).thenReturn(LINK_TOKEN);
+		when(oAuthService.generateAuthUrlWithToken(OAuthProvider.KAKAO, LINK_TOKEN)).thenReturn(urlResponse);
 
 		// when
 		ResultActions resultActions = mockMvc
-			.perform(get("/api/users/oauth/link/{provider}", PROVIDER)
-				.queryParam("code", AUTH_CODE)
+			.perform(post("/api/users/oauth/link/{provider}/url", PROVIDER)
 				.contentType(MediaType.APPLICATION_JSON)
 				.with(user(customUserDetails)));
 
 		// then
 		resultActions
 			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data").value("OAuth 계정이 성공적으로 연동되었습니다."))
-			.andDo(document("oauth-account-link-success",
+			.andExpect(jsonPath("$.data.authUrl").value(AUTH_URL))
+			.andExpect(jsonPath("$.data.provider").value(PROVIDER.toUpperCase()))
+			.andExpect(jsonPath("$.data.state").value("link_" + LINK_TOKEN))
+			.andDo(document("oauth-url-generation",
 				pathParameters(
 					parameterWithName("provider").description("OAuth 제공자 (kakao, google, github, naver)")
 				),
-				queryParameters(
-					parameterWithName("code").description("OAuth 인증 코드")
-				),
 				responseFields(
 					fieldWithPath("code").description("상태 코드"),
 					fieldWithPath("message").description("응답 메시지"),
-					fieldWithPath("data").description("연동 성공 메시지")
+					fieldWithPath("data.authUrl").description("OAuth 인증 URL"),
+					fieldWithPath("data.provider").description("OAuth 제공자"),
+					fieldWithPath("data.state").description("상태 값")
 				)
 			));
 
-		verify(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.KAKAO, AUTH_CODE);
-	}
-
-	@Test
-	@DisplayName("OAuth 계정 연동 실패 - 이미 연동된 계정")
-	void OAuth_계정_연동_실패_이미_연동된_계정() throws Exception {
-		// given
-		final String AUTH_CODE = "auth_code";
-		final String PROVIDER = "kakao";
-		final Long USER_ID = 1L;
-
-		CustomUserDetails customUserDetails = CustomUserDetails.builder()
-			.userId(USER_ID)
-			.userName("testuser")
-			.roleId(1L)
-			.build();
-
-		doThrow(new ApiException(ErrorCode.DUPLICATE_EMAIL))
-			.when(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.KAKAO, AUTH_CODE);
-
-		// when
-		ResultActions resultActions = mockMvc
-			.perform(get("/api/users/oauth/link/{provider}", PROVIDER)
-				.queryParam("code", AUTH_CODE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.with(user(customUserDetails)));
-
-		// then
-		resultActions
-			.andExpect(status().isConflict())
-			.andExpect(jsonPath("$.message").value("이미 가입된 이메일입니다."));
-
-		verify(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.KAKAO, AUTH_CODE);
-	}
-
-	@Test
-	@DisplayName("OAuth 계정 연동 실패 - 다른 계정에 연결된 OAuth")
-	void OAuth_계정_연동_실패_다른_계정에_연결된_OAuth() throws Exception {
-		// given
-		final String AUTH_CODE = "auth_code";
-		final String PROVIDER = "google";
-		final Long USER_ID = 1L;
-
-		CustomUserDetails customUserDetails = CustomUserDetails.builder()
-			.userId(USER_ID)
-			.userName("testuser")
-			.roleId(1L)
-			.build();
-
-		doThrow(new ApiException(ErrorCode.DUPLICATE_EMAIL))
-			.when(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.GOOGLE, AUTH_CODE);
-
-		// when
-		ResultActions resultActions = mockMvc
-			.perform(get("/api/users/oauth/link/{provider}", PROVIDER)
-				.queryParam("code", AUTH_CODE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.with(user(customUserDetails)));
-
-		// then
-		resultActions
-			.andExpect(status().isConflict())
-			.andExpect(jsonPath("$.message").value("이미 가입된 이메일입니다."));
-
-		verify(oAuthService).linkOAuthAccount(USER_ID, OAuthProvider.GOOGLE, AUTH_CODE);
-	}
-
-	@ParameterizedTest
-	@ValueSource(strings = {"kakao", "google", "github", "naver"})
-	@DisplayName("OAuth 계정 연동 - 모든 제공자 지원")
-	void OAuth_계정_연동_모든_제공자_지원(String provider) throws Exception {
-		// given
-		final String AUTH_CODE = "auth_code";
-		final Long USER_ID = 1L;
-		final OAuthProvider oAuthProvider = OAuthProvider.valueOf(provider.toUpperCase());
-
-		CustomUserDetails customUserDetails = CustomUserDetails.builder()
-			.userId(USER_ID)
-			.userName("testuser")
-			.roleId(1L)
-			.build();
-
-		doNothing().when(oAuthService).linkOAuthAccount(USER_ID, oAuthProvider, AUTH_CODE);
-
-		// when
-		ResultActions resultActions = mockMvc
-			.perform(get("/api/users/oauth/link/{provider}", provider)
-				.queryParam("code", AUTH_CODE)
-				.contentType(MediaType.APPLICATION_JSON)
-				.with(user(customUserDetails)));
-
-		// then
-		resultActions
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data").value("OAuth 계정이 성공적으로 연동되었습니다."));
-
-		verify(oAuthService).linkOAuthAccount(USER_ID, oAuthProvider, AUTH_CODE);
+		verify(oAuthLinkService).createLinkToken(PROVIDER.toUpperCase(), USER_ID);
+		verify(oAuthService).generateAuthUrlWithToken(OAuthProvider.KAKAO, LINK_TOKEN);
 	}
 }

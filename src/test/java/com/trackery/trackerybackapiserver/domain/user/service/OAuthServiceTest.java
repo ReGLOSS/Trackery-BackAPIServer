@@ -13,9 +13,11 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.trackery.trackerybackapiserver.config.OAuthProperties;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.client.OAuthClient;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUrlResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
@@ -35,6 +37,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 3. 3.        inari       최초 생성
+ * 25. 6. 24.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
  */
 @ExtendWith(MockitoExtension.class)
 class OAuthServiceTest {
@@ -56,6 +59,9 @@ class OAuthServiceTest {
 
 	@Mock
 	private OAuthClient oAuthClient;
+
+	@Mock
+	private OAuthProperties oAuthProperties;
 
 	private OAuthLoginDto oAuthLoginDto;
 	private OAuthUserInfoDto oAuthUserInfoDto;
@@ -212,5 +218,83 @@ class OAuthServiceTest {
 		verify(oAuthMapper).insertOAuth(any(OAuth.class));
 		verify(userRoleMapper).findByUserId(anyLong());
 		verify(jwtService).generateAccessToken(anyLong(), anyString(), anyLong());
+	}
+
+	@Test
+	void OAuth_로그인_linkToken_기반_연동_성공() {
+		// given
+		oAuthLoginDto = OAuthLoginDto.builder()
+			.provider("KAKAO")
+			.code("auth_code")
+			.linkAccount(true)
+			.linkUserId(1L)
+			.build();
+
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(), any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
+		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.empty());
+		when(oAuthMapper.findByUserIdAndProvider(anyLong(), anyString())).thenReturn(Optional.empty());
+		when(userMapper.findByUserId(anyLong())).thenReturn(Optional.of(user));
+		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
+		when(jwtService.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt_token");
+
+		// when
+		OAuthService.OAuthLoginResult result = oAuthService.processOAuthLogin(oAuthLoginDto);
+
+		// then
+		assertNotNull(result);
+		assertEquals("jwt_token", result.getJwtToken());
+		assertFalse(result.getResponseDto().isExistingEmail());
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
+		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
+		verify(oAuthMapper).findByUserIdAndProvider(anyLong(), anyString());
+		verify(userMapper).findByUserId(anyLong());
+		verify(oAuthMapper).insertOAuth(any(OAuth.class));
+		verify(userRoleMapper).findByUserId(anyLong());
+		verify(jwtService).generateAccessToken(anyLong(), anyString(), anyLong());
+	}
+
+	@Test
+	void generateAuthUrlWithToken_카카오_성공() {
+		// given
+		OAuthProvider provider = OAuthProvider.KAKAO;
+		String linkToken = "test-link-token";
+		String baseUrl = "https://kauth.kakao.com/oauth/authorize?client_id=test&redirect_uri=test";
+
+		OAuthProperties.ProviderProperties providerProps = mock(OAuthProperties.ProviderProperties.class);
+		when(providerProps.getAuthUri()).thenReturn(baseUrl);
+		when(oAuthProperties.getKakao()).thenReturn(providerProps);
+
+		// when
+		OAuthUrlResponseDto result = oAuthService.generateAuthUrlWithToken(provider, linkToken);
+
+		// then
+		assertNotNull(result);
+		assertEquals("KAKAO", result.getProvider());
+		assertEquals("link_" + linkToken, result.getState());
+		assertTrue(result.getAuthUrl().contains("state=link_" + linkToken));
+	}
+
+	@Test
+	void generateAuthUrlWithToken_네이버_성공() {
+		// given
+		OAuthProvider provider = OAuthProvider.NAVER;
+		String linkToken = "test-link-token";
+		String baseUrl = "https://nid.naver.com/oauth2.0/authorize?client_id=test&redirect_uri=test&state=random_state";
+
+		OAuthProperties.ProviderProperties providerProps = mock(OAuthProperties.ProviderProperties.class);
+		when(providerProps.getAuthUri()).thenReturn(baseUrl);
+		when(providerProps.getState()).thenReturn("random_state");
+		when(oAuthProperties.getNaver()).thenReturn(providerProps);
+
+		// when
+		OAuthUrlResponseDto result = oAuthService.generateAuthUrlWithToken(provider, linkToken);
+
+		// then
+		assertNotNull(result);
+		assertEquals("NAVER", result.getProvider());
+		assertEquals("random_state_" + linkToken, result.getState());
+		assertTrue(result.getAuthUrl().contains("state=random_state_" + linkToken));
 	}
 }
