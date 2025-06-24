@@ -378,6 +378,10 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 		result.andExpect(status().isOk());
 
 		result.andDo(document("get-album-images",
+			queryParameters(
+				PaginationDocumentationUtils.getPageableQueryParameters()
+			),
+
 			responseFields(
 				fieldWithPath("code").description("응답 코드"),
 				fieldWithPath("message").description("응답 메시지"),

@@ -1,8 +1,10 @@
 package com.trackery.trackerybackapiserver.domain.common.util;
 
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
+import static org.springframework.restdocs.request.RequestDocumentation.*;
 
 import org.springframework.restdocs.payload.FieldDescriptor;
+import org.springframework.restdocs.request.ParameterDescriptor;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.common.util
@@ -35,6 +37,13 @@ public class PaginationDocumentationUtils {
 			fieldWithPath("data.navigatepageNums").description("네비게이션 페이지 번호 배열"),
 			fieldWithPath("data.navigateFirstPage").description("네비게이션 첫 페이지"),
 			fieldWithPath("data.navigateLastPage").description("네비게이션 마지막 페이지")
+		};
+	}
+
+	public static ParameterDescriptor[] getPageableQueryParameters() {
+		return new ParameterDescriptor[] {
+			parameterWithName("pageNum").description("페이지 번호 (기본값 : 1)"),
+			parameterWithName("pageSize").description("페이지 크기 (기본값 : 10)")
 		};
 	}
 }
