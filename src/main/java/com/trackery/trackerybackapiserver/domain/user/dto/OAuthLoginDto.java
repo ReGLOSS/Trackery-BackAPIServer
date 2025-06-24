@@ -34,4 +34,10 @@ public class OAuthLoginDto {
 	 * 기존 이메일 계정과 연동 요청시 true, 새 계정 생성 또는 취소시 false를 리턴합니다.
 	 */
 	private boolean linkAccount;
+
+	/**
+	 * 연동할 사용자 ID입니다.
+	 * link_token에서 추출한 사용자 ID로, 계정 연동 시 사용됩니다.
+	 */
+	private Long linkUserId;
 }
