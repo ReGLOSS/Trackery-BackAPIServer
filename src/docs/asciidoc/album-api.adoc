@@ -60,15 +60,28 @@ include::{snippets}/delete-images-from-album/response-fields.adoc[]
 === 앨범 상세 정보 조회 API
 ==== GET /api/albums/{앨범 ID}
 
-앨범의 정보와 앨범에 포함돼있는 이미지를 불러오는 API입니다. 이미지 응답 데이터 형식은 이미지 API 문서를 참고 바랍니다.
+앨범의 상세 정보를 조회할 수 있는 API입니다.
 
 ===== 요청
-include::{snippets}/get-album-detailed-info/http-request.adoc[]
+include::{snippets}/get-album-metadata/http-request.adoc[]
 
 ===== 응답
-include::{snippets}/get-album-detailed-info/http-response.adoc[]
-include::{snippets}/get-album-detailed-info/response-fields.adoc[]
+include::{snippets}/get-album-metadata/http-response.adoc[]
+include::{snippets}/get-album-metadata/response-fields.adoc[]
 '''
+
+=== 앨범 이미지 조회 API
+==== GET /api/albums/{앨범 ID}/images
+
+앨범에 포함된 이미지를 조회할 수 있는 API입니다.
+
+===== 요청
+include::{snippets}/get-album-images/http-request.adoc[]
+include::{snippets}/get-album-images/query-parameters.adoc[]
+
+===== 응답
+include::{snippets}/get-album-images/http-response.adoc[]
+include::{snippets}/get-album-images/response-fields.adoc[]
 
 === 앨범 정보 수정 API
 ==== PATCH /api/albums/{앨범 ID}
