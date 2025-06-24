@@ -48,7 +48,8 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 14.        inari       주석 추가
  * 25. 3. 27.        inari		 provider를 enum으로 변경
  * 25. 6. 23.        inari		 기존 유저에 간편 로그인 연동 추가
- * 25. 6. 24.        inari		 	linkToken을 이용하는 방식으로 변경 */
+ * 25. 6. 24.        inari		 linkToken을 이용하는 방식으로 변경 및 안쓰는 코드 제거
+ */
 @Slf4j
 @Service
 @RequiredArgsConstructor
