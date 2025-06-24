@@ -59,7 +59,7 @@ public interface LocationMapper {
 	 * @param lastModifiedDate 수정 시간
 	 * @return 수정된 행 수
 	 */
-	int updateCoordinatePointById(Long coordinatePointId, String coordinatePointName, Point coordinatePointPoint, 
+	int updateCoordinatePointById(Long coordinatePointId, String coordinatePointName, Point coordinatePointPoint,
 		Long sigunguId, LocalDateTime lastModifiedDate);
 
 	/**
