@@ -30,12 +30,12 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 26.        inari       최초 생성
  * 25. 3. 26.        inari       프로바이더 및 이메일을 필수사항으로 지정
  * 25. 3. 27.        inari       코드 스멜 수정
- * 25. 6. 24.        inari		 	linkToken을 이용하는 방식으로 변경
+ * 25. 6. 24.        inari		 	linkToken을 이용하는 방식으로 변경 및 이름 수정
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class OAuthLinkService {
+public class OAuthLinkTokenService {
 
 	// Redis 키 접두사 및 토큰 유효시간
 	private static final String LINK_TOKEN_PREFIX = "oauth:link:";

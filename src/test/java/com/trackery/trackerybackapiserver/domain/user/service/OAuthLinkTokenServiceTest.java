@@ -40,7 +40,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
  * 25. 6. 24.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
  */
 @ExtendWith(MockitoExtension.class)
-class OAuthLinkServiceTest {
+class OAuthLinkTokenServiceTest {
 
 	private static final String LINK_TOKEN_PREFIX = "oauth:link:";
 	private static final Duration TOKEN_EXPIRY = Duration.ofMinutes(10);
@@ -51,7 +51,7 @@ class OAuthLinkServiceTest {
 	@Mock
 	private UserMapper userMapper;
 	@InjectMocks
-	private OAuthLinkService oAuthLinkService;
+	private OAuthLinkTokenService oAuthLinkTokenService;
 
 	@BeforeEach
 	void setUp() {
@@ -71,7 +71,7 @@ class OAuthLinkServiceTest {
 		when(userMapper.findByEmail(email)).thenReturn(Optional.of(user));
 
 		// when
-		String token = oAuthLinkService.createLinkToken(provider, email);
+		String token = oAuthLinkTokenService.createLinkToken(provider, email);
 
 		// then
 		assertNotNull(token);
@@ -93,7 +93,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.createLinkToken(provider, email);
+			oAuthLinkTokenService.createLinkToken(provider, email);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER, exception.getErrorCode());
 	}
@@ -110,7 +110,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.createLinkToken(provider, email);
+			oAuthLinkTokenService.createLinkToken(provider, email);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER, exception.getErrorCode());
 	}
@@ -125,7 +125,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.createLinkToken(provider, email);
+			oAuthLinkTokenService.createLinkToken(provider, email);
 		});
 		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
 	}
@@ -140,7 +140,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.createLinkToken(provider, email);
+			oAuthLinkTokenService.createLinkToken(provider, email);
 		});
 		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
 	}
@@ -153,7 +153,7 @@ class OAuthLinkServiceTest {
 		Long userId = 1L;
 
 		// when
-		String token = oAuthLinkService.createLinkToken(provider, userId);
+		String token = oAuthLinkTokenService.createLinkToken(provider, userId);
 
 		// then
 		assertNotNull(token);
@@ -171,7 +171,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.createLinkToken(provider, userId);
+			oAuthLinkTokenService.createLinkToken(provider, userId);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST_INVALID_USER_AUTH, exception.getErrorCode());
 	}
@@ -193,7 +193,7 @@ class OAuthLinkServiceTest {
 		when(hashOperations.entries(key)).thenReturn(linkInfo);
 
 		// when
-		Long result = oAuthLinkService.validateToken(token);
+		Long result = oAuthLinkTokenService.validateToken(token);
 
 		// then
 		assertNotNull(result);
@@ -217,7 +217,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.validateToken(token);
+			oAuthLinkTokenService.validateToken(token);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
 	}
@@ -230,7 +230,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.validateToken(token);
+			oAuthLinkTokenService.validateToken(token);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
 	}
@@ -243,7 +243,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.validateToken(token);
+			oAuthLinkTokenService.validateToken(token);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
 	}
@@ -259,7 +259,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.validateToken(token);
+			oAuthLinkTokenService.validateToken(token);
 		});
 		assertEquals(ErrorCode.UNAUTHORIZED, exception.getErrorCode());
 	}
@@ -281,7 +281,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.validateToken(token);
+			oAuthLinkTokenService.validateToken(token);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER, exception.getErrorCode());
 	}
@@ -294,7 +294,7 @@ class OAuthLinkServiceTest {
 		String key = LINK_TOKEN_PREFIX + token;
 
 		// when
-		oAuthLinkService.deleteToken(token);
+		oAuthLinkTokenService.deleteToken(token);
 
 		// then
 		verify(redisTemplate).delete(key);
@@ -307,7 +307,7 @@ class OAuthLinkServiceTest {
 		String token = "";
 
 		// when
-		oAuthLinkService.deleteToken(token);
+		oAuthLinkTokenService.deleteToken(token);
 
 		// then
 		verify(redisTemplate, never()).delete(any(String.class));
@@ -320,7 +320,7 @@ class OAuthLinkServiceTest {
 		String token = null;
 
 		// when
-		oAuthLinkService.deleteToken(token);
+		oAuthLinkTokenService.deleteToken(token);
 
 		// then
 		verify(redisTemplate, never()).delete(any(String.class));

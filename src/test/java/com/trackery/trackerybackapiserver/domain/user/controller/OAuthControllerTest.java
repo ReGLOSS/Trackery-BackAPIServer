@@ -18,17 +18,14 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
-import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
-import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.GlobalExceptionHandler;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
-import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUrlResponseDto;
-import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkService;
+import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkTokenService;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
 
 /**
@@ -53,7 +50,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 	private OAuthService oAuthService;
 
 	@MockitoBean
-	private OAuthLinkService oAuthLinkService;
+	private OAuthLinkTokenService oAuthLinkTokenService;
 
 	@ParameterizedTest
 	@ValueSource(strings = {"KAKAO", "GOOGLE", "GITHUB"})
@@ -165,7 +162,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT);
 
-		when(oAuthLinkService.validateToken(LINK_TOKEN)).thenReturn(USER_ID);
+		when(oAuthLinkTokenService.validateToken(LINK_TOKEN)).thenReturn(USER_ID);
 		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
 
 		// when
@@ -183,8 +180,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(cookie().value("accessToken", JWT))
 			.andExpect(jsonPath("$.data.existingEmail").value(false));
 
-		verify(oAuthLinkService).validateToken(LINK_TOKEN);
-		verify(oAuthLinkService).deleteToken(LINK_TOKEN);
+		verify(oAuthLinkTokenService).validateToken(LINK_TOKEN);
+		verify(oAuthLinkTokenService).deleteToken(LINK_TOKEN);
 	}
 
 	@Test
@@ -208,7 +205,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.state("link_" + LINK_TOKEN)
 			.build();
 
-		when(oAuthLinkService.createLinkToken(PROVIDER.toUpperCase(), USER_ID)).thenReturn(LINK_TOKEN);
+		when(oAuthLinkTokenService.createLinkToken(PROVIDER.toUpperCase(), USER_ID)).thenReturn(LINK_TOKEN);
 		when(oAuthService.generateAuthUrlWithToken(OAuthProvider.KAKAO, LINK_TOKEN)).thenReturn(urlResponse);
 
 		// when
@@ -236,7 +233,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 				)
 			));
 
-		verify(oAuthLinkService).createLinkToken(PROVIDER.toUpperCase(), USER_ID);
+		verify(oAuthLinkTokenService).createLinkToken(PROVIDER.toUpperCase(), USER_ID);
 		verify(oAuthService).generateAuthUrlWithToken(OAuthProvider.KAKAO, LINK_TOKEN);
 	}
 }

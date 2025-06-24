@@ -24,7 +24,7 @@ import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUrlResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
-import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkService;
+import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkTokenService;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -62,7 +62,7 @@ public class OAuthController {
 	/**
 	 * 간편 로그인 연동 서비스 객체입니다.
 	 */
-	private final OAuthLinkService oAuthLinkService;
+	private final OAuthLinkTokenService oAuthLinkTokenService;
 
 	/**
 	 * OAuth 계정 연동을 위한 토큰을 생성하는 API 메서드입니다.
@@ -73,7 +73,7 @@ public class OAuthController {
 	@PostMapping("/link-account")
 	public ResponseEntity<ApiResponse<OAuthLinkTokenDto>> createLinkToken(@RequestBody OAuthLinkRequestDto request) {
 		// 연동 토큰 생성
-		String token = oAuthLinkService.createLinkToken(request.getProvider(), request.getEmail());
+		String token = oAuthLinkTokenService.createLinkToken(request.getProvider(), request.getEmail());
 
 		OAuthLinkTokenDto response = OAuthLinkTokenDto.builder()
 			.token(token)
@@ -132,13 +132,13 @@ public class OAuthController {
 		if (extractedLinkToken != null && !extractedLinkToken.isEmpty()) {
 			log.info("링크 토큰 감지: provider={}, token={}", provider, extractedLinkToken);
 			try {
-				Long userId = oAuthLinkService.validateToken(extractedLinkToken);
+				Long userId = oAuthLinkTokenService.validateToken(extractedLinkToken);
 				builder.linkAccount(true).linkUserId(userId);
 				log.info("계정 연동 요청 검증 성공: provider={}, userId={}, token={}",
 					provider, userId, extractedLinkToken);
 
 				// 토큰 사용 후 삭제
-				oAuthLinkService.deleteToken(extractedLinkToken);
+				oAuthLinkTokenService.deleteToken(extractedLinkToken);
 
 			} catch (Exception e) {
 				log.warn("계정 연동 토큰 검증 실패: {}", e.getMessage());
@@ -196,7 +196,7 @@ public class OAuthController {
 			Long userId = userDetails.getUserId();
 
 			// 계정 연동용 토큰 생성
-			String linkToken = oAuthLinkService.createLinkToken(provider.name(), userId);
+			String linkToken = oAuthLinkTokenService.createLinkToken(provider.name(), userId);
 
 			// OAuth 인증 URL 생성 (link_token 포함)
 			OAuthUrlResponseDto urlResponse = oAuthService.generateAuthUrlWithToken(provider, linkToken);
