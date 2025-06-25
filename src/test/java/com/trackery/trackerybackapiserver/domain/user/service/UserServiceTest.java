@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpHeaders;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -26,6 +28,7 @@ import com.trackery.trackerybackapiserver.domain.image.service.ImageS3Service;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
@@ -69,6 +72,8 @@ class UserServiceTest {
 	private UserRoleMapper userRoleMapper;
 	@Mock
 	private JwtService jwtService;
+	@Mock
+	private JwtRedisService jwtRedisService;
 	@Mock
 	private ImageS3Service imageS3Service;
 
@@ -323,6 +328,58 @@ class UserServiceTest {
 
 			assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
 			verify(userMapper, times(1)).findByUserId(99L);
+		}
+	}
+
+	@Nested
+	@DisplayName("로그아웃 테스트")
+	class logoutTest {
+		@Test
+		@DisplayName("성공 - 유효한 토큰 만료 시간이 남아있는 경우")
+		void success_validToken() {
+			String accessToken = "validAccessToken";
+			String refreshToken = "validRefreshToken";
+			String jti = "jti-12345";
+			
+			DecodedJWT decodedAccessToken = mock(DecodedJWT.class);
+			Date expirationDate = new Date(System.currentTimeMillis() + 3600000);
+			
+			when(jwtService.verifyJwt(accessToken)).thenReturn(decodedAccessToken);
+			when(decodedAccessToken.getId()).thenReturn(jti);
+			when(decodedAccessToken.getExpiresAt()).thenReturn(expirationDate);
+			
+			HttpHeaders result = userService.logout(accessToken, refreshToken);
+			
+			verify(jwtService, times(1)).verifyJwt(accessToken);
+			verify(jwtRedisService, times(1)).addAccessTokenToBlacklist(eq(jti), anyLong());
+			verify(jwtRedisService, times(1)).deleteRefreshToken(refreshToken);
+			
+			assertNotNull(result);
+			assertTrue(result.get("Set-Cookie").size() >= 3);
+		}
+
+		@Test
+		@DisplayName("성공 - 토큰이 이미 만료된 경우")
+		void success_expiredToken() {
+			String accessToken = "expiredAccessToken";
+			String refreshToken = "validRefreshToken";
+			String jti = "jti-12345";
+			
+			DecodedJWT decodedAccessToken = mock(DecodedJWT.class);
+			Date expiredDate = new Date(System.currentTimeMillis() - 3600000);
+			
+			when(jwtService.verifyJwt(accessToken)).thenReturn(decodedAccessToken);
+			when(decodedAccessToken.getId()).thenReturn(jti);
+			when(decodedAccessToken.getExpiresAt()).thenReturn(expiredDate);
+			
+			HttpHeaders result = userService.logout(accessToken, refreshToken);
+			
+			verify(jwtService, times(1)).verifyJwt(accessToken);
+			verify(jwtRedisService, times(0)).addAccessTokenToBlacklist(anyString(), anyLong());
+			verify(jwtRedisService, times(1)).deleteRefreshToken(refreshToken);
+			
+			assertNotNull(result);
+			assertTrue(result.get("Set-Cookie").size() >= 3);
 		}
 	}
 }

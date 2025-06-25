@@ -151,7 +151,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("Ok"))
-			.andDo(document("get-my-images-v2",
+			.andDo(document("get-my-images-success",
 				queryParameters(
 					parameterWithName("pageNum").description("페이지 번호 (1부터 시작, 기본값 : 1)"),
 					parameterWithName("pageSize").description("페이지 크기 (기본값 : 10)")

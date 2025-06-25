@@ -31,6 +31,21 @@ include::{snippets}/login-user-success/http-response.adoc[]
 include::{snippets}/login-user-success/response-fields.adoc[]
 '''
 
+=== 사용자 로그아웃 API
+==== POST /api/users/logout
+
+인증된 사용자의 로그아웃을 처리하는 API입니다.
+액세스 토큰을 블랙리스트에 추가하고, 리프레시 토큰을 Redis에서 삭제합니다.
+클라이언트의 모든 인증 관련 쿠키도 삭제합니다.
+
+===== 요청
+include::{snippets}/logout-user-success/http-request.adoc[]
+
+===== 응답
+include::{snippets}/logout-user-success/http-response.adoc[]
+include::{snippets}/logout-user-success/response-fields.adoc[]
+'''
+
 === 사용자 상세 정보 조회 API
 ==== GET /api/users/details
 
@@ -103,6 +118,64 @@ include::{snippets}/oauth-link-success/request-fields.adoc[]
 ===== 응답
 include::{snippets}/oauth-link-success/http-response.adoc[]
 include::{snippets}/oauth-link-success/response-fields.adoc[]
+'''
+
+=== 사용자명 수정 API
+==== PATCH /api/users/me/username
+
+인증된 사용자의 사용자명을 변경하는 API입니다.
+사용자명 변경 시 새로운 JWT 토큰이 발급됩니다.
+
+===== 요청
+include::{snippets}/update-user-username-success/http-request.adoc[]
+include::{snippets}/update-user-username-success/request-fields.adoc[]
+
+===== 응답
+include::{snippets}/update-user-username-success/http-response.adoc[]
+include::{snippets}/update-user-username-success/response-fields.adoc[]
+'''
+
+=== 닉네임 수정 API
+==== PATCH /api/users/me/nickname
+
+인증된 사용자의 닉네임을 변경하는 API입니다.
+
+===== 요청
+include::{snippets}/update-user-nickname-success/http-request.adoc[]
+include::{snippets}/update-user-nickname-success/request-fields.adoc[]
+
+===== 응답
+include::{snippets}/update-user-nickname-success/http-response.adoc[]
+include::{snippets}/update-user-nickname-success/response-fields.adoc[]
+'''
+
+=== 이메일 기반 비밀번호 변경 API  
+==== PATCH /api/users/me/password/email-token
+
+이메일 토큰을 통해 비밀번호를 변경하는 API입니다.
+이메일 인증을 통해 받은 토큰으로 비밀번호를 재설정할 수 있습니다.
+
+===== 요청
+include::{snippets}/update-user-password-by-email-token-success/http-request.adoc[]
+include::{snippets}/update-user-password-by-email-token-success/request-fields.adoc[]
+
+===== 응답
+include::{snippets}/update-user-password-by-email-token-success/http-response.adoc[]
+include::{snippets}/update-user-password-by-email-token-success/response-fields.adoc[]
+'''
+
+=== 이메일 수정 API
+==== PATCH /api/users/me/email
+
+인증된 사용자의 이메일을 변경하는 API입니다.
+이메일 토큰을 통해 인증 후 이메일을 변경합니다.
+
+===== 요청
+include::{snippets}/update-user-email-success/http-request.adoc[]
+
+===== 응답
+include::{snippets}/update-user-email-success/http-response.adoc[]
+include::{snippets}/update-user-email-success/response-fields.adoc[]
 '''
 
 === 사용자 프로필 조회 API
