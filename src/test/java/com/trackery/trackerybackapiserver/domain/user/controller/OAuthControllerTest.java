@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.trackery.trackerybackapiserver.domain.common.util.GlobalExceptionHandler;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
@@ -64,7 +65,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.isExistingEmail(false)
 			.build();
 
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT);
+		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT, authTokenDto);
 
 		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
 
@@ -87,7 +89,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.isExistingEmail(false)
 			.build();
 
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, "jwt");
+		AuthTokenDto authTokenDto = new AuthTokenDto("jwt", "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, "jwt", authTokenDto);
 
 		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
 
@@ -129,7 +132,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.isExistingEmail(true)
 			.build();
 
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, null);
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, null, null);
 
 		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
 
@@ -160,7 +163,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.isExistingEmail(false)
 			.build();
 
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT);
+		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT, authTokenDto);
 
 		when(oAuthLinkTokenService.validateToken(LINK_TOKEN)).thenReturn(USER_ID);
 		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
