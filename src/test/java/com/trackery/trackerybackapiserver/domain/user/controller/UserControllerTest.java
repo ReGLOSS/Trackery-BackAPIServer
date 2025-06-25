@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -50,6 +51,7 @@ import jakarta.servlet.http.Cookie;
  * 25. 4. 09.		 durururuk	   	유저 상세정보 조회 API 단위테스트 코드 작성
  * 25. 4. 10.		 durururuk	    인증 기반 비밀번호 변경 컨트롤러 mockMvc 테스트 작성
  * 25. 6. 17.		 inari		    Spring-Rest-Docs api문서 추가
+ * 25. 6. 25.		 inari		    로그아웃 테스트 작성
  */
 @WebMvcTest(UserController.class)
 class UserControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -228,5 +230,40 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 					)
 				));
 		}
+	}
+
+	@Test
+	@DisplayName("로그아웃 성공")
+	void 로그아웃_성공() throws Exception {
+		String accessToken = "validAccessToken";
+		String refreshToken = "validRefreshToken";
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Set-Cookie", "accessToken=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0");
+		headers.add("Set-Cookie", "refreshToken=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0");
+		headers.add("Set-Cookie", "SESSION=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
+		
+		when(userService.logout(accessToken, refreshToken)).thenReturn(headers);
+		
+		ResultActions result = mockMvc
+			.perform(post("/api/users/logout")
+				.contentType(MediaType.APPLICATION_JSON)
+				.cookie(new Cookie("accessToken", accessToken))
+				.cookie(new Cookie("refreshToken", refreshToken))
+				.with(csrf())
+			);
+		
+		result
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.message").value("Ok"))
+			.andDo(document("logout-user-success",
+				relaxedResponseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지")
+				)
+			));
+		
+		verify(userService, times(1)).logout(accessToken, refreshToken);
 	}
 }
