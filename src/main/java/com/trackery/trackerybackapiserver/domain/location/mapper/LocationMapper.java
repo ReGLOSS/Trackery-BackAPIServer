@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Param;
 import org.locationtech.jts.geom.Point;
 
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
@@ -60,7 +59,7 @@ public interface LocationMapper {
 	 * @param lastModifiedDate 수정 시간
 	 * @return 수정된 행 수
 	 */
-	int updateCoordinatePointById(Long coordinatePointId, String coordinatePointName, Point coordinatePointPoint, 
+	int updateCoordinatePointById(Long coordinatePointId, String coordinatePointName, Point coordinatePointPoint,
 		Long sigunguId, LocalDateTime lastModifiedDate);
 
 	/**

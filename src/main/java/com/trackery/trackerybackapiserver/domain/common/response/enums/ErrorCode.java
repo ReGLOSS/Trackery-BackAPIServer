@@ -82,6 +82,7 @@ public enum ErrorCode {
 	 */
 	BAD_REQUEST_INVALID_INPUT_MISSING_EMAIL(HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다."),
 
+	BAD_REQUEST_INVALID_USER_AUTH(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 사용자 인증입니다."),
 	/**
 	 * SHA-256 알고리즘을 사용할 수 없음 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "SHA-256 알고리즘을 사용할 수 없습니다.")
 	 */

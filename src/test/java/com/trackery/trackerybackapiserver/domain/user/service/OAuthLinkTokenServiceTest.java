@@ -7,6 +7,7 @@ import static org.mockito.Mockito.*;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -17,10 +18,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
+import com.trackery.trackerybackapiserver.domain.user.entity.User;
+import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
 
 /**
@@ -34,9 +37,10 @@ import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
  * -----------------------------------------------------------
  * 25. 3. 26.        inari       최초 생성
  * 25. 3. 26.        inari       프로바이더, 이메일 필수 사항으로 전환
+ * 25. 6. 24.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
  */
 @ExtendWith(MockitoExtension.class)
-class OAuthLinkServiceTest {
+class OAuthLinkTokenServiceTest {
 
 	private static final String LINK_TOKEN_PREFIX = "oauth:link:";
 	private static final Duration TOKEN_EXPIRY = Duration.ofMinutes(10);
@@ -44,8 +48,10 @@ class OAuthLinkServiceTest {
 	private RedisTemplate<String, Object> redisTemplate;
 	@Mock
 	private HashOperations<String, Object, Object> hashOperations;
+	@Mock
+	private UserMapper userMapper;
 	@InjectMocks
-	private OAuthLinkService oAuthLinkService;
+	private OAuthLinkTokenService oAuthLinkTokenService;
 
 	@BeforeEach
 	void setUp() {
@@ -60,14 +66,18 @@ class OAuthLinkServiceTest {
 		// given
 		String provider = "kakao";
 		String email = "test@example.com";
+		User user = User.builder().email(email).build();
+		ReflectionTestUtils.setField(user, "userId", 1L);
+		when(userMapper.findByEmail(email)).thenReturn(Optional.of(user));
 
 		// when
-		String token = oAuthLinkService.createLinkToken(provider, email);
+		String token = oAuthLinkTokenService.createLinkToken(provider, email);
 
 		// then
 		assertNotNull(token);
+		verify(userMapper).findByEmail(email);
 		verify(hashOperations).put(argThat(s -> s.startsWith(LINK_TOKEN_PREFIX)), eq("provider"), eq(provider));
-		verify(hashOperations).put(argThat(s -> s.startsWith(LINK_TOKEN_PREFIX)), eq("email"), eq(email));
+		verify(hashOperations).put(argThat(s -> s.startsWith(LINK_TOKEN_PREFIX)), eq("userId"), eq("1"));
 		verify(redisTemplate).expire(argThat(s -> s.startsWith(LINK_TOKEN_PREFIX)), eq(TOKEN_EXPIRY));
 	}
 
@@ -77,10 +87,13 @@ class OAuthLinkServiceTest {
 		// given
 		String provider = null;
 		String email = "test@example.com";
+		User user = User.builder().email(email).build();
+		ReflectionTestUtils.setField(user, "userId", 1L);
+		when(userMapper.findByEmail(email)).thenReturn(Optional.of(user));
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.createLinkToken(provider, email);
+			oAuthLinkTokenService.createLinkToken(provider, email);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER, exception.getErrorCode());
 	}
@@ -91,10 +104,13 @@ class OAuthLinkServiceTest {
 		// given
 		String provider = "  ";
 		String email = "test@example.com";
+		User user = User.builder().email(email).build();
+		ReflectionTestUtils.setField(user, "userId", 1L);
+		when(userMapper.findByEmail(email)).thenReturn(Optional.of(user));
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.createLinkToken(provider, email);
+			oAuthLinkTokenService.createLinkToken(provider, email);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER, exception.getErrorCode());
 	}
@@ -105,12 +121,13 @@ class OAuthLinkServiceTest {
 		// given
 		String provider = "google";
 		String email = null;
+		when(userMapper.findByEmail(email)).thenReturn(Optional.empty());
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.createLinkToken(provider, email);
+			oAuthLinkTokenService.createLinkToken(provider, email);
 		});
-		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT_MISSING_EMAIL, exception.getErrorCode());
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
 	}
 
 	@Test
@@ -119,12 +136,44 @@ class OAuthLinkServiceTest {
 		// given
 		String provider = "naver";
 		String email = "";
+		when(userMapper.findByEmail(email)).thenReturn(Optional.empty());
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.createLinkToken(provider, email);
+			oAuthLinkTokenService.createLinkToken(provider, email);
 		});
-		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT_MISSING_EMAIL, exception.getErrorCode());
+		assertEquals(ErrorCode.NOT_FOUND, exception.getErrorCode());
+	}
+
+	@Test
+	@DisplayName("토큰 생성 - userId 기반 성공")
+	void createLinkToken_WithUserId_Success() {
+		// given
+		String provider = "KAKAO";
+		Long userId = 1L;
+
+		// when
+		String token = oAuthLinkTokenService.createLinkToken(provider, userId);
+
+		// then
+		assertNotNull(token);
+		verify(hashOperations).put(argThat(s -> s.startsWith(LINK_TOKEN_PREFIX)), eq("provider"), eq(provider));
+		verify(hashOperations).put(argThat(s -> s.startsWith(LINK_TOKEN_PREFIX)), eq("userId"), eq("1"));
+		verify(redisTemplate).expire(argThat(s -> s.startsWith(LINK_TOKEN_PREFIX)), eq(TOKEN_EXPIRY));
+	}
+
+	@Test
+	@DisplayName("토큰 생성 - userId null 예외")
+	void createLinkToken_NullUserId_ThrowsException() {
+		// given
+		String provider = "KAKAO";
+		Long userId = null;
+
+		// when & then
+		ApiException exception = assertThrows(ApiException.class, () -> {
+			oAuthLinkTokenService.createLinkToken(provider, userId);
+		});
+		assertEquals(ErrorCode.BAD_REQUEST_INVALID_USER_AUTH, exception.getErrorCode());
 	}
 
 	@Test
@@ -133,49 +182,44 @@ class OAuthLinkServiceTest {
 		// given
 		String token = "valid-token";
 		String provider = "naver";
-		String email = "user@example.com";
+		Long userId = 1L;
 		String key = LINK_TOKEN_PREFIX + token;
 
 		Map<Object, Object> linkInfo = new HashMap<>();
 		linkInfo.put("provider", provider);
-		linkInfo.put("email", email);
+		linkInfo.put("userId", userId.toString());
 
 		when(redisTemplate.hasKey(key)).thenReturn(true);
 		when(hashOperations.entries(key)).thenReturn(linkInfo);
 
 		// when
-		OAuthLinkRequestDto result = oAuthLinkService.validateToken(token);
+		Long result = oAuthLinkTokenService.validateToken(token);
 
 		// then
 		assertNotNull(result);
-		assertEquals(provider, result.getProvider());
-		assertEquals(email, result.getEmail());
-		assertTrue(result.isLinkAccount());
+		assertEquals(userId, result);
 	}
 
 	@Test
-	@DisplayName("토큰 검증 - 유효한 토큰, 이메일 없음")
-	void validateToken_ValidToken_NoEmail_Success() {
+	@DisplayName("토큰 검증 - 유효한 토큰, userId 없음")
+	void validateToken_ValidToken_NoUserId_ThrowsException() {
 		// given
-		String token = "valid-token-no-email";
+		String token = "valid-token-no-userid";
 		String provider = "apple";
 		String key = LINK_TOKEN_PREFIX + token;
 
 		Map<Object, Object> linkInfo = new HashMap<>();
 		linkInfo.put("provider", provider);
-		// 이메일 없음
-
-		when(redisTemplate.hasKey(key)).thenReturn(true);
-		when(hashOperations.entries(key)).thenReturn(linkInfo);
+		// userId 없음
 
 		when(redisTemplate.hasKey(key)).thenReturn(true);
 		when(hashOperations.entries(key)).thenReturn(linkInfo);
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.validateToken(token);
+			oAuthLinkTokenService.validateToken(token);
 		});
-		assertEquals(ErrorCode.BAD_REQUEST_INVALID_INPUT_MISSING_EMAIL, exception.getErrorCode());
+		assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
 	}
 
 	@Test
@@ -186,7 +230,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.validateToken(token);
+			oAuthLinkTokenService.validateToken(token);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
 	}
@@ -199,7 +243,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.validateToken(token);
+			oAuthLinkTokenService.validateToken(token);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
 	}
@@ -215,7 +259,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.validateToken(token);
+			oAuthLinkTokenService.validateToken(token);
 		});
 		assertEquals(ErrorCode.UNAUTHORIZED, exception.getErrorCode());
 	}
@@ -237,7 +281,7 @@ class OAuthLinkServiceTest {
 
 		// when & then
 		ApiException exception = assertThrows(ApiException.class, () -> {
-			oAuthLinkService.validateToken(token);
+			oAuthLinkTokenService.validateToken(token);
 		});
 		assertEquals(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER, exception.getErrorCode());
 	}
@@ -250,7 +294,7 @@ class OAuthLinkServiceTest {
 		String key = LINK_TOKEN_PREFIX + token;
 
 		// when
-		oAuthLinkService.deleteToken(token);
+		oAuthLinkTokenService.deleteToken(token);
 
 		// then
 		verify(redisTemplate).delete(key);
@@ -263,7 +307,7 @@ class OAuthLinkServiceTest {
 		String token = "";
 
 		// when
-		oAuthLinkService.deleteToken(token);
+		oAuthLinkTokenService.deleteToken(token);
 
 		// then
 		verify(redisTemplate, never()).delete(any(String.class));
@@ -276,7 +320,7 @@ class OAuthLinkServiceTest {
 		String token = null;
 
 		// when
-		oAuthLinkService.deleteToken(token);
+		oAuthLinkTokenService.deleteToken(token);
 
 		// then
 		verify(redisTemplate, never()).delete(any(String.class));
