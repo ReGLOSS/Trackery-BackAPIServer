@@ -14,6 +14,7 @@ import com.trackery.trackerybackapiserver.config.OAuthProperties;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.client.OAuthClient;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
@@ -97,11 +98,12 @@ public class OAuthService {
 			UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
 				.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-			String jwt = jwtService.generateAccessToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
+			AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
 
 			return new OAuthLoginResult(
 				OAuthResponseDto.builder().isExistingEmail(false).build(),
-				jwt
+				authTokenDto.accessToken(),
+				authTokenDto
 			);
 		}
 
@@ -129,7 +131,7 @@ public class OAuthService {
 			UserRole userRole = userRoleMapper.findByUserId(existingUser.getUserId())
 				.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-			String jwt = jwtService.generateAccessToken(
+			AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(
 				existingUser.getUserId(),
 				existingUser.getUserName(),
 				userRole.getRoleId()
@@ -137,7 +139,8 @@ public class OAuthService {
 
 			return new OAuthLoginResult(
 				OAuthResponseDto.builder().isExistingEmail(false).build(),
-				jwt
+				authTokenDto.accessToken(),
+				authTokenDto
 			);
 		}
 
@@ -153,6 +156,7 @@ public class OAuthService {
 							.isExistingEmail(true)
 							.email(userInfo.getEmail())
 							.build(),
+						null,
 						null
 					);
 				}
@@ -170,7 +174,7 @@ public class OAuthService {
 				UserRole userRole = userRoleMapper.findByUserId(existingUserByEmail.get().getUserId())
 					.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-				String jwt = jwtService.generateAccessToken(
+				AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(
 					existingUserByEmail.get().getUserId(),
 					existingUserByEmail.get().getUserName(),
 					userRole.getRoleId()
@@ -178,7 +182,8 @@ public class OAuthService {
 
 				return new OAuthLoginResult(
 					OAuthResponseDto.builder().isExistingEmail(false).build(),
-					jwt
+					authTokenDto.accessToken(),
+					authTokenDto
 				);
 			}
 		}
@@ -198,11 +203,12 @@ public class OAuthService {
 		UserRole userRole = userRoleMapper.findByUserId(newUser.getUserId())
 			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-		String jwt = jwtService.generateAccessToken(newUser.getUserId(), newUser.getUserName(), userRole.getRoleId());
+		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(newUser.getUserId(), newUser.getUserName(), userRole.getRoleId());
 
 		return new OAuthLoginResult(
 			OAuthResponseDto.builder().isExistingEmail(false).build(),
-			jwt
+			authTokenDto.accessToken(),
+			authTokenDto
 		);
 	}
 
@@ -377,5 +383,6 @@ public class OAuthService {
 	public static class OAuthLoginResult {
 		private OAuthResponseDto responseDto;
 		private String jwtToken;
+		private AuthTokenDto authTokenDto;
 	}
 }

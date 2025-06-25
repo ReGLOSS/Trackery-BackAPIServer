@@ -169,12 +169,18 @@ public class OAuthController {
 
 		// 로그인 성공 또는 계정 연동 성공한 경우
 		// JWT 토큰을 쿠키에 설정
-		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", result.getJwtToken(),
-			Duration.ofMinutes(60));
-
-		return ResponseEntity.ok()
-			.header(HttpHeaders.SET_COOKIE, cookie.toString())
-			.body(ApiResponse.success(SuccessCode.OK, responseDto));
+		if (result.getAuthTokenDto() != null) {
+			HttpHeaders authHeaders = CookieUtil.setAuthCookie(result.getAuthTokenDto());
+			return ResponseEntity.ok()
+				.headers(authHeaders)
+				.body(ApiResponse.success(SuccessCode.OK, responseDto));
+		} else {
+			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", result.getJwtToken(),
+				Duration.ofMinutes(60));
+			return ResponseEntity.ok()
+				.header(HttpHeaders.SET_COOKIE, cookie.toString())
+				.body(ApiResponse.success(SuccessCode.OK, responseDto));
+		}
 	}
 
 	/**
