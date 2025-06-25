@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 import com.trackery.trackerybackapiserver.domain.common.util.GlobalExceptionHandler;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
@@ -41,6 +42,7 @@ import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
  * 25. 3. 26.       inari       계정 연동 토큰 테스트 추가
  * 25. 6. 17.		inari		Spring-Rest-Docs api문서 추가
  * 25. 6. 23.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
+ * 25. 6. 25.        inari		 	리프레시 토큰 발급 테스트 추가
  */
 @WithMockUser
 @WebMvcTest({OAuthController.class, GlobalExceptionHandler.class})
@@ -64,7 +66,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.isExistingEmail(false)
 			.build();
 
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT);
+		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT, authTokenDto);
 
 		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
 
@@ -87,7 +90,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.isExistingEmail(false)
 			.build();
 
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, "jwt");
+		AuthTokenDto authTokenDto = new AuthTokenDto("jwt", "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, "jwt", authTokenDto);
 
 		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
 
@@ -129,7 +133,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.isExistingEmail(true)
 			.build();
 
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, null);
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, null, null);
 
 		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
 
@@ -160,7 +164,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.isExistingEmail(false)
 			.build();
 
-		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT);
+		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT, authTokenDto);
 
 		when(oAuthLinkTokenService.validateToken(LINK_TOKEN)).thenReturn(USER_ID);
 		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
