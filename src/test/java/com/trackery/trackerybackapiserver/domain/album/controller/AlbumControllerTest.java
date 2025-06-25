@@ -8,6 +8,7 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -20,6 +21,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumImageEditRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
@@ -29,7 +31,9 @@ import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEd
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumSimpledResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
+import com.trackery.trackerybackapiserver.domain.common.util.PaginationDocumentationUtils;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 /**
@@ -151,55 +155,6 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 						fieldWithPath("data.succeededImageIds").description("성공한 이미지 ID 리스트"),
 						fieldWithPath("data.failedImageIds").description("실패한 이미지 ID 맵"),
 						fieldWithPath("data.failedImageIds.*").description("실패한 이미지 ID별 오류 메시지")
-					)
-				)
-			);
-	}
-
-	@Test
-	void getAlbumDetailedInfoSuccess() throws Exception {
-		Long albumId = 1L;
-
-		AlbumDetailedResponseDto responseDto = AlbumDetailedResponseDto.builder()
-			.albumId(albumId)
-			.createdUserId(customUserDetails.getUserId())
-			.albumTitle("강릉 여행")
-			.albumDescription("강릉 여행 기록")
-			.imageList(List.of())
-			.isPublic(0)
-			.imageCount(0)
-			.build();
-
-		when(albumService.getAlbumDetailedInfo(any(), eq(albumId))).thenReturn(responseDto);
-
-		ResultActions result = mockMvc.perform(get("/api/albums/{albumId}", albumId)
-			.with(user(customUserDetails)));
-
-		result
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.data").exists())
-			.andExpect(jsonPath("$.data.albumId").value(1))
-			.andExpect(jsonPath("$.data.createdUserId").value(1))
-			.andExpect(jsonPath("$.data.albumTitle").value("강릉 여행"))
-			.andExpect(jsonPath("$.data.albumDescription").value("강릉 여행 기록"))
-			.andExpect(jsonPath("$.data.imageList").isArray())
-			.andExpect(jsonPath("$.data.imageList").exists());
-
-		result
-			.andDo(document("get-album-detailed-info",
-					pathParameters(
-						parameterWithName("albumId").description("앨범 ID")
-					),
-					responseFields(
-						fieldWithPath("code").description("응답 코드"),
-						fieldWithPath("message").description("응답 메시지"),
-						fieldWithPath("data.albumId").description("앨범 ID"),
-						fieldWithPath("data.createdUserId").description("앨벙을 생성한 유저 ID"),
-						fieldWithPath("data.albumTitle").description("앨범 제목"),
-						fieldWithPath("data.albumDescription").description("앨범 설명"),
-						fieldWithPath("data.isPublic").description("공개 여부").type(JsonFieldType.NUMBER),
-						fieldWithPath("data.imageCount").description("이미지 개수").type(JsonFieldType.NUMBER),
-						fieldWithPath("data.imageList").description("앨범 이미지 리스트")
 					)
 				)
 			);
@@ -346,6 +301,105 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 				)
 			)
 		);
+	}
+
+	@Test
+	void getAlbumMetadataSuccess() throws Exception {
+		final Long ALBUM_ID = 16L;
+		final Long USER_ID = 1L;
+		final String TITLE = "부산 여행";
+		final String DESCRIPTION = "서면-광안리-해운대 여행";
+		final int IS_PUBLIC = 1;
+		final int IMAGE_COUNT = 3;
+		AlbumDetailedResponseDto albumDetailedResponseDto = AlbumDetailedResponseDto
+			.builder()
+			.albumId(ALBUM_ID)
+			.createdUserId(USER_ID)
+			.albumTitle(TITLE)
+			.albumDescription(DESCRIPTION)
+			.isPublic(IS_PUBLIC)
+			.imageCount(IMAGE_COUNT)
+			.build();
+
+		when(albumService.getAlbumMetadata(USER_ID, ALBUM_ID)).thenReturn(albumDetailedResponseDto);
+
+		ResultActions result = mockMvc.perform(get("/api/albums/{albumId}", ALBUM_ID)
+			.with(user(customUserDetails)));
+
+		result.andExpect(status().isOk());
+
+		result.andDo(document("get-album-metadata",
+				pathParameters(
+					parameterWithName("albumId").description("앨범 ID")
+				),
+
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.albumId").description("앨범 ID"),
+					fieldWithPath("data.createdUserId").description("앨범 생성한 유저 ID"),
+					fieldWithPath("data.albumTitle").description("앨범 제목"),
+					fieldWithPath("data.albumDescription").description("앨범 설명"),
+					fieldWithPath("data.isPublic").description("공개 여부"),
+					fieldWithPath("data.imageCount").description("이미지 장수")
+				)
+			)
+		);
+	}
+
+	@Test
+	void getAlbumImagesSuccess() throws Exception {
+		ImageDto imageDto = ImageDto.builder()
+			.imageId(1L)
+			.userId(2L)
+			.imageRegDate(LocalDateTime.of(2025, 5, 22, 0, 0))
+			.sdName("서울특별시")
+			.sggName("강남구")
+			.latitude(15.57)
+			.longitude(121.45)
+			.imageName("image.jpg")
+			.imageContent("테스트용 이미지")
+			.imageDate(LocalDateTime.of(2000, 1, 1, 0, 0))
+			.imageUrl("http://test.com/api/images/image.jpg")
+			.isPublic(0)
+			.build();
+
+		List<ImageDto> imageDtoList = List.of(imageDto);
+
+		PageInfo<ImageDto> pageInfo = new PageInfo<>(imageDtoList);
+		when(albumService.getAlbumImages(16L, 1, 10)).thenReturn(pageInfo);
+
+		ResultActions result = mockMvc.perform(get("/api/albums/{albumId}/images", 16L)
+			.with(user(customUserDetails))
+			.queryParam("pageNum", "1")
+			.queryParam("pageSize", "10")
+		);
+
+		result.andExpect(status().isOk());
+
+		result.andDo(document("get-album-images",
+			queryParameters(
+				PaginationDocumentationUtils.getPageableQueryParameters()
+			),
+
+			responseFields(
+				fieldWithPath("code").description("응답 코드"),
+				fieldWithPath("message").description("응답 메시지"),
+				fieldWithPath("data.list[]").description("이미지 목록"),
+				fieldWithPath("data.list[].imageId").description("이미지 ID"),
+				fieldWithPath("data.list[].userId").description("사용자 ID"),
+				fieldWithPath("data.list[].imageRegDate").description("이미지 등록일"),
+				fieldWithPath("data.list[].sdName").description("시도명"),
+				fieldWithPath("data.list[].sggName").description("시군구명"),
+				fieldWithPath("data.list[].latitude").description("위도"),
+				fieldWithPath("data.list[].longitude").description("경도"),
+				fieldWithPath("data.list[].imageName").description("이미지 파일명"),
+				fieldWithPath("data.list[].imageContent").description("이미지 설명"),
+				fieldWithPath("data.list[].imageDate").description("이미지 촬영일"),
+				fieldWithPath("data.list[].isPublic").description("공개 여부"),
+				fieldWithPath("data.list[].imageUrl").description("이미지 URL")
+			).andWithPrefix("", PaginationDocumentationUtils.getPageableResponseFields())
+		));
 	}
 
 	@Test
