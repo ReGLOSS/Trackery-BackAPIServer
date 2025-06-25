@@ -93,7 +93,7 @@ public class UpdateUserInfoController {
 		@Valid @RequestBody UpdatePasswordDto dto) {
 		updateUserInfoService.updatePasswordByEmailToken(emailToken, dto.getNewPassword());
 
-		ResponseCookie cookie = CookieUtil.deleteCookie("emailToken");
+		ResponseCookie cookie = CookieUtil.deleteCookie("emailToken", "Strict");
 
 		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -126,7 +126,7 @@ public class UpdateUserInfoController {
 	public ResponseEntity<ApiResponse<Void>> updateEmail (
 		@AuthenticationPrincipal CustomUserDetails userDetails, @CookieValue(name = "emailToken") String emailToken) {
 		updateUserInfoService.updateEmail(userDetails.getUserId(), emailToken);
-		ResponseCookie cookie = CookieUtil.deleteCookie("emailToken");
+		ResponseCookie cookie = CookieUtil.deleteCookie("emailToken", "Strict");
 		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
 			.body(ApiResponse.success(SuccessCode.OK));

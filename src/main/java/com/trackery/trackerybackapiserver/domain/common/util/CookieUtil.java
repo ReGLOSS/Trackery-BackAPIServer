@@ -62,12 +62,12 @@ public class CookieUtil {
 	 * @param key 삭제할 쿠키 key
 	 * @return 삭제될 쿠키 정보
 	 */
-	public static ResponseCookie deleteCookie(String key) {
+	public static ResponseCookie deleteCookie(String key, String sameSite) {
 		return ResponseCookie.from(key, "")
 			.httpOnly(true)
 			.path("/")
 			.maxAge(0)
-			.sameSite("Strict")
+			.sameSite(sameSite)
 			.build();
 	}
 
