@@ -471,7 +471,6 @@ public class GenericOAuthClient implements OAuthClient {
 		if (provider == null) {
 			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER);
 		}
-		
 		return switch (provider) {
 			case NAVER -> oAuthProperties.getNaver();
 			case KAKAO -> oAuthProperties.getKakao();
