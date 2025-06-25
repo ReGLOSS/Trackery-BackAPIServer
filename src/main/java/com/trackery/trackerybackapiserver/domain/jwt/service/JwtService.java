@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 2. 18.       durururuk       최초 생성
  * 25. 3. 28.		durururuk		리프레시 토큰 생성 메서드 추가
+ * 25. 6. 25.		inari			액세스 토큰 블랙리스트 기능 추가
  */
 @Slf4j
 @Component
@@ -129,7 +130,12 @@ public class JwtService {
 			JWTVerifier verifier = JWT.require(algorithm)
 				.withIssuer(projectDomain)
 				.build();
-			return verifier.verify(token);
+			DecodedJWT jwt = verifier.verify(token);
+			String jti = jwt.getId();
+			if (jti != null && jwtRedisService.isAccessTokenBlacklisted(jti)) {
+				throw new ApiException(ErrorCode.UNAUTHORIZED);
+			}
+			return jwt;
 
 		} catch (JWTVerificationException e) {
 			log.error(e.getMessage());
