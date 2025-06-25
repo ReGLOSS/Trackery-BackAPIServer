@@ -42,6 +42,7 @@ import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
  * 25. 3. 26.       inari       계정 연동 토큰 테스트 추가
  * 25. 6. 17.		inari		Spring-Rest-Docs api문서 추가
  * 25. 6. 23.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
+ * 25. 6. 25.        inari		 	리프레시 토큰 발급 테스트 추가
  */
 @WithMockUser
 @WebMvcTest({OAuthController.class, GlobalExceptionHandler.class})

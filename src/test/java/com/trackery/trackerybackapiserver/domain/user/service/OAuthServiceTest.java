@@ -39,6 +39,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  * -----------------------------------------------------------
  * 25. 3. 3.        inari       최초 생성
  * 25. 6. 24.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
+ * 25. 6. 25.        inari		 	리프레시 토큰 발급 테스트 추가
  */
 @ExtendWith(MockitoExtension.class)
 class OAuthServiceTest {
