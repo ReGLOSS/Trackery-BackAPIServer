@@ -21,6 +21,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.trackery.trackerybackapiserver.domain.common.util.GlobalExceptionHandler;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
@@ -187,6 +188,50 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		verify(oAuthLinkTokenService).validateToken(LINK_TOKEN);
 		verify(oAuthLinkTokenService).deleteToken(LINK_TOKEN);
+	}
+
+	@Test
+	@DisplayName("OAuth 계정 연동 토큰 생성 성공")
+	void OAuth_계정_연동_토큰_생성_성공() throws Exception {
+		// given
+		final String PROVIDER = "KAKAO";
+		final String EMAIL = "test@example.com";
+		final String GENERATED_TOKEN = "generated-link-token";
+
+		OAuthLinkRequestDto request = OAuthLinkRequestDto.builder()
+			.provider(PROVIDER)
+			.email(EMAIL)
+			.build();
+
+		when(oAuthLinkTokenService.createLinkToken(PROVIDER, EMAIL)).thenReturn(GENERATED_TOKEN);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(post("/api/users/oauth/link-account")
+				.contentType(MediaType.APPLICATION_JSON)
+				.content(objectMapper.writeValueAsString(request))
+				.with(csrf()));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.data.token").value(GENERATED_TOKEN))
+			.andExpect(jsonPath("$.data.provider").value(PROVIDER))
+			.andDo(document("oauth-link-success",
+				requestFields(
+					fieldWithPath("provider").description("OAuth 제공자 (KAKAO, GOOGLE, GITHUB, NAVER)"),
+					fieldWithPath("email").description("연동할 이메일 주소"),
+					fieldWithPath("linkAccount").description("계정 연동 여부").optional()
+				),
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.token").description("생성된 연동 토큰"),
+					fieldWithPath("data.provider").description("OAuth 제공자")
+				)
+			));
+
+		verify(oAuthLinkTokenService).createLinkToken(PROVIDER, EMAIL);
 	}
 
 	@Test
