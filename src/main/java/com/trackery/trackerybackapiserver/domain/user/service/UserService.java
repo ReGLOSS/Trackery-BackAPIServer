@@ -3,17 +3,20 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageS3Service;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
@@ -44,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 25.        durururuk       로그인 메서드 추가
  * 25. 2. 26.        durururuk       로그인 시 비활성유저인지 확인하는 로직 추가
  * 25. 4. 09.		 durururuk		 유저 상세 정보를 조회할 수 있는 메서드 추가
+ * 25. 6. 25.		 inari			 로그아웃 기능 추가
  */
 @Slf4j
 @Service
@@ -52,6 +56,7 @@ import lombok.extern.slf4j.Slf4j;
 public class UserService {
 	private final UserMapper userMapper;
 	private final JwtService jwtService;
+	private final JwtRedisService jwtRedisService;
 	private final UserRoleMapper userRoleMapper;
 	private final OAuthMapper oAuthMapper;
 	private final ImageS3Service imageS3Service;
@@ -179,5 +184,28 @@ public class UserService {
 			user.getNickname(),
 			userProfilePicPresignedUrl
 		);
+	}
+
+	/**
+	 * 로그아웃 처리를 수행하는 메서드입니다.
+	 * 액세스 토큰을 블랙리스트에 추가하고, 리프레시 토큰을 Redis에서 삭제합니다.
+	 * 클라이언트 쿠키도 삭제하는 헤더를 반환합니다.
+	 * @param accessToken 액세스 토큰
+	 * @param refreshToken 리프레시 토큰
+	 * @return 쿠키 삭제 헤더
+	 */
+	public HttpHeaders logout(String accessToken, String refreshToken) {
+		DecodedJWT decodedAccessToken = jwtService.verifyJwt(accessToken);
+		String jti = decodedAccessToken.getId();
+		long expirationTime = decodedAccessToken.getExpiresAt().getTime() / 1000 - System.currentTimeMillis() / 1000;
+		if (expirationTime > 0) {
+			jwtRedisService.addAccessTokenToBlacklist(jti, expirationTime);
+		}
+		jwtRedisService.deleteRefreshToken(refreshToken);
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Set-Cookie", CookieUtil.deleteCookie("accessToken", "Strict").toString());
+		headers.add("Set-Cookie", CookieUtil.deleteCookie("refreshToken", "Strict").toString());
+		headers.add("Set-Cookie", CookieUtil.deleteCookie("SESSION", "Lax").toString());
+		return headers;
 	}
 }

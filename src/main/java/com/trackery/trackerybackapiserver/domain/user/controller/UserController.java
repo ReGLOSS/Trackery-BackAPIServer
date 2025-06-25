@@ -44,6 +44,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 2. 25.        durururuk      로그인 메서드 추가
  * 25. 4. 09.		 durururuk		상세 정보 조회 API 추가
  * 25. 4. 10.		 durururuk		인증 기반 비밀번호 변경 API 추가
+ * 25. 6. 25.		 inari			 로그아웃 기능 추가
  */
 @RestController
 @RequestMapping("/api/users")
@@ -71,8 +72,8 @@ public class UserController {
 			Duration.ofMinutes(60));
 		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", authTokenDto.refreshToken(),
 			Duration.ofDays(7));
-		ResponseCookie emailTokenCookie = CookieUtil.deleteCookie("emailToken");
-		ResponseCookie userNameTokenCookie = CookieUtil.deleteCookie("userNameToken");
+		ResponseCookie emailTokenCookie = CookieUtil.deleteCookie("emailToken", "Strict");
+		ResponseCookie userNameTokenCookie = CookieUtil.deleteCookie("userNameToken", "Strict");
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.headers(httpHeaders -> {
@@ -138,5 +139,24 @@ public class UserController {
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		DetailedUserInfoDto result = userService.getDetailedUserInfoByUserId(userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
+	}
+
+	/**
+	 * 로그아웃 API
+	 * 액세스 토큰을 블랙리스트에 추가하고, 리프레시 토큰을 Redis에서 삭제합니다.
+	 * 클라이언트 쿠키도 삭제하여 완전한 로그아웃을 처리합니다.
+	 * @param accessToken 액세스 토큰 (쿠키에서 추출)
+	 * @param refreshToken 리프레시 토큰 (쿠키에서 추출)
+	 * @return 로그아웃 성공 응답
+	 */
+	@PostMapping("/logout")
+	public ResponseEntity<ApiResponse<String>> logout(
+		@CookieValue(name = "accessToken") String accessToken,
+		@CookieValue(name = "refreshToken") String refreshToken) {
+		HttpHeaders headers = userService.logout(accessToken, refreshToken);
+
+		return ResponseEntity.ok()
+			.headers(headers)
+			.body(ApiResponse.success(SuccessCode.OK));
 	}
 }
