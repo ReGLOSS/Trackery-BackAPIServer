@@ -52,6 +52,7 @@ import jakarta.servlet.http.Cookie;
  * 25. 4. 10.		 durururuk	    인증 기반 비밀번호 변경 컨트롤러 mockMvc 테스트 작성
  * 25. 6. 17.		 inari		    Spring-Rest-Docs api문서 추가
  * 25. 6. 25.		 inari		    로그아웃 테스트 작성
+ * 25. 6. 26.		 inari		    회원 탈퇴 테스트 작성
  */
 @WebMvcTest(UserController.class)
 class UserControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -265,5 +266,44 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			));
 		
 		verify(userService, times(1)).logout(accessToken, refreshToken);
+	}
+
+	@Test
+	@DisplayName("회원탈퇴 성공")
+	void 회원탈퇴_성공() throws Exception {
+		String accessToken = "validAccessToken";
+		String refreshToken = "validRefreshToken";
+		Long userId = 1L;
+		
+		CustomUserDetails customUserDetails = new CustomUserDetails(userId, "testuser", 1L);
+		
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Set-Cookie", "accessToken=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0");
+		headers.add("Set-Cookie", "refreshToken=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0");
+		headers.add("Set-Cookie", "SESSION=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
+		
+		when(userService.deleteUser(userId, accessToken, refreshToken)).thenReturn(headers);
+		
+		ResultActions result = mockMvc
+			.perform(delete("/api/users/delete")
+				.contentType(MediaType.APPLICATION_JSON)
+				.cookie(new Cookie("accessToken", accessToken))
+				.cookie(new Cookie("refreshToken", refreshToken))
+				.with(user(customUserDetails))
+				.with(csrf())
+			);
+		
+		result
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value("200"))
+			.andExpect(jsonPath("$.message").value("Ok"))
+			.andDo(document("delete-user-success",
+				relaxedResponseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지")
+				)
+			));
+		
+		verify(userService, times(1)).deleteUser(userId, accessToken, refreshToken);
 	}
 }
