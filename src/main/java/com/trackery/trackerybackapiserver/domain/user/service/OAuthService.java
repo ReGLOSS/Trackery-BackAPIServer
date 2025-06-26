@@ -51,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 23.        inari		 기존 유저에 간편 로그인 연동 추가
  * 25. 6. 24.        inari		 linkToken을 이용하는 방식으로 변경 및 안쓰는 코드 제거
  * 25. 6. 25.        inari		 리프레시 토큰 발급 추가
+ * 25. 6. 26.        inari		 "state=" 상수화로 코드 스멜 제거
  */
 @Slf4j
 @Service
@@ -64,6 +65,7 @@ public class OAuthService {
 	private final OAuthClient oAuthClient;
 	private final OAuthProperties oAuthProperties;
 	private final SecureRandom random = new SecureRandom();
+	private static final String STATE = "state=";
 
 	/**
 	 * OAuth 로그인 처리 매서드입니다.
@@ -326,24 +328,24 @@ public class OAuthService {
 				originalState = "random_state";
 			}
 			stateValue = originalState + "_" + linkToken;
-			if (baseUrl.contains("state=")) {
-				authUrl = baseUrl.replaceAll("state=[^&]*", "state="
+			if (baseUrl.contains(STATE)) {
+				authUrl = baseUrl.replaceAll("state=[^&]*", STATE
 					+ URLEncoder.encode(stateValue, StandardCharsets.UTF_8));
 			} else {
 				String connector = baseUrl.contains("?") ? "&" : "?";
-				authUrl = baseUrl + connector + "state=" + URLEncoder.encode(stateValue, StandardCharsets.UTF_8);
+				authUrl = baseUrl + connector + STATE + URLEncoder.encode(stateValue, StandardCharsets.UTF_8);
 			}
 			log.info("네이버 URL 생성: 원본state={}, 새state={}, authUrl={}",
 				providerProps.getState(), stateValue, authUrl);
 		} else {
 			// 다른 제공자들도 state에 link_token 포함 (OAuth 콜백에서 파라미터 유지 안되므로)
 			stateValue = "link_" + linkToken;
-			if (baseUrl.contains("state=")) {
-				authUrl = baseUrl.replaceAll("state=[^&]*", "state="
+			if (baseUrl.contains(STATE)) {
+				authUrl = baseUrl.replaceAll("state=[^&]*", STATE
 					+ URLEncoder.encode(stateValue, StandardCharsets.UTF_8));
 			} else {
 				String connector = baseUrl.contains("?") ? "&" : "?";
-				authUrl = baseUrl + connector + "state=" + URLEncoder.encode(stateValue, StandardCharsets.UTF_8);
+				authUrl = baseUrl + connector + STATE + URLEncoder.encode(stateValue, StandardCharsets.UTF_8);
 			}
 			log.info("{} URL 생성: 원본URL={}, 최종URL={}, state={}",
 				provider, baseUrl, authUrl, stateValue);
