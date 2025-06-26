@@ -55,18 +55,21 @@
         WHERE email = #{email})
     </select>
 
+    <!-- 사용자 ID로 비밀번호 및 솔트 업데이트 -->
     <update id="updatePasswordByUserId" parameterType="com.trackery.trackerybackapiserver.domain.user.dto.update.UpdatePasswordDto">
         UPDATE user
         SET password = #{password}, salt = #{salt}
         WHERE user_Id = #{userId}
     </update>
 
+    <!-- 사용자 ID로 닉네임 업데이트 -->
     <update id="updateNicknameByUserId">
         UPDATE user
         SET nickname = #{nickname}
         WHERE user_id = #{userId}
     </update>
 
+    <!-- 사용자 ID로 활성 사용자 존재 여부 확인 -->
     <select id="isExistsUser" parameterType="Long">
         SELECT EXISTS (SELECT 1 FROM user WHERE userId = #{userId} AND status = 1)
     </select>
@@ -76,12 +79,14 @@
         SELECT EXISTS (SELECT 1 FROM user WHERE user_id = #{userId} AND status = 1)
     </select>
 
+    <!-- 사용자 ID로 사용자명 업데이트 -->
     <update id="updateUserNameByUserId">
         UPDATE user
         SET username = #{userName}
         WHERE user_id = #{userId}
     </update>
 
+    <!-- 사용자 ID로 이메일 업데이트 -->
     <update id="updateEmailByUserId">
         UPDATE user
         SET email = #{email}

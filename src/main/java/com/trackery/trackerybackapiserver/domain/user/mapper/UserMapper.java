@@ -21,7 +21,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
  * 25. 2. 24.        inari         주석 추가
  * 25. 2. 25.        inari         fingByEmail, isExistsEmail 추가
  * 25. 3. 6.		 durururuk	   비밀번호 업데이트 추가
- * 25. 6. 26.		 inari	   	   회원 탈퇴 기능 추가
+ * 25. 6. 26.		 inari	   	   자바독 추가 및 회원 탈퇴 기능 추가
  */
 @Mapper
 public interface UserMapper {
@@ -78,13 +78,38 @@ public interface UserMapper {
 	 */
 	Optional<User> findByUserName(String userName);
 
+	/**
+	 * 사용자 ID로 비밀번호와 솔트를 업데이트합니다.
+	 *
+	 * @param userId 업데이트할 사용자 ID
+	 * @param password 새로운 암호화된 비밀번호
+	 * @param salt 새로운 솔트 값
+	 */
 	void updatePasswordByUserId(@Param("userId") Long userId, @Param("password") String password,
 		@Param("salt") String salt);
 
+	/**
+	 * 사용자 ID로 닉네임을 업데이트합니다.
+	 *
+	 * @param userId 업데이트할 사용자 ID
+	 * @param nickname 새로운 닉네임
+	 */
 	void updateNicknameByUserId(@Param("userId") Long userId, @Param("nickname") String nickname);
 
+	/**
+	 * 사용자 ID로 사용자명을 업데이트합니다.
+	 *
+	 * @param userId 업데이트할 사용자 ID
+	 * @param userName 새로운 사용자명
+	 */
 	void updateUserNameByUserId(@Param("userId") Long userId, @Param("userName") String userName);
 
+	/**
+	 * 사용자 ID로 이메일을 업데이트합니다.
+	 *
+	 * @param userId 업데이트할 사용자 ID
+	 * @param email 새로운 이메일 주소
+	 */
 	void updateEmailByUserId(@Param("userId") Long userId, @Param("email") String email);
 
 	/**
