@@ -43,19 +43,20 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
 
 /**
- *packageName    : com.trackery.trackerybackapiserver.domain.user.service
-
- fileName       : UserServiceTest
- author         : durururuk
- date           : 25. 2. 14.
- description    : UserService 테스트코드
- ===========================================================
- DATE              AUTHOR             NOTE
- -----------------------------------------------------------
- 25. 2. 14.        durururuk       최초 생성
- 25. 4. 09.		   durururuk	   유저 상세정보 서비스 테스트 코드 작성
- 25. 4. 10.		   durururuk	   인증 기반 비밀번호 변경 서비스 단위테스트 코드 작성
- 25. 4. 27.		   inari	       사이드탭 추가용 서비스 단위테스트 코드 작성
+ * packageName    : com.trackery.trackerybackapiserver.domain.user.service
+ * fileName       : UserServiceTest
+ * author         : durururuk
+ * date           : 25. 2. 14.
+ * description    : UserService 테스트코드
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 2. 14.        durururuk      최초 생성
+ * 25. 4. 09.		 durururuk	    유저 상세정보 서비스 테스트 코드 작성
+ * 25. 4. 10.	 	 durururuk	    인증 기반 비밀번호 변경 서비스 단위테스트 코드 작성
+ * 25. 4. 27.		 inari	        사이드탭 추가용 서비스 단위테스트 코드 작성
+ * 25. 6. 25.		 inari		    로그아웃 테스트 작성
+ * 25. 6. 26.		 inari		    회원 탈퇴 테스트 작성
  */
 
 @ExtendWith(MockitoExtension.class)
@@ -348,14 +349,11 @@ class UserServiceTest {
 			when(decodedAccessToken.getId()).thenReturn(jti);
 			when(decodedAccessToken.getExpiresAt()).thenReturn(expirationDate);
 			
-			HttpHeaders result = userService.logout(accessToken, refreshToken);
+			userService.logout(accessToken, refreshToken);
 			
 			verify(jwtService, times(1)).verifyJwt(accessToken);
 			verify(jwtRedisService, times(1)).addAccessTokenToBlacklist(eq(jti), anyLong());
 			verify(jwtRedisService, times(1)).deleteRefreshToken(refreshToken);
-			
-			assertNotNull(result);
-			assertTrue(result.get("Set-Cookie").size() >= 3);
 		}
 
 		@Test
@@ -372,14 +370,61 @@ class UserServiceTest {
 			when(decodedAccessToken.getId()).thenReturn(jti);
 			when(decodedAccessToken.getExpiresAt()).thenReturn(expiredDate);
 			
-			HttpHeaders result = userService.logout(accessToken, refreshToken);
+			userService.logout(accessToken, refreshToken);
 			
 			verify(jwtService, times(1)).verifyJwt(accessToken);
 			verify(jwtRedisService, times(0)).addAccessTokenToBlacklist(anyString(), anyLong());
 			verify(jwtRedisService, times(1)).deleteRefreshToken(refreshToken);
+		}
+	}
+
+	@Nested
+	@DisplayName("회원 탈퇴 테스트")
+	class deleteUserTest {
+		
+		@Test
+		@DisplayName("성공")
+		void success() {
+			Long userId = 1L;
+			String accessToken = "validAccessToken";
+			String refreshToken = "validRefreshToken";
+			String jti = "jti-12345";
 			
-			assertNotNull(result);
-			assertTrue(result.get("Set-Cookie").size() >= 3);
+			DecodedJWT decodedAccessToken = mock(DecodedJWT.class);
+			Date expirationDate = new Date(System.currentTimeMillis() + 3600000);
+			
+			when(userMapper.existsByUserId(userId)).thenReturn(true);
+			when(jwtService.verifyJwt(accessToken)).thenReturn(decodedAccessToken);
+			when(decodedAccessToken.getId()).thenReturn(jti);
+			when(decodedAccessToken.getExpiresAt()).thenReturn(expirationDate);
+			
+			userService.deleteUser(userId, accessToken, refreshToken);
+			
+			verify(userMapper, times(1)).existsByUserId(userId);
+			verify(userMapper, times(1)).deleteUserByUserId(eq(userId), anyString(), anyString(), anyString(), anyString(), anyString());
+			verify(oAuthMapper, times(1)).deleteByUserId(userId);
+			verify(jwtService, times(1)).verifyJwt(accessToken);
+			verify(jwtRedisService, times(1)).addAccessTokenToBlacklist(eq(jti), anyLong());
+			verify(jwtRedisService, times(1)).deleteRefreshToken(refreshToken);
+		}
+
+		@Test
+		@DisplayName("실패 - 존재하지 않는 사용자")
+		void failure_userNotFound() {
+			Long userId = 999L;
+			String accessToken = "validAccessToken";
+			String refreshToken = "validRefreshToken";
+			
+			when(userMapper.existsByUserId(userId)).thenReturn(false);
+			
+			ApiException exception = assertThrows(ApiException.class, 
+				() -> userService.deleteUser(userId, accessToken, refreshToken));
+			
+			assertEquals(ErrorCode.NOT_FOUND_USER, exception.getErrorCode());
+			
+			verify(userMapper, times(1)).existsByUserId(userId);
+			verify(userMapper, times(0)).deleteUserByUserId(anyLong(), anyString(), anyString(), anyString(), anyString(), anyString());
+			verify(oAuthMapper, times(0)).deleteByUserId(anyLong());
 		}
 	}
 }

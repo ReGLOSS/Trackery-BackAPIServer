@@ -217,3 +217,30 @@ include::{snippets}/update-user-info-success/request-fields.adoc[]
 include::{snippets}/update-user-info-success/http-response.adoc[]
 include::{snippets}/update-user-info-success/response-fields.adoc[]
 '''
+
+=== 회원 탈퇴 API
+==== DELETE /api/users/delete
+
+인증된 사용자의 회원 탈퇴를 처리하는 API입니다.
+사용자의 개인정보를 익명화하고 상태를 탈퇴(0)로 변경합니다.
+모든 OAuth 연동 정보도 함께 삭제되며, 해당 사용자의 모든 JWT 토큰을 무효화합니다.
+
+===== 처리 과정
+1. 사용자 정보 익명화 (이메일, 사용자명, 닉네임을 랜덤 식별자로 변경, 비밀번호 무작위화)
+2. OAuth 연동 정보 완전 삭제
+3. 액세스 토큰 블랙리스트 등록
+4. 리프레시 토큰 Redis에서 삭제
+5. 클라이언트 쿠키 삭제 (컨트롤러에서 처리)
+
+===== 요청
+include::{snippets}/delete-user-success/http-request.adoc[]
+
+===== 응답
+include::{snippets}/delete-user-success/http-response.adoc[]
+include::{snippets}/delete-user-success/response-fields.adoc[]
+
+===== 주의사항
+- 회원 탈퇴 후에는 복구가 불가능합니다
+- 모든 간편로그인 연동이 해제됩니다
+- 탈퇴 처리 후 즉시 로그아웃됩니다
+'''

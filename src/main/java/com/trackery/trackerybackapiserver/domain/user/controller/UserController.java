@@ -8,6 +8,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,11 +46,20 @@ import lombok.RequiredArgsConstructor;
  * 25. 4. 09.		 durururuk		상세 정보 조회 API 추가
  * 25. 4. 10.		 durururuk		인증 기반 비밀번호 변경 API 추가
  * 25. 6. 25.		 inari			 로그아웃 기능 추가
+ * 25. 6. 26.		 inari			 회원 탈퇴 기능 추가
  */
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 public class UserController {
+
+	public static final String REFRESH_TOKEN = "refreshToken";
+	public static final String ACCESS_TOKEN = "accessToken";
+	public static final String SESSION = "SESSION";
+	public static final String EMAIL_TOKEN = "emailToken";
+	public static final String USERNAME_TOKEN = "userNameToken";
+	public static final String STRICT = "Strict";
+	public static final String LAX = "Lax";
 
 	/**
 	 * 사용자 서비스 객체입니다.
@@ -63,17 +73,17 @@ public class UserController {
 	 * @return : 성공, 실패 여부 응답
 	 */
 	@PostMapping("/register")
-	public ResponseEntity<ApiResponse<String>> register(@CookieValue(name = "emailToken") String emailToken,
-		@CookieValue(name = "userNameToken") String userNameToken,
+	public ResponseEntity<ApiResponse<String>> register(@CookieValue(name = EMAIL_TOKEN) String emailToken,
+		@CookieValue(name = USERNAME_TOKEN) String userNameToken,
 		@Valid @RequestBody UserRegisterDto userRegisterDto) {
 		AuthTokenDto authTokenDto = userService.registerUser(emailToken, userNameToken, userRegisterDto);
 
-		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", authTokenDto.accessToken(),
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie(ACCESS_TOKEN, authTokenDto.accessToken(),
 			Duration.ofMinutes(60));
-		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", authTokenDto.refreshToken(),
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie(REFRESH_TOKEN, authTokenDto.refreshToken(),
 			Duration.ofDays(7));
-		ResponseCookie emailTokenCookie = CookieUtil.deleteCookie("emailToken", "Strict");
-		ResponseCookie userNameTokenCookie = CookieUtil.deleteCookie("userNameToken", "Strict");
+		ResponseCookie emailTokenCookie = CookieUtil.deleteCookie(EMAIL_TOKEN, STRICT);
+		ResponseCookie userNameTokenCookie = CookieUtil.deleteCookie(USERNAME_TOKEN, STRICT);
 
 		return ResponseEntity.status(HttpStatus.CREATED)
 			.headers(httpHeaders -> {
@@ -95,9 +105,9 @@ public class UserController {
 	public ResponseEntity<ApiResponse<String>> login(@Valid @RequestBody UserLoginDto userLoginDto) {
 		AuthTokenDto authTokenDto = userService.login(userLoginDto);
 
-		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie("accessToken", authTokenDto.accessToken(),
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie(ACCESS_TOKEN, authTokenDto.accessToken(),
 			Duration.ofMinutes(60));
-		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie("refreshToken", authTokenDto.refreshToken(),
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie(REFRESH_TOKEN, authTokenDto.refreshToken(),
 			Duration.ofDays(7));
 
 		return ResponseEntity.ok()
@@ -117,7 +127,7 @@ public class UserController {
 		UserNameAvailabilityResponseDto result = userService.checkUsernameAvailability(value);
 
 		if (result.available()) {
-			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("userNameToken", result.token(),
+			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie(USERNAME_TOKEN, result.token(),
 				Duration.ofMinutes(10));
 
 			return ResponseEntity.ok()
@@ -151,12 +161,47 @@ public class UserController {
 	 */
 	@PostMapping("/logout")
 	public ResponseEntity<ApiResponse<String>> logout(
-		@CookieValue(name = "accessToken") String accessToken,
-		@CookieValue(name = "refreshToken") String refreshToken) {
-		HttpHeaders headers = userService.logout(accessToken, refreshToken);
+		@CookieValue(name = ACCESS_TOKEN) String accessToken,
+		@CookieValue(name = REFRESH_TOKEN) String refreshToken) {
+		userService.logout(accessToken, refreshToken);
+		HttpHeaders headers = createCookieDeletionHeaders();
 
 		return ResponseEntity.ok()
 			.headers(headers)
 			.body(ApiResponse.success(SuccessCode.OK));
+	}
+
+	/**
+	 * 회원탈퇴 API
+	 * 사용자의 개인정보를 익명화하고 상태를 탈퇴로 변경합니다.
+	 * 모든 JWT 토큰을 무효화하고 쿠키를 삭제하여 완전한 탈퇴 처리를 합니다.
+	 * @param userDetails 인증된 사용자 정보
+	 * @param accessToken 액세스 토큰 (쿠키에서 추출)
+	 * @param refreshToken 리프레시 토큰 (쿠키에서 추출)
+	 * @return 회원탈퇴 성공 응답
+	 */
+	@DeleteMapping("/delete")
+	public ResponseEntity<ApiResponse<String>> deleteUser(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@CookieValue(name = ACCESS_TOKEN) String accessToken,
+		@CookieValue(name = REFRESH_TOKEN) String refreshToken) {
+		userService.deleteUser(userDetails.getUserId(), accessToken, refreshToken);
+		HttpHeaders headers = createCookieDeletionHeaders();
+
+		return ResponseEntity.ok()
+			.headers(headers)
+			.body(ApiResponse.success(SuccessCode.OK));
+	}
+
+	/**
+	 * 인증 관련 쿠키들을 삭제하는 HttpHeaders를 생성하는 헬퍼 메서드입니다.
+	 * @return 쿠키 삭제 헤더
+	 */
+	private HttpHeaders createCookieDeletionHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(HttpHeaders.SET_COOKIE, CookieUtil.deleteCookie(ACCESS_TOKEN, STRICT).toString());
+		headers.add(HttpHeaders.SET_COOKIE, CookieUtil.deleteCookie(REFRESH_TOKEN, STRICT).toString());
+		headers.add(HttpHeaders.SET_COOKIE, CookieUtil.deleteCookie(SESSION, LAX).toString());
+		return headers;
 	}
 }
