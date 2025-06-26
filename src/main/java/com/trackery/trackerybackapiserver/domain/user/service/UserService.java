@@ -224,7 +224,7 @@ public class UserService {
 	/**
 	 * 회원탈퇴 처리를 수행하는 메서드입니다.
 	 * 사용자의 개인정보를 익명화하고 상태를 탈퇴(0)로 변경합니다.
-	 * 동시에 해당 사용자의 모든 JWT 토큰을 무효화합니다.
+	 * OAuth 연동 정보도 모두 삭제하며, 해당 사용자의 모든 JWT 토큰을 무효화합니다.
 	 * @param userId 탈퇴할 사용자 ID
 	 * @param accessToken 현재 액세스 토큰
 	 * @param refreshToken 현재 리프레시 토큰
@@ -243,6 +243,8 @@ public class UserService {
 
 		userMapper.deleteUserByUserId(userId, anonymizedEmail, anonymizedUserName,
 			anonymizedNickname, randomPassword, randomSalt);
+
+		oAuthMapper.deleteByUserId(userId);
 
 		DecodedJWT decodedAccessToken = jwtService.verifyJwt(accessToken);
 		String jti = decodedAccessToken.getId();
