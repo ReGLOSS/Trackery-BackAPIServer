@@ -8,6 +8,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.CookieValue;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,6 +46,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 4. 09.		 durururuk		상세 정보 조회 API 추가
  * 25. 4. 10.		 durururuk		인증 기반 비밀번호 변경 API 추가
  * 25. 6. 25.		 inari			 로그아웃 기능 추가
+ * 25. 6. 26.		 inari			 회원 탈퇴 기능 추가
  */
 @RestController
 @RequestMapping("/api/users")
@@ -154,6 +156,27 @@ public class UserController {
 		@CookieValue(name = "accessToken") String accessToken,
 		@CookieValue(name = "refreshToken") String refreshToken) {
 		HttpHeaders headers = userService.logout(accessToken, refreshToken);
+
+		return ResponseEntity.ok()
+			.headers(headers)
+			.body(ApiResponse.success(SuccessCode.OK));
+	}
+
+	/**
+	 * 회원탈퇴 API
+	 * 사용자의 개인정보를 익명화하고 상태를 탈퇴로 변경합니다.
+	 * 모든 JWT 토큰을 무효화하고 쿠키를 삭제하여 완전한 탈퇴 처리를 합니다.
+	 * @param userDetails 인증된 사용자 정보
+	 * @param accessToken 액세스 토큰 (쿠키에서 추출)
+	 * @param refreshToken 리프레시 토큰 (쿠키에서 추출)
+	 * @return 회원탈퇴 성공 응답
+	 */
+	@DeleteMapping("/delete")
+	public ResponseEntity<ApiResponse<String>> deleteUser(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@CookieValue(name = "accessToken") String accessToken,
+		@CookieValue(name = "refreshToken") String refreshToken) {
+		HttpHeaders headers = userService.deleteUser(userDetails.getUserId(), accessToken, refreshToken);
 
 		return ResponseEntity.ok()
 			.headers(headers)

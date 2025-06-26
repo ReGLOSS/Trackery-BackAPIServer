@@ -2,6 +2,7 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -48,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 26.        durururuk       로그인 시 비활성유저인지 확인하는 로직 추가
  * 25. 4. 09.		 durururuk		 유저 상세 정보를 조회할 수 있는 메서드 추가
  * 25. 6. 25.		 inari			 로그아웃 기능 추가
+ * 25. 6. 26.		 inari			 회원 탈퇴 기능 추가
  */
 @Slf4j
 @Service
@@ -60,6 +62,8 @@ public class UserService {
 	private final UserRoleMapper userRoleMapper;
 	private final OAuthMapper oAuthMapper;
 	private final ImageS3Service imageS3Service;
+	private static final String SET_COOKIE_HEADER = "Set-Cookie";
+
 
 	/**
 	 * 회원가입 정보를 담아서 db에 인서트하는 메서드입니다.
@@ -187,6 +191,18 @@ public class UserService {
 	}
 
 	/**
+	 * 인증 관련 쿠키들을 삭제하는 HttpHeaders를 생성하는 헬퍼 메서드입니다.
+	 * @return 쿠키 삭제 헤더
+	 */
+	private HttpHeaders clearAuthCookieHeaders() {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add(SET_COOKIE_HEADER, CookieUtil.deleteCookie("accessToken", "Strict").toString());
+		headers.add(SET_COOKIE_HEADER, CookieUtil.deleteCookie("refreshToken", "Strict").toString());
+		headers.add(SET_COOKIE_HEADER, CookieUtil.deleteCookie("SESSION", "Lax").toString());
+		return headers;
+	}
+
+	/**
 	 * 로그아웃 처리를 수행하는 메서드입니다.
 	 * 액세스 토큰을 블랙리스트에 추가하고, 리프레시 토큰을 Redis에서 삭제합니다.
 	 * 클라이언트 쿠키도 삭제하는 헤더를 반환합니다.
@@ -202,10 +218,40 @@ public class UserService {
 			jwtRedisService.addAccessTokenToBlacklist(jti, expirationTime);
 		}
 		jwtRedisService.deleteRefreshToken(refreshToken);
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Set-Cookie", CookieUtil.deleteCookie("accessToken", "Strict").toString());
-		headers.add("Set-Cookie", CookieUtil.deleteCookie("refreshToken", "Strict").toString());
-		headers.add("Set-Cookie", CookieUtil.deleteCookie("SESSION", "Lax").toString());
-		return headers;
+		return clearAuthCookieHeaders();
+	}
+
+	/**
+	 * 회원탈퇴 처리를 수행하는 메서드입니다.
+	 * 사용자의 개인정보를 익명화하고 상태를 탈퇴(0)로 변경합니다.
+	 * 동시에 해당 사용자의 모든 JWT 토큰을 무효화합니다.
+	 * @param userId 탈퇴할 사용자 ID
+	 * @param accessToken 현재 액세스 토큰
+	 * @param refreshToken 현재 리프레시 토큰
+	 * @return 쿠키 삭제 헤더
+	 */
+	public HttpHeaders deleteUser(Long userId, String accessToken, String refreshToken) {
+		if (!userMapper.existsByUserId(userId)) {
+			throw new ApiException(ErrorCode.NOT_FOUND_USER);
+		}
+
+		String anonymizedEmail = "deleted_user_" + userId + "@deleted.com";
+		String anonymizedUserName = "deleted_user_" + userId;
+		String anonymizedNickname = "탈퇴한 사용자_" + userId;
+		String randomPassword = UUID.randomUUID().toString();
+		String randomSalt = UUID.randomUUID().toString();
+
+		userMapper.deleteUserByUserId(userId, anonymizedEmail, anonymizedUserName,
+			anonymizedNickname, randomPassword, randomSalt);
+
+		DecodedJWT decodedAccessToken = jwtService.verifyJwt(accessToken);
+		String jti = decodedAccessToken.getId();
+		long expirationTime = decodedAccessToken.getExpiresAt().getTime() / 1000 - System.currentTimeMillis() / 1000;
+		if (expirationTime > 0) {
+			jwtRedisService.addAccessTokenToBlacklist(jti, expirationTime);
+		}
+		jwtRedisService.deleteRefreshToken(refreshToken);
+
+		return clearAuthCookieHeaders();
 	}
 }
