@@ -71,6 +71,11 @@
         SELECT EXISTS (SELECT 1 FROM user WHERE userId = #{userId} AND status = 1)
     </select>
 
+    <!-- 주어진 사용자 ID가 존재하는지 확인하는 쿼리 -->
+    <select id="existsByUserId" resultType="boolean" parameterType="Long">
+        SELECT EXISTS (SELECT 1 FROM user WHERE user_id = #{userId} AND status = 1)
+    </select>
+
     <update id="updateUserNameByUserId">
         UPDATE user
         SET username = #{userName}
@@ -80,6 +85,19 @@
     <update id="updateEmailByUserId">
         UPDATE user
         SET email = #{email}
+        WHERE user_id = #{userId}
+    </update>
+
+    <!-- 사용자 논리적 삭제 및 개인정보 익명화 -->
+    <update id="deleteUserByUserId">
+        UPDATE user
+        SET status = 0,
+            email = #{email},
+            username = #{userName},
+            nickname = #{nickname},
+            password = #{password},
+            salt = #{salt},
+            user_profile = NULL
         WHERE user_id = #{userId}
     </update>
 </mapper>

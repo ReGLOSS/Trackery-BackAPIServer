@@ -21,6 +21,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
  * 25. 2. 24.        inari         주석 추가
  * 25. 2. 25.        inari         fingByEmail, isExistsEmail 추가
  * 25. 3. 6.		 durururuk	   비밀번호 업데이트 추가
+ * 25. 6. 26.		 inari	   	   회원 탈퇴 기능 추가
  */
 @Mapper
 public interface UserMapper {
@@ -77,11 +78,34 @@ public interface UserMapper {
 	 */
 	Optional<User> findByUserName(String userName);
 
-	void updatePasswordByUserId(@Param("userId") Long userId, @Param("password") String password, @Param("salt") String salt);
+	void updatePasswordByUserId(@Param("userId") Long userId, @Param("password") String password,
+		@Param("salt") String salt);
 
 	void updateNicknameByUserId(@Param("userId") Long userId, @Param("nickname") String nickname);
 
 	void updateUserNameByUserId(@Param("userId") Long userId, @Param("userName") String userName);
 
 	void updateEmailByUserId(@Param("userId") Long userId, @Param("email") String email);
+
+	/**
+	 * 주어진 사용자 ID가 존재하는지 확인합니다.
+	 *
+	 * @param userId 확인할 사용자 ID
+	 * @return 존재하면 true, 없으면 false
+	 */
+	boolean existsByUserId(Long userId);
+
+	/**
+	 * 사용자를 논리적으로 삭제하고 개인정보를 익명화합니다.
+	 *
+	 * @param userId 탈퇴할 사용자 ID
+	 * @param email 익명화된 이메일
+	 * @param userName 익명화된 사용자명
+	 * @param nickname 익명화된 닉네임
+	 * @param password 랜덤 패스워드
+	 * @param salt 랜덤 솔트
+	 */
+	void deleteUserByUserId(@Param("userId") Long userId, @Param("email") String email,
+		@Param("userName") String userName, @Param("nickname") String nickname,
+		@Param("password") String password, @Param("salt") String salt);
 }
