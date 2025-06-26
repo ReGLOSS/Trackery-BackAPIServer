@@ -349,14 +349,11 @@ class UserServiceTest {
 			when(decodedAccessToken.getId()).thenReturn(jti);
 			when(decodedAccessToken.getExpiresAt()).thenReturn(expirationDate);
 			
-			HttpHeaders result = userService.logout(accessToken, refreshToken);
+			userService.logout(accessToken, refreshToken);
 			
 			verify(jwtService, times(1)).verifyJwt(accessToken);
 			verify(jwtRedisService, times(1)).addAccessTokenToBlacklist(eq(jti), anyLong());
 			verify(jwtRedisService, times(1)).deleteRefreshToken(refreshToken);
-			
-			assertNotNull(result);
-			assertTrue(result.get("Set-Cookie").size() >= 3);
 		}
 
 		@Test
@@ -373,14 +370,11 @@ class UserServiceTest {
 			when(decodedAccessToken.getId()).thenReturn(jti);
 			when(decodedAccessToken.getExpiresAt()).thenReturn(expiredDate);
 			
-			HttpHeaders result = userService.logout(accessToken, refreshToken);
+			userService.logout(accessToken, refreshToken);
 			
 			verify(jwtService, times(1)).verifyJwt(accessToken);
 			verify(jwtRedisService, times(0)).addAccessTokenToBlacklist(anyString(), anyLong());
 			verify(jwtRedisService, times(1)).deleteRefreshToken(refreshToken);
-			
-			assertNotNull(result);
-			assertTrue(result.get("Set-Cookie").size() >= 3);
 		}
 	}
 
@@ -404,7 +398,7 @@ class UserServiceTest {
 			when(decodedAccessToken.getId()).thenReturn(jti);
 			when(decodedAccessToken.getExpiresAt()).thenReturn(expirationDate);
 			
-			HttpHeaders result = userService.deleteUser(userId, accessToken, refreshToken);
+			userService.deleteUser(userId, accessToken, refreshToken);
 			
 			verify(userMapper, times(1)).existsByUserId(userId);
 			verify(userMapper, times(1)).deleteUserByUserId(eq(userId), anyString(), anyString(), anyString(), anyString(), anyString());
@@ -412,9 +406,6 @@ class UserServiceTest {
 			verify(jwtService, times(1)).verifyJwt(accessToken);
 			verify(jwtRedisService, times(1)).addAccessTokenToBlacklist(eq(jti), anyLong());
 			verify(jwtRedisService, times(1)).deleteRefreshToken(refreshToken);
-			
-			assertNotNull(result);
-			assertTrue(result.get("Set-Cookie").size() >= 3);
 		}
 
 		@Test

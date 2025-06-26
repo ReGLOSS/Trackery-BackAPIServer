@@ -239,12 +239,7 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 		String accessToken = "validAccessToken";
 		String refreshToken = "validRefreshToken";
 		
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Set-Cookie", "accessToken=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0");
-		headers.add("Set-Cookie", "refreshToken=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0");
-		headers.add("Set-Cookie", "SESSION=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
-		
-		when(userService.logout(accessToken, refreshToken)).thenReturn(headers);
+		doNothing().when(userService).logout(accessToken, refreshToken);
 		
 		ResultActions result = mockMvc
 			.perform(post("/api/users/logout")
@@ -277,12 +272,7 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 		
 		CustomUserDetails customUserDetails = new CustomUserDetails(userId, "testuser", 1L);
 		
-		HttpHeaders headers = new HttpHeaders();
-		headers.add("Set-Cookie", "accessToken=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0");
-		headers.add("Set-Cookie", "refreshToken=; Path=/; HttpOnly; SameSite=Strict; Max-Age=0");
-		headers.add("Set-Cookie", "SESSION=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0");
-		
-		when(userService.deleteUser(userId, accessToken, refreshToken)).thenReturn(headers);
+		doNothing().when(userService).deleteUser(userId, accessToken, refreshToken);
 		
 		ResultActions result = mockMvc
 			.perform(delete("/api/users/delete")

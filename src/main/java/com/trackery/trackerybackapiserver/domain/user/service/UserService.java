@@ -4,14 +4,12 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.common.util.PasswordUtil;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageS3Service;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
@@ -62,7 +60,6 @@ public class UserService {
 	private final UserRoleMapper userRoleMapper;
 	private final OAuthMapper oAuthMapper;
 	private final ImageS3Service imageS3Service;
-	private static final String SET_COOKIE_HEADER = "Set-Cookie";
 
 
 	/**
@@ -190,27 +187,14 @@ public class UserService {
 		);
 	}
 
-	/**
-	 * 인증 관련 쿠키들을 삭제하는 HttpHeaders를 생성하는 헬퍼 메서드입니다.
-	 * @return 쿠키 삭제 헤더
-	 */
-	private HttpHeaders clearAuthCookieHeaders() {
-		HttpHeaders headers = new HttpHeaders();
-		headers.add(SET_COOKIE_HEADER, CookieUtil.deleteCookie("accessToken", "Strict").toString());
-		headers.add(SET_COOKIE_HEADER, CookieUtil.deleteCookie("refreshToken", "Strict").toString());
-		headers.add(SET_COOKIE_HEADER, CookieUtil.deleteCookie("SESSION", "Lax").toString());
-		return headers;
-	}
 
 	/**
 	 * 로그아웃 처리를 수행하는 메서드입니다.
 	 * 액세스 토큰을 블랙리스트에 추가하고, 리프레시 토큰을 Redis에서 삭제합니다.
-	 * 클라이언트 쿠키도 삭제하는 헤더를 반환합니다.
 	 * @param accessToken 액세스 토큰
 	 * @param refreshToken 리프레시 토큰
-	 * @return 쿠키 삭제 헤더
 	 */
-	public HttpHeaders logout(String accessToken, String refreshToken) {
+	public void logout(String accessToken, String refreshToken) {
 		DecodedJWT decodedAccessToken = jwtService.verifyJwt(accessToken);
 		String jti = decodedAccessToken.getId();
 		long expirationTime = decodedAccessToken.getExpiresAt().getTime() / 1000 - System.currentTimeMillis() / 1000;
@@ -218,7 +202,6 @@ public class UserService {
 			jwtRedisService.addAccessTokenToBlacklist(jti, expirationTime);
 		}
 		jwtRedisService.deleteRefreshToken(refreshToken);
-		return clearAuthCookieHeaders();
 	}
 
 	/**
@@ -228,16 +211,16 @@ public class UserService {
 	 * @param userId 탈퇴할 사용자 ID
 	 * @param accessToken 현재 액세스 토큰
 	 * @param refreshToken 현재 리프레시 토큰
-	 * @return 쿠키 삭제 헤더
 	 */
-	public HttpHeaders deleteUser(Long userId, String accessToken, String refreshToken) {
+	public void deleteUser(Long userId, String accessToken, String refreshToken) {
 		if (!userMapper.existsByUserId(userId)) {
 			throw new ApiException(ErrorCode.NOT_FOUND_USER);
 		}
 
-		String anonymizedEmail = "deleted_user_" + userId + "@deleted.com";
-		String anonymizedUserName = "deleted_user_" + userId;
-		String anonymizedNickname = "탈퇴한 사용자_" + userId;
+		String randomIdentifier = UUID.randomUUID().toString().substring(0, 8);
+		String anonymizedEmail = "deleted_user_" + randomIdentifier + "@deleted.com";
+		String anonymizedUserName = "deleted_user_" + randomIdentifier;
+		String anonymizedNickname = "탈퇴한 사용자_" + randomIdentifier;
 		String randomPassword = UUID.randomUUID().toString();
 		String randomSalt = UUID.randomUUID().toString();
 
@@ -253,7 +236,5 @@ public class UserService {
 			jwtRedisService.addAccessTokenToBlacklist(jti, expirationTime);
 		}
 		jwtRedisService.deleteRefreshToken(refreshToken);
-
-		return clearAuthCookieHeaders();
 	}
 }

@@ -226,11 +226,11 @@ include::{snippets}/update-user-info-success/response-fields.adoc[]
 모든 OAuth 연동 정보도 함께 삭제되며, 해당 사용자의 모든 JWT 토큰을 무효화합니다.
 
 ===== 처리 과정
-1. 사용자 정보 익명화 (이메일, 사용자명, 닉네임, 비밀번호)
+1. 사용자 정보 익명화 (이메일, 사용자명, 닉네임을 랜덤 식별자로 변경, 비밀번호 무작위화)
 2. OAuth 연동 정보 완전 삭제
 3. 액세스 토큰 블랙리스트 등록
 4. 리프레시 토큰 Redis에서 삭제
-5. 클라이언트 쿠키 삭제
+5. 클라이언트 쿠키 삭제 (컨트롤러에서 처리)
 
 ===== 요청
 include::{snippets}/delete-user-success/http-request.adoc[]
