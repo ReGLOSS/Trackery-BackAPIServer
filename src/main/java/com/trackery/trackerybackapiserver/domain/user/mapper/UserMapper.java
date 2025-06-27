@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.user.mapper;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -22,6 +23,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
  * 25. 2. 25.        inari         fingByEmail, isExistsEmail 추가
  * 25. 3. 6.		 durururuk	   비밀번호 업데이트 추가
  * 25. 6. 26.		 inari	   	   자바독 추가 및 회원 탈퇴 기능 추가
+ * 25. 6. 27.		 inari	   	   로그인시 lastlogin 갱신 추가
  */
 @Mapper
 public interface UserMapper {
@@ -119,6 +121,14 @@ public interface UserMapper {
 	 * @return 존재하면 true, 없으면 false
 	 */
 	boolean existsByUserId(Long userId);
+
+	/**
+	 * 사용자 ID로 마지막 로그인 시간을 업데이트합니다.
+	 *
+	 * @param userId 업데이트할 사용자 ID
+	 * @param lastLogin 마지막 로그인 시간
+	 */
+	void updateLastLoginByUserId(@Param("userId") Long userId, @Param("lastLogin") LocalDateTime lastLogin);
 
 	/**
 	 * 사용자를 논리적으로 삭제하고 개인정보를 익명화합니다.
