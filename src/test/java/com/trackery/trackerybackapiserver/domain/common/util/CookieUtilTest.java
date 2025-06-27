@@ -11,6 +11,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseCookie;
 
+import com.trackery.trackerybackapiserver.domain.common.enums.CookieName;
+import com.trackery.trackerybackapiserver.domain.common.enums.SameSitePolicy;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -26,6 +29,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * 25. 2. 26.       durururuk       최초 생성
  * 25. 2. 26.       durururuk       액세스토큰 쿠키 생성 성공 케이스 단위테스트 작성
  * 25. 4. 01.		durururuk		extractCookie 테스트 코드 작성
+ * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
  */
 class CookieUtilTest {
 
@@ -33,13 +37,13 @@ class CookieUtilTest {
 	void 액세스_토큰_쿠키_생성_성공() {
 		String jwt = "jwt";
 
-		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken" ,jwt, Duration.ofMinutes(60));
+		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie(CookieName.ACCESS_TOKEN.getValue() ,jwt, Duration.ofMinutes(60));
 
 		assertNotNull(cookie);
-		assertEquals("accessToken", cookie.getName());
+		assertEquals(CookieName.ACCESS_TOKEN.getValue(), cookie.getName());
 		assertEquals(jwt, cookie.getValue());
 		assertTrue(cookie.isHttpOnly());
-		assertEquals("Strict", cookie.getSameSite());
+		assertEquals(SameSitePolicy.STRICT.getValue(), cookie.getSameSite());
 		assertEquals("/", cookie.getPath());
 	}
 

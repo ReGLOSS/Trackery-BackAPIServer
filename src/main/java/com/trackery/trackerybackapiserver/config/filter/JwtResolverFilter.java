@@ -7,6 +7,7 @@ import org.springframework.http.ResponseCookie;
 import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.trackery.trackerybackapiserver.domain.common.enums.CookieName;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
@@ -32,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 19.        durururuk       최초 생성
+ * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -39,8 +41,6 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 
 	private final JwtService jwtService;
 	private final UserService userService;
-	private static final String ACCESS_TOKEN_COOKIE_NAME = "accessToken";
-	private static final String REFRESH_TOKEN_COOKIE_NAME = "refreshToken";
 
 	/**
 	 * 필터 흐름
@@ -52,10 +52,10 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 		@NonNull FilterChain filterChain) throws ServletException, IOException {
-		String accessToken = CookieUtil.extractCookieValue(request, ACCESS_TOKEN_COOKIE_NAME,
+		String accessToken = CookieUtil.extractCookieValue(request, CookieName.ACCESS_TOKEN.getValue(),
 			() -> reissueAccessTokenByRefreshToken(request, response));
 
-		request.setAttribute(ACCESS_TOKEN_COOKIE_NAME, accessToken);
+		request.setAttribute(CookieName.ACCESS_TOKEN.getValue(), accessToken);
 		filterChain.doFilter(request, response);
 	}
 
@@ -66,7 +66,7 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 	 * @return : 액세스 토큰
 	 */
 	private String reissueAccessTokenByRefreshToken(HttpServletRequest request, HttpServletResponse response) {
-		String refreshToken = CookieUtil.extractCookieValue(request, REFRESH_TOKEN_COOKIE_NAME,
+		String refreshToken = CookieUtil.extractCookieValue(request, CookieName.REFRESH_TOKEN.getValue(),
 			() -> {
 				throw new ApiException(ErrorCode.UNAUTHORIZED);
 			});
@@ -90,12 +90,10 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 	 * @param response : 응답 정보가 담긴 HttpServletResponse 객체
 	 */
 	private void addAuthCookiesToHeader(AuthTokenDto authTokenDto, HttpServletResponse response) {
-		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie(ACCESS_TOKEN_COOKIE_NAME,
-			authTokenDto.accessToken(),
-			Duration.ofMinutes(60));
-		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie(REFRESH_TOKEN_COOKIE_NAME,
-			authTokenDto.refreshToken(),
-			Duration.ofDays(7));
+		ResponseCookie accessTokenCookie = CookieUtil.createHttpOnlyCookie(
+			CookieName.ACCESS_TOKEN.getValue(), authTokenDto.accessToken(), Duration.ofMinutes(60));
+		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie(
+			CookieName.REFRESH_TOKEN.getValue(), authTokenDto.refreshToken(), Duration.ofDays(7));
 
 		response.addHeader("Set-Cookie", accessTokenCookie.toString());
 		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
