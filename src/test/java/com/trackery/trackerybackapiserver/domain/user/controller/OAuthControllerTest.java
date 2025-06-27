@@ -39,11 +39,12 @@ import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 3.        inari       최초 생성
- * 25. 3. 26.       inari       계정 연동 토큰 테스트 추가
- * 25. 6. 17.		inari		Spring-Rest-Docs api문서 추가
- * 25. 6. 23.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
+ * 25. 3. 3.         inari       	최초 생성
+ * 25. 3. 26.        inari       	계정 연동 토큰 테스트 추가
+ * 25. 6. 17.		 inari			Spring-Rest-Docs api문서 추가
+ * 25. 6. 23.        inari		 	기존 유저에 간편 로그인 연동 테스트 추가
  * 25. 6. 25.        inari		 	리프레시 토큰 발급 테스트 추가
+ * 25. 6. 28.        inari		 	메서드 분리로 인한 테스트 코드 추가
  */
 @WithMockUser
 @WebMvcTest({OAuthController.class, GlobalExceptionHandler.class})
@@ -285,5 +286,199 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		verify(oAuthLinkTokenService).createLinkToken(PROVIDER.toUpperCase(), USER_ID);
 		verify(oAuthService).generateAuthUrlWithToken(OAuthProvider.KAKAO, LINK_TOKEN);
+	}
+
+	@Test
+	@DisplayName("OAuth URL 생성 실패 - 서비스 예외")
+	void OAuth_URL_생성_실패() throws Exception {
+		// given
+		final String PROVIDER = "kakao";
+		final Long USER_ID = 1L;
+
+		CustomUserDetails customUserDetails = CustomUserDetails.builder()
+			.userId(USER_ID)
+			.userName("testuser")
+			.roleId(1L)
+			.build();
+
+		when(oAuthLinkTokenService.createLinkToken(PROVIDER.toUpperCase(), USER_ID))
+			.thenThrow(new RuntimeException("서비스 에러"));
+
+		// when & then
+		mockMvc
+			.perform(post("/api/users/oauth/link/{provider}/url", PROVIDER)
+				.contentType(MediaType.APPLICATION_JSON)
+				.with(user(customUserDetails)))
+			.andExpect(status().is5xxServerError());
+	}
+
+	@Test
+	@DisplayName("네이버 state에서 링크 토큰 추출 성공")
+	void 네이버_state에서_링크_토큰_추출_성공() throws Exception {
+		// given
+		final String AUTH_CODE = "auth_code";
+		final String LINK_TOKEN = "valid-link-token";
+		final String STATE = "random_state_" + LINK_TOKEN;
+		final Long USER_ID = 1L;
+		final String JWT = "jwt_token";
+
+		OAuthResponseDto responseDto = OAuthResponseDto.builder()
+			.isExistingEmail(false)
+			.build();
+
+		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT, authTokenDto);
+
+		when(oAuthLinkTokenService.validateToken(LINK_TOKEN)).thenReturn(USER_ID);
+		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(get("/api/users/oauth/login/naver")
+				.queryParam("code", AUTH_CODE)
+				.queryParam("state", STATE)
+				.contentType(MediaType.APPLICATION_JSON));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(cookie().exists("accessToken"))
+			.andExpect(cookie().value("accessToken", JWT))
+			.andExpect(jsonPath("$.data.existingEmail").value(false));
+
+		verify(oAuthLinkTokenService).validateToken(LINK_TOKEN);
+		verify(oAuthLinkTokenService).deleteToken(LINK_TOKEN);
+	}
+
+	@Test
+	@DisplayName("네이버 잘못된 state 형식")
+	void 네이버_잘못된_state_형식() throws Exception {
+		// given
+		final String AUTH_CODE = "auth_code";
+		final String INVALID_STATE = "invalid_format";
+		final String JWT = "jwt_token";
+
+		OAuthResponseDto responseDto = OAuthResponseDto.builder()
+			.isExistingEmail(false)
+			.build();
+
+		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT, authTokenDto);
+
+		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(get("/api/users/oauth/login/naver")
+				.queryParam("code", AUTH_CODE)
+				.queryParam("state", INVALID_STATE)
+				.contentType(MediaType.APPLICATION_JSON));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(cookie().exists("accessToken"))
+			.andExpect(jsonPath("$.data.existingEmail").value(false));
+
+		verify(oAuthLinkTokenService, never()).validateToken(any());
+	}
+
+	@Test
+	@DisplayName("링크 토큰 검증 실패")
+	void 링크_토큰_검증_실패() throws Exception {
+		// given
+		final String AUTH_CODE = "auth_code";
+		final String INVALID_LINK_TOKEN = "invalid-link-token";
+		final String JWT = "jwt_token";
+
+		OAuthResponseDto responseDto = OAuthResponseDto.builder()
+			.isExistingEmail(false)
+			.build();
+
+		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT, authTokenDto);
+
+		when(oAuthLinkTokenService.validateToken(INVALID_LINK_TOKEN))
+			.thenThrow(new RuntimeException("토큰 검증 실패"));
+		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(get("/api/users/oauth/login/kakao")
+				.queryParam("code", AUTH_CODE)
+				.queryParam("linkToken", INVALID_LINK_TOKEN)
+				.contentType(MediaType.APPLICATION_JSON));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(cookie().exists("accessToken"))
+			.andExpect(jsonPath("$.data.existingEmail").value(false));
+
+		verify(oAuthLinkTokenService).validateToken(INVALID_LINK_TOKEN);
+		verify(oAuthLinkTokenService, never()).deleteToken(any());
+	}
+
+	@Test
+	@DisplayName("기존 이메일 존재하고 계정 연동하는 경우")
+	void 기존_이메일_존재_계정_연동_성공() throws Exception {
+		// given
+		final String AUTH_CODE = "auth_code";
+		final String LINK_TOKEN = "valid-link-token";
+		final Long USER_ID = 1L;
+		final String JWT = "jwt_token";
+
+		OAuthResponseDto responseDto = OAuthResponseDto.builder()
+			.isExistingEmail(true)
+			.build();
+
+		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT, authTokenDto);
+
+		when(oAuthLinkTokenService.validateToken(LINK_TOKEN)).thenReturn(USER_ID);
+		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(get("/api/users/oauth/login/kakao")
+				.queryParam("code", AUTH_CODE)
+				.queryParam("linkToken", LINK_TOKEN)
+				.contentType(MediaType.APPLICATION_JSON));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(cookie().exists("accessToken"))
+			.andExpect(jsonPath("$.data.existingEmail").value(true));
+	}
+
+	@Test
+	@DisplayName("AuthTokenDto가 null인 경우 - 레거시 JWT 토큰 사용")
+	void AuthTokenDto가_null인_경우_레거시_JWT_사용() throws Exception {
+		// given
+		final String AUTH_CODE = "auth_code";
+		final String JWT = "jwt_token";
+
+		OAuthResponseDto responseDto = OAuthResponseDto.builder()
+			.isExistingEmail(false)
+			.build();
+
+		// AuthTokenDto가 null인 경우
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT, null);
+
+		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(get("/api/users/oauth/login/kakao")
+				.queryParam("code", AUTH_CODE)
+				.contentType(MediaType.APPLICATION_JSON));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(cookie().exists("accessToken"))
+			.andExpect(cookie().value("accessToken", JWT))
+			.andExpect(jsonPath("$.data.existingEmail").value(false));
 	}
 }

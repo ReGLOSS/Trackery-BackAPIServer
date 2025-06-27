@@ -53,6 +53,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 25.        inari		 리프레시 토큰 발급 추가
  * 25. 6. 26.        inari		 "state=" 상수화로 코드 스멜 제거
  * 25. 6. 27.		 inari	   	 로그인시 lastlogin 갱신 추가 및 이미 연동된 계정 타유저 접근 차단
+ * 25. 6. 27.		 inari	   	 코드 복잡도 해결을 위해 메서드 분리
  */
 @Slf4j
 @Service
@@ -76,140 +77,31 @@ public class OAuthService {
 	 */
 	@Transactional
 	public OAuthLoginResult processOAuthLogin(OAuthLoginDto oAuthLoginDto) {
-
 		OAuthProvider provider = OAuthProvider.valueOf(oAuthLoginDto.getProvider());
 		log.info("OAuth 로그인 처리 시작: provider={}, linkAccount={}, linkUserId={}",
 			provider, oAuthLoginDto.isLinkAccount(), oAuthLoginDto.getLinkUserId());
 
-		// 인증 코드로 토큰 획득
-		String accessToken = oAuthClient.getAccessToken(oAuthLoginDto.getCode(), provider);
+		// 인증 코드로 토큰 획득 및 사용자 정보 획득
+		OAuthUserInfoDto userInfo = getUserInfoFromOAuth(oAuthLoginDto.getCode(), provider);
 
-		// 액세스 토큰으로 사용자 정보 획득
-		OAuthUserInfoDto userInfo = oAuthClient.getUserInfo(accessToken, provider);
-		log.info("OAuth 사용자 정보 획득: providerId={}, email={}",
-			userInfo.getProviderUserId(), userInfo.getEmail());
-
-		// 1단계: provider + providerId로 기존 OAuth 연동 확인 (최우선)
+		// 1단계: 기존 OAuth 연동 확인
 		Optional<OAuth> existingOAuth = oAuthMapper.findByProviderAndProviderId(provider.name(),
 			userInfo.getProviderUserId());
 
 		if (existingOAuth.isPresent()) {
-			log.info("기존 OAuth 연동 발견: userId={}", existingOAuth.get().getUserId());
-			
-			// 계정 연동 모드인 경우, 현재 연동 시도하는 사용자와 OAuth 소유자가 같은지 검증
-			if (oAuthLoginDto.isLinkAccount() && oAuthLoginDto.getLinkUserId() != null) {
-				if (!existingOAuth.get().getUserId().equals(oAuthLoginDto.getLinkUserId())) {
-					log.warn("계정 연동 시도: 다른 사용자의 OAuth 계정 접근 차단 - 요청userId={}, OAuth소유자userId={}", 
-						oAuthLoginDto.getLinkUserId(), existingOAuth.get().getUserId());
-					throw new ApiException(ErrorCode.CONFLICT_OAUTH_ALREADY_LINKED);
-				}
-				log.info("계정 연동 모드: 본인 OAuth 계정 확인됨 - userId={}", existingOAuth.get().getUserId());
-			}
-			
-			// 기존 OAuth 연동이 있으면 해당 사용자로 로그인
-			User user = userMapper.findByUserId(existingOAuth.get().getUserId())
-				.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
-
-			// 로그인 시간 업데이트
-			userMapper.updateLastLoginByUserId(user.getUserId(), LocalDateTime.now());
-
-			UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
-				.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
-
-			AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(user.getUserId(),
-				user.getUserName(), userRole.getRoleId());
-
-			return new OAuthLoginResult(
-				OAuthResponseDto.builder().isExistingEmail(false).build(),
-				authTokenDto.accessToken(),
-				authTokenDto
-			);
+			return handleExistingOAuthLogin(oAuthLoginDto, existingOAuth.get());
 		}
 
-		// 1.5단계: link_token으로 직접 연동 처리 (linkUserId가 있는 경우)
+		// 1.5단계: link_token으로 직접 연동 처리
 		if (oAuthLoginDto.isLinkAccount() && oAuthLoginDto.getLinkUserId() != null) {
-			log.info("링크 토큰 기반 계정 연동 처리: userId={}", oAuthLoginDto.getLinkUserId());
-			// 해당 사용자에게 이미 동일한 OAuth 연동이 있는지 확인
-			Optional<OAuth> duplicateOAuth = oAuthMapper.findByUserIdAndProvider(
-				oAuthLoginDto.getLinkUserId(), provider.name());
-			if (duplicateOAuth.isPresent()) {
-				log.warn("이미 연동된 OAuth 제공자: userId={}, provider={}",
-					oAuthLoginDto.getLinkUserId(), provider);
-				throw new ApiException(ErrorCode.DUPLICATE_EMAIL);
-			}
-
-			// 사용자 존재 확인
-			User existingUser = userMapper.findByUserId(oAuthLoginDto.getLinkUserId())
-				.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
-
-			// 기존 계정과 연동
-			linkOAuthToExistingUser(existingUser.getUserId(), userInfo);
-			log.info("OAuth 계정 연동 완료: userId={}, provider={}",
-				existingUser.getUserId(), provider);
-
-			// 로그인 시간 업데이트
-			userMapper.updateLastLoginByUserId(existingUser.getUserId(), LocalDateTime.now());
-
-			UserRole userRole = userRoleMapper.findByUserId(existingUser.getUserId())
-				.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
-
-			AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(
-				existingUser.getUserId(),
-				existingUser.getUserName(),
-				userRole.getRoleId()
-			);
-
-			return new OAuthLoginResult(
-				OAuthResponseDto.builder().isExistingEmail(false).build(),
-				authTokenDto.accessToken(),
-				authTokenDto
-			);
+			return handleLinkTokenBasedConnection(oAuthLoginDto, userInfo, provider);
 		}
 
-		// 2단계: 이메일로 기존 계정 확인 (이메일이 있는 경우)
+		// 2단계: 이메일로 기존 계정 확인
 		if (userInfo.getEmail() != null && !userInfo.getEmail().trim().isEmpty()) {
-			Optional<User> existingUserByEmail = userMapper.findByEmail(userInfo.getEmail());
-
-			if (existingUserByEmail.isPresent()) {
-				// 연동을 원하지 않는 경우
-				if (!oAuthLoginDto.isLinkAccount()) {
-					return new OAuthLoginResult(
-						OAuthResponseDto.builder()
-							.isExistingEmail(true)
-							.email(userInfo.getEmail())
-							.build(),
-						null,
-						null
-					);
-				}
-
-				// 연동을 원하는 경우 - 해당 사용자에게 이미 동일한 OAuth 연동이 있는지 확인
-				Optional<OAuth> duplicateOAuth = oAuthMapper.findByUserIdAndProvider(
-					existingUserByEmail.get().getUserId(), provider.name());
-				if (duplicateOAuth.isPresent()) {
-					throw new ApiException(ErrorCode.DUPLICATE_EMAIL); // 이미 연동된 OAuth 제공자
-				}
-
-				// 기존 계정과 연동
-				linkOAuthToExistingUser(existingUserByEmail.get().getUserId(), userInfo);
-
-				// 로그인 시간 업데이트
-				userMapper.updateLastLoginByUserId(existingUserByEmail.get().getUserId(), LocalDateTime.now());
-
-				UserRole userRole = userRoleMapper.findByUserId(existingUserByEmail.get().getUserId())
-					.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
-
-				AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(
-					existingUserByEmail.get().getUserId(),
-					existingUserByEmail.get().getUserName(),
-					userRole.getRoleId()
-				);
-
-				return new OAuthLoginResult(
-					OAuthResponseDto.builder().isExistingEmail(false).build(),
-					authTokenDto.accessToken(),
-					authTokenDto
-				);
+			OAuthLoginResult emailResult = handleEmailBasedLogin(oAuthLoginDto, userInfo, provider);
+			if (emailResult != null) {
+				return emailResult;
 			}
 		}
 
@@ -219,26 +111,8 @@ public class OAuthService {
 			throw new ApiException(ErrorCode.NOT_FOUND);
 		}
 
-		// 4단계: 이메일도 없고 OAuth 연동도 없으면 신규 회원가입 진행
-		log.info("신규 회원가입 진행: email={}", userInfo.getEmail());
-		User newUser = registerNewUser(userInfo);
-		linkOAuthToExistingUser(newUser.getUserId(), userInfo);
-		log.info("신규 회원가입 완료: userId={}", newUser.getUserId());
-
-		// 로그인 시간 업데이트 (신규 가입 시에도)
-		userMapper.updateLastLoginByUserId(newUser.getUserId(), LocalDateTime.now());
-
-		UserRole userRole = userRoleMapper.findByUserId(newUser.getUserId())
-			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
-
-		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(newUser.getUserId(),
-			newUser.getUserName(), userRole.getRoleId());
-
-		return new OAuthLoginResult(
-			OAuthResponseDto.builder().isExistingEmail(false).build(),
-			authTokenDto.accessToken(),
-			authTokenDto
-		);
+		// 4단계: 신규 회원가입 진행
+		return handleNewUserRegistration(userInfo);
 	}
 
 	/**
@@ -343,44 +217,243 @@ public class OAuthService {
 	 */
 	public OAuthUrlResponseDto generateAuthUrlWithToken(OAuthProvider provider, String linkToken) {
 		OAuthProperties.ProviderProperties providerProps = getProviderProperties(provider);
-		String baseUrl = providerProps.getAuthUri();
-		String authUrl;
-		String stateValue;
 		log.info("URL 생성 시작: provider={}, linkToken={}", provider, linkToken);
+
 		if (provider == OAuthProvider.NAVER) {
-			// 네이버만 state에 link_token 포함
-			String originalState = providerProps.getState();
-			if (originalState == null) {
-				originalState = "random_state";
-			}
-			stateValue = originalState + "_" + linkToken;
-			if (baseUrl.contains(STATE)) {
-				authUrl = baseUrl.replaceAll("state=[^&]*", STATE
-					+ URLEncoder.encode(stateValue, StandardCharsets.UTF_8));
-			} else {
-				String connector = baseUrl.contains("?") ? "&" : "?";
-				authUrl = baseUrl + connector + STATE + URLEncoder.encode(stateValue, StandardCharsets.UTF_8);
-			}
-			log.info("네이버 URL 생성: 원본state={}, 새state={}, authUrl={}",
-				providerProps.getState(), stateValue, authUrl);
+			return generateNaverAuthUrl(providerProps, linkToken);
 		} else {
-			// 다른 제공자들도 state에 link_token 포함 (OAuth 콜백에서 파라미터 유지 안되므로)
-			stateValue = "link_" + linkToken;
-			if (baseUrl.contains(STATE)) {
-				authUrl = baseUrl.replaceAll("state=[^&]*", STATE
-					+ URLEncoder.encode(stateValue, StandardCharsets.UTF_8));
-			} else {
-				String connector = baseUrl.contains("?") ? "&" : "?";
-				authUrl = baseUrl + connector + STATE + URLEncoder.encode(stateValue, StandardCharsets.UTF_8);
-			}
-			log.info("{} URL 생성: 원본URL={}, 최종URL={}, state={}",
-				provider, baseUrl, authUrl, stateValue);
+			return generateOtherProviderAuthUrl(providerProps, linkToken, provider);
 		}
+	}
+
+	/**
+	 * 인증 코드로 토큰을 획득하고 사용자 정보를 반환합니다.
+	 *
+	 * @param code 인증 코드
+	 * @param provider OAuth 제공자
+	 * @return OAuth 사용자 정보
+	 */
+	private OAuthUserInfoDto getUserInfoFromOAuth(String code, OAuthProvider provider) {
+		String accessToken = oAuthClient.getAccessToken(code, provider);
+		OAuthUserInfoDto userInfo = oAuthClient.getUserInfo(accessToken, provider);
+		log.info("OAuth 사용자 정보 획득: providerId={}, email={}",
+			userInfo.getProviderUserId(), userInfo.getEmail());
+		return userInfo;
+	}
+
+	/**
+	 * 기존 OAuth 연동 계정으로 로그인을 처리합니다.
+	 *
+	 * @param oAuthLoginDto OAuth 로그인 요청 정보
+	 * @param existingOAuth 기존 OAuth 연동 정보
+	 * @return OAuth 로그인 결과
+	 */
+	private OAuthLoginResult handleExistingOAuthLogin(OAuthLoginDto oAuthLoginDto, OAuth existingOAuth) {
+		log.info("기존 OAuth 연동 발견: userId={}", existingOAuth.getUserId());
+
+		// 계정 연동 모드인 경우 소유자 검증
+		validateOAuthOwnership(oAuthLoginDto, existingOAuth);
+
+		// 기존 OAuth 연동이 있으면 해당 사용자로 로그인
+		User user = userMapper.findByUserId(existingOAuth.getUserId())
+			.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+
+		return generateLoginResult(user);
+	}
+
+	/**
+	 * OAuth 소유자 검증을 수행합니다.
+	 *
+	 * @param oAuthLoginDto OAuth 로그인 요청 정보
+	 * @param existingOAuth 기존 OAuth 연동 정보
+	 */
+	private void validateOAuthOwnership(OAuthLoginDto oAuthLoginDto, OAuth existingOAuth) {
+		if (oAuthLoginDto.isLinkAccount() && oAuthLoginDto.getLinkUserId() != null) {
+			if (!existingOAuth.getUserId().equals(oAuthLoginDto.getLinkUserId())) {
+				log.warn("계정 연동 시도: 다른 사용자의 OAuth 계정 접근 차단 - 요청userId={}, OAuth소유자userId={}",
+					oAuthLoginDto.getLinkUserId(), existingOAuth.getUserId());
+				throw new ApiException(ErrorCode.CONFLICT_OAUTH_ALREADY_LINKED);
+			}
+			log.info("계정 연동 모드: 본인 OAuth 계정 확인됨 - userId={}", existingOAuth.getUserId());
+		}
+	}
+
+	/**
+	 * 링크 토큰 기반 계정 연동을 처리합니다.
+	 *
+	 * @param oAuthLoginDto OAuth 로그인 요청 정보
+	 * @param userInfo OAuth 사용자 정보
+	 * @param provider OAuth 제공자
+	 * @return OAuth 로그인 결과
+	 */
+	private OAuthLoginResult handleLinkTokenBasedConnection(OAuthLoginDto oAuthLoginDto,
+			OAuthUserInfoDto userInfo, OAuthProvider provider) {
+		log.info("링크 토큰 기반 계정 연동 처리: userId={}", oAuthLoginDto.getLinkUserId());
+
+		// 중복 OAuth 연동 확인
+		Optional<OAuth> duplicateOAuth = oAuthMapper.findByUserIdAndProvider(
+			oAuthLoginDto.getLinkUserId(), provider.name());
+		if (duplicateOAuth.isPresent()) {
+			log.warn("이미 연동된 OAuth 제공자: userId={}, provider={}",
+				oAuthLoginDto.getLinkUserId(), provider);
+			throw new ApiException(ErrorCode.DUPLICATE_EMAIL);
+		}
+
+		// 사용자 존재 확인 및 연동
+		User existingUser = userMapper.findByUserId(oAuthLoginDto.getLinkUserId())
+			.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
+
+		linkOAuthToExistingUser(existingUser.getUserId(), userInfo);
+		log.info("OAuth 계정 연동 완료: userId={}, provider={}",
+			existingUser.getUserId(), provider);
+
+		return generateLoginResult(existingUser);
+	}
+
+	/**
+	 * 이메일 기반 로그인을 처리합니다.
+	 *
+	 * @param oAuthLoginDto OAuth 로그인 요청 정보
+	 * @param userInfo OAuth 사용자 정보
+	 * @param provider OAuth 제공자
+	 * @return OAuth 로그인 결과 (없으면 null)
+	 */
+	private OAuthLoginResult handleEmailBasedLogin(OAuthLoginDto oAuthLoginDto,
+			OAuthUserInfoDto userInfo, OAuthProvider provider) {
+		Optional<User> existingUserByEmail = userMapper.findByEmail(userInfo.getEmail());
+
+		if (existingUserByEmail.isPresent()) {
+			// 연동을 원하지 않는 경우
+			if (!oAuthLoginDto.isLinkAccount()) {
+				return new OAuthLoginResult(
+					OAuthResponseDto.builder()
+						.isExistingEmail(true)
+						.email(userInfo.getEmail())
+						.build(),
+					null,
+					null
+				);
+			}
+
+			// 중복 OAuth 연동 확인
+			Optional<OAuth> duplicateOAuth = oAuthMapper.findByUserIdAndProvider(
+					existingUserByEmail.get().getUserId(), provider.name());
+			if (duplicateOAuth.isPresent()) {
+				throw new ApiException(ErrorCode.DUPLICATE_EMAIL);
+			}
+
+			// 기존 계정과 연동
+			linkOAuthToExistingUser(existingUserByEmail.get().getUserId(), userInfo);
+			return generateLoginResult(existingUserByEmail.get());
+		}
+
+		return null;
+	}
+
+	/**
+	 * 신규 사용자 등록을 처리합니다.
+	 *
+	 * @param userInfo OAuth 사용자 정보
+	 * @return OAuth 로그인 결과
+	 */
+	private OAuthLoginResult handleNewUserRegistration(OAuthUserInfoDto userInfo) {
+		log.info("신규 회원가입 진행: email={}", userInfo.getEmail());
+		User newUser = registerNewUser(userInfo);
+		linkOAuthToExistingUser(newUser.getUserId(), userInfo);
+		log.info("신규 회원가입 완료: userId={}", newUser.getUserId());
+
+		return generateLoginResult(newUser);
+	}
+
+	/**
+	 * 로그인 결과를 생성합니다.
+	 *
+	 * @param user 사용자 정보
+	 * @return OAuth 로그인 결과
+	 */
+	private OAuthLoginResult generateLoginResult(User user) {
+		// 로그인 시간 업데이트
+		userMapper.updateLastLoginByUserId(user.getUserId(), LocalDateTime.now());
+
+		UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
+			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
+
+		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(
+			user.getUserId(), user.getUserName(), userRole.getRoleId());
+
+		return new OAuthLoginResult(
+			OAuthResponseDto.builder().isExistingEmail(false).build(),
+			authTokenDto.accessToken(),
+			authTokenDto
+		);
+	}
+
+	/**
+	 * 네이버 OAuth 인증 URL을 생성합니다.
+	 *
+	 * @param providerProps 제공자 프로퍼티
+	 * @param linkToken 링크 토큰
+	 * @return OAuth URL 응답
+	 */
+	private OAuthUrlResponseDto generateNaverAuthUrl(
+			OAuthProperties.ProviderProperties providerProps, String linkToken) {
+		String baseUrl = providerProps.getAuthUri();
+		String originalState = providerProps.getState();
+		if (originalState == null) {
+			originalState = "random_state";
+		}
+		String stateValue = originalState + "_" + linkToken;
+		String authUrl = buildAuthUrl(baseUrl, stateValue);
+
+		log.info("네이버 URL 생성: 원본state={}, 새state={}, authUrl={}",
+			providerProps.getState(), stateValue, authUrl);
+
+		return OAuthUrlResponseDto.builder()
+			.authUrl(authUrl)
+			.provider(OAuthProvider.NAVER.name())
+			.state(stateValue)
+			.build();
+	}
+
+	/**
+	 * 네이버가 아닌 다른 제공자의 OAuth 인증 URL을 생성합니다.
+	 *
+	 * @param providerProps 제공자 프로퍼티
+	 * @param linkToken 링크 토큰
+	 * @param provider OAuth 제공자
+	 * @return OAuth URL 응답
+	 */
+	private OAuthUrlResponseDto generateOtherProviderAuthUrl(
+			OAuthProperties.ProviderProperties providerProps, String linkToken, OAuthProvider provider) {
+		String baseUrl = providerProps.getAuthUri();
+		String stateValue = "link_" + linkToken;
+		String authUrl = buildAuthUrl(baseUrl, stateValue);
+
+		log.info("{} URL 생성: 원본URL={}, 최종URL={}, state={}",
+			provider, baseUrl, authUrl, stateValue);
+
 		return OAuthUrlResponseDto.builder()
 			.authUrl(authUrl)
 			.provider(provider.name())
 			.state(stateValue)
 			.build();
+	}
+
+	/**
+	 * OAuth 인증 URL을 구성합니다.
+	 *
+	 * @param baseUrl 기본 URL
+	 * @param stateValue state 값
+	 * @return 구성된 인증 URL
+	 */
+	private String buildAuthUrl(String baseUrl, String stateValue) {
+		if (baseUrl.contains(STATE)) {
+			return baseUrl.replaceAll("state=[^&]*", STATE
+				+ URLEncoder.encode(stateValue, StandardCharsets.UTF_8));
+		} else {
+			String connector = baseUrl.contains("?") ? "&" : "?";
+			return baseUrl + connector + STATE + URLEncoder.encode(stateValue, StandardCharsets.UTF_8);
+		}
 	}
 
 	/**
@@ -390,18 +463,12 @@ public class OAuthService {
 	 * @return 제공자 프로퍼티
 	 */
 	private OAuthProperties.ProviderProperties getProviderProperties(OAuthProvider provider) {
-		switch (provider) {
-			case GOOGLE:
-				return oAuthProperties.getGoogle();
-			case KAKAO:
-				return oAuthProperties.getKakao();
-			case NAVER:
-				return oAuthProperties.getNaver();
-			case GITHUB:
-				return oAuthProperties.getGithub();
-			default:
-				throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER);
-		}
+		return switch (provider) {
+			case GOOGLE -> oAuthProperties.getGoogle();
+			case KAKAO -> oAuthProperties.getKakao();
+			case NAVER -> oAuthProperties.getNaver();
+			case GITHUB -> oAuthProperties.getGithub();
+		};
 	}
 
 	/**

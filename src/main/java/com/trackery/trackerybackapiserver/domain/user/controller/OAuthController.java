@@ -50,6 +50,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 24.        inari		 	linkToken을 이용하는 방식으로 변경
  * 25. 6. 25.        inari		 	리프레시 토큰 발급 추가
  * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
+ * 25. 6. 28.        inari      	outhLogin의 코드 복잡도 해결
  */
 @Slf4j
 @RestController
@@ -108,50 +109,107 @@ public class OAuthController {
 			.provider(provider.name())
 			.code(code);
 
-		// link_token 추출 (제공자별로 다른 방식)
-		String extractedLinkToken = linkToken;
-		log.info("링크 토큰 추출 시도: provider={}, linkToken={}, state={}", provider, linkToken, state);
-		if (provider == OAuthProvider.NAVER) {
-			// 네이버는 state에서 link_token 추출
-			if ((extractedLinkToken == null || extractedLinkToken.isEmpty()) && state != null
-				&& state.startsWith("random_state_")) {
-				extractedLinkToken = state.substring("random_state_".length());
-				log.info("네이버 state에서 링크 토큰 추출 성공: 원본state={}, 추출된linkToken={}",
-					state, extractedLinkToken);
-			} else if ((extractedLinkToken == null || extractedLinkToken.isEmpty()) && state != null) {
-				log.info("네이버 state 형식이 맞지 않음: state={}", state);
-			}
-		} else {
-			// 다른 제공자들은 link_token 파라미터에서 직접 추출
-			if (extractedLinkToken != null && !extractedLinkToken.isEmpty()) {
-				log.info("{}에서 link_token 파라미터로 토큰 추출 성공: linkToken={}",
-					provider, extractedLinkToken);
-			} else {
-				log.info("{}에서 link_token 파라미터 없음", provider);
-			}
-		}
-
-		// 링크 토큰이 있으면 Redis에서 검증하고 연동 플래그 설정
-		if (extractedLinkToken != null && !extractedLinkToken.isEmpty()) {
-			log.info("링크 토큰 감지: provider={}, token={}", provider, extractedLinkToken);
-			try {
-				Long userId = oAuthLinkTokenService.validateToken(extractedLinkToken);
-				builder.linkAccount(true).linkUserId(userId);
-				log.info("계정 연동 요청 검증 성공: provider={}, userId={}, token={}",
-					provider, userId, extractedLinkToken);
-
-				// 토큰 사용 후 삭제
-				oAuthLinkTokenService.deleteToken(extractedLinkToken);
-
-			} catch (Exception e) {
-				log.warn("계정 연동 토큰 검증 실패: {}", e.getMessage());
-			}
-		} else {
-			log.info("링크 토큰 없음 - 일반 로그인 처리: provider={}", provider);
-		}
+		String extractedLinkToken = extractLinkToken(provider, linkToken, state);
+		processLinkToken(extractedLinkToken, provider, builder);
 
 		OAuthLoginDto oAuthLoginDto = builder.build();
 		return processOAuthLogin(oAuthLoginDto);
+	}
+
+	/**
+	 * OAuth 제공자별로 링크 토큰을 추출하는 메서드입니다.
+	 *
+	 * @param provider OAuth 제공자
+	 * @param linkToken 직접 전달받은 링크 토큰
+	 * @param state OAuth state 파라미터 (네이버의 경우 토큰 포함 가능)
+	 * @return 추출된 링크 토큰 또는 null
+	 */
+	private String extractLinkToken(OAuthProvider provider, String linkToken, String state) {
+		log.info("링크 토큰 추출 시도: provider={}, linkToken={}, state={}", provider, linkToken, state);
+
+		if (provider == OAuthProvider.NAVER) {
+			return extractNaverLinkToken(linkToken, state);
+		}
+
+		return extractGeneralLinkToken(provider, linkToken);
+	}
+
+	/**
+	 * 네이버 OAuth에서 링크 토큰을 추출하는 메서드입니다.
+	 * 네이버는 state 파라미터에 토큰을 포함시키는 방식을 사용합니다.
+	 *
+	 * @param linkToken 직접 전달받은 링크 토큰
+	 * @param state OAuth state 파라미터
+	 * @return 추출된 링크 토큰 또는 null
+	 */
+	private String extractNaverLinkToken(String linkToken, String state) {
+		if (isValidToken(linkToken)) {
+			return linkToken;
+		}
+
+		if (state != null && state.startsWith("random_state_")) {
+			String extracted = state.substring("random_state_".length());
+			log.info("네이버 state에서 링크 토큰 추출 성공: 원본state={}, 추출된linkToken={}", state, extracted);
+			return extracted;
+		}
+
+		if (state != null) {
+			log.info("네이버 state 형식이 맞지 않음: state={}", state);
+		}
+
+		return null;
+	}
+
+	/**
+	 * 일반 OAuth 제공자(카카오, 구글, 깃허브)에서 링크 토큰을 추출하는 메서드입니다.
+	 *
+	 * @param provider OAuth 제공자
+	 * @param linkToken 링크 토큰 파라미터
+	 * @return 유효한 링크 토큰 또는 null
+	 */
+	private String extractGeneralLinkToken(OAuthProvider provider, String linkToken) {
+		if (isValidToken(linkToken)) {
+			log.info("{}에서 link_token 파라미터로 토큰 추출 성공: linkToken={}", provider, linkToken);
+			return linkToken;
+		}
+
+		log.info("{}에서 link_token 파라미터 없음", provider);
+		return null;
+	}
+
+	/**
+	 * 토큰이 유효한지 검증하는 유틸리티 메서드입니다.
+	 *
+	 * @param token 검증할 토큰
+	 * @return 토큰이 null이 아니고 비어있지 않으면 true
+	 */
+	private boolean isValidToken(String token) {
+		return token != null && !token.isEmpty();
+	}
+
+	/**
+	 * 링크 토큰을 검증하고 계정 연동 정보를 설정하는 메서드입니다.
+	 *
+	 * @param extractedLinkToken 추출된 링크 토큰
+	 * @param provider OAuth 제공자
+	 * @param builder OAuthLoginDto 빌더
+	 */
+	private void processLinkToken(String extractedLinkToken, OAuthProvider provider,
+			OAuthLoginDto.OAuthLoginDtoBuilder builder) {
+		if (!isValidToken(extractedLinkToken)) {
+			log.info("링크 토큰 없음 - 일반 로그인 처리: provider={}", provider);
+			return;
+		}
+
+		log.info("링크 토큰 감지: provider={}, token={}", provider, extractedLinkToken);
+		try {
+			Long userId = oAuthLinkTokenService.validateToken(extractedLinkToken);
+			builder.linkAccount(true).linkUserId(userId);
+			log.info("계정 연동 요청 검증 성공: provider={}, userId={}, token={}", provider, userId, extractedLinkToken);
+			oAuthLinkTokenService.deleteToken(extractedLinkToken);
+		} catch (Exception e) {
+			log.warn("계정 연동 토큰 검증 실패: {}", e.getMessage());
+		}
 	}
 
 	/**
