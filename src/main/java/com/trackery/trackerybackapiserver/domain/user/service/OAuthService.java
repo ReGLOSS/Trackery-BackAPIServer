@@ -52,7 +52,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 24.        inari		 linkToken을 이용하는 방식으로 변경 및 안쓰는 코드 제거
  * 25. 6. 25.        inari		 리프레시 토큰 발급 추가
  * 25. 6. 26.        inari		 "state=" 상수화로 코드 스멜 제거
- * 25. 6. 27.		 inari	   	 로그인시 lastlogin 갱신 추가
+ * 25. 6. 27.		 inari	   	 로그인시 lastlogin 갱신 추가 및 이미 연동된 계정 타유저 접근 차단
  */
 @Slf4j
 @Service
@@ -95,6 +95,17 @@ public class OAuthService {
 
 		if (existingOAuth.isPresent()) {
 			log.info("기존 OAuth 연동 발견: userId={}", existingOAuth.get().getUserId());
+			
+			// 계정 연동 모드인 경우, 현재 연동 시도하는 사용자와 OAuth 소유자가 같은지 검증
+			if (oAuthLoginDto.isLinkAccount() && oAuthLoginDto.getLinkUserId() != null) {
+				if (!existingOAuth.get().getUserId().equals(oAuthLoginDto.getLinkUserId())) {
+					log.warn("계정 연동 시도: 다른 사용자의 OAuth 계정 접근 차단 - 요청userId={}, OAuth소유자userId={}", 
+						oAuthLoginDto.getLinkUserId(), existingOAuth.get().getUserId());
+					throw new ApiException(ErrorCode.CONFLICT_OAUTH_ALREADY_LINKED);
+				}
+				log.info("계정 연동 모드: 본인 OAuth 계정 확인됨 - userId={}", existingOAuth.get().getUserId());
+			}
+			
 			// 기존 OAuth 연동이 있으면 해당 사용자로 로그인
 			User user = userMapper.findByUserId(existingOAuth.get().getUserId())
 				.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));

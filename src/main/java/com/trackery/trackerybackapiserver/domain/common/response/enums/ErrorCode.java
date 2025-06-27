@@ -107,6 +107,10 @@ public enum ErrorCode {
 	 * GitHub 계정이 미공개라 이메일을 찾을 수 없음 (HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다. GitHub 계정에 공개 이메일을 설정해주세요.")
 	 */
 	BAD_REQUEST_INVALID_INPUT_GITHUB(HttpStatus.BAD_REQUEST, 400, "이메일은 필수 정보입니다. GitHub 계정에 공개 이메일을 설정해주세요."),
+	/**
+	 * 이미 다른 계정에 연동된 소셜 계정 (HttpStatus.CONFLICT, 409, "이미 다른 계정에 연동된 소셜 계정입니다.")
+	 */
+	CONFLICT_OAUTH_ALREADY_LINKED(HttpStatus.CONFLICT, 409, "이미 다른 계정에 연동된 소셜 계정입니다."),
 
 
 	/*
