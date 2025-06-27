@@ -120,6 +120,21 @@ include::{snippets}/oauth-link-success/http-response.adoc[]
 include::{snippets}/oauth-link-success/response-fields.adoc[]
 '''
 
+=== OAuth 인증 URL 생성 API
+==== POST /api/users/oauth/link/{provider}/url
+
+OAuth 제공자별 인증 URL을 생성하는 API입니다.
+계정 연동을 위한 링크 토큰이 포함된 OAuth 인증 URL을 반환합니다.
+
+===== 요청
+include::{snippets}/oauth-url-generation/http-request.adoc[]
+include::{snippets}/oauth-url-generation/path-parameters.adoc[]
+
+===== 응답
+include::{snippets}/oauth-url-generation/http-response.adoc[]
+include::{snippets}/oauth-url-generation/response-fields.adoc[]
+'''
+
 === 사용자명 수정 API
 ==== PATCH /api/users/me/username
 

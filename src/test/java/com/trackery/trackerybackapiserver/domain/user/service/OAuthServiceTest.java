@@ -43,6 +43,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  * 25. 6. 25.        inari		 리프레시 토큰 발급 테스트 추가
  * 25. 6. 27.		 inari	   	 로그인시 lastlogin 갱신 추가 및 이미 연동된 계정 타유저 접근 차단
  * 25. 6. 27.		 inari	   	 코드 복잡도 해결을 위해 메서드 분리 테스트
+ * 25. 6. 28.		 inari	   	 코드 스멜 수정
  */
 @ExtendWith(MockitoExtension.class)
 class OAuthServiceTest {
@@ -374,8 +375,9 @@ class OAuthServiceTest {
 		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
 		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
-		verify(userMapper).findByUserId(eq(1L));
-		verify(userRoleMapper).findByUserId(eq(1L));
+		// Mockito에서 정확한 값(1L)을 검증할 때는 eq() matcher를 사용할 필요가 없음
+		verify(userMapper).findByUserId(1L);
+		verify(userRoleMapper).findByUserId(1L);
 		verify(jwtService).generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong());
 		verify(userMapper).updateLastLoginByUserId(eq(1L), any(LocalDateTime.class));
 	}
