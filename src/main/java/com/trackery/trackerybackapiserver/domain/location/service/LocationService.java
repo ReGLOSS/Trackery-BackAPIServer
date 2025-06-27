@@ -37,13 +37,17 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 13.		inari			시군구 ID로 시군구 정보를 조회 메서드 추가
  * 25. 6. 14.		inari			홈화면 전국지도용 통계 추가
  * 25. 6. 22.		inari			좌표 업데이트 메서드 추가
+ * 25. 6. 27.		inari			코드 스멜 수정
  */
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class LocationService {
+
 	private final LocationMapper locationMapper;
 	private final GeometryFactory geometryFactory = new GeometryFactory();
+	public static final String SEOUL =  "Asia/Seoul";
+	private static final String SIDO_SIGUNGU_FORMAT = "%s %s";
 
 	/**
 	 * 좌표로 시도 + 시군구 주소를 조회하는 메서드입니다.
@@ -55,7 +59,7 @@ public class LocationService {
 			() -> new ApiException(ErrorCode.NOT_FOUND)
 		);
 
-		return String.format("%s %s", sigungu.getSido().getSidoName(), sigungu.getSigunguName());
+		return String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(), sigungu.getSigunguName());
 	}
 
 	/**
@@ -89,14 +93,14 @@ public class LocationService {
 	public CoordinatePoint insertCoordinatePoint(CoordinateDto coordinateDto) {
 		Point point = getPointByCoord(coordinateDto);
 		JusoSigungu sigungu = getSigunguByPoint(point);
-		String pointName = String.format("%s %s", sigungu.getSido().getSidoName(), sigungu.getSigunguName());
+		String pointName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(), sigungu.getSigunguName());
 
 		CoordinatePoint coordinatePoint = CoordinatePoint.builder()
 			.coordinatePointName(pointName)
 			.coordinatePointPoint(point)
 			.coordinatePointType((byte)1)
-			.firstRegisteredDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
-			.lastModifiedDate(LocalDateTime.now(ZoneId.of("Asia/Seoul")))
+			.firstRegisteredDate(LocalDateTime.now(ZoneId.of(SEOUL)))
+			.lastModifiedDate(LocalDateTime.now(ZoneId.of(SEOUL)))
 			.sigungu(sigungu)
 			.build();
 
@@ -115,10 +119,10 @@ public class LocationService {
 	public int updateCoordinatePoint(Long coordinatePointId, CoordinateDto coordinateDto) {
 		Point point = getPointByCoord(coordinateDto);
 		JusoSigungu sigungu = getSigunguByPoint(point);
-		String pointName = String.format("%s %s", sigungu.getSido().getSidoName(), sigungu.getSigunguName());
+		String pointName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(), sigungu.getSigunguName());
 
 		return locationMapper.updateCoordinatePointById(coordinatePointId, pointName, point, sigungu.getSigunguId(),
-			LocalDateTime.now(ZoneId.of("Asia/Seoul")));
+			LocalDateTime.now(ZoneId.of(SEOUL)));
 	}
 
 	/**
