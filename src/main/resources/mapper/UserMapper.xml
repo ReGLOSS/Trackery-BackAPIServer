@@ -93,6 +93,13 @@
         WHERE user_id = #{userId}
     </update>
 
+    <!-- 사용자 ID로 마지막 로그인 시간 업데이트 -->
+    <update id="updateLastLoginByUserId">
+        UPDATE user
+        SET last_login = #{lastLogin}
+        WHERE user_id = #{userId}
+    </update>
+
     <!-- 사용자 논리적 삭제 및 개인정보 익명화 -->
     <update id="deleteUserByUserId">
         UPDATE user

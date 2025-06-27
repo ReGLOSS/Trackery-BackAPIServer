@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.common.dto.VerifyEmailDto;
+import com.trackery.trackerybackapiserver.domain.common.enums.CookieName;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
@@ -30,6 +31,7 @@ import lombok.RequiredArgsConstructor;
  * -----------------------------------------------------------
  * 25. 3. 5.        durururuk      최초 생성
  * 25. 3. 5.        durururuk      유저 컨트롤러에서 분리
+ * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
  */
 @RestController
 @RequiredArgsConstructor
@@ -59,7 +61,8 @@ public class MailController {
 	public ResponseEntity<ApiResponse<String>> verifyMail(@Valid @RequestBody VerifyEmailDto dto) {
 		String emailToken = mailService.verifyEmail(dto.getEmail(), dto.getAuthNumber());
 
-		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("emailToken", emailToken, Duration.ofMinutes(10));
+		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie(
+			CookieName.EMAIL_TOKEN.getValue(), emailToken, Duration.ofMinutes(10));
 
 		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())

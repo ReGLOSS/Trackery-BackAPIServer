@@ -52,6 +52,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 24.        inari		 linkToken을 이용하는 방식으로 변경 및 안쓰는 코드 제거
  * 25. 6. 25.        inari		 리프레시 토큰 발급 추가
  * 25. 6. 26.        inari		 "state=" 상수화로 코드 스멜 제거
+ * 25. 6. 27.		 inari	   	 로그인시 lastlogin 갱신 추가 및 이미 연동된 계정 타유저 접근 차단
  */
 @Slf4j
 @Service
@@ -94,14 +95,29 @@ public class OAuthService {
 
 		if (existingOAuth.isPresent()) {
 			log.info("기존 OAuth 연동 발견: userId={}", existingOAuth.get().getUserId());
+			
+			// 계정 연동 모드인 경우, 현재 연동 시도하는 사용자와 OAuth 소유자가 같은지 검증
+			if (oAuthLoginDto.isLinkAccount() && oAuthLoginDto.getLinkUserId() != null) {
+				if (!existingOAuth.get().getUserId().equals(oAuthLoginDto.getLinkUserId())) {
+					log.warn("계정 연동 시도: 다른 사용자의 OAuth 계정 접근 차단 - 요청userId={}, OAuth소유자userId={}", 
+						oAuthLoginDto.getLinkUserId(), existingOAuth.get().getUserId());
+					throw new ApiException(ErrorCode.CONFLICT_OAUTH_ALREADY_LINKED);
+				}
+				log.info("계정 연동 모드: 본인 OAuth 계정 확인됨 - userId={}", existingOAuth.get().getUserId());
+			}
+			
 			// 기존 OAuth 연동이 있으면 해당 사용자로 로그인
 			User user = userMapper.findByUserId(existingOAuth.get().getUserId())
 				.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND));
 
+			// 로그인 시간 업데이트
+			userMapper.updateLastLoginByUserId(user.getUserId(), LocalDateTime.now());
+
 			UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
 				.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-			AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(user.getUserId(), user.getUserName(), userRole.getRoleId());
+			AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(user.getUserId(),
+				user.getUserName(), userRole.getRoleId());
 
 			return new OAuthLoginResult(
 				OAuthResponseDto.builder().isExistingEmail(false).build(),
@@ -130,6 +146,9 @@ public class OAuthService {
 			linkOAuthToExistingUser(existingUser.getUserId(), userInfo);
 			log.info("OAuth 계정 연동 완료: userId={}, provider={}",
 				existingUser.getUserId(), provider);
+
+			// 로그인 시간 업데이트
+			userMapper.updateLastLoginByUserId(existingUser.getUserId(), LocalDateTime.now());
 
 			UserRole userRole = userRoleMapper.findByUserId(existingUser.getUserId())
 				.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
@@ -174,6 +193,9 @@ public class OAuthService {
 				// 기존 계정과 연동
 				linkOAuthToExistingUser(existingUserByEmail.get().getUserId(), userInfo);
 
+				// 로그인 시간 업데이트
+				userMapper.updateLastLoginByUserId(existingUserByEmail.get().getUserId(), LocalDateTime.now());
+
 				UserRole userRole = userRoleMapper.findByUserId(existingUserByEmail.get().getUserId())
 					.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
@@ -203,10 +225,14 @@ public class OAuthService {
 		linkOAuthToExistingUser(newUser.getUserId(), userInfo);
 		log.info("신규 회원가입 완료: userId={}", newUser.getUserId());
 
+		// 로그인 시간 업데이트 (신규 가입 시에도)
+		userMapper.updateLastLoginByUserId(newUser.getUserId(), LocalDateTime.now());
+
 		UserRole userRole = userRoleMapper.findByUserId(newUser.getUserId())
 			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
 
-		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(newUser.getUserId(), newUser.getUserName(), userRole.getRoleId());
+		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(newUser.getUserId(),
+			newUser.getUserName(), userRole.getRoleId());
 
 		return new OAuthLoginResult(
 			OAuthResponseDto.builder().isExistingEmail(false).build(),

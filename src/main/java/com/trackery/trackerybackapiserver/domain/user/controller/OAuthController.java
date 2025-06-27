@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.trackery.trackerybackapiserver.domain.common.enums.CookieName;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
@@ -48,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 23.        inari		 	기존 유저에 간편 로그인 연동 추가
  * 25. 6. 24.        inari		 	linkToken을 이용하는 방식으로 변경
  * 25. 6. 25.        inari		 	리프레시 토큰 발급 추가
+ * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
  */
 @Slf4j
 @RestController
@@ -176,8 +178,8 @@ public class OAuthController {
 				.headers(authHeaders)
 				.body(ApiResponse.success(SuccessCode.OK, responseDto));
 		} else {
-			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", result.getJwtToken(),
-				Duration.ofMinutes(60));
+			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie(
+				CookieName.ACCESS_TOKEN.getValue(), result.getJwtToken(), Duration.ofMinutes(60));
 			return ResponseEntity.ok()
 				.header(HttpHeaders.SET_COOKIE, cookie.toString())
 				.body(ApiResponse.success(SuccessCode.OK, responseDto));

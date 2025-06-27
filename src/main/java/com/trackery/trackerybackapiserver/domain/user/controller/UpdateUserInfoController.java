@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.trackery.trackerybackapiserver.domain.common.enums.CookieName;
+import com.trackery.trackerybackapiserver.domain.common.enums.SameSitePolicy;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
@@ -35,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 4. 12.		durururuk		최초 생성
  * 25. 4. 14.		durururuk		이메일 수정 API 추가, 주석 작성
+ * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
  */
 @Slf4j
 @RestController
@@ -89,11 +92,13 @@ public class UpdateUserInfoController {
 	 * @return : 성공 시 이메일 토큰 재사용 못하게 제거하는 쿠키 + Ok 응답
 	 */
 	@PatchMapping("/password/email-token")
-	public ResponseEntity<ApiResponse<String>> updatePasswordByEmailToken(@CookieValue(name = "emailToken") String emailToken,
+	public ResponseEntity<ApiResponse<String>> updatePasswordByEmailToken(
+		@CookieValue(name = "emailToken") String emailToken,
 		@Valid @RequestBody UpdatePasswordDto dto) {
 		updateUserInfoService.updatePasswordByEmailToken(emailToken, dto.getNewPassword());
 
-		ResponseCookie cookie = CookieUtil.deleteCookie("emailToken", "Strict");
+		ResponseCookie cookie = CookieUtil.deleteCookie(
+			CookieName.EMAIL_TOKEN.getValue(), SameSitePolicy.STRICT.getValue());
 
 		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
@@ -110,7 +115,8 @@ public class UpdateUserInfoController {
 	 */
 	@PatchMapping("/password")
 	public ResponseEntity<ApiResponse<Void>> updatePasswordByAuthentication(
-		@AuthenticationPrincipal CustomUserDetails userDetails, @Valid @RequestBody UpdatePasswordDto updatePasswordDto) {
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@Valid @RequestBody UpdatePasswordDto updatePasswordDto) {
 		updateUserInfoService.updatePasswordByAuthentication(userDetails.getUserId(), updatePasswordDto);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
@@ -123,10 +129,12 @@ public class UpdateUserInfoController {
 	 * @return 성공 시 이메일 토큰 재사용하지 못하게 지우는 헤더 + 공통 OK 포맷
 	 */
 	@PatchMapping("/email")
-	public ResponseEntity<ApiResponse<Void>> updateEmail (
-		@AuthenticationPrincipal CustomUserDetails userDetails, @CookieValue(name = "emailToken") String emailToken) {
+	public ResponseEntity<ApiResponse<Void>> updateEmail(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@CookieValue(name = "emailToken") String emailToken) {
 		updateUserInfoService.updateEmail(userDetails.getUserId(), emailToken);
-		ResponseCookie cookie = CookieUtil.deleteCookie("emailToken", "Strict");
+		ResponseCookie cookie = CookieUtil.deleteCookie(
+			CookieName.EMAIL_TOKEN.getValue(), SameSitePolicy.STRICT.getValue());
 		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
 			.body(ApiResponse.success(SuccessCode.OK));

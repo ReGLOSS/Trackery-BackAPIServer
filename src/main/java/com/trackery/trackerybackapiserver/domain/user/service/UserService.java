@@ -48,19 +48,20 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 4. 09.		 durururuk		 유저 상세 정보를 조회할 수 있는 메서드 추가
  * 25. 6. 25.		 inari			 로그아웃 기능 추가
  * 25. 6. 26.		 inari			 회원 탈퇴 기능 추가
+ * 25. 6. 27.		 inari	   	   	 로그인시 lastlogin 갱신 추가
  */
 @Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserService {
+
 	private final UserMapper userMapper;
 	private final JwtService jwtService;
 	private final JwtRedisService jwtRedisService;
 	private final UserRoleMapper userRoleMapper;
 	private final OAuthMapper oAuthMapper;
 	private final ImageS3Service imageS3Service;
-
 
 	/**
 	 * 회원가입 정보를 담아서 db에 인서트하는 메서드입니다.
@@ -116,6 +117,9 @@ public class UserService {
 		if (!PasswordUtil.hashPassword(userLoginDto.getPassword(), user.getSalt()).equals(user.getPassword())) {
 			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_CREDENTIALS);
 		}
+
+		// 로그인 시간 업데이트
+		userMapper.updateLastLoginByUserId(user.getUserId(), LocalDateTime.now());
 
 		return jwtService.generateAccessTokenAndRefreshToken(user.getUserId(), user.getUserName(),
 			user.getRoleId());
@@ -186,7 +190,6 @@ public class UserService {
 			userProfilePicPresignedUrl
 		);
 	}
-
 
 	/**
 	 * 로그아웃 처리를 수행하는 메서드입니다.

@@ -9,6 +9,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.trackery.trackerybackapiserver.domain.common.enums.CookieName;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
@@ -33,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 3. 28.        durururuk      최초 생성
+ * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
  */
 @Slf4j
 @RequiredArgsConstructor
@@ -49,7 +51,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 		@NonNull FilterChain filterChain) throws ServletException, IOException {
 
-		String accessToken = (String)request.getAttribute("accessToken");
+		String accessToken = (String)request.getAttribute(CookieName.ACCESS_TOKEN.getValue());
 
 		if (accessToken == null) {
 			throw new ApiException(ErrorCode.UNAUTHORIZED);

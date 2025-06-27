@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -176,6 +177,7 @@ class UserServiceTest {
 
 		assertEquals(authTokenDto, result);
 		verify(userMapper, times(1)).findByUserName(anyString());
+		verify(userMapper, times(1)).updateLastLoginByUserId(eq(1L), any(LocalDateTime.class));
 	}
 
 	@Nested
