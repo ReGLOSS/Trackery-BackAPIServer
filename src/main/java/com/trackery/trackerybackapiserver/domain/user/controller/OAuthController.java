@@ -203,9 +203,9 @@ public class OAuthController {
 
 		log.info("링크 토큰 감지: provider={}, token={}", provider, extractedLinkToken);
 		try {
-			Long userId = oAuthLinkTokenService.validateToken(extractedLinkToken);
-			builder.linkAccount(true).linkUserId(userId);
-			log.info("계정 연동 요청 검증 성공: provider={}, userId={}, token={}", provider, userId, extractedLinkToken);
+			Long validatedUserId = oAuthLinkTokenService.validateToken(extractedLinkToken);
+			builder.linkAccount(true).linkUserId(validatedUserId);
+			log.info("계정 연동 요청 검증 성공: provider={}, userId={}, token={}", provider, validatedUserId, extractedLinkToken);
 			oAuthLinkTokenService.deleteToken(extractedLinkToken);
 		} catch (Exception e) {
 			log.warn("계정 연동 토큰 검증 실패: {}", e.getMessage());
