@@ -42,6 +42,8 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  * 25. 6. 24.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
  * 25. 6. 25.        inari		 리프레시 토큰 발급 테스트 추가
  * 25. 6. 27.		 inari	   	 로그인시 lastlogin 갱신 추가 및 이미 연동된 계정 타유저 접근 차단
+ * 25. 6. 27.		 inari	   	 코드 복잡도 해결을 위해 메서드 분리 테스트
+ * 25. 6. 28.		 inari	   	 코드 스멜 수정
  */
 @ExtendWith(MockitoExtension.class)
 class OAuthServiceTest {
@@ -373,9 +375,84 @@ class OAuthServiceTest {
 		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
 		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
-		verify(userMapper).findByUserId(eq(1L));
-		verify(userRoleMapper).findByUserId(eq(1L));
+		// Mockito에서 정확한 값(1L)을 검증할 때는 eq() matcher를 사용할 필요가 없음
+		verify(userMapper).findByUserId(1L);
+		verify(userRoleMapper).findByUserId(1L);
 		verify(jwtService).generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong());
 		verify(userMapper).updateLastLoginByUserId(eq(1L), any(LocalDateTime.class));
+	}
+
+	@Test
+	void OAuth_linkToken_중복_제공자_연동_실패_테스트() {
+		// given
+		oAuthLoginDto = OAuthLoginDto.builder()
+			.provider("KAKAO")
+			.code("auth_code")
+			.linkAccount(true)
+			.linkUserId(1L)
+			.build();
+
+		OAuth duplicateOAuth = OAuth.builder()
+			.userId(1L)
+			.provider("KAKAO")
+			.providerUserId("existing_provider_id")
+			.build();
+
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(), any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
+		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.empty());
+		when(oAuthMapper.findByUserIdAndProvider(anyLong(), anyString())).thenReturn(Optional.of(duplicateOAuth));
+
+		// when & then
+		com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException exception = 
+			assertThrows(com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException.class, 
+				() -> oAuthService.processOAuthLogin(oAuthLoginDto));
+		
+		assertEquals(com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode.DUPLICATE_EMAIL, 
+			exception.getErrorCode());
+
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
+		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
+		verify(oAuthMapper).findByUserIdAndProvider(anyLong(), anyString());
+		verify(userMapper, never()).findByUserId(anyLong());
+		verify(oAuthMapper, never()).insertOAuth(any(OAuth.class));
+	}
+
+	@Test
+	void OAuth_이메일_중복_제공자_연동_실패_테스트() {
+		// given
+		oAuthLoginDto = OAuthLoginDto.builder()
+			.provider("KAKAO")
+			.code("auth_code")
+			.linkAccount(true)
+			.build();
+
+		OAuth duplicateOAuth = OAuth.builder()
+			.userId(1L)
+			.provider("KAKAO")
+			.providerUserId("existing_provider_id")
+			.build();
+
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(), any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
+		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.empty());
+		when(userMapper.findByEmail(anyString())).thenReturn(Optional.of(user));
+		when(oAuthMapper.findByUserIdAndProvider(anyLong(), anyString())).thenReturn(Optional.of(duplicateOAuth));
+
+		// when & then
+		com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException exception = 
+			assertThrows(com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException.class, 
+				() -> oAuthService.processOAuthLogin(oAuthLoginDto));
+		
+		assertEquals(com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode.DUPLICATE_EMAIL, 
+			exception.getErrorCode());
+
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
+		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
+		verify(userMapper).findByEmail(anyString());
+		verify(oAuthMapper).findByUserIdAndProvider(anyLong(), anyString());
+		verify(oAuthMapper, never()).insertOAuth(any(OAuth.class));
 	}
 }
