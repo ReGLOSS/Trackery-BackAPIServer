@@ -2,7 +2,7 @@
 -- DATABASE SCHEMA CHANGE LOG
 -- ========================================
 -- 2025-05-29: 초기 스키마 생성
--- 2025-07-01: 앨범 관련 변경사항, coord_zone 테이블 삭제, spring_session 테이블 삭제, 게시물이외 erd에 적용 완료
+-- 2025-07-01: 앨범 관련 변경사항, coord_zone 테이블 삭제, spring_session 테이블 삭제, 게시물이외 erd에 적용 완료, 태그-이미지 다대다 관계로 변경
 -- ========================================
 
 create table if not exists juso_sido
@@ -47,14 +47,12 @@ create spatial index idx_sgg_border
 
 create table if not exists tag
 (
-    tag_id         bigint auto_increment
+    tag_id        bigint auto_increment
         primary key,
-    tag_name       varchar(50) null,
-    tag_type       tinyint      null,
-    tag_use_count  bigint       null,
-    coord_point_id bigint       not null,
-    constraint tag_ibfk_1
-        foreign key (coord_point_id) references coord_poi (coord_point_id)
+    tag_name      varchar(50) not null,
+    tag_type      tinyint default 0 null,
+    tag_use_count bigint default 0 null,
+    created_at    datetime not null
 );
 
 create table if not exists user
@@ -268,3 +266,24 @@ create table if not exists user_oauth
     constraint user_oauth_ibfk_1
         foreign key (user_id) references user (user_id)
 );
+
+create table if not exists image_tag
+(
+    image_tag_id bigint auto_increment
+        primary key,
+    image_id     bigint not null,
+    tag_id       bigint not null,
+    created_at   datetime null,
+    constraint image_tag_ibfk_1
+        foreign key (image_id) references image (image_id) on delete cascade,
+    constraint image_tag_ibfk_2
+        foreign key (tag_id) references tag (tag_id) on delete cascade,
+    constraint uk_image_tag
+        unique (image_id, tag_id)
+);
+
+create index idx_image_tag_image_id
+    on image_tag (image_id);
+
+create index idx_image_tag_tag_id
+    on image_tag (tag_id);
