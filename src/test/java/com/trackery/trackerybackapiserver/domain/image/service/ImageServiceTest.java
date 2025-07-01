@@ -118,19 +118,18 @@ class ImageServiceTest {
 	class getImagesTest {
 		private Image testImage1;
 		private final Long testUserId = 1L;
-		private final Long testSidoId = 2L;
-		private final Long testSigunguId = 3L;
-		private final Long testCoordinatePointId = 4L;
 		private final Long testImageId = 5L;
 		private final String testPresignedUrl = "testPresignedUrl";
 
 		@BeforeEach
 		void setUp() {
 			JusoSido sido = new JusoSido();
+			Long testSidoId = 2L;
 			ReflectionTestUtils.setField(sido, "sidoId", testSidoId);
 			ReflectionTestUtils.setField(sido, "sidoName", "서울특별시");
 
 			JusoSigungu sigungu = new JusoSigungu();
+			Long testSigunguId = 3L;
 			ReflectionTestUtils.setField(sigungu, "sigunguId", testSigunguId);
 			ReflectionTestUtils.setField(sigungu, "sigunguName", "강남구");
 			ReflectionTestUtils.setField(sigungu, "sido", sido);
@@ -141,6 +140,7 @@ class ImageServiceTest {
 			Point testPoint = geometryFactory.createPoint(coordinate);
 
 			CoordinatePoint coordPoint = new CoordinatePoint();
+			Long testCoordinatePointId = 4L;
 			ReflectionTestUtils.setField(coordPoint, "coordinatePointId", testCoordinatePointId);
 			ReflectionTestUtils.setField(coordPoint, "coordinatePointName", "테스트 좌표");
 			ReflectionTestUtils.setField(coordPoint, "coordinatePointPoint", testPoint);
@@ -294,8 +294,6 @@ class ImageServiceTest {
 	@DisplayName("시도별 이미지 조회 테스트")
 	class GetImagesBySidoTest {
 		private final Long testUserId = 1L;
-		private final Long testImageId = 5L;
-		private final String testPresignedUrl = "testPresignedUrl";
 
 		@Test
 		@DisplayName("성공 - 시도별 이미지 목록 반환")
@@ -306,9 +304,11 @@ class ImageServiceTest {
 				.imageFile("images/test.jpg")
 				.userId(testUserId)
 				.build();
+			Long testImageId = 5L;
 			ReflectionTestUtils.setField(testImage, "imageId", testImageId);
 
 			when(imageMapper.findImagesBySidoIdAndUserId(sidoId, testUserId)).thenReturn(List.of(testImage));
+			String testPresignedUrl = "testPresignedUrl";
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("thumbnail"))).thenReturn(
 				testPresignedUrl);
 
@@ -341,8 +341,6 @@ class ImageServiceTest {
 	@DisplayName("시군구별 이미지 조회 테스트")
 	class GetImagesBySigunguTest {
 		private final Long testUserId = 1L;
-		private final Long testImageId = 5L;
-		private final String testPresignedUrl = "testPresignedUrl";
 
 		@Test
 		@DisplayName("성공 - 시군구별 이미지 목록 반환")
@@ -353,9 +351,11 @@ class ImageServiceTest {
 				.imageFile("images/test.jpg")
 				.userId(testUserId)
 				.build();
+			Long testImageId = 5L;
 			ReflectionTestUtils.setField(testImage, "imageId", testImageId);
 
 			when(imageMapper.findImagesBySigunguIdAndUserId(sigunguId, testUserId)).thenReturn(List.of(testImage));
+			String testPresignedUrl = "testPresignedUrl";
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("thumbnail"))).thenReturn(
 				testPresignedUrl);
 
@@ -387,13 +387,12 @@ class ImageServiceTest {
 	@Nested
 	@DisplayName("S3 Presigned URL 생성 테스트")
 	class FetchS3PresignedUrlByImageIdTest {
-		private final Long testUserId = 1L;
 		private final Long testImageId = 5L;
-		private final String testPresignedUrl = "testPresignedUrl";
 
 		@Test
 		@DisplayName("성공 - S3 Presigned URL 반환")
 		void fetchS3PresignedUrlByImageId_success() {
+			Long testUserId = 1L;
 			Image testImage = Image.builder()
 				.imageName("테스트 이미지")
 				.imageFile("images/test.jpg")
@@ -402,6 +401,7 @@ class ImageServiceTest {
 			ReflectionTestUtils.setField(testImage, "imageId", testImageId);
 
 			when(imageMapper.findImageByImageId(testImageId)).thenReturn(Optional.of(testImage));
+			String testPresignedUrl = "testPresignedUrl";
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("original"))).thenReturn(
 				testPresignedUrl);
 

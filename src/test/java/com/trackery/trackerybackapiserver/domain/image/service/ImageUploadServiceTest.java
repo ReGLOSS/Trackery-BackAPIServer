@@ -81,7 +81,7 @@ class ImageUploadServiceTest {
 
 	@Nested
 	class saveImageTest {
-		private ImageUploadDto imageUploadDto = new ImageUploadDto();
+		private final ImageUploadDto imageUploadDto = new ImageUploadDto();
 		private CoordinatePoint coordinatePoint;
 
 		@BeforeEach

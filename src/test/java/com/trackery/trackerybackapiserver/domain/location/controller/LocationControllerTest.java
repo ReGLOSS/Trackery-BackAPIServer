@@ -22,16 +22,15 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
+import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
-import com.trackery.trackerybackapiserver.domain.location.dto.SigunguResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
-import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
-import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 /**
@@ -301,7 +300,6 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 		void success() throws Exception {
 			JusoSido seoul = createSido(11L, "서울특별시");
 			JusoSigungu dongjak = createSigungu(11200L, "동작구", seoul);
-			SigunguResponseDto response = SigunguResponseDto.from(dongjak);
 
 			when(locationService.getSigunguById(11200L)).thenReturn(dongjak);
 
@@ -352,7 +350,7 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 		@Test
 		@DisplayName("시도별 사용자 이미지 조회 성공")
 		void success() throws Exception {
-			List<ImageThumbnailDto> response = Arrays.asList();
+			List<ImageThumbnailDto> response = List.of();
 
 			when(imageService.getImagesBySido(11L, 1L)).thenReturn(response);
 
@@ -383,7 +381,7 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 		@Test
 		@DisplayName("시군구별 사용자 이미지 조회 성공")
 		void success() throws Exception {
-			List<ImageThumbnailDto> response = Arrays.asList();
+			List<ImageThumbnailDto> response = List.of();
 
 			when(imageService.getImagesBySigungu(11200L, 1L)).thenReturn(response);
 

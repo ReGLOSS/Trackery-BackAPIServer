@@ -38,9 +38,6 @@ class ImageS3ServiceTest {
 	@InjectMocks
 	private ImageS3Service imageS3Service;
 
-	private final String TEMP_FOLDER = "temp/";
-	private final String IMAGES_FOLDER = "images/";
-
 	@BeforeEach
 	void setUp() {
 		String UPLOAD_BUCKET = "test-upload-bucket";
