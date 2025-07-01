@@ -50,12 +50,12 @@ public class ImageS3Service {
 
 		actualKey = switch (type) {
 			case ("original") -> {
-				imageKeyWithSuffix = imageKey + "-original.webp";
-				yield String.format("%s/images/%s/%s", userId, type, imageKeyWithSuffix);
+				imageKeyWithSuffix = imageKey + "-orig.webp";
+				yield String.format("%s/%s/%s", userId, type, imageKeyWithSuffix);
 			}
 			case ("thumbnail") -> {
 				imageKeyWithSuffix = imageKey + "-thumbnail.webp";
-				yield String.format("%s/images/%s/%s", userId, type, imageKeyWithSuffix);
+				yield String.format("%s/%s/%s", userId, type, imageKeyWithSuffix);
 			}
 			default -> throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		};
