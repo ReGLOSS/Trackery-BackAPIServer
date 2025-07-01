@@ -1,29 +1,26 @@
 package com.trackery.trackerybackapiserver.domain.image.controller;
 
-import java.util.List;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jakarta.validation.Valid;
-
 import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -45,30 +42,16 @@ public class ImageController {
 	private final ImageService imageService;
 
 	/**
-	 * 이미지 단건 조회 API
+	 * 원본 이미지 단건 조회 API
 	 * @param imageId 이미지 ID
+	 * @param userDetails 인증된 사용자 정보
 	 * @return 이미지 정보 DTO
 	 */
 	@GetMapping
-	public ResponseEntity<ApiResponse<ImageDto>> getImageDto(@RequestParam Long imageId) {
-		ImageDto imageDto = imageService.getImageByImageId(imageId);
+	public ResponseEntity<ApiResponse<ImageDto>> getImageDto(@RequestParam Long imageId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+		ImageDto imageDto = imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
 
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDto));
-	}
-
-	/**
-	 * 현재 인증된 유저가 업로드한 이미지 다건 조회 API
-	 * @deprecated 페이지네이션 사용 버전으로 프론트 수정 후 삭제 예정 {@link #getMyImagesV2(CustomUserDetails, int, int)}
-	 * @param userDetails 인증 유저 정보
-	 * @return 이미지 정보 DTO
-	 */
-	@Deprecated(forRemoval = true)
-	@GetMapping("/me")
-	public ResponseEntity<ApiResponse<List<ImageDto>>> getMyImages(
-		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		List<ImageDto> imageDtoList = imageService.getImageListByUserId(userDetails.getUserId());
-
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDtoList));
 	}
 
 	/**
@@ -78,13 +61,13 @@ public class ImageController {
 	 * @param pageSize 페이지 크기 (기본값 : 10)
 	 * @return 페이지네이션된 이미지 DTO 리스트
 	 */
-	@GetMapping("/v2/me")
-	public ResponseEntity<ApiResponse<PageInfo<ImageDto>>> getMyImagesV2(
+	@GetMapping("/me")
+	public ResponseEntity<ApiResponse<PageInfo<ImageThumbnailDto>>> getMyImagesV2(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam(defaultValue = "1") int pageNum,
 		@RequestParam(defaultValue = "10") int pageSize
 	) {
-		PageInfo<ImageDto> imageDtoList = imageService.getImageListByUserIdV2(userDetails.getUserId(), pageNum,
+		PageInfo<ImageThumbnailDto> imageDtoList = imageService.getImageListByUserIdV2(userDetails.getUserId(), pageNum,
 			pageSize);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDtoList));
 	}
