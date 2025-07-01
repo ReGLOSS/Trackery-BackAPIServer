@@ -30,4 +30,10 @@ public class OAuthResponseDto {
 	 * 사용자 이메일입니다.
 	 */
 	private String email;
+
+	/**
+	 * 신규 사용자 여부를 나타냅니다.
+	 * 신규 회원가입이면 true, 기존 계정 연동이면 false를 리턴합니다.
+	 */
+	private boolean isNewUser;
 }

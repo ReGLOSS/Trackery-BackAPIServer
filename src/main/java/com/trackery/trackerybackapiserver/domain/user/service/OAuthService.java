@@ -329,6 +329,7 @@ public class OAuthService {
 					OAuthResponseDto.builder()
 						.isExistingEmail(true)
 						.email(userInfo.getEmail())
+						.isNewUser(false)
 						.build(),
 					null,
 					null
@@ -362,7 +363,7 @@ public class OAuthService {
 		linkOAuthToExistingUser(newUser.getUserId(), userInfo);
 		log.info("신규 회원가입 완료: userId={}", newUser.getUserId());
 
-		return generateLoginResult(newUser);
+		return generateNewUserLoginResult(newUser);
 	}
 
 	/**
@@ -382,7 +383,36 @@ public class OAuthService {
 			user.getUserId(), user.getUserName(), userRole.getRoleId());
 
 		return new OAuthLoginResult(
-			OAuthResponseDto.builder().isExistingEmail(false).build(),
+			OAuthResponseDto.builder()
+				.isExistingEmail(false)
+				.isNewUser(false)
+				.build(),
+			authTokenDto.accessToken(),
+			authTokenDto
+		);
+	}
+
+	/**
+	 * 신규 사용자 로그인 결과를 생성합니다.
+	 *
+	 * @param user 사용자 정보
+	 * @return OAuth 로그인 결과
+	 */
+	private OAuthLoginResult generateNewUserLoginResult(User user) {
+		// 로그인 시간 업데이트
+		userMapper.updateLastLoginByUserId(user.getUserId(), LocalDateTime.now());
+
+		UserRole userRole = userRoleMapper.findByUserId(user.getUserId())
+			.orElseThrow(() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR));
+
+		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(
+			user.getUserId(), user.getUserName(), userRole.getRoleId());
+
+		return new OAuthLoginResult(
+			OAuthResponseDto.builder()
+				.isExistingEmail(false)
+				.isNewUser(true)
+				.build(),
 			authTokenDto.accessToken(),
 			authTokenDto
 		);
