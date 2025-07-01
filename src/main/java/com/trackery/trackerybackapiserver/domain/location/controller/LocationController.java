@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
-import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
@@ -155,10 +155,10 @@ public class LocationController {
 	 * @return 해당 시도의 사용자 이미지 목록을 포함한 API 응답
 	 */
 	@GetMapping("/sido/{sidoId}/images")
-	public ResponseEntity<ApiResponse<List<ImageDto>>> getImagesBySido(
+	public ResponseEntity<ApiResponse<List<ImageThumbnailDto>>> getImagesBySido(
 		@PathVariable Long sidoId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		List<ImageDto> response = imageService.getImagesBySido(sidoId, userDetails.getUserId());
+		List<ImageThumbnailDto> response = imageService.getImagesBySido(sidoId, userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 
@@ -170,10 +170,10 @@ public class LocationController {
 	 * @return 해당 시군구의 사용자 이미지 목록을 포함한 API 응답
 	 */
 	@GetMapping("/sigungu/{sigunguId}/images")
-	public ResponseEntity<ApiResponse<List<ImageDto>>> getImagesBySigungu(
+	public ResponseEntity<ApiResponse<List<ImageThumbnailDto>>> getImagesBySigungu(
 		@PathVariable Long sigunguId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
-		List<ImageDto> response = imageService.getImagesBySigungu(sigunguId, userDetails.getUserId());
+		List<ImageThumbnailDto> response = imageService.getImagesBySigungu(sigunguId, userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 }
