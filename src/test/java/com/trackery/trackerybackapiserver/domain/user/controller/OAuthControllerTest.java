@@ -1,8 +1,8 @@
 package com.trackery.trackerybackapiserver.domain.user.controller;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
@@ -24,9 +24,9 @@ import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUrlResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
-import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUrlResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkTokenService;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
 
@@ -45,6 +45,7 @@ import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
  * 25. 6. 23.        inari		 	기존 유저에 간편 로그인 연동 테스트 추가
  * 25. 6. 25.        inari		 	리프레시 토큰 발급 테스트 추가
  * 25. 6. 28.        inari		 	메서드 분리로 인한 테스트 코드 추가
+ * 25. 7. 1.         inari		 	isNewUser 파라미터 테스트 코드 추가
  */
 @WithMockUser
 @WebMvcTest({OAuthController.class, GlobalExceptionHandler.class})
@@ -66,6 +67,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(false)
+			.isNewUser(false)
 			.build();
 
 		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
@@ -82,7 +84,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 		// then
 		resultActions
 			.andExpect(cookie().value("accessToken", JWT))
-			.andExpect(jsonPath("$.data.existingEmail").value(false));
+			.andExpect(jsonPath("$.data.existingEmail").value(false))
+			.andExpect(jsonPath("$.data.newUser").value(false));
 	}
 
 	@Test
@@ -90,6 +93,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 		// given
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(false)
+			.isNewUser(false)
 			.build();
 
 		AuthTokenDto authTokenDto = new AuthTokenDto("jwt", "refresh_token");
@@ -111,6 +115,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(cookie().httpOnly("accessToken", true))
 			.andExpect(cookie().value("accessToken", "jwt"))
 			.andExpect(jsonPath("$.data.existingEmail").value(false))
+			.andExpect(jsonPath("$.data.newUser").value(false))
 			.andDo(document("oauth-login-success",
 				pathParameters(
 					parameterWithName("provider").description("OAuth 제공자 (naver, kakao, google, github)")
@@ -123,7 +128,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("code").description("상태 코드"),
 					fieldWithPath("message").description("응답 메시지"),
 					fieldWithPath("data.email").description("사용자 이메일").optional(),
-					fieldWithPath("data.existingEmail").description("기존 이메일 존재 여부")
+					fieldWithPath("data.existingEmail").description("기존 이메일 존재 여부"),
+					fieldWithPath("data.newUser").description("신규 사용자 여부")
 				)
 			));
 	}
@@ -133,6 +139,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 		// given
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(true)
+			.isNewUser(false)
 			.build();
 
 		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, null, null);
@@ -150,7 +157,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 		resultActions
 			.andExpect(status().isOk())
 			.andExpect(cookie().doesNotExist("accessToken"))
-			.andExpect(jsonPath("$.data.existingEmail").value(true));
+			.andExpect(jsonPath("$.data.existingEmail").value(true))
+			.andExpect(jsonPath("$.data.newUser").value(false));
 	}
 
 	@Test
@@ -164,6 +172,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(false)
+			.isNewUser(false)
 			.build();
 
 		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
@@ -185,7 +194,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(cookie().exists("accessToken"))
 			.andExpect(cookie().httpOnly("accessToken", true))
 			.andExpect(cookie().value("accessToken", JWT))
-			.andExpect(jsonPath("$.data.existingEmail").value(false));
+			.andExpect(jsonPath("$.data.existingEmail").value(false))
+			.andExpect(jsonPath("$.data.newUser").value(false));
 
 		verify(oAuthLinkTokenService).validateToken(LINK_TOKEN);
 		verify(oAuthLinkTokenService).deleteToken(LINK_TOKEN);
@@ -324,6 +334,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(false)
+			.isNewUser(false)
 			.build();
 
 		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
@@ -344,7 +355,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isOk())
 			.andExpect(cookie().exists("accessToken"))
 			.andExpect(cookie().value("accessToken", JWT))
-			.andExpect(jsonPath("$.data.existingEmail").value(false));
+			.andExpect(jsonPath("$.data.existingEmail").value(false))
+			.andExpect(jsonPath("$.data.newUser").value(false));
 
 		verify(oAuthLinkTokenService).validateToken(LINK_TOKEN);
 		verify(oAuthLinkTokenService).deleteToken(LINK_TOKEN);
@@ -360,6 +372,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(false)
+			.isNewUser(false)
 			.build();
 
 		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
@@ -378,7 +391,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 		resultActions
 			.andExpect(status().isOk())
 			.andExpect(cookie().exists("accessToken"))
-			.andExpect(jsonPath("$.data.existingEmail").value(false));
+			.andExpect(jsonPath("$.data.existingEmail").value(false))
+			.andExpect(jsonPath("$.data.newUser").value(false));
 
 		verify(oAuthLinkTokenService, never()).validateToken(any());
 	}
@@ -393,6 +407,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(false)
+			.isNewUser(false)
 			.build();
 
 		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
@@ -413,7 +428,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 		resultActions
 			.andExpect(status().isOk())
 			.andExpect(cookie().exists("accessToken"))
-			.andExpect(jsonPath("$.data.existingEmail").value(false));
+			.andExpect(jsonPath("$.data.existingEmail").value(false))
+			.andExpect(jsonPath("$.data.newUser").value(false));
 
 		verify(oAuthLinkTokenService).validateToken(INVALID_LINK_TOKEN);
 		verify(oAuthLinkTokenService, never()).deleteToken(any());
@@ -430,6 +446,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(true)
+			.isNewUser(false)
 			.build();
 
 		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
@@ -449,7 +466,8 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 		resultActions
 			.andExpect(status().isOk())
 			.andExpect(cookie().exists("accessToken"))
-			.andExpect(jsonPath("$.data.existingEmail").value(true));
+			.andExpect(jsonPath("$.data.existingEmail").value(true))
+			.andExpect(jsonPath("$.data.newUser").value(false));
 	}
 
 	@Test
@@ -461,6 +479,7 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		OAuthResponseDto responseDto = OAuthResponseDto.builder()
 			.isExistingEmail(false)
+			.isNewUser(false)
 			.build();
 
 		// AuthTokenDto가 null인 경우
@@ -479,6 +498,39 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isOk())
 			.andExpect(cookie().exists("accessToken"))
 			.andExpect(cookie().value("accessToken", JWT))
-			.andExpect(jsonPath("$.data.existingEmail").value(false));
+			.andExpect(jsonPath("$.data.existingEmail").value(false))
+			.andExpect(jsonPath("$.data.newUser").value(false));
+	}
+
+	@Test
+	@DisplayName("신규 사용자 OAuth 로그인 성공")
+	void 신규_사용자_OAuth_로그인_성공() throws Exception {
+		// given
+		final String AUTH_CODE = "auth_code";
+		final String JWT = "jwt_token";
+
+		OAuthResponseDto responseDto = OAuthResponseDto.builder()
+			.isExistingEmail(false)
+			.isNewUser(true)
+			.build();
+
+		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT, authTokenDto);
+
+		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(get("/api/users/oauth/login/kakao")
+				.queryParam("code", AUTH_CODE)
+				.contentType(MediaType.APPLICATION_JSON));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(cookie().exists("accessToken"))
+			.andExpect(cookie().value("accessToken", JWT))
+			.andExpect(jsonPath("$.data.existingEmail").value(false))
+			.andExpect(jsonPath("$.data.newUser").value(true));
 	}
 }
