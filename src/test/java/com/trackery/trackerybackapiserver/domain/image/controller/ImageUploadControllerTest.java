@@ -48,7 +48,7 @@ class ImageUploadControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Test
 	void requestPreSignedPutUrlSuccess() throws Exception {
 		String imageFileName = "image.jpg";
-		when(imageUploadService.getPresignedPutUrl(imageFileName)).thenReturn("PresignedURL.com");
+		when(imageUploadService.getPresignedPutUrl(imageFileName, 1L)).thenReturn("PresignedURL.com");
 
 		ResultActions result = mockMvc.perform(get("/api/images/presigned-url/put")
 			.queryParam("imageFileName", imageFileName)

@@ -25,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
@@ -88,7 +89,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 	@Test
 	@DisplayName("이미지 단건 조회 성공")
 	void getImageDtoSuccess() throws Exception {
-		when(imageService.getImageByImageId(IMAGE_ID)).thenReturn(imageDto);
+		when(imageService.getOriginalImageByImageId(USER_ID, IMAGE_ID)).thenReturn(imageDto);
 
 		ResultActions result = mockMvc.perform(get("/api/images")
 			.with(user(userDetails)) // 인증된 사용자 정보 추가 (필요하다면)
@@ -130,21 +131,22 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 				)
 			));
 
-		verify(imageService, times(1)).getImageByImageId(IMAGE_ID);
+		verify(imageService, times(1)).getOriginalImageByImageId(USER_ID, IMAGE_ID);
 	}
 
 	@Test
 	@DisplayName("인증된 사용자의 이미지 목록 조회 페이지네이션 성공")
 	void getMyImagesV2Success() throws Exception {
-		List<ImageDto> imageDtoList = List.of(imageDto);
-		PageInfo<ImageDto> pageInfo = new PageInfo<>(imageDtoList);
+		ImageThumbnailDto imageThumbnailDto = ImageThumbnailDto.builder().imageId(IMAGE_ID).thumbnailUrl("s3.thumbnail.image.webp").build();
+		List<ImageThumbnailDto> imageThumbnailDtoList = List.of(imageThumbnailDto);
+		PageInfo<ImageThumbnailDto> pageInfo = new PageInfo<>(imageThumbnailDtoList);
 		when(imageService.getImageListByUserIdV2(USER_ID, 1, 10)).thenReturn(pageInfo);
 
 		ResultActions result = mockMvc.perform(get("/api/images/me")
-				.with(user(userDetails))
-				.queryParam("pageNum", "1")
-				.queryParam("pageSize", "10")
-			);
+			.with(user(userDetails))
+			.queryParam("pageNum", "1")
+			.queryParam("pageSize", "10")
+		);
 
 		result
 			.andDo(print())
@@ -162,19 +164,9 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("message").description("응답 메시지"),
 					fieldWithPath("data").description("페이지네이션된 이미지 데이터"),
 					fieldWithPath("data.total").description("전체 이미지 개수"),
-					fieldWithPath("data.list").description("이미지 목록"),
+					fieldWithPath("data.list[]").description("이미지 썸네일 목록"),
 					fieldWithPath("data.list[].imageId").description("이미지 ID"),
-					fieldWithPath("data.list[].userId").description("사용자 ID"),
-					fieldWithPath("data.list[].imageRegDate").description("이미지 등록일시"),
-					fieldWithPath("data.list[].sdName").description("시도명"),
-					fieldWithPath("data.list[].sggName").description("시군구명"),
-					fieldWithPath("data.list[].latitude").description("위도"),
-					fieldWithPath("data.list[].longitude").description("경도"),
-					fieldWithPath("data.list[].imageName").description("이미지 파일명"),
-					fieldWithPath("data.list[].imageContent").description("이미지 설명"),
-					fieldWithPath("data.list[].imageDate").description("이미지 촬영일시"),
-					fieldWithPath("data.list[].isPublic").description("공개 여부").optional(),
-					fieldWithPath("data.list[].imageUrl").description("이미지 URL"),
+					fieldWithPath("data.list[].thumbnailUrl").description("이미지 썸네일 주소"),
 					fieldWithPath("data.pageNum").description("현재 페이지 번호"),
 					fieldWithPath("data.pageSize").description("페이지 크기"),
 					fieldWithPath("data.size").description("현재 페이지의 데이터 개수"),

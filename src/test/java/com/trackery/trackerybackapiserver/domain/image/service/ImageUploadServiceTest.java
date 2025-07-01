@@ -59,9 +59,9 @@ class ImageUploadServiceTest {
 			String imageFileName = "image.jpg";
 			String expected = "Presigned Put URL";
 
-			when(imageS3Service.generatePreSignedPutUrl(imageFileName)).thenReturn("Presigned Put URL");
+			when(imageS3Service.generatePreSignedPutUrl(imageFileName, 1L)).thenReturn("Presigned Put URL");
 
-			String result = imageUploadService.getPresignedPutUrl(imageFileName);
+			String result = imageUploadService.getPresignedPutUrl(imageFileName, 1L);
 
 			assertEquals(expected, result);
 		}
@@ -73,7 +73,7 @@ class ImageUploadServiceTest {
 
 			ApiException expect = new ApiException(ErrorCode.BAD_REQUEST_INVALID_IMAGE_FILE);
 
-			ApiException result = assertThrows(ApiException.class, () -> imageUploadService.getPresignedPutUrl(imageFileName));
+			ApiException result = assertThrows(ApiException.class, () -> imageUploadService.getPresignedPutUrl(imageFileName, 1L));
 
 			assertEquals(expect.getMessage(), result.getMessage());
 		}
@@ -86,7 +86,7 @@ class ImageUploadServiceTest {
 
 		@BeforeEach
 		void setUp() {
-			ReflectionTestUtils.setField(imageUploadDto, "imageName", "image.jpg");
+			ReflectionTestUtils.setField(imageUploadDto, "imageName", "image");
 			ReflectionTestUtils.setField(imageUploadDto, "imageType", "jpg");
 			ReflectionTestUtils.setField(imageUploadDto, "description", "이미지 설명");
 			ReflectionTestUtils.setField(imageUploadDto, "longitude", 123.123);
@@ -102,7 +102,6 @@ class ImageUploadServiceTest {
 		void success() {
 			doNothing().when(imageMapper).insertImage(any(Image.class));
 			when(locationService.insertCoordinatePoint(any(CoordinateDto.class))).thenReturn(coordinatePoint);
-			doNothing().when(imageS3Service).moveObjectTempToImageFolder(anyString());
 
 			Image result = imageUploadService.saveImage(1L, imageUploadDto);
 

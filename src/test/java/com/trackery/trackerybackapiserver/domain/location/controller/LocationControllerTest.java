@@ -30,7 +30,7 @@ import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
-import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
@@ -51,7 +51,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 	@MockitoBean
 	LocationService locationService;
-	
+
 	@MockitoBean
 	ImageService imageService;
 
@@ -352,7 +352,7 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 		@Test
 		@DisplayName("시도별 사용자 이미지 조회 성공")
 		void success() throws Exception {
-			List<ImageDto> response = Arrays.asList();
+			List<ImageThumbnailDto> response = Arrays.asList();
 
 			when(imageService.getImagesBySido(11L, 1L)).thenReturn(response);
 
@@ -383,7 +383,7 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 		@Test
 		@DisplayName("시군구별 사용자 이미지 조회 성공")
 		void success() throws Exception {
-			List<ImageDto> response = Arrays.asList();
+			List<ImageThumbnailDto> response = Arrays.asList();
 
 			when(imageService.getImagesBySigungu(11200L, 1L)).thenReturn(response);
 
