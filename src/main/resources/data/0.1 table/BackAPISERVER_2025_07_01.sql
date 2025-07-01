@@ -2,7 +2,8 @@
 -- DATABASE SCHEMA CHANGE LOG
 -- ========================================
 -- 2025-05-29: 초기 스키마 생성
--- 2025-07-01: 앨범 관련 변경사항, coord_zone 테이블 삭제, spring_session 테이블 삭제, 게시물이외 erd에 적용 완료, 태그-이미지 다대다 관계로 변경
+-- 2025-07-01: 앨범 관련 변경사항, coord_zone 테이블 삭제, spring_session 테이블 삭제, 게시물이외 erd에 적용 완료,
+--             태그-이미지 다대다 관계로 변경
 -- ========================================
 
 create table if not exists juso_sido
@@ -73,6 +74,13 @@ create table if not exists user
         foreign key (coord_point_id) references coord_poi (coord_point_id)
 );
 
+create table if not exists role
+(
+    role_id   bigint auto_increment
+        primary key,
+    role_name varchar(50) not null
+);
+
 create table if not exists user_role
 (
     user_role_id bigint auto_increment
@@ -84,14 +92,6 @@ create table if not exists user_role
     constraint user_role_ibfk_2
         foreign key (role_id) references role (role_id)
 );
-
-create table if not exists role
-(
-    role_id   bigint auto_increment
-        primary key,
-    role_name varchar(50) not null
-);
-
 create table if not exists image
 (
     image_id       bigint auto_increment
