@@ -1,4 +1,8 @@
-# 앨범 관련해서 변경점이 있습니다.
+-- ========================================
+-- DATABASE SCHEMA CHANGE LOG
+-- ========================================
+-- 2025-05-29: 초기 스키마 생성
+-- ========================================
 
 create table if not exists coord_zone
 (
@@ -295,4 +299,3 @@ create table if not exists user_role
     constraint user_role_ibfk_2
         foreign key (role_id) references role (role_id)
 );
-
