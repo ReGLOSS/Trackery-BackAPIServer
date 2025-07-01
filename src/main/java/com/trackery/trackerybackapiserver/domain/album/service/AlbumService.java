@@ -28,7 +28,7 @@ import com.trackery.trackerybackapiserver.domain.album.event.AlbumImageEditEvent
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
@@ -233,19 +233,19 @@ public class AlbumService {
 	 * @return 페이지네이션된 이미지 DTO 리스트
 	 */
 	@SuppressWarnings("squid:S3252")
-	public PageInfo<ImageDto> getAlbumImages(Long albumId, int pageNum, int pageSize) {
+	public PageInfo<ImageThumbnailDto> getAlbumImages(Long albumId, Long userId, int pageNum, int pageSize) {
 		PageHelper.startPage(pageNum, pageSize);
 
 		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(albumId);
 
-		List<ImageDto> albumImageDtoList = albumImageList.stream()
+		List<ImageThumbnailDto> albumImageThumbnailDtoList = albumImageList.stream()
 			.map(albumImage -> imageMapper.findImageByImageId(albumImage.getImageId()).orElseThrow(
 				() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
 			))
-			.map(imageService::convertImageToImageDto)
+			.map(image -> imageService.convertImageToImageThumbnailDto(image, userId))
 			.toList();
 
-		return new PageInfo<>(albumImageDtoList);
+		return new PageInfo<>(albumImageThumbnailDtoList);
 	}
 
 	/**

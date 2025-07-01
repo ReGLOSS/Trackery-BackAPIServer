@@ -23,7 +23,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumRespo
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
-import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 import jakarta.validation.Valid;
@@ -118,9 +118,9 @@ public class AlbumController {
 	 * @return 페이지네이션된 이미지 DTO 리스트
 	 */
 	@GetMapping("/{albumId}/images")
-	public ResponseEntity<ApiResponse<PageInfo<ImageDto>>> getAlbumImages(@PathVariable Long albumId,
+	public ResponseEntity<ApiResponse<PageInfo<ImageThumbnailDto>>> getAlbumImages(@PathVariable Long albumId, @AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam(defaultValue = "1") int pageNum, @RequestParam(defaultValue = "10") int pageSize) {
-		PageInfo<ImageDto> result = albumService.getAlbumImages(albumId, pageNum, pageSize);
+		PageInfo<ImageThumbnailDto> result = albumService.getAlbumImages(albumId, userDetails.getUserId(), pageNum, pageSize);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 

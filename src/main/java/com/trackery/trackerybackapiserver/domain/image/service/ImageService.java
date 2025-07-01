@@ -212,7 +212,7 @@ public class ImageService {
 			}
 		}
 
-		return getImageByImageId(imageId);
+		return getOriginalImageByImageId(userId, imageId);
 	}
 
 	/**
