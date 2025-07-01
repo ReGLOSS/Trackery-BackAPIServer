@@ -39,7 +39,8 @@ public class UserProfileController {
 	 * @return 사용자 프로필 정보를 포함한 응답
 	 */
 	@GetMapping("/me")
-	public ResponseEntity<ApiResponse<UserProfileDto>> getMyProfile(@AuthenticationPrincipal CustomUserDetails userDetails) {
+	public ResponseEntity<ApiResponse<UserProfileDto>> getMyProfile(
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		UserProfileDto profileDto = userService.getUserProfile(userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, profileDto));
 	}

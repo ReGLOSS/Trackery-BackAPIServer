@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.user.mapper;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -21,6 +22,8 @@ import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
  * 25. 2. 24.        inari         주석 추가
  * 25. 2. 25.        inari         fingByEmail, isExistsEmail 추가
  * 25. 3. 6.		 durururuk	   비밀번호 업데이트 추가
+ * 25. 6. 26.		 inari	   	   자바독 추가 및 회원 탈퇴 기능 추가
+ * 25. 6. 27.		 inari	   	   로그인시 lastlogin 갱신 추가
  */
 @Mapper
 public interface UserMapper {
@@ -77,11 +80,67 @@ public interface UserMapper {
 	 */
 	Optional<User> findByUserName(String userName);
 
-	void updatePasswordByUserId(@Param("userId") Long userId, @Param("password") String password, @Param("salt") String salt);
+	/**
+	 * 사용자 ID로 비밀번호와 솔트를 업데이트합니다.
+	 *
+	 * @param userId 업데이트할 사용자 ID
+	 * @param password 새로운 암호화된 비밀번호
+	 * @param salt 새로운 솔트 값
+	 */
+	void updatePasswordByUserId(@Param("userId") Long userId, @Param("password") String password,
+		@Param("salt") String salt);
 
+	/**
+	 * 사용자 ID로 닉네임을 업데이트합니다.
+	 *
+	 * @param userId 업데이트할 사용자 ID
+	 * @param nickname 새로운 닉네임
+	 */
 	void updateNicknameByUserId(@Param("userId") Long userId, @Param("nickname") String nickname);
 
+	/**
+	 * 사용자 ID로 사용자명을 업데이트합니다.
+	 *
+	 * @param userId 업데이트할 사용자 ID
+	 * @param userName 새로운 사용자명
+	 */
 	void updateUserNameByUserId(@Param("userId") Long userId, @Param("userName") String userName);
 
+	/**
+	 * 사용자 ID로 이메일을 업데이트합니다.
+	 *
+	 * @param userId 업데이트할 사용자 ID
+	 * @param email 새로운 이메일 주소
+	 */
 	void updateEmailByUserId(@Param("userId") Long userId, @Param("email") String email);
+
+	/**
+	 * 주어진 사용자 ID가 존재하는지 확인합니다.
+	 *
+	 * @param userId 확인할 사용자 ID
+	 * @return 존재하면 true, 없으면 false
+	 */
+	boolean existsByUserId(Long userId);
+
+	/**
+	 * 사용자 ID로 마지막 로그인 시간을 업데이트합니다.
+	 *
+	 * @param userId 업데이트할 사용자 ID
+	 * @param lastLogin 마지막 로그인 시간
+	 */
+	void updateLastLoginByUserId(@Param("userId") Long userId, @Param("lastLogin") LocalDateTime lastLogin);
+
+	/**
+	 * 사용자를 논리적으로 삭제하고 개인정보를 익명화합니다.
+	 *
+	 * @param userId 탈퇴할 사용자 ID
+	 * @param email 익명화된 이메일
+	 * @param userName 익명화된 사용자명
+	 * @param nickname 익명화된 닉네임
+	 * @param password 랜덤 패스워드
+	 * @param salt 랜덤 솔트
+	 */
+	void deleteUserByUserId(@Param("userId") Long userId, @Param("email") String email,
+		@Param("userName") String userName, @Param("nickname") String nickname,
+		@Param("password") String password, @Param("salt") String salt);
 }

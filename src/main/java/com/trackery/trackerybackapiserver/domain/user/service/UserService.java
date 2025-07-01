@@ -2,6 +2,7 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +15,7 @@ import com.trackery.trackerybackapiserver.domain.image.service.ImageS3Service;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.dto.DetailedUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.UserLoginDto;
@@ -44,14 +46,19 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 25.        durururuk       로그인 메서드 추가
  * 25. 2. 26.        durururuk       로그인 시 비활성유저인지 확인하는 로직 추가
  * 25. 4. 09.		 durururuk		 유저 상세 정보를 조회할 수 있는 메서드 추가
+ * 25. 6. 25.		 inari			 로그아웃 기능 추가
+ * 25. 6. 26.		 inari			 회원 탈퇴 기능 추가
+ * 25. 6. 27.		 inari	   	   	 로그인시 lastlogin 갱신 추가
  */
 @Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class UserService {
+
 	private final UserMapper userMapper;
 	private final JwtService jwtService;
+	private final JwtRedisService jwtRedisService;
 	private final UserRoleMapper userRoleMapper;
 	private final OAuthMapper oAuthMapper;
 	private final ImageS3Service imageS3Service;
@@ -110,6 +117,9 @@ public class UserService {
 		if (!PasswordUtil.hashPassword(userLoginDto.getPassword(), user.getSalt()).equals(user.getPassword())) {
 			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_CREDENTIALS);
 		}
+
+		// 로그인 시간 업데이트
+		userMapper.updateLastLoginByUserId(user.getUserId(), LocalDateTime.now());
 
 		return jwtService.generateAccessTokenAndRefreshToken(user.getUserId(), user.getUserName(),
 			user.getRoleId());
@@ -179,5 +189,55 @@ public class UserService {
 			user.getNickname(),
 			userProfilePicPresignedUrl
 		);
+	}
+
+	/**
+	 * 로그아웃 처리를 수행하는 메서드입니다.
+	 * 액세스 토큰을 블랙리스트에 추가하고, 리프레시 토큰을 Redis에서 삭제합니다.
+	 * @param accessToken 액세스 토큰
+	 * @param refreshToken 리프레시 토큰
+	 */
+	public void logout(String accessToken, String refreshToken) {
+		DecodedJWT decodedAccessToken = jwtService.verifyJwt(accessToken);
+		String jti = decodedAccessToken.getId();
+		long expirationTime = decodedAccessToken.getExpiresAt().getTime() / 1000 - System.currentTimeMillis() / 1000;
+		if (expirationTime > 0) {
+			jwtRedisService.addAccessTokenToBlacklist(jti, expirationTime);
+		}
+		jwtRedisService.deleteRefreshToken(refreshToken);
+	}
+
+	/**
+	 * 회원탈퇴 처리를 수행하는 메서드입니다.
+	 * 사용자의 개인정보를 익명화하고 상태를 탈퇴(0)로 변경합니다.
+	 * OAuth 연동 정보도 모두 삭제하며, 해당 사용자의 모든 JWT 토큰을 무효화합니다.
+	 * @param userId 탈퇴할 사용자 ID
+	 * @param accessToken 현재 액세스 토큰
+	 * @param refreshToken 현재 리프레시 토큰
+	 */
+	public void deleteUser(Long userId, String accessToken, String refreshToken) {
+		if (!userMapper.existsByUserId(userId)) {
+			throw new ApiException(ErrorCode.NOT_FOUND_USER);
+		}
+
+		String randomIdentifier = UUID.randomUUID().toString().substring(0, 8);
+		String anonymizedEmail = "deleted_user_" + randomIdentifier + "@deleted.com";
+		String anonymizedUserName = "deleted_user_" + randomIdentifier;
+		String anonymizedNickname = "탈퇴한 사용자_" + randomIdentifier;
+		String randomPassword = UUID.randomUUID().toString();
+		String randomSalt = UUID.randomUUID().toString();
+
+		userMapper.deleteUserByUserId(userId, anonymizedEmail, anonymizedUserName,
+			anonymizedNickname, randomPassword, randomSalt);
+
+		oAuthMapper.deleteByUserId(userId);
+
+		DecodedJWT decodedAccessToken = jwtService.verifyJwt(accessToken);
+		String jti = decodedAccessToken.getId();
+		long expirationTime = decodedAccessToken.getExpiresAt().getTime() / 1000 - System.currentTimeMillis() / 1000;
+		if (expirationTime > 0) {
+			jwtRedisService.addAccessTokenToBlacklist(jti, expirationTime);
+		}
+		jwtRedisService.deleteRefreshToken(refreshToken);
 	}
 }

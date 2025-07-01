@@ -12,6 +12,8 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumCreateResponseDto;
@@ -197,14 +199,15 @@ public class AlbumService {
 	}
 
 	/**
-	 * 앨범 상세 정보 조회
-	 * @param userId 유저 ID
-	 * @param albumId 앨범 ID
-	 * @return 앨범 정보, 앨범에 포함돼있는 이미지 정보를 담은 DTO
+	 * 앨범 메타데이터 조회
+	 * @param userId 요청한 유저 ID
+	 * @param albumId 조회할 앨범 ID
+	 * @return 앨범의 정보를 담은 DTO
 	 */
-	@Transactional(readOnly = true)
-	public AlbumDetailedResponseDto getAlbumDetailedInfo(Long userId, Long albumId) {
-		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM));
+	public AlbumDetailedResponseDto getAlbumMetadata(Long userId, Long albumId) {
+		Album album = albumMapper.findByAlbumId(albumId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_ALBUM)
+		);
 
 		if (album.getIsPublic() == 0 && !userId.equals(album.getUserId())) {
 			throw new ApiException(ErrorCode.FORBIDDEN);
@@ -212,14 +215,37 @@ public class AlbumService {
 
 		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(albumId);
 
-		List<Image> imageList = albumImageList.stream()
-			.map(albumImage -> imageMapper.findImageByImageId(albumImage.getImageId())
-				.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)))
+		return AlbumDetailedResponseDto.builder()
+			.albumId(album.getAlbumId())
+			.createdUserId(album.getUserId())
+			.albumTitle(album.getAlbumTitle())
+			.albumDescription(album.getAlbumDescription())
+			.isPublic(album.getIsPublic())
+			.imageCount(albumImageList.size())
+			.build();
+	}
+
+	/**
+	 * 앨범 이미지 조회
+	 * @param albumId 조회할 이미지 ID
+	 * @param pageNum 페이지 번호
+	 * @param pageSize 페이지 크기
+	 * @return 페이지네이션된 이미지 DTO 리스트
+	 */
+	@SuppressWarnings("squid:S3252")
+	public PageInfo<ImageDto> getAlbumImages(Long albumId, int pageNum, int pageSize) {
+		PageHelper.startPage(pageNum, pageSize);
+
+		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(albumId);
+
+		List<ImageDto> albumImageDtoList = albumImageList.stream()
+			.map(albumImage -> imageMapper.findImageByImageId(albumImage.getImageId()).orElseThrow(
+				() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
+			))
+			.map(imageService::convertImageToImageDto)
 			.toList();
 
-		List<ImageDto> imageDtoList = imageList.stream().map(imageService::convertImageToImageDto).toList();
-
-		return AlbumDetailedResponseDto.of(album, imageDtoList);
+		return new PageInfo<>(albumImageDtoList);
 	}
 
 	/**

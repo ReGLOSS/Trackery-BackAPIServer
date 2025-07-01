@@ -30,6 +30,15 @@
 		<java.version>17</java.version>
 		<sonar.organization>regloss</sonar.organization>
 		<sonar.host.url>https://sonarcloud.io</sonar.host.url>
+		<sonar.coverage.exclusions>
+			**/TrackeryBackApiServerApplication.java,
+			**/config/**,
+			**/domain/**/dto/**,
+			**/domain/**/entity/**,
+			**/domain/**/mapper/**,
+			**/domain/**/enums/**,
+			**/domain/common/response/**
+		</sonar.coverage.exclusions>
 		<spring-restdocs.version>3.0.3</spring-restdocs.version>
 
 	</properties>

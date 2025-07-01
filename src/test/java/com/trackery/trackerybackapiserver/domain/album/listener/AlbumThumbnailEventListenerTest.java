@@ -29,6 +29,7 @@ import com.trackery.trackerybackapiserver.domain.album.service.AlbumThumbnailSer
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 6. 23.		durururuk		최초 생성
+ * 25. 6. 28.		inari			코드 스멜 수정
  */
 @ExtendWith(MockitoExtension.class)
 class AlbumThumbnailEventListenerTest {
@@ -88,9 +89,10 @@ class AlbumThumbnailEventListenerTest {
 		albumThumbnailEventListener.handleAlbumEditEvent(addEvent);
 
 		verify(albumThumbnailService).handleAlbumThumbnailChange(
-			eq(album),
-			eq(dto),
-			eq(AlbumImageEditOperation.ADD)
+			// eq(album)이 불필요한 이유는 album이 객체 참조이고, Mockito가 기본적으로 equals() 메서드로 객체를 비교하기 때문
+			album,
+			dto,
+			AlbumImageEditOperation.ADD
 		);
 	}
 }

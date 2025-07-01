@@ -18,6 +18,7 @@ import lombok.Setter;
  * -----------------------------------------------------------
  * 25. 2. 26.        inari       최초 생성
  * 25. 3. 03.        inari       경로 수정
+ * 25. 6. 24.        inari       authUri 추가
  */
 @Getter
 @Setter
@@ -54,6 +55,7 @@ public class OAuthProperties {
 		private String clientId;
 		private String clientSecret;
 		private String redirectUri;
+		private String authUri;
 		private String tokenUri;
 		private String userInfoUri;
 

@@ -54,4 +54,10 @@ public interface OAuthMapper {
 	 * @return : OAuth 엔티티 리스트
 	 */
 	List<OAuth> findByUserId(Long userId);
+
+	/**
+	 * 사용자의 모든 OAuth 연동 정보를 삭제합니다.
+	 * @param userId 사용자 ID
+	 */
+	void deleteByUserId(Long userId);
 }

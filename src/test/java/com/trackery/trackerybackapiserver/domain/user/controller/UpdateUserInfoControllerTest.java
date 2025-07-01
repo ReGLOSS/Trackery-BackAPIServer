@@ -39,6 +39,7 @@ import jakarta.servlet.http.Cookie;
  * -----------------------------------------------------------
  * 25. 2. 14.       durururuk       최초 생성
  * 25. 6. 17.		inari		Spring-Rest-Docs api문서 추가
+ * 25. 6. 25.		inari		쿠키 삭제시 파라미터 추가
  */
 @WebMvcTest(UpdateUserInfoController.class)
 class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -74,7 +75,17 @@ class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
 				.with(user(customUserDetails)));
 
 			result.andExpect(status().isOk())
-				.andExpect(jsonPath("$.message").value("Ok"));
+				.andExpect(jsonPath("$.message").value("Ok"))
+				.andDo(document("update-user-nickname-success",
+					requestFields(
+						fieldWithPath("nickname").description("변경할 닉네임")
+					),
+					responseFields(
+						fieldWithPath("code").description("상태 코드"),
+						fieldWithPath("message").description("응답 메시지"),
+						fieldWithPath("data").type(Object.class).description("응답 데이터").optional()
+					)
+				));
 
 			verify(updateUserInfoService, times(1)).updateUserNickname(anyLong(), any());
 		}
@@ -101,7 +112,17 @@ class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
 				.with(user(customUserDetails)));
 
 			result.andExpect(status().isOk())
-				.andExpect(jsonPath("$.message").value("Ok"));
+				.andExpect(jsonPath("$.message").value("Ok"))
+				.andDo(document("update-user-username-success",
+					requestFields(
+						fieldWithPath("userName").description("변경할 사용자명")
+					),
+					responseFields(
+						fieldWithPath("code").description("상태 코드"),
+						fieldWithPath("message").description("응답 메시지"),
+						fieldWithPath("data").type(Object.class).description("응답 데이터").optional()
+					)
+				));
 
 			verify(updateUserInfoService, times(1))
 				.updateUserName(1L, newUserName);
@@ -126,7 +147,18 @@ class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
 					.content(objectMapper.writeValueAsString(dto))
 					.cookie(new Cookie("emailToken", "test-token")))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.message").value("Ok"));
+				.andExpect(jsonPath("$.message").value("Ok"))
+				.andDo(document("update-user-password-by-email-token-success",
+					requestFields(
+						fieldWithPath("newPassword").description("새 비밀번호"),
+						fieldWithPath("oldPassword").description("기존 비밀번호").optional()
+					),
+					responseFields(
+						fieldWithPath("code").description("상태 코드"),
+						fieldWithPath("message").description("응답 메시지"),
+						fieldWithPath("data").type(Object.class).description("응답 데이터").optional()
+					)
+				));
 
 			verify(updateUserInfoService, times(1))
 				.updatePasswordByEmailToken("test-token", "newStrongPassword123!");
@@ -183,7 +215,14 @@ class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
 					.cookie(new Cookie("emailToken", "test-email-token"))
 					.with(user(customUserDetails)))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.message").value("Ok"));
+				.andExpect(jsonPath("$.message").value("Ok"))
+				.andDo(document("update-user-email-success",
+					responseFields(
+						fieldWithPath("code").description("상태 코드"),
+						fieldWithPath("message").description("응답 메시지"),
+						fieldWithPath("data").type(Object.class).description("응답 데이터").optional()
+					)
+				));
 
 			verify(updateUserInfoService, times(1))
 				.updateEmail(1L, "test-email-token");

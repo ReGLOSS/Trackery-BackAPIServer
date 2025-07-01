@@ -1,19 +1,14 @@
 package com.trackery.trackerybackapiserver.domain.image.controller;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
-import static org.springframework.restdocs.request.RequestDocumentation.*;
-import static org.springframework.http.MediaType.*;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -23,10 +18,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.data.rest.webmvc.json.patch.Patch;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.ResultActions;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
@@ -139,61 +134,13 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 	}
 
 	@Test
-	@DisplayName("인증된 사용자의 이미지 목록 조회 성공")
-	void getMyImagesSuccess() throws Exception {
-		List<ImageDto> imageDtoList = List.of(imageDto);
-		when(imageService.getImageListByUserId(userDetails.getUserId())).thenReturn(imageDtoList);
-
-		ResultActions result = mockMvc.perform(get("/api/images/me")
-			.with(user(userDetails)));
-
-		result
-			.andExpect(status().isOk())
-			.andExpect(jsonPath("$.code").value(200))
-			.andExpect(jsonPath("$.message").value("Ok"))
-			.andExpect(jsonPath("$.data").isArray())
-			.andExpect(jsonPath("$.data.length()").value(imageDtoList.size()))
-			.andExpect(jsonPath("$.data[0].imageId").value(imageDto.getImageId()))
-			.andExpect(jsonPath("$.data[0].userId").value(imageDto.getUserId()))
-			.andExpect(jsonPath("$.data[0].sdName").value(imageDto.getSdName()))
-			.andExpect(jsonPath("$.data[0].sggName").value(imageDto.getSggName()))
-			.andExpect(jsonPath("$.data[0].latitude").value(imageDto.getLatitude()))
-			.andExpect(jsonPath("$.data[0].longitude").value(imageDto.getLongitude()))
-			.andExpect(jsonPath("$.data[0].imageName").value(imageDto.getImageName()))
-			.andExpect(jsonPath("$.data[0].imageContent").value(imageDto.getImageContent()))
-			.andExpect(jsonPath("$.data[0].imageDate").value(imageDto.getImageDate().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
-			.andExpect(jsonPath("$.data[0].imageUrl").value(imageDto.getImageUrl()))
-			.andDo(document("get-my-images-success",
-				responseFields(
-					fieldWithPath("code").description("상태 코드"),
-					fieldWithPath("message").description("응답 메시지"),
-					fieldWithPath("data[]").description("이미지 목록"),
-					fieldWithPath("data[].imageId").description("이미지 ID"),
-					fieldWithPath("data[].userId").description("이미지 업로드 사용자 ID"),
-					fieldWithPath("data[].imageRegDate").description("이미지 등록 일시"),
-					fieldWithPath("data[].sdName").description("시도명"),
-					fieldWithPath("data[].sggName").description("시군구명"),
-					fieldWithPath("data[].latitude").description("위도"),
-					fieldWithPath("data[].longitude").description("경도"),
-					fieldWithPath("data[].imageName").description("이미지 파일명"),
-					fieldWithPath("data[].imageContent").description("이미지 설명"),
-					fieldWithPath("data[].imageDate").description("이미지 촬영 일시"),
-					fieldWithPath("data[].isPublic").description("공개 여부 (true: 공개, false: 비공개, null: 미설정)"),
-					fieldWithPath("data[].imageUrl").description("이미지 URL")
-				)
-			));
-
-		verify(imageService, times(1)).getImageListByUserId(userDetails.getUserId());
-	}
-
-	@Test
 	@DisplayName("인증된 사용자의 이미지 목록 조회 페이지네이션 성공")
 	void getMyImagesV2Success() throws Exception {
 		List<ImageDto> imageDtoList = List.of(imageDto);
 		PageInfo<ImageDto> pageInfo = new PageInfo<>(imageDtoList);
 		when(imageService.getImageListByUserIdV2(USER_ID, 1, 10)).thenReturn(pageInfo);
 
-		ResultActions result = mockMvc.perform(get("/api/images/v2/me")
+		ResultActions result = mockMvc.perform(get("/api/images/me")
 				.with(user(userDetails))
 				.queryParam("pageNum", "1")
 				.queryParam("pageSize", "10")
@@ -204,7 +151,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("Ok"))
-			.andDo(document("get-my-images-v2",
+			.andDo(document("get-my-images-success",
 				queryParameters(
 					parameterWithName("pageNum").description("페이지 번호 (1부터 시작, 기본값 : 1)"),
 					parameterWithName("pageSize").description("페이지 크기 (기본값 : 10)")

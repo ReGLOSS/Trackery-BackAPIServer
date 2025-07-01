@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 3. 28.       durururuk       최초 생성
  * 25. 3. 28.		durururuk		리프레시 토큰 저장, 조회, 삭제 기능 구현
+ * 25. 6. 25.		inari			액세스 토큰 블랙리스트 기능 추가
  */
 @Slf4j
 @Service
@@ -35,6 +36,7 @@ public class JwtRedisService {
 	private final ObjectMapper objectMapper;
 
 	private static final String REFRESH_TOKEN_REDIS_KEY = "jwtRefreshToken:";
+	private static final String ACCESS_TOKEN_BLACKLIST_KEY = "jwtBlacklist:";
 
 	/**
 	 * 리프레시 토큰 정보를 Redis에 저장합니다.
@@ -80,6 +82,27 @@ public class JwtRedisService {
 	public void deleteRefreshToken(String refreshToken) {
 		String redisKey = REFRESH_TOKEN_REDIS_KEY + refreshToken;
 		redisTemplate.unlink(redisKey);
+	}
+
+	/**
+	 * 액세스 토큰을 블랙리스트에 추가하는 메서드입니다.
+	 * @param jti JWT ID (토큰 고유 식별자)
+	 * @param expirationTime 토큰 만료까지 남은 시간 (초)
+	 */
+	public void addAccessTokenToBlacklist(String jti, long expirationTime) {
+		String redisKey = ACCESS_TOKEN_BLACKLIST_KEY + jti;
+		redisTemplate.opsForValue().set(redisKey, "blacklisted",
+			java.time.Duration.ofSeconds(expirationTime));
+	}
+
+	/**
+	 * 액세스 토큰이 블랙리스트에 있는지 확인하는 메서드입니다.
+	 * @param jti JWT ID (토큰 고유 식별자)
+	 * @return 블랙리스트에 있으면 true, 없으면 false
+	 */
+	public boolean isAccessTokenBlacklisted(String jti) {
+		String redisKey = ACCESS_TOKEN_BLACKLIST_KEY + jti;
+		return Boolean.TRUE.equals(redisTemplate.hasKey(redisKey));
 	}
 
 }

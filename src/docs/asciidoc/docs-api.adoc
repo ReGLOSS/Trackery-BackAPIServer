@@ -1,0 +1,57 @@
+== 문서 API
+'''
+
+=== API 문서 조회 (index.html)
+==== GET /api/docs/index.html
+
+Spring REST Docs로 생성된 API 문서 HTML 파일을 제공하는 API입니다.
+클래스패스의 정적 HTML 파일을 읽어서 브라우저에 전달합니다.
+
+===== 요청
+include::{snippets}/docs-get-index-html/http-request.adoc[]
+
+===== 응답
+[NOTE]
+====
+HTML 응답 내용이 매우 길어서 응답 헤더 정보만 표시합니다.
+실제로는 완전한 HTML 문서가 반환됩니다.
+====
+
+*응답 상태*: `200 OK`
+
+*응답 헤더*:
+include::{snippets}/docs-get-index-html/response-headers.adoc[]
+
+===== 예외 상황
+- 문서 파일이 존재하지 않는 경우: `ApiException(ErrorCode.NOT_FOUND)` 발생
+- 파일 읽기 중 IOException 발생: `ApiException(ErrorCode.INTERNAL_SERVER_ERROR)` 발생
+
+=== API 문서 조회 (루트)
+==== GET /api/docs
+
+API 문서의 루트 경로로 접근하는 API입니다.
+`/api/docs/index.html`과 동일한 결과를 반환합니다.
+
+===== 요청
+include::{snippets}/docs-get-root/http-request.adoc[]
+
+===== 응답
+[NOTE]
+====
+HTML 응답 내용이 매우 길어서 응답 헤더 정보만 표시합니다.
+실제로는 완전한 HTML 문서가 반환됩니다.
+====
+
+*응답 상태*: `200 OK`
+
+*응답 헤더*:
+include::{snippets}/docs-get-root/response-headers.adoc[]
+
+===== 예외 상황
+- 문서 파일이 존재하지 않는 경우: `ApiException(ErrorCode.NOT_FOUND)` 발생
+- 파일 읽기 중 IOException 발생: `ApiException(ErrorCode.INTERNAL_SERVER_ERROR)` 발생
+
+===== 테스트 케이스
+- 정상적인 문서 파일 조회 (index.html 경로)
+- 정상적인 문서 파일 조회 (루트 경로)
+'''

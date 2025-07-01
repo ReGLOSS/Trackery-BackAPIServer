@@ -6,6 +6,8 @@ include::album-api.adoc[]
 
 include::auth-api.adoc[]
 
+include::docs-api.adoc[]
+
 include::image-api.adoc[]
 
 include::location-api.adoc[]

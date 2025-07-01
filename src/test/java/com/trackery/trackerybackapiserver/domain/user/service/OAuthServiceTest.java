@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.user.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -13,9 +14,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import com.trackery.trackerybackapiserver.config.OAuthProperties;
+import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.client.OAuthClient;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUrlResponseDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUserInfoDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
@@ -34,7 +38,12 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 3.        inari       최초 생성
+ * 25. 3. 3.         inari       최초 생성
+ * 25. 6. 24.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
+ * 25. 6. 25.        inari		 리프레시 토큰 발급 테스트 추가
+ * 25. 6. 27.		 inari	   	 로그인시 lastlogin 갱신 추가 및 이미 연동된 계정 타유저 접근 차단
+ * 25. 6. 27.		 inari	   	 코드 복잡도 해결을 위해 메서드 분리 테스트
+ * 25. 6. 28.		 inari	   	 코드 스멜 수정
  */
 @ExtendWith(MockitoExtension.class)
 class OAuthServiceTest {
@@ -56,6 +65,9 @@ class OAuthServiceTest {
 
 	@Mock
 	private OAuthClient oAuthClient;
+
+	@Mock
+	private OAuthProperties oAuthProperties;
 
 	private OAuthLoginDto oAuthLoginDto;
 	private OAuthUserInfoDto oAuthUserInfoDto;
@@ -107,7 +119,7 @@ class OAuthServiceTest {
 		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.of(oAuth));
 		when(userMapper.findByUserId(anyLong())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
-		when(jwtService.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt_token");
+		when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(new AuthTokenDto("jwt_token", "refresh_token"));
 
 		// when
 		OAuthService.OAuthLoginResult result = oAuthService.processOAuthLogin(oAuthLoginDto);
@@ -121,7 +133,8 @@ class OAuthServiceTest {
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
 		verify(userMapper).findByUserId(anyLong());
 		verify(userRoleMapper).findByUserId(anyLong());
-		verify(jwtService).generateAccessToken(anyLong(), anyString(), anyLong());
+		verify(jwtService).generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong());
+		verify(userMapper).updateLastLoginByUserId(eq(1L), any(LocalDateTime.class));
 	}
 
 	@Test
@@ -160,7 +173,7 @@ class OAuthServiceTest {
 		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.empty());
 		when(userMapper.findByEmail(anyString())).thenReturn(Optional.of(user));
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
-		when(jwtService.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt_token");
+		when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(new AuthTokenDto("jwt_token", "refresh_token"));
 
 		// when
 		OAuthService.OAuthLoginResult result = oAuthService.processOAuthLogin(oAuthLoginDto);
@@ -175,7 +188,8 @@ class OAuthServiceTest {
 		verify(userMapper).findByEmail(anyString());
 		verify(oAuthMapper).insertOAuth(any(OAuth.class));
 		verify(userRoleMapper).findByUserId(anyLong());
-		verify(jwtService).generateAccessToken(anyLong(), anyString(), anyLong());
+		verify(jwtService).generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong());
+		verify(userMapper).updateLastLoginByUserId(eq(1L), any(LocalDateTime.class));
 	}
 
 	@Test
@@ -194,7 +208,7 @@ class OAuthServiceTest {
 		}).when(userMapper).insertUser(any(User.class));
 
 		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
-		when(jwtService.generateAccessToken(anyLong(), anyString(), anyLong())).thenReturn("jwt_token");
+		when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(new AuthTokenDto("jwt_token", "refresh_token"));
 
 		// when
 		OAuthService.OAuthLoginResult result = oAuthService.processOAuthLogin(oAuthLoginDto);
@@ -211,6 +225,234 @@ class OAuthServiceTest {
 		verify(userRoleMapper).insertUserRole(any(UserRole.class));
 		verify(oAuthMapper).insertOAuth(any(OAuth.class));
 		verify(userRoleMapper).findByUserId(anyLong());
-		verify(jwtService).generateAccessToken(anyLong(), anyString(), anyLong());
+		verify(jwtService).generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong());
+		verify(userMapper).updateLastLoginByUserId(eq(1L), any(LocalDateTime.class));
+	}
+
+	@Test
+	void OAuth_로그인_linkToken_기반_연동_성공() {
+		// given
+		oAuthLoginDto = OAuthLoginDto.builder()
+			.provider("KAKAO")
+			.code("auth_code")
+			.linkAccount(true)
+			.linkUserId(1L)
+			.build();
+
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(), any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
+		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.empty());
+		when(oAuthMapper.findByUserIdAndProvider(anyLong(), anyString())).thenReturn(Optional.empty());
+		when(userMapper.findByUserId(anyLong())).thenReturn(Optional.of(user));
+		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
+		when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(new AuthTokenDto("jwt_token", "refresh_token"));
+
+		// when
+		OAuthService.OAuthLoginResult result = oAuthService.processOAuthLogin(oAuthLoginDto);
+
+		// then
+		assertNotNull(result);
+		assertEquals("jwt_token", result.getJwtToken());
+		assertFalse(result.getResponseDto().isExistingEmail());
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
+		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
+		verify(oAuthMapper).findByUserIdAndProvider(anyLong(), anyString());
+		verify(userMapper).findByUserId(anyLong());
+		verify(oAuthMapper).insertOAuth(any(OAuth.class));
+		verify(userRoleMapper).findByUserId(anyLong());
+		verify(jwtService).generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong());
+		verify(userMapper).updateLastLoginByUserId(eq(1L), any(LocalDateTime.class));
+	}
+
+	@Test
+	void generateAuthUrlWithToken_카카오_성공() {
+		// given
+		OAuthProvider provider = OAuthProvider.KAKAO;
+		String linkToken = "test-link-token";
+		String baseUrl = "https://kauth.kakao.com/oauth/authorize?client_id=test&redirect_uri=test";
+
+		OAuthProperties.ProviderProperties providerProps = mock(OAuthProperties.ProviderProperties.class);
+		when(providerProps.getAuthUri()).thenReturn(baseUrl);
+		when(oAuthProperties.getKakao()).thenReturn(providerProps);
+
+		// when
+		OAuthUrlResponseDto result = oAuthService.generateAuthUrlWithToken(provider, linkToken);
+
+		// then
+		assertNotNull(result);
+		assertEquals("KAKAO", result.getProvider());
+		assertEquals("link_" + linkToken, result.getState());
+		assertTrue(result.getAuthUrl().contains("state=link_" + linkToken));
+	}
+
+	@Test
+	void generateAuthUrlWithToken_네이버_성공() {
+		// given
+		OAuthProvider provider = OAuthProvider.NAVER;
+		String linkToken = "test-link-token";
+		String baseUrl = "https://nid.naver.com/oauth2.0/authorize?client_id=test&redirect_uri=test&state=random_state";
+
+		OAuthProperties.ProviderProperties providerProps = mock(OAuthProperties.ProviderProperties.class);
+		when(providerProps.getAuthUri()).thenReturn(baseUrl);
+		when(providerProps.getState()).thenReturn("random_state");
+		when(oAuthProperties.getNaver()).thenReturn(providerProps);
+
+		// when
+		OAuthUrlResponseDto result = oAuthService.generateAuthUrlWithToken(provider, linkToken);
+
+		// then
+		assertNotNull(result);
+		assertEquals("NAVER", result.getProvider());
+		assertEquals("random_state_" + linkToken, result.getState());
+		assertTrue(result.getAuthUrl().contains("state=random_state_" + linkToken));
+	}
+
+	@Test
+	void OAuth_연동모드_다른사용자_OAuth계정_접근차단_테스트() {
+		// given
+		oAuthLoginDto = OAuthLoginDto.builder()
+			.provider("KAKAO")
+			.code("auth_code")
+			.linkAccount(true)
+			.linkUserId(2L)  // 현재 사용자 ID = 2
+			.build();
+
+		OAuth otherUserOAuth = OAuth.builder()
+			.userId(1L)  // 다른 사용자 ID = 1 (OAuth 소유자)
+			.provider("KAKAO")
+			.providerUserId("12345")
+			.build();
+
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(), any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
+		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.of(otherUserOAuth));
+
+		// when & then
+		com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException exception = 
+			assertThrows(com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException.class, 
+				() -> oAuthService.processOAuthLogin(oAuthLoginDto));
+		
+		assertEquals(com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode.CONFLICT_OAUTH_ALREADY_LINKED, 
+			exception.getErrorCode());
+
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
+		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
+		verify(userMapper, never()).findByUserId(anyLong());
+	}
+
+	@Test
+	void OAuth_연동모드_본인_OAuth계정_접근허용_테스트() {
+		// given
+		oAuthLoginDto = OAuthLoginDto.builder()
+			.provider("KAKAO")
+			.code("auth_code")
+			.linkAccount(true)
+			.linkUserId(1L)  // 현재 사용자 ID = 1
+			.build();
+
+		OAuth ownOAuth = OAuth.builder()
+			.userId(1L)  // 본인 OAuth 계정 (소유자 ID = 1)
+			.provider("KAKAO")
+			.providerUserId("12345")
+			.build();
+
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(), any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
+		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.of(ownOAuth));
+		when(userMapper.findByUserId(anyLong())).thenReturn(Optional.of(user));
+		when(userRoleMapper.findByUserId(anyLong())).thenReturn(Optional.of(userRole));
+		when(jwtService.generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong())).thenReturn(new AuthTokenDto("jwt_token", "refresh_token"));
+
+		// when
+		OAuthService.OAuthLoginResult result = oAuthService.processOAuthLogin(oAuthLoginDto);
+
+		// then
+		assertNotNull(result);
+		assertEquals("jwt_token", result.getJwtToken());
+		assertFalse(result.getResponseDto().isExistingEmail());
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
+		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
+		// Mockito에서 정확한 값(1L)을 검증할 때는 eq() matcher를 사용할 필요가 없음
+		verify(userMapper).findByUserId(1L);
+		verify(userRoleMapper).findByUserId(1L);
+		verify(jwtService).generateAccessTokenAndRefreshToken(anyLong(), anyString(), anyLong());
+		verify(userMapper).updateLastLoginByUserId(eq(1L), any(LocalDateTime.class));
+	}
+
+	@Test
+	void OAuth_linkToken_중복_제공자_연동_실패_테스트() {
+		// given
+		oAuthLoginDto = OAuthLoginDto.builder()
+			.provider("KAKAO")
+			.code("auth_code")
+			.linkAccount(true)
+			.linkUserId(1L)
+			.build();
+
+		OAuth duplicateOAuth = OAuth.builder()
+			.userId(1L)
+			.provider("KAKAO")
+			.providerUserId("existing_provider_id")
+			.build();
+
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(), any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
+		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.empty());
+		when(oAuthMapper.findByUserIdAndProvider(anyLong(), anyString())).thenReturn(Optional.of(duplicateOAuth));
+
+		// when & then
+		com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException exception = 
+			assertThrows(com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException.class, 
+				() -> oAuthService.processOAuthLogin(oAuthLoginDto));
+		
+		assertEquals(com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode.DUPLICATE_EMAIL, 
+			exception.getErrorCode());
+
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
+		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
+		verify(oAuthMapper).findByUserIdAndProvider(anyLong(), anyString());
+		verify(userMapper, never()).findByUserId(anyLong());
+		verify(oAuthMapper, never()).insertOAuth(any(OAuth.class));
+	}
+
+	@Test
+	void OAuth_이메일_중복_제공자_연동_실패_테스트() {
+		// given
+		oAuthLoginDto = OAuthLoginDto.builder()
+			.provider("KAKAO")
+			.code("auth_code")
+			.linkAccount(true)
+			.build();
+
+		OAuth duplicateOAuth = OAuth.builder()
+			.userId(1L)
+			.provider("KAKAO")
+			.providerUserId("existing_provider_id")
+			.build();
+
+		when(oAuthClient.getAccessToken(anyString(), any(OAuthProvider.class))).thenReturn("access_token");
+		when(oAuthClient.getUserInfo(anyString(), any(OAuthProvider.class))).thenReturn(oAuthUserInfoDto);
+		when(oAuthMapper.findByProviderAndProviderId(anyString(), anyString())).thenReturn(Optional.empty());
+		when(userMapper.findByEmail(anyString())).thenReturn(Optional.of(user));
+		when(oAuthMapper.findByUserIdAndProvider(anyLong(), anyString())).thenReturn(Optional.of(duplicateOAuth));
+
+		// when & then
+		com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException exception = 
+			assertThrows(com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException.class, 
+				() -> oAuthService.processOAuthLogin(oAuthLoginDto));
+		
+		assertEquals(com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode.DUPLICATE_EMAIL, 
+			exception.getErrorCode());
+
+		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
+		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
+		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
+		verify(userMapper).findByEmail(anyString());
+		verify(oAuthMapper).findByUserIdAndProvider(anyLong(), anyString());
+		verify(oAuthMapper, never()).insertOAuth(any(OAuth.class));
 	}
 }

@@ -41,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 05.        inari       프로필 사진 제거
  * 25. 3. 20.        inari       소나큐브 코드스멜 개선
  * 25. 3. 27.        inari		 provider를 enum으로 변경
+ * 25. 6. 25.        inari		 코드 스멜 수정
  */
 @Slf4j
 @Component
@@ -75,76 +76,123 @@ public class GenericOAuthClient implements OAuthClient {
 	 * OAuth 제공자별 사용자 정보 파싱을 위한 매핑
 	 */
 	private final Map<OAuthProvider, Function<JsonNode, OAuthUserInfoDto>> userInfoParsers
-		= new EnumMap<>(OAuthProvider.class);
+		= createUserInfoParsers();
 
-	{
-		// 네이버 간편 로그인 파서
-		userInfoParsers.put(OAuthProvider.NAVER, jsonNode -> {
-			JsonNode responseNode = jsonNode.get("response");
-			String id = responseNode.get(FIELD_ID).asText();
-			String email = responseNode.has(FIELD_EMAIL) ? responseNode.get(FIELD_EMAIL).asText() : null;
-			String nickname = responseNode.has(FIELD_NICKNAME) ? responseNode.get(FIELD_NICKNAME).asText() : null;
+	private Map<OAuthProvider, Function<JsonNode, OAuthUserInfoDto>> createUserInfoParsers() {
+		Map<OAuthProvider, Function<JsonNode, OAuthUserInfoDto>> parsers = new EnumMap<>(OAuthProvider.class);
+		parsers.put(OAuthProvider.NAVER, this::parseNaverUserInfo);
+		parsers.put(OAuthProvider.KAKAO, this::parseKakaoUserInfo);
+		parsers.put(OAuthProvider.GOOGLE, this::parseGoogleUserInfo);
+		parsers.put(OAuthProvider.GITHUB, this::parseGithubUserInfo);
 
-			return OAuthUserInfoDto.builder()
-				.email(email)
-				.nickname(nickname)
-				.provider(OAuthProvider.NAVER.name())
-				.providerUserId(id)
-				.build();
-		});
+		return parsers;
+	}
 
-		// 카카오 간편 로그인 파서
-		userInfoParsers.put(OAuthProvider.KAKAO, jsonNode -> {
-			JsonNode kakaoAccount = jsonNode.get("kakao_account");
-			JsonNode profile = kakaoAccount.get("profile");
+	/**
+	 * 네이버 간편 로그인 사용자 정보를 파싱하는 메서드입니다.
+	 *
+	 * @param jsonNode 네이버 API 응답 JSON
+	 * @return 파싱된 사용자 정보
+	 */
+	private OAuthUserInfoDto parseNaverUserInfo(JsonNode jsonNode) {
+		JsonNode responseNode = jsonNode.get("response");
+		String id = responseNode.get(FIELD_ID).asText();
+		String email = extractOptionalField(responseNode, FIELD_EMAIL);
+		String nickname = extractOptionalField(responseNode, FIELD_NICKNAME);
 
-			String id = jsonNode.get(FIELD_ID).asText();
-			String email = kakaoAccount.has(FIELD_EMAIL) ? kakaoAccount.get(FIELD_EMAIL).asText() : null;
-			String nickname = profile.has(FIELD_NICKNAME) ? profile.get(FIELD_NICKNAME).asText() : null;
+		return OAuthUserInfoDto.builder()
+			.email(email)
+			.nickname(nickname)
+			.provider(OAuthProvider.NAVER.name())
+			.providerUserId(id)
+			.build();
+	}
 
-			return OAuthUserInfoDto.builder()
-				.email(email)
-				.nickname(nickname)
-				.provider(OAuthProvider.KAKAO.name())
-				.providerUserId(id)
-				.build();
-		});
+	/**
+	 * 카카오 간편 로그인 사용자 정보를 파싱하는 메서드입니다.
+	 *
+	 * @param jsonNode 카카오 API 응답 JSON
+	 * @return 파싱된 사용자 정보
+	 */
+	private OAuthUserInfoDto parseKakaoUserInfo(JsonNode jsonNode) {
+		JsonNode kakaoAccount = jsonNode.get("kakao_account");
+		JsonNode profile = kakaoAccount.get("profile");
 
-		// 구글 간편 로그인 파서
-		userInfoParsers.put(OAuthProvider.GOOGLE, jsonNode -> {
-			String id = jsonNode.get("sub").asText();
-			String email = jsonNode.has(FIELD_EMAIL) ? jsonNode.get(FIELD_EMAIL).asText() : null;
-			String nickname = jsonNode.has("name") ? jsonNode.get("name").asText() : null;
+		String id = jsonNode.get(FIELD_ID).asText();
+		String email = extractOptionalField(kakaoAccount, FIELD_EMAIL);
+		String nickname = extractOptionalField(profile, FIELD_NICKNAME);
 
-			return OAuthUserInfoDto.builder()
-				.email(email)
-				.nickname(nickname)
-				.provider(OAuthProvider.GOOGLE.name())
-				.providerUserId(id)
-				.build();
-		});
+		return OAuthUserInfoDto.builder()
+			.email(email)
+			.nickname(nickname)
+			.provider(OAuthProvider.KAKAO.name())
+			.providerUserId(id)
+			.build();
+	}
 
-		// 깃허브 간편 로그인 파서
-		userInfoParsers.put(OAuthProvider.GITHUB, jsonNode -> {
-			String id = jsonNode.get(FIELD_ID).asText();
+	/**
+	 * 구글 간편 로그인 사용자 정보를 파싱하는 메서드입니다.
+	 *
+	 * @param jsonNode 구글 API 응답 JSON
+	 * @return 파싱된 사용자 정보
+	 */
+	private OAuthUserInfoDto parseGoogleUserInfo(JsonNode jsonNode) {
+		String id = jsonNode.get("sub").asText();
+		String email = extractOptionalField(jsonNode, FIELD_EMAIL);
+		String nickname = extractOptionalField(jsonNode, "name");
 
-			// email이 null이나 빈 문자열인 경우가 많음
-			String email = jsonNode.has(FIELD_EMAIL) && !jsonNode.get(FIELD_EMAIL).isNull()
-				? jsonNode.get(FIELD_EMAIL).asText() : null;
+		return OAuthUserInfoDto.builder()
+			.email(email)
+			.nickname(nickname)
+			.provider(OAuthProvider.GOOGLE.name())
+			.providerUserId(id)
+			.build();
+	}
 
-			// 로깅 추가
-			log.debug("GitHub 사용자 정보 원본: {}", jsonNode.toString());
-			log.debug("GitHub 이메일 (기본 응답): {}", email);
+	/**
+	 * 깃허브 간편 로그인 사용자 정보를 파싱하는 메서드입니다.
+	 *
+	 * @param jsonNode 깃허브 API 응답 JSON
+	 * @return 파싱된 사용자 정보
+	 */
+	private OAuthUserInfoDto parseGithubUserInfo(JsonNode jsonNode) {
+		String id = jsonNode.get(FIELD_ID).asText();
+		String email = extractGithubEmail(jsonNode);
+		String nickname = extractOptionalField(jsonNode, "login");
 
-			String nickname = jsonNode.has("login") ? jsonNode.get("login").asText() : null;
+		log.debug("GitHub 사용자 정보 원본: {}", jsonNode);
+		log.debug("GitHub 이메일 (기본 응답): {}", email);
 
-			return OAuthUserInfoDto.builder()
-				.email(email) // 기본 응답의 이메일 (나중에 보완될 수 있음)
-				.nickname(nickname)
-				.provider(OAuthProvider.GITHUB.name())
-				.providerUserId(id)
-				.build();
-		});
+		return OAuthUserInfoDto.builder()
+			.email(email)
+			.nickname(nickname)
+			.provider(OAuthProvider.GITHUB.name())
+			.providerUserId(id)
+			.build();
+	}
+
+	/**
+	 * JSON 노드에서 선택적 필드를 추출하는 메서드입니다.
+	 * 필드가 존재하지 않으면 null을 반환합니다.
+	 *
+	 * @param node JSON 노드
+	 * @param fieldName 추출할 필드명
+	 * @return 필드 값 또는 null
+	 */
+	private String extractOptionalField(JsonNode node, String fieldName) {
+		return node.has(fieldName) ? node.get(fieldName).asText() : null;
+	}
+
+	/**
+	 * 깃허브 사용자 정보에서 이메일을 추출하는 메서드입니다.
+	 * 깃허브는 이메일이 null이거나 비공개일 수 있어 특별한 처리가 필요합니다.
+	 *
+	 * @param jsonNode 깃허브 사용자 정보 JSON
+	 * @return 이메일 주소 또는 null
+	 */
+	private String extractGithubEmail(JsonNode jsonNode) {
+		return jsonNode.has(FIELD_EMAIL) && !jsonNode.get(FIELD_EMAIL).isNull()
+			? jsonNode.get(FIELD_EMAIL).asText() : null;
 	}
 
 	/**
@@ -377,7 +425,7 @@ public class GenericOAuthClient implements OAuthClient {
 	 * GitHub 이메일 목록에서 적절한 이메일 찾는 메서드입니다.
 	 */
 	private String findPrimaryEmail(JsonNode emailsNode) {
-		if (!emailsNode.isArray() || emailsNode.size() == 0) {
+		if (!emailsNode.isArray() || emailsNode.isEmpty()) {
 			return null;
 		}
 
@@ -420,17 +468,14 @@ public class GenericOAuthClient implements OAuthClient {
 	 * @return 제공자별 속성
 	 */
 	private OAuthProperties.ProviderProperties getProviderProperties(OAuthProvider provider) {
-		switch (provider) {
-			case NAVER:
-				return oAuthProperties.getNaver();
-			case KAKAO:
-				return oAuthProperties.getKakao();
-			case GOOGLE:
-				return oAuthProperties.getGoogle();
-			case GITHUB:
-				return oAuthProperties.getGithub();
-			default:
-				throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER);
+		if (provider == null) {
+			throw new ApiException(ErrorCode.BAD_REQUEST_INVALID_OAUTH_PROVIDER);
 		}
+		return switch (provider) {
+			case NAVER -> oAuthProperties.getNaver();
+			case KAKAO -> oAuthProperties.getKakao();
+			case GOOGLE -> oAuthProperties.getGoogle();
+			case GITHUB -> oAuthProperties.getGithub();
+		};
 	}
 }

@@ -5,6 +5,7 @@ import java.time.Duration;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.trackery.trackerybackapiserver.domain.common.enums.CookieName;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
@@ -20,8 +22,10 @@ import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkRequestDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLinkTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthLoginDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.OAuthResponseDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.OAuthUrlResponseDto;
+import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
-import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkService;
+import com.trackery.trackerybackapiserver.domain.user.service.OAuthLinkTokenService;
 import com.trackery.trackerybackapiserver.domain.user.service.OAuthService;
 
 import lombok.RequiredArgsConstructor;
@@ -42,6 +46,11 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 27.        inari			provider를 enum으로 변경
  * 25. 3. 27.        inari			코드 스멜 수정
  * 25. 4. 08.        inari			GlobalExceptionHandle로 ApiException 위임
+ * 25. 6. 23.        inari		 	기존 유저에 간편 로그인 연동 추가
+ * 25. 6. 24.        inari		 	linkToken을 이용하는 방식으로 변경
+ * 25. 6. 25.        inari		 	리프레시 토큰 발급 추가
+ * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
+ * 25. 6. 28.        inari      	outhLogin의 코드 복잡도 해결
  */
 @Slf4j
 @RestController
@@ -57,7 +66,7 @@ public class OAuthController {
 	/**
 	 * 간편 로그인 연동 서비스 객체입니다.
 	 */
-	private final OAuthLinkService oAuthLinkService;
+	private final OAuthLinkTokenService oAuthLinkTokenService;
 
 	/**
 	 * OAuth 계정 연동을 위한 토큰을 생성하는 API 메서드입니다.
@@ -68,7 +77,7 @@ public class OAuthController {
 	@PostMapping("/link-account")
 	public ResponseEntity<ApiResponse<OAuthLinkTokenDto>> createLinkToken(@RequestBody OAuthLinkRequestDto request) {
 		// 연동 토큰 생성
-		String token = oAuthLinkService.createLinkToken(request.getProvider(), request.getEmail());
+		String token = oAuthLinkTokenService.createLinkToken(request.getProvider(), request.getEmail());
 
 		OAuthLinkTokenDto response = OAuthLinkTokenDto.builder()
 			.token(token)
@@ -92,7 +101,7 @@ public class OAuthController {
 		@PathVariable("provider") OAuthProvider provider,
 		@RequestParam("code") String code,
 		@RequestParam(value = "state", required = false) String state,
-		@RequestParam(value = "link_token", required = false) String linkToken) {
+		@RequestParam(value = "linkToken", required = false) String linkToken) {
 
 		log.info("OAuth 로그인 요청: provider={}, code={}", provider, code);
 
@@ -100,24 +109,107 @@ public class OAuthController {
 			.provider(provider.name())
 			.code(code);
 
-		// 링크 토큰이 있으면 Redis에서 검증하고 연동 플래그 설정
-		if (linkToken != null && !linkToken.isEmpty()) {
-			try {
-				OAuthLinkRequestDto linkRequest = oAuthLinkService.validateToken(linkToken);
-				builder.linkAccount(true);
-				log.info("계정 연동 요청 검증 성공: provider={}, email={}, token={}",
-					provider, linkRequest.getEmail(), linkToken);
-
-				// 토큰 사용 후 삭제
-				oAuthLinkService.deleteToken(linkToken);
-
-			} catch (Exception e) {
-				log.warn("계정 연동 토큰 검증 실패: {}", e.getMessage());
-			}
-		}
+		String extractedLinkToken = extractLinkToken(provider, linkToken, state);
+		processLinkToken(extractedLinkToken, provider, builder);
 
 		OAuthLoginDto oAuthLoginDto = builder.build();
 		return processOAuthLogin(oAuthLoginDto);
+	}
+
+	/**
+	 * OAuth 제공자별로 링크 토큰을 추출하는 메서드입니다.
+	 *
+	 * @param provider OAuth 제공자
+	 * @param linkToken 직접 전달받은 링크 토큰
+	 * @param state OAuth state 파라미터 (네이버의 경우 토큰 포함 가능)
+	 * @return 추출된 링크 토큰 또는 null
+	 */
+	private String extractLinkToken(OAuthProvider provider, String linkToken, String state) {
+		log.info("링크 토큰 추출 시도: provider={}, linkToken={}, state={}", provider, linkToken, state);
+
+		if (provider == OAuthProvider.NAVER) {
+			return extractNaverLinkToken(linkToken, state);
+		}
+
+		return extractGeneralLinkToken(provider, linkToken);
+	}
+
+	/**
+	 * 네이버 OAuth에서 링크 토큰을 추출하는 메서드입니다.
+	 * 네이버는 state 파라미터에 토큰을 포함시키는 방식을 사용합니다.
+	 *
+	 * @param linkToken 직접 전달받은 링크 토큰
+	 * @param state OAuth state 파라미터
+	 * @return 추출된 링크 토큰 또는 null
+	 */
+	private String extractNaverLinkToken(String linkToken, String state) {
+		if (isValidToken(linkToken)) {
+			return linkToken;
+		}
+
+		if (state != null && state.startsWith("random_state_")) {
+			String extracted = state.substring("random_state_".length());
+			log.info("네이버 state에서 링크 토큰 추출 성공: 원본state={}, 추출된linkToken={}", state, extracted);
+			return extracted;
+		}
+
+		if (state != null) {
+			log.info("네이버 state 형식이 맞지 않음: state={}", state);
+		}
+
+		return null;
+	}
+
+	/**
+	 * 일반 OAuth 제공자(카카오, 구글, 깃허브)에서 링크 토큰을 추출하는 메서드입니다.
+	 *
+	 * @param provider OAuth 제공자
+	 * @param linkToken 링크 토큰 파라미터
+	 * @return 유효한 링크 토큰 또는 null
+	 */
+	private String extractGeneralLinkToken(OAuthProvider provider, String linkToken) {
+		if (isValidToken(linkToken)) {
+			log.info("{}에서 link_token 파라미터로 토큰 추출 성공: linkToken={}", provider, linkToken);
+			return linkToken;
+		}
+
+		log.info("{}에서 link_token 파라미터 없음", provider);
+		return null;
+	}
+
+	/**
+	 * 토큰이 유효한지 검증하는 유틸리티 메서드입니다.
+	 *
+	 * @param token 검증할 토큰
+	 * @return 토큰이 null이 아니고 비어있지 않으면 true
+	 */
+	private boolean isValidToken(String token) {
+		return token != null && !token.isEmpty();
+	}
+
+	/**
+	 * 링크 토큰을 검증하고 계정 연동 정보를 설정하는 메서드입니다.
+	 *
+	 * @param extractedLinkToken 추출된 링크 토큰
+	 * @param provider OAuth 제공자
+	 * @param builder OAuthLoginDto 빌더
+	 */
+	private void processLinkToken(String extractedLinkToken, OAuthProvider provider,
+			OAuthLoginDto.OAuthLoginDtoBuilder builder) {
+		if (!isValidToken(extractedLinkToken)) {
+			log.info("링크 토큰 없음 - 일반 로그인 처리: provider={}", provider);
+			return;
+		}
+
+		log.info("링크 토큰 감지: provider={}, token={}", provider, extractedLinkToken);
+		try {
+			Long validatedUserId = oAuthLinkTokenService.validateToken(extractedLinkToken);
+			builder.linkAccount(true).linkUserId(validatedUserId);
+			log.info("계정 연동 요청 검증 성공: provider={}, userId={}, token={}", provider, validatedUserId, extractedLinkToken);
+			oAuthLinkTokenService.deleteToken(extractedLinkToken);
+		} catch (Exception e) {
+			log.warn("계정 연동 토큰 검증 실패: {}", e.getMessage());
+		}
 	}
 
 	/**
@@ -138,11 +230,49 @@ public class OAuthController {
 
 		// 로그인 성공 또는 계정 연동 성공한 경우
 		// JWT 토큰을 쿠키에 설정
-		ResponseCookie cookie = CookieUtil.createHttpOnlyCookie("accessToken", result.getJwtToken(),
-			Duration.ofMinutes(60));
+		if (result.getAuthTokenDto() != null) {
+			HttpHeaders authHeaders = CookieUtil.setAuthCookie(result.getAuthTokenDto());
+			return ResponseEntity.ok()
+				.headers(authHeaders)
+				.body(ApiResponse.success(SuccessCode.OK, responseDto));
+		} else {
+			ResponseCookie cookie = CookieUtil.createHttpOnlyCookie(
+				CookieName.ACCESS_TOKEN.getValue(), result.getJwtToken(), Duration.ofMinutes(60));
+			return ResponseEntity.ok()
+				.header(HttpHeaders.SET_COOKIE, cookie.toString())
+				.body(ApiResponse.success(SuccessCode.OK, responseDto));
+		}
+	}
 
-		return ResponseEntity.ok()
-			.header(HttpHeaders.SET_COOKIE, cookie.toString())
-			.body(ApiResponse.success(SuccessCode.OK, responseDto));
+	/**
+	 * OAuth 인증 URL을 생성하는 API 메서드입니다.
+	 *
+	 * @param provider OAuth 제공자(KAKAO, GOOGLE, GITHUB, NAVER)
+	 * @param userDetails 현재 인증된 사용자 정보
+	 * @return OAuth 인증 URL 응답
+	 */
+	@PostMapping("/link/{provider}/url")
+	public ResponseEntity<ApiResponse<OAuthUrlResponseDto>> generateOAuthUrl(
+		@PathVariable("provider") OAuthProvider provider,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
+
+		log.info("OAuth URL 생성 요청: provider={}, userId={}", provider, userDetails.getUserId());
+
+		try {
+			// 현재 사용자 ID 조회
+			Long userId = userDetails.getUserId();
+
+			// 계정 연동용 토큰 생성
+			String linkToken = oAuthLinkTokenService.createLinkToken(provider.name(), userId);
+
+			// OAuth 인증 URL 생성 (link_token 포함)
+			OAuthUrlResponseDto urlResponse = oAuthService.generateAuthUrlWithToken(provider, linkToken);
+			log.info("OAuth URL 생성 성공: provider={}, authUrl={}", provider, urlResponse.getAuthUrl());
+
+			return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, urlResponse));
+		} catch (Exception e) {
+			log.error("OAuth URL 생성 실패: provider={}, error={}", provider, e.getMessage(), e);
+			throw e;
+		}
 	}
 }

@@ -1,10 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.album.dto.response;
 
-import java.util.List;
-
-import com.trackery.trackerybackapiserver.domain.album.entity.Album;
-import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,18 +27,4 @@ public class AlbumDetailedResponseDto {
 	private String albumDescription;
 	private Integer isPublic;
 	private Integer imageCount;
-
-	private List<ImageDto> imageList;
-
-	public static AlbumDetailedResponseDto of(Album album, List<ImageDto> imageList) {
-		return AlbumDetailedResponseDto.builder()
-			.albumId(album.getAlbumId())
-			.createdUserId(album.getUserId())
-			.albumTitle(album.getAlbumTitle())
-			.albumDescription(album.getAlbumDescription())
-			.imageList(imageList)
-			.isPublic(album.getIsPublic())
-			.imageCount(imageList.size())
-			.build();
-	}
 }
