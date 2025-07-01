@@ -45,10 +45,10 @@ public class ImageUploadService {
 	 * @param imageFileName 이미지 파일명
 	 * @return S3 PresignedPutUrl
 	 */
-	public String getPresignedPutUrl(String imageFileName) {
+	public String getPresignedPutUrl(String imageFileName, Long userId) {
 		isImage(imageFileName);
 
-		return imageS3Service.generatePreSignedPutUrl(imageFileName);
+		return imageS3Service.generatePreSignedPutUrl(imageFileName, userId);
 	}
 
 	/**
@@ -92,6 +92,14 @@ public class ImageUploadService {
 		}
 	}
 
+	private String getFileNameWithoutExtension(String imageFileName) {
+		int lastDotIndex = imageFileName.lastIndexOf(".");
+		if (lastDotIndex == -1) {
+			return imageFileName;
+		}
+		return imageFileName.substring(0, lastDotIndex);
+	}
+
 	/**
 	 * 유저ID, 이미지 업로드 DTO에서 사진 메타데이터를 DB에 삽입하는 메서드입니다.
 	 * @param userId 사진을 업로드한 유저 ID
@@ -107,7 +115,7 @@ public class ImageUploadService {
 
 		Image image = Image.builder()
 			.coordPoint(coordinatePoint)
-			.imageName(imageUploadDto.getImageName())
+			.imageName(getFileNameWithoutExtension(imageUploadDto.getImageName()))
 			.imageFile(imageUploadDto.getImageName())
 			.isPublic(isPublic)
 			.isDeleted(false)
@@ -119,8 +127,6 @@ public class ImageUploadService {
 			.build();
 
 		imageMapper.insertImage(image);
-
-		imageS3Service.moveObjectTempToImageFolder(image.getImageFile());
 
 		return image;
 	}
