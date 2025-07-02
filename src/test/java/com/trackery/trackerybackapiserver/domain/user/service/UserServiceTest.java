@@ -18,7 +18,6 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import com.auth0.jwt.interfaces.DecodedJWT;
@@ -268,7 +267,7 @@ class UserServiceTest {
 		@DisplayName("성공 - 프로필 사진이 업로드 돼있던 경우")
 		void success_1() {
 			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
-			when(imageS3Service.generatePreSignedGetUrl("profilePic-object-key")).thenReturn("profilePic-Presigned-url");
+			when(imageS3Service.generatePreSignedGetUrl("profilePic-object-key", 1L, "original")).thenReturn("profilePic-Presigned-url");
 
 			UserProfileDto expect = new UserProfileDto(
 				1L,
@@ -285,7 +284,7 @@ class UserServiceTest {
 			assertEquals(expect.getUserProfilePic(), result.getUserProfilePic());
 
 			verify(userMapper, times(1)).findByUserId(1L);
-			verify(imageS3Service, times(1)).generatePreSignedGetUrl("profilePic-object-key");
+			verify(imageS3Service, times(1)).generatePreSignedGetUrl("profilePic-object-key", 1L, "original");
 		}
 
 		@Test
@@ -316,7 +315,7 @@ class UserServiceTest {
 			assertEquals(expect.getUserProfilePic(), result.getUserProfilePic());
 
 			verify(userMapper, times(1)).findByUserId(1L);
-			verify(imageS3Service, times(0)).generatePreSignedGetUrl(anyString());
+			verify(imageS3Service, times(0)).generatePreSignedGetUrl(anyString(), anyLong(), anyString());
 		}
 
 		@Test

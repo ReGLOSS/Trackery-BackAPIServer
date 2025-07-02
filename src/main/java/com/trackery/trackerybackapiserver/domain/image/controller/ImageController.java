@@ -15,6 +15,7 @@ import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
@@ -41,13 +42,14 @@ public class ImageController {
 	private final ImageService imageService;
 
 	/**
-	 * 이미지 단건 조회 API
+	 * 원본 이미지 단건 조회 API
 	 * @param imageId 이미지 ID
+	 * @param userDetails 인증된 사용자 정보
 	 * @return 이미지 정보 DTO
 	 */
 	@GetMapping
-	public ResponseEntity<ApiResponse<ImageDto>> getImageDto(@RequestParam Long imageId) {
-		ImageDto imageDto = imageService.getImageByImageId(imageId);
+	public ResponseEntity<ApiResponse<ImageDto>> getImageDto(@RequestParam Long imageId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+		ImageDto imageDto = imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
 
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDto));
 	}
@@ -60,12 +62,12 @@ public class ImageController {
 	 * @return 페이지네이션된 이미지 DTO 리스트
 	 */
 	@GetMapping("/me")
-	public ResponseEntity<ApiResponse<PageInfo<ImageDto>>> getMyImagesV2(
+	public ResponseEntity<ApiResponse<PageInfo<ImageThumbnailDto>>> getMyImagesV2(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam(defaultValue = "1") int pageNum,
 		@RequestParam(defaultValue = "10") int pageSize
 	) {
-		PageInfo<ImageDto> imageDtoList = imageService.getImageListByUserIdV2(userDetails.getUserId(), pageNum,
+		PageInfo<ImageThumbnailDto> imageDtoList = imageService.getImageListByUserIdV2(userDetails.getUserId(), pageNum,
 			pageSize);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDtoList));
 	}

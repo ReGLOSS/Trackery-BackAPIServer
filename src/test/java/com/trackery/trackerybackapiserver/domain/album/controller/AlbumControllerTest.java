@@ -8,7 +8,6 @@ import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -33,7 +32,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumRespo
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.common.util.PaginationDocumentationUtils;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
-import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 /**
@@ -349,25 +348,11 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 
 	@Test
 	void getAlbumImagesSuccess() throws Exception {
-		ImageDto imageDto = ImageDto.builder()
-			.imageId(1L)
-			.userId(2L)
-			.imageRegDate(LocalDateTime.of(2025, 5, 22, 0, 0))
-			.sdName("서울특별시")
-			.sggName("강남구")
-			.latitude(15.57)
-			.longitude(121.45)
-			.imageName("image.jpg")
-			.imageContent("테스트용 이미지")
-			.imageDate(LocalDateTime.of(2000, 1, 1, 0, 0))
-			.imageUrl("http://test.com/api/images/image.jpg")
-			.isPublic(0)
-			.build();
+		ImageThumbnailDto imageThumbnailDto = ImageThumbnailDto.builder().imageId(49L).thumbnailUrl("https://s3.thumbnailImage.jpg").build();
+		List<ImageThumbnailDto> imageThumbnailDtoList = List.of(imageThumbnailDto);
 
-		List<ImageDto> imageDtoList = List.of(imageDto);
-
-		PageInfo<ImageDto> pageInfo = new PageInfo<>(imageDtoList);
-		when(albumService.getAlbumImages(16L, 1, 10)).thenReturn(pageInfo);
+		PageInfo<ImageThumbnailDto> pageInfo = new PageInfo<>(imageThumbnailDtoList);
+		when(albumService.getAlbumImages(16L, 1L, 1, 10)).thenReturn(pageInfo);
 
 		ResultActions result = mockMvc.perform(get("/api/albums/{albumId}/images", 16L)
 			.with(user(customUserDetails))
@@ -385,19 +370,9 @@ class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {
 			responseFields(
 				fieldWithPath("code").description("응답 코드"),
 				fieldWithPath("message").description("응답 메시지"),
-				fieldWithPath("data.list[]").description("이미지 목록"),
+				fieldWithPath("data.list[]").description("이미지 썸네일 목록"),
 				fieldWithPath("data.list[].imageId").description("이미지 ID"),
-				fieldWithPath("data.list[].userId").description("사용자 ID"),
-				fieldWithPath("data.list[].imageRegDate").description("이미지 등록일"),
-				fieldWithPath("data.list[].sdName").description("시도명"),
-				fieldWithPath("data.list[].sggName").description("시군구명"),
-				fieldWithPath("data.list[].latitude").description("위도"),
-				fieldWithPath("data.list[].longitude").description("경도"),
-				fieldWithPath("data.list[].imageName").description("이미지 파일명"),
-				fieldWithPath("data.list[].imageContent").description("이미지 설명"),
-				fieldWithPath("data.list[].imageDate").description("이미지 촬영일"),
-				fieldWithPath("data.list[].isPublic").description("공개 여부"),
-				fieldWithPath("data.list[].imageUrl").description("이미지 URL")
+				fieldWithPath("data.list[].thumbnailUrl").description("이미지 썸네일 주소")
 			).andWithPrefix("", PaginationDocumentationUtils.getPageableResponseFields())
 		));
 	}

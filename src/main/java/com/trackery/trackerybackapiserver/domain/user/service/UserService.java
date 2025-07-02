@@ -180,7 +180,8 @@ public class UserService {
 		String userProfilePicPresignedUrl = null;
 
 		if (user.getUserProfile() != null) {
-			userProfilePicPresignedUrl = imageS3Service.generatePreSignedGetUrl(user.getUserProfile());
+			userProfilePicPresignedUrl = imageS3Service.generatePreSignedGetUrl(user.getUserProfile(), userId,
+				"original");
 		}
 
 		return new UserProfileDto(

@@ -12,6 +12,7 @@ import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
@@ -77,47 +78,42 @@ public class ImageService {
 		log.info("공개된 이미지 주소들을 삭제합니다.");
 	}
 
-	/**
-	 * 이미지 ID로 단건 조회
-	 * @param imageId 이미지 Id
-	 * @return 이미지 정보를 담은 DTO
-	 */
-	public ImageDto getImageByImageId(Long imageId) {
+	public ImageDto getOriginalImageByImageId(Long userId, Long imageId) {
 		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
-			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
+			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
+		);
 
-		return convertImageToImageDto(image);
+		if (!image.getUserId().equals(userId) && image.getIsPublic().equals(0)) {
+			throw new ApiException(ErrorCode.FORBIDDEN);
+		}
+
+		return convertImageToImageDto(image, userId);
+	}
+
+	public ImageThumbnailDto convertImageToImageThumbnailDto(Image image, Long userId) {
+		String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageName(), userId, "thumbnail");
+		return ImageThumbnailDto
+			.builder()
+			.thumbnailUrl(imagePresignedUrl)
+			.imageId(image.getImageId())
+			.build();
 	}
 
 	/**
-	 * 유저 ID로 이미지 다건 조회
-	 * @deprecated 페이지네이션 버전으로 변경 후 삭제 예정
-	 * @param userId 조회할 유저 ID
-	 * @return 이미지 정보를 담은 DTO
-	 */
-	@Deprecated(forRemoval = true)
-	public List<ImageDto> getImageListByUserId(Long userId) {
-		return imageMapper.findImagesByUserId(userId).stream()
-			.map(this::convertImageToImageDto)
-			.toList();
-	}
-
-	/**
-	 * 유저 ID로 이미지 다건 조회 페이지네이션 버전
+	 * 유저 ID로 이미지 다건 조회 썸네일 페이지네이션 버전
 	 * @param userId 유저 ID
 	 * @param pageNum 페이지 번호
 	 * @param pageSize 페이지 사이즈
 	 * @return 페이지네이션된 이미지 DTO 리스트
 	 */
-	@SuppressWarnings("squid:S3252")
-	public PageInfo<ImageDto> getImageListByUserIdV2(Long userId, int pageNum, int pageSize) {
+	public PageInfo<ImageThumbnailDto> getImageListByUserIdV2(Long userId, int pageNum, int pageSize) {
 		PageHelper.startPage(pageNum, pageSize);
 
-		List<ImageDto> imageDtoList = imageMapper.findImagesByUserId(userId).stream()
-			.map(this::convertImageToImageDto)
+		List<ImageThumbnailDto> imageThumbnailDtoList = imageMapper.findImagesByUserId(userId).stream()
+			.map(image -> convertImageToImageThumbnailDto(image, userId))
 			.toList();
 
-		return new PageInfo<>(imageDtoList);
+		return new PageInfo<>(imageThumbnailDtoList);
 	}
 
 	/**
@@ -125,8 +121,8 @@ public class ImageService {
 	 * @param image 이미지 객체
 	 * @return 이미지 정보를 담고있는 DTO
 	 */
-	public ImageDto convertImageToImageDto(Image image) {
-		String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageFile());
+	public ImageDto convertImageToImageDto(Image image, Long userId) {
+		String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageName(), userId, "original");
 
 		CoordinatePoint coordPoint = image.getCoordPoint();
 		LocationInfoDto locationInfoDto = LocationUtil.getLocationInfoByCoordinatePoint(coordPoint);
@@ -150,24 +146,24 @@ public class ImageService {
 	/**
 	 * 특정 시도에 등록된 사용자의 이미지를 조회합니다.
 	 */
-	public List<ImageDto> getImagesBySido(Long sidoId, Long userId) {
+	public List<ImageThumbnailDto> getImagesBySido(Long sidoId, Long userId) {
 		log.debug("시도 ID {}의 사용자 ID {} 이미지 목록 조회", sidoId, userId);
 		List<Image> images = imageMapper.findImagesBySidoIdAndUserId(sidoId, userId);
 		log.debug("시도 ID {}의 사용자 ID {} 이미지 조회 완료 - {} 개", sidoId, userId, images.size());
 		return images.stream()
-			.map(this::convertImageToImageDto)
+			.map(image -> convertImageToImageThumbnailDto(image, userId))
 			.toList();
 	}
 
 	/**
 	 * 특정 시군구에 등록된 사용자의 이미지를 조회합니다.
 	 */
-	public List<ImageDto> getImagesBySigungu(Long sigunguId, Long userId) {
+	public List<ImageThumbnailDto> getImagesBySigungu(Long sigunguId, Long userId) {
 		log.debug("시군구 ID {}의 사용자 ID {} 이미지 목록 조회", sigunguId, userId);
 		List<Image> images = imageMapper.findImagesBySigunguIdAndUserId(sigunguId, userId);
 		log.debug("시군구 ID {}의 사용자 ID {} 이미지 조회 완료 - {} 개", sigunguId, userId, images.size());
 		return images.stream()
-			.map(this::convertImageToImageDto)
+			.map(image -> convertImageToImageThumbnailDto(image, userId))
 			.toList();
 	}
 
@@ -216,7 +212,7 @@ public class ImageService {
 			}
 		}
 
-		return getImageByImageId(imageId);
+		return getOriginalImageByImageId(userId, imageId);
 	}
 
 	/**
@@ -251,6 +247,6 @@ public class ImageService {
 		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
 
-		return imageS3Service.generatePreSignedGetUrl(image.getImageFile());
+		return imageS3Service.generatePreSignedGetUrl(image.getImageFile(), image.getUserId(), "original");
 	}
 }
