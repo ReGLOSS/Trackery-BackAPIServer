@@ -17,11 +17,11 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public enum TagType {
-    CUSTOM("사용자 정의"),
-    LOCATION("위치"),
-    SEASON("계절"),
-    TIME("시간대"),
-    WEATHER("날씨");
+	CUSTOM("사용자 정의"),
+	LOCATION("위치"),
+	SEASON("계절"),
+	TIME("시간대"),
+	WEATHER("날씨");
 
-    private final String description;
+	private final String description;
 }
