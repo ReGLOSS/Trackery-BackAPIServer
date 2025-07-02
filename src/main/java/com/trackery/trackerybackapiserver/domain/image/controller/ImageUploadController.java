@@ -40,8 +40,8 @@ public class ImageUploadController {
 	 * @return 성공 시 data node에 S3 PresignedPutUrl을 반환합니다.
 	 */
 	@GetMapping("/presigned-url/put")
-	public ResponseEntity<ApiResponse<String>> requestPreSignedPutUrl(@RequestParam String imageFileName) {
-		String result = imageUploadService.getPresignedPutUrl(imageFileName);
+	public ResponseEntity<ApiResponse<String>> requestPreSignedPutUrl(@RequestParam String imageFileName, @AuthenticationPrincipal CustomUserDetails userDetails) {
+		String result = imageUploadService.getPresignedPutUrl(imageFileName, userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 
