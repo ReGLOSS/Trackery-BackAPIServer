@@ -44,6 +44,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  * 25. 6. 27.		 inari	   	 로그인시 lastlogin 갱신 추가 및 이미 연동된 계정 타유저 접근 차단
  * 25. 6. 27.		 inari	   	 코드 복잡도 해결을 위해 메서드 분리 테스트
  * 25. 6. 28.		 inari	   	 코드 스멜 수정
+ * 25. 7. 1.         inari		 isNewUser 파라미터 테스트 코드 추가
  */
 @ExtendWith(MockitoExtension.class)
 class OAuthServiceTest {
@@ -128,6 +129,7 @@ class OAuthServiceTest {
 		assertNotNull(result);
 		assertEquals("jwt_token", result.getJwtToken());
 		assertFalse(result.getResponseDto().isExistingEmail());
+		assertFalse(result.getResponseDto().isNewUser());
 		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
 		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
@@ -152,6 +154,7 @@ class OAuthServiceTest {
 		assertNotNull(result);
 		assertNull(result.getJwtToken());
 		assertTrue(result.getResponseDto().isExistingEmail());
+		assertFalse(result.getResponseDto().isNewUser());
 		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
 		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
@@ -182,6 +185,7 @@ class OAuthServiceTest {
 		assertNotNull(result);
 		assertEquals("jwt_token", result.getJwtToken());
 		assertFalse(result.getResponseDto().isExistingEmail());
+		assertFalse(result.getResponseDto().isNewUser());
 		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
 		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
@@ -217,6 +221,7 @@ class OAuthServiceTest {
 		assertNotNull(result);
 		assertEquals("jwt_token", result.getJwtToken());
 		assertFalse(result.getResponseDto().isExistingEmail());
+		assertTrue(result.getResponseDto().isNewUser());
 		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
 		verify(oAuthClient).getUserInfo(anyString(),any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
@@ -254,6 +259,7 @@ class OAuthServiceTest {
 		assertNotNull(result);
 		assertEquals("jwt_token", result.getJwtToken());
 		assertFalse(result.getResponseDto().isExistingEmail());
+		assertFalse(result.getResponseDto().isNewUser());
 		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
 		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
@@ -372,6 +378,7 @@ class OAuthServiceTest {
 		assertNotNull(result);
 		assertEquals("jwt_token", result.getJwtToken());
 		assertFalse(result.getResponseDto().isExistingEmail());
+		assertFalse(result.getResponseDto().isNewUser());
 		verify(oAuthClient).getAccessToken(anyString(), any(OAuthProvider.class));
 		verify(oAuthClient).getUserInfo(anyString(), any(OAuthProvider.class));
 		verify(oAuthMapper).findByProviderAndProviderId(anyString(), anyString());
