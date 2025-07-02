@@ -9,7 +9,8 @@
 
 INSERT INTO role (role_id, role_name) VALUES
                                           (1, 'USER'),
-                                          (2, 'MANAGER');
+                                          (2, 'MANAGER'),
+                                          (3, 'ADMIN');
 
 -- tag_type: 1 (위치)
 
