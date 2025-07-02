@@ -15,6 +15,7 @@ import lombok.Getter;
  * 25. 2. 25.        inari       최초 생성
  * 25. 2. 26.        inari       JWT 인증 헤더 삭제
  * 25. 3. 14.        inari       이메일 추가
+ * 25. 7. 2.         inari       회원가입 유무 추가
  */
 @Getter
 @Builder
