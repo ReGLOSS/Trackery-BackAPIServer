@@ -14,12 +14,14 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.LocationNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.mapper.LocationMapper;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagNameResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 14.		inari			홈화면 전국지도용 통계 추가
  * 25. 6. 22.		inari			좌표 업데이트 메서드 추가
  * 25. 6. 27.		inari			코드 스멜 수정
+ * 25. 7. 7.		inari			지역 태그 서비스 추가
  */
 @Slf4j
 @Service
@@ -63,6 +66,29 @@ public class LocationService {
 	}
 
 	/**
+	 * 좌표로 시도 + 시군구 주소명과 지역 태그명을 조회하는 메서드입니다.
+	 * @param coordinateDto 좌표 DTO : latitude(위도), longitude(경도) 둘 다 double 타입입니다.
+	 * @return 위치명과 지역 태그명 목록을 포함한 응답 DTO
+	 */
+	public LocationNameResponseDto getLocationNameWithTagsByCoord(CoordinateDto coordinateDto) {
+		JusoSigungu sigungu = locationMapper.findSigunguByCoordinate(coordinateDto).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND)
+		);
+
+		String locationName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(),
+			sigungu.getSigunguName());
+		List<TagNameResponseDto> regionalTags = List.of(
+			TagNameResponseDto.builder().tagName(sigungu.getSido().getSidoName()).build(),
+			TagNameResponseDto.builder().tagName(sigungu.getSigunguName()).build()
+		);
+
+		return LocationNameResponseDto.builder()
+			.locationName(locationName)
+			.regionalTags(regionalTags)
+			.build();
+	}
+
+	/**
 	 * 좌표로 Point 타입 객체를 반환하는 메서드입니다.
 	 * @param coordinateDto : 좌표 DTO
 	 * @return : jts 라이브러리의 Point 객체
@@ -85,6 +111,23 @@ public class LocationService {
 	}
 
 	/**
+	 * 위도와 경도로 시군구 정보를 조회합니다.
+	 * @param latitude 위도
+	 * @param longitude 경도
+	 * @return 시군구 정보 (null일 수 있음)
+	 */
+	public JusoSigungu findSigunguByCoordinate(double latitude, double longitude) {
+		try {
+			CoordinateDto coordinateDto = new CoordinateDto(latitude, longitude);
+			Point point = getPointByCoord(coordinateDto);
+			return getSigunguByPoint(point);
+		} catch (ApiException e) {
+			log.warn("Failed to find sigungu for coordinates ({}, {}): {}", latitude, longitude, e.getMessage());
+			return null;
+		}
+	}
+
+	/**
 	 * 좌표 객체 CoordinatePoint 객체를 생성하고 DB에 삽입하는 메서드입니다.
 	 * @param coordinateDto 좌표 DTO
 	 * @return DB에서 자동으로 할당된 ID를 포함하는 CoordinatePoint 객체
@@ -93,7 +136,8 @@ public class LocationService {
 	public CoordinatePoint insertCoordinatePoint(CoordinateDto coordinateDto) {
 		Point point = getPointByCoord(coordinateDto);
 		JusoSigungu sigungu = getSigunguByPoint(point);
-		String pointName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(), sigungu.getSigunguName());
+		String pointName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(),
+			sigungu.getSigunguName());
 
 		CoordinatePoint coordinatePoint = CoordinatePoint.builder()
 			.coordinatePointName(pointName)
@@ -119,7 +163,8 @@ public class LocationService {
 	public int updateCoordinatePoint(Long coordinatePointId, CoordinateDto coordinateDto) {
 		Point point = getPointByCoord(coordinateDto);
 		JusoSigungu sigungu = getSigunguByPoint(point);
-		String pointName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(), sigungu.getSigunguName());
+		String pointName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(),
+			sigungu.getSigunguName());
 
 		return locationMapper.updateCoordinatePointById(coordinatePointId, pointName, point, sigungu.getSigunguId(),
 			LocalDateTime.now(ZoneId.of(SEOUL)));
