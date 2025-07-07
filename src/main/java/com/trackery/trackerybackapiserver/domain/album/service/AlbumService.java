@@ -28,6 +28,7 @@ import com.trackery.trackerybackapiserver.domain.album.event.AlbumImageEditEvent
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.common.util.PageUtil;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
@@ -240,12 +241,9 @@ public class AlbumService {
 
 		List<ImageInfoForThumbnailDto> albumImageList = albumMapper.findImagesForThumbnailByAlbumId(albumId);
 
-		// 이미지 도메인에서 썸네일 변환 처리
-		List<ImageThumbnailDto> result = albumImageList.stream()
-			.map(imageInfo -> imageService.convertToThumbnail(imageInfo, userId))
-			.toList();
+		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(albumImageList);
 
-		return new PageInfo<>(result);
+		return PageUtil.convert(pageInfo, imageInfo -> imageService.convertToThumbnail(imageInfo, userId));
 	}
 
 	/**
