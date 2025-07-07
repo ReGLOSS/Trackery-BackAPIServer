@@ -4,6 +4,8 @@ import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.trackery.trackerybackapiserver.domain.tag.enums.TagTypeHandler;
+
 /**
  * packageName    : com.trackery.trackerybackapiserver.config.mybatis.spital
  * fileName       : MybatisSpitalConfig
@@ -17,6 +19,7 @@ import org.springframework.context.annotation.Configuration;
  * -----------------------------------------------------------
  * 25. 4. 18.		durururuk		최초 생성
  * 25. 6. 30.		inari			주석추가
+ * 25. 7. 7.		inari			TagTypeHandler 추가
  */
 @Configuration
 public class MybatisSpatialConfig {
@@ -36,6 +39,7 @@ public class MybatisSpatialConfig {
 				.register(org.locationtech.jts.geom.Geometry.class, handler.getClass());
 			configuration.getTypeHandlerRegistry()
 				.register(org.locationtech.jts.geom.Point.class, handler.getClass());
+			configuration.getTypeHandlerRegistry().register(new TagTypeHandler());
 		};
 	}
 }

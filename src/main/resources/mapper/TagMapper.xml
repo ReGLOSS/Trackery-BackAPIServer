@@ -15,7 +15,7 @@
     <resultMap id="TagMap" type="com.trackery.trackerybackapiserver.domain.tag.entity.Tag">
         <id property="tagId" column="tag_id"/>
         <result property="tagName" column="tag_name"/>
-        <result property="tagType" column="tag_type" typeHandler="org.apache.ibatis.type.EnumOrdinalTypeHandler"/>
+        <result property="tagType" column="tag_type"/>
         <result property="tagUseCount" column="tag_use_count"/>
         <result property="createdAt" column="created_at"/>
     </resultMap>

@@ -24,36 +24,25 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Tag {
 
-    /**
-     * 태그의 고유 식별자입니다.
-     */
-    private Long tagId;
+	/**
+	 * tagId : 태그의 고유 식별자
+	 * tagName : 태그명
+	 * tagType : 태그 유형 (0: CUSTOM, 1: LOCATION, 2: SEASON, 3: TIME, 4: WEATHER)
+	 * tagUseCount : 태그 사용 횟수
+	 * createdAt : 태그가 생성된 날짜
+	 */
+	private Long tagId;
+	private String tagName;
+	private TagType tagType;
+	private Long tagUseCount;
+	private LocalDateTime createdAt;
 
-    /**
-     * 태그명입니다.
-     */
-    private String tagName;
-
-    /**
-     * 태그 유형입니다.
-     */
-    private TagType tagType;
-
-    /**
-     * 태그 사용 횟수입니다.
-     */
-    private Long tagUseCount;
-
-    /**
-     * 태그가 생성된 날짜입니다.
-     */
-    private LocalDateTime createdAt;
-
-    @Builder
-    public Tag(String tagName, TagType tagType, Long tagUseCount, LocalDateTime createdAt) {
-        this.tagName = tagName;
-        this.tagType = tagType;
-        this.tagUseCount = tagUseCount;
-        this.createdAt = createdAt;
-    }
+	@Builder
+	public Tag(String tagName, TagType tagType, Long tagUseCount,
+		LocalDateTime createdAt) {
+		this.tagName = tagName;
+		this.tagType = tagType;
+		this.tagUseCount = tagUseCount;
+		this.createdAt = createdAt;
+	}
 }
