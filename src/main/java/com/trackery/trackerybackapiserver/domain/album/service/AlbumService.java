@@ -29,6 +29,7 @@ import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
@@ -227,7 +228,8 @@ public class AlbumService {
 
 	/**
 	 * 앨범 이미지 조회
-	 * @param albumId 조회할 이미지 ID
+	 * @param albumId 조회할 앨범 ID
+	 * @param userId 사용자 ID
 	 * @param pageNum 페이지 번호
 	 * @param pageSize 페이지 크기
 	 * @return 페이지네이션된 이미지 DTO 리스트
@@ -236,16 +238,14 @@ public class AlbumService {
 	public PageInfo<ImageThumbnailDto> getAlbumImages(Long albumId, Long userId, int pageNum, int pageSize) {
 		PageHelper.startPage(pageNum, pageSize);
 
-		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(albumId);
+		List<ImageInfoForThumbnailDto> albumImageList = albumMapper.findImagesForThumbnailByAlbumId(albumId);
 
-		List<ImageThumbnailDto> albumImageThumbnailDtoList = albumImageList.stream()
-			.map(albumImage -> imageMapper.findImageByImageId(albumImage.getImageId()).orElseThrow(
-				() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
-			))
-			.map(image -> imageService.convertImageToImageThumbnailDto(image, userId))
+		// 이미지 도메인에서 썸네일 변환 처리
+		List<ImageThumbnailDto> result = albumImageList.stream()
+			.map(imageInfo -> imageService.convertToThumbnail(imageInfo, userId))
 			.toList();
 
-		return new PageInfo<>(albumImageThumbnailDtoList);
+		return new PageInfo<>(result);
 	}
 
 	/**

@@ -67,10 +67,10 @@ public interface ImageMapper {
 	 * @return 수정된 행의 수
 	 */
 	int updateImageMetadata(@Param("imageId") Long imageId,
-			@Param("imageName") String imageName,
-			@Param("imageContent") String imageContent,
-			@Param("imageDate") LocalDateTime imageDate,
-			@Param("isPublic") Integer isPublic);
+		@Param("imageName") String imageName,
+		@Param("imageContent") String imageContent,
+		@Param("imageDate") LocalDateTime imageDate,
+		@Param("isPublic") Integer isPublic);
 
 	/**
 	 * 이미지를 논리적으로 삭제합니다 (is_deleted = 1).
