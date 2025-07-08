@@ -14,6 +14,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
@@ -41,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 22.		inari			좌표 업데이트 메서드 추가
  * 25. 6. 27.		inari			코드 스멜 수정
  * 25. 7. 7.		inari			지역 태그 서비스 추가
+ * 25. 7. 8.		inari			시군구 ID로 시도명과 시군구명을 분리한 메서드 추가
  */
 @Slf4j
 @Service
@@ -257,6 +259,19 @@ public class LocationService {
 		log.debug("시군구 정보 조회 결과: {} {} (ID: {})",
 			sigungu.getSido().getSidoName(), sigungu.getSigunguName(), sigungu.getSigunguId());
 		return sigungu;
+	}
+
+	/**
+	 * 시군구 ID로 시도명과 시군구명을 분리하여 조회합니다.
+	 */
+	public LocationInfoDto getSigunguLocationInfoById(Long sigunguId) {
+		log.debug("시군구 ID {}로 위치 정보 조회", sigunguId);
+		JusoSigungu sigungu = locationMapper.findSigunguById(sigunguId).orElseThrow(
+			() -> new ApiException(ErrorCode.NOT_FOUND_SIGUNGU)
+		);
+		log.debug("위치 정보 조회 결과: {} {} (ID: {})",
+			sigungu.getSido().getSidoName(), sigungu.getSigunguName(), sigungu.getSigunguId());
+		return new LocationInfoDto(0.0, 0.0, sigungu.getSido().getSidoName(), sigungu.getSigunguName());
 	}
 
 	/**

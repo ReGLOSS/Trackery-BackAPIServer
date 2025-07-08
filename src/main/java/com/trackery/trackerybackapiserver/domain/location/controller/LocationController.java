@@ -17,6 +17,7 @@ import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.SigunguResponseDto;
@@ -43,6 +44,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 6. 14.		inari       	홈화면 전국지도용 통계 추가
  * 25. 6. 16.		inari       	지도에서 사용자 이미지 조회 추가
  * 25. 7. 7.		inari			지역 태그 서비스 추가
+ * 25. 7. 8.		inari			프론트에서 시도명과 시군구명을 분리해서 받을 수 있음
  */
 @RestController
 @RequestMapping("/api/location")
@@ -134,6 +136,18 @@ public class LocationController {
 	public ResponseEntity<ApiResponse<SigunguResponseDto>> getSigungu(@PathVariable Long sigunguId) {
 		JusoSigungu sigungu = locationService.getSigunguById(sigunguId);
 		SigunguResponseDto response = SigunguResponseDto.from(sigungu);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
+	}
+
+	/**
+	 * 시군구 ID로 시도명과 시군구명을 분리하여 조회합니다.
+	 *
+	 * @param sigunguId 조회할 시군구의 ID
+	 * @return 시도명과 시군구명을 분리한 위치 정보를 포함한 API 응답
+	 */
+	@GetMapping("/sigungu/{sigunguId}/location-info")
+	public ResponseEntity<ApiResponse<LocationInfoDto>> getSigunguLocationInfo(@PathVariable Long sigunguId) {
+		LocationInfoDto response = locationService.getSigunguLocationInfoById(sigunguId);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 
