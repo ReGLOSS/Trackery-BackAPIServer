@@ -63,4 +63,6 @@ public interface AlbumMapper {
 	 * @return 썸네일 생성에 필요한 이미지 기본 정보
 	 */
 	List<ImageInfoForThumbnailDto> findImagesForThumbnailByAlbumId(@Param("albumId") Long albumId);
+
+	List<ImageInfoForThumbnailDto> findMyImagesThumbnailWithoutAlbumImages(@Param("albumId")Long albumId, @Param("userId") Long userId);
 }

@@ -233,15 +233,34 @@ public class AlbumService {
 	 * @param userId 사용자 ID
 	 * @param pageNum 페이지 번호
 	 * @param pageSize 페이지 크기
-	 * @return 페이지네이션된 이미지 DTO 리스트
+	 * @return 페이지네이션 된 이미지 썸네일 DTO 리스트
 	 */
 	@SuppressWarnings("squid:S3252")
 	public PageInfo<ImageThumbnailDto> getAlbumImages(Long albumId, Long userId, int pageNum, int pageSize) {
 		PageHelper.startPage(pageNum, pageSize);
 
-		List<ImageInfoForThumbnailDto> albumImageList = albumMapper.findImagesForThumbnailByAlbumId(albumId);
+		List<ImageInfoForThumbnailDto> imageInfoForThumbnailDtos = albumMapper.findImagesForThumbnailByAlbumId(albumId);
 
-		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(albumImageList);
+		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
+
+		return PageUtil.convert(pageInfo, imageInfo -> imageService.convertToThumbnail(imageInfo, userId));
+	}
+
+	/**
+	 * 앨범 이미지를 제외한 내 이미지 조회
+	 * @param userId 유저 ID
+	 * @param albumId 앨범 ID
+	 * @param pageNum 페이지 번호
+	 * @param pageSize 페이지 크기
+	 * @return 페이지네이션 된 이미지 썸네일 DTO 리스트
+	 */
+	@SuppressWarnings("squid:S3252")
+	public PageInfo<ImageThumbnailDto> getMyImageThumbnailsWithoutAlbumImages(Long userId, Long albumId, int pageNum, int pageSize) {
+		PageHelper.startPage(pageNum, pageSize);
+
+		List<ImageInfoForThumbnailDto> imageInfoForThumbnailDtos = albumMapper.findMyImagesThumbnailWithoutAlbumImages(albumId, userId);
+
+		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
 
 		return PageUtil.convert(pageInfo, imageInfo -> imageService.convertToThumbnail(imageInfo, userId));
 	}

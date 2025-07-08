@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.pagehelper.PageInfo;
+import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
@@ -40,6 +42,7 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/images")
 public class ImageController {
 	private final ImageService imageService;
+	private final AlbumService aLbumService;
 
 	/**
 	 * 원본 이미지 단건 조회 API
@@ -65,10 +68,18 @@ public class ImageController {
 	public ResponseEntity<ApiResponse<PageInfo<ImageThumbnailDto>>> getMyImagesV2(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam(defaultValue = "1") int pageNum,
-		@RequestParam(defaultValue = "10") int pageSize
+		@RequestParam(defaultValue = "10") int pageSize,
+		@RequestParam(required = false) Long excludeAlbumId
 	) {
-		PageInfo<ImageThumbnailDto> imageDtoList = imageService.getImageListByUserIdV2(userDetails.getUserId(), pageNum,
-			pageSize);
+		ImageSearchByUserIdDto searchByUserIdDto = ImageSearchByUserIdDto.builder()
+			.userId(userDetails.getUserId())
+			.excludeAlbumId(excludeAlbumId)
+			.pageNum(pageNum)
+			.pageSize(pageSize)
+			.build();
+
+		PageInfo<ImageThumbnailDto> imageDtoList = imageService.getImageListByUserId(searchByUserIdDto);
+
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDtoList));
 	}
 

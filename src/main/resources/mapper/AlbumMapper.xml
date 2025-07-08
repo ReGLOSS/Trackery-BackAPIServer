@@ -98,8 +98,7 @@
     </update>
 
     <!-- 앨범의 이미지들을 썸네일 생성용으로 조회 -->
-    <select id="findImagesForThumbnailByAlbumId" 
-            parameterType="Long" 
+    <select id="findImagesForThumbnailByAlbumId"
             resultType="com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto">
         SELECT
             i.image_id as imageId,
@@ -109,5 +108,23 @@
         JOIN image i ON ai.image_id = i.image_id
         WHERE ai.album_id = #{albumId}
           AND i.is_deleted = 0
+    </select>
+
+    <!-- 내 이미지에서 앨범에 포함된 이미지를 제외해서 조회-->
+    <select id="findMyImagesThumbnailWithoutAlbumImages"
+            resultType="com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto">
+        SELECT
+            i.image_id as imageId,
+            i.user_id as userId,
+            i.image_name as imageName
+        From image i
+        WHERE i.user_id = #{userId}
+        AND i.is_deleted = 0
+        AND NOT EXISTS (
+            SELECT 1
+            FROM album_image ai
+            WHERE ai.image_id = i.image_id
+            AND ai.album_id = #{albumId}
+        )
     </select>
 </mapper>

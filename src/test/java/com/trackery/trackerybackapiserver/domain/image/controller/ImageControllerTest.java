@@ -140,7 +140,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 		ImageThumbnailDto imageThumbnailDto = ImageThumbnailDto.builder().imageId(IMAGE_ID).thumbnailUrl("s3.thumbnail.image.webp").build();
 		List<ImageThumbnailDto> imageThumbnailDtoList = List.of(imageThumbnailDto);
 		PageInfo<ImageThumbnailDto> pageInfo = new PageInfo<>(imageThumbnailDtoList);
-		when(imageService.getImageListByUserIdV2(USER_ID, 1, 10)).thenReturn(pageInfo);
+		when(imageService.getImageListByUserId(USER_ID, 1, 10)).thenReturn(pageInfo);
 
 		ResultActions result = mockMvc.perform(get("/api/images/me")
 			.with(user(userDetails))
@@ -186,7 +186,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 				)
 			));
 
-		verify(imageService, times(1)).getImageListByUserIdV2(USER_ID, 1, 10);
+		verify(imageService, times(1)).getImageListByUserId(USER_ID, 1, 10);
 	}
 
 	@Test

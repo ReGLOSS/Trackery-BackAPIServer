@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 
 /**
@@ -40,6 +42,8 @@ public interface ImageMapper {
 	Optional<Image> findImageByImageId(@Param("imageId") Long imageId);
 
 	List<Image> findImagesByUserId(@Param("userId") Long userId);
+
+	List<ImageInfoForThumbnailDto> findImageThumbnailsByUserId(ImageSearchByUserIdDto imageSearchByUserIdDto);
 
 	/**
 	 * 특정 시도에 등록된 특정 사용자의 이미지를 조회합니다.

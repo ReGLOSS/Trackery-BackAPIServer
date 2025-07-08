@@ -211,7 +211,7 @@ class ImageServiceTest {
 				when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("thumbnail"))).thenReturn(
 					testPresignedUrl);
 
-				PageInfo<ImageThumbnailDto> pageInfo = imageService.getImageListByUserIdV2(testUserId, 1, 10);
+				PageInfo<ImageThumbnailDto> pageInfo = imageService.getImageListByUserId(testUserId, 1, 10);
 
 				assertNotNull(pageInfo);
 				assertFalse(pageInfo.getList().isEmpty());
@@ -229,7 +229,7 @@ class ImageServiceTest {
 			void getImageListByUserIdV2_emptyResult() {
 				when(imageMapper.findImagesByUserId(testUserId)).thenReturn(List.of());
 
-				PageInfo<ImageThumbnailDto> pageInfo = imageService.getImageListByUserIdV2(testUserId, 1, 10);
+				PageInfo<ImageThumbnailDto> pageInfo = imageService.getImageListByUserId(testUserId, 1, 10);
 
 				assertNotNull(pageInfo);
 				assertTrue(pageInfo.getList().isEmpty());
