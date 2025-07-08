@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,10 +15,9 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagCreateRequestDto;
-import com.trackery.trackerybackapiserver.domain.tag.dto.TagDefaultRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
-import com.trackery.trackerybackapiserver.domain.tag.dto.TagUpdateRequestDto;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagTimeRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,7 +31,8 @@ import lombok.RequiredArgsConstructor;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 2.        inari       최초 생성
+ * 25. 7. 2.        inari       	최초 생성
+ * 25. 7. 9.	 	inari		 TagController로 일부 이동
  */
 @RestController
 @RequestMapping("/api/tags")
@@ -76,66 +75,6 @@ public class TagController {
 	}
 
 	/**
-	 * 특정 이미지에 연결된 태그 목록을 조회합니다.
-	 * @param imageId 이미지 ID
-	 * @return 이미지에 연결된 태그 목록
-	 */
-	@GetMapping("/image/{imageId}")
-	public ResponseEntity<ApiResponse<List<TagResponseDto>>> getTagsByImageId(
-			@PathVariable Long imageId) {
-
-		List<TagResponseDto> response = tagService.getTagsByImageId(imageId);
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
-	}
-
-	/**
-	 * 이미지에 태그를 연결합니다.
-	 * @param imageId 이미지 ID
-	 * @param tagId 태그 ID
-	 * @return 성공 응답
-	 */
-	@PostMapping("/image/{imageId}/tag/{tagId}")
-	public ResponseEntity<ApiResponse<Void>> addTagToImage(
-			@PathVariable Long imageId,
-			@PathVariable Long tagId) {
-
-		tagService.addTagToImage(imageId, tagId);
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
-	}
-
-	/**
-	 * 이미지에서 태그 연결을 제거합니다.
-	 * @param imageId 이미지 ID
-	 * @param tagId 태그 ID
-	 * @return 성공 응답
-	 */
-	@DeleteMapping("/image/{imageId}/tag/{tagId}")
-	public ResponseEntity<ApiResponse<Void>> removeTagFromImage(
-			@PathVariable Long imageId,
-			@PathVariable Long tagId) {
-
-		tagService.removeTagFromImage(imageId, tagId);
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
-	}
-
-	/**
-	 * 특정 이미지의 태그를 수정합니다.
-	 * @param imageId 이미지 ID
-	 * @param tagId 수정할 태그 ID
-	 * @param request 태그 수정 요청 데이터
-	 * @return 수정된 태그 정보
-	 */
-	@PutMapping("/image/{imageId}/tag/{tagId}")
-	public ResponseEntity<ApiResponse<TagResponseDto>> updateImageTag(
-			@PathVariable Long imageId,
-			@PathVariable Long tagId,
-			@RequestBody TagUpdateRequestDto request) {
-
-		TagResponseDto response = tagService.updateImageTag(imageId, tagId, request.getNewTagName());
-		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
-	}
-
-	/**
 	 * 태그를 안전하게 삭제합니다. (관리자 전용)
 	 * - 사용되지 않는 태그만 삭제 가능
 	 * - 시스템 태그 (CUSTOM 제외)는 삭제 불가
@@ -161,7 +100,7 @@ public class TagController {
 	 */
 	@PostMapping("/default")
 	public ResponseEntity<ApiResponse<List<TagNameResponseDto>>> getDefaultTags(
-			@RequestBody TagDefaultRequestDto request) {
+			@RequestBody TagTimeRequestDto request) {
 
 		List<TagNameResponseDto> response = tagService.createDefaultTags(request.getDateTime());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
