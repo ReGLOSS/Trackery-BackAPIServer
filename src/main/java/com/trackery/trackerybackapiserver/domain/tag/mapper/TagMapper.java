@@ -18,7 +18,7 @@ import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 2.        inari       	최초 생성
+ * 25. 7. 2.        inari           최초 생성
  */
 @Mapper
 public interface TagMapper {

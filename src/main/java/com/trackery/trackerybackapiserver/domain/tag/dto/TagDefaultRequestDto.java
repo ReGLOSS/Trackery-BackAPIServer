@@ -1,28 +1,24 @@
 package com.trackery.trackerybackapiserver.domain.tag.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.tag.dto
- * fileName       : TagNameResponseDto
+ * fileName       : TagDefaultRequestDto
  * author         : inari
  * date           : 25. 7. 7.
- * description    : 태그명만 포함한 간단한 응답 DTO 클래스입니다.
+ * description    : 날짜/시간 기반 기본 태그 생성 요청 DTO 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 7.        inari        최초 생성
+ * 25. 7. 7.        inari       최초 생성
  */
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class TagNameResponseDto {
+public class TagDefaultRequestDto {
 	/**
-	 * 태그명.
+	 * 날짜/시간 문자열 (기본 태그 생성용).
 	 */
-	private String tagName;
+	private String dateTime;
 }

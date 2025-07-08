@@ -25,21 +25,36 @@ import lombok.NoArgsConstructor;
 public class Tag {
 
 	/**
-	 * tagId : 태그의 고유 식별자
-	 * tagName : 태그명
-	 * tagType : 태그 유형 (0: CUSTOM, 1: LOCATION, 2: SEASON, 3: TIME, 4: WEATHER)
-	 * tagUseCount : 태그 사용 횟수
-	 * createdAt : 태그가 생성된 날짜
+	 * 태그의 고유 식별자.
 	 */
 	private Long tagId;
+	/**
+	 * 태그명.
+	 */
 	private String tagName;
+	/**
+	 * 태그 유형.
+	 */
 	private TagType tagType;
+	/**
+	 * 태그 사용 횟수.
+	 */
 	private Long tagUseCount;
+	/**
+	 * 태그 생성일시.
+	 */
 	private LocalDateTime createdAt;
-
+	/**
+	 * Tag 생성자.
+	 *
+	 * @param tagName 태그명
+	 * @param tagType 태그 유형
+	 * @param tagUseCount 태그 사용 횟수
+	 * @param createdAt 생성일시
+	 */
 	@Builder
-	public Tag(String tagName, TagType tagType, Long tagUseCount,
-		LocalDateTime createdAt) {
+	public Tag(final String tagName, final TagType tagType, 
+			final Long tagUseCount, final LocalDateTime createdAt) {
 		this.tagName = tagName;
 		this.tagType = tagType;
 		this.tagUseCount = tagUseCount;
