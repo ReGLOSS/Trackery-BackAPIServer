@@ -17,6 +17,7 @@ import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
+import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 17.		durururuk		최초 생성
+ * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
  */
 @Slf4j
 @Service
@@ -39,6 +41,7 @@ public class ImageUploadService {
 	private final ImageMapper imageMapper;
 	private final LocationService locationService;
 	private final ImageS3Service imageS3Service;
+	private final TagService tagService;
 
 	/**
 	 * S3에 Object Put Presigned URL을 요청하는 메서드입니다.
@@ -128,7 +131,14 @@ public class ImageUploadService {
 
 		imageMapper.insertImage(image);
 
+		// 이미지 위치 기반 지역 태그 자동 연결 시도
+		try {
+			tagService.attachLocationTagsToImage(image.getImageId(),
+				imageUploadDto.getLatitude(), imageUploadDto.getLongitude());
+		} catch (Exception e) {
+			log.warn("Failed to attach location tags to image {}: {}", image.getImageId(), e.getMessage());
+		}
+
 		return image;
 	}
-
 }
