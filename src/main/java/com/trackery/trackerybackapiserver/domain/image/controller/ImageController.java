@@ -48,8 +48,9 @@ public class ImageController {
 	 * @param userDetails 인증된 사용자 정보
 	 * @return 이미지 정보 DTO
 	 */
-	@GetMapping
-	public ResponseEntity<ApiResponse<ImageDto>> getImageDto(@RequestParam Long imageId, @AuthenticationPrincipal CustomUserDetails userDetails) {
+	@GetMapping("/{imageId}")
+	public ResponseEntity<ApiResponse<ImageDto>> getImageDto(@PathVariable Long imageId,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		ImageDto imageDto = imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
 
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDto));

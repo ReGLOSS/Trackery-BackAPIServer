@@ -92,9 +92,8 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 	void getImageDtoSuccess() throws Exception {
 		when(imageService.getOriginalImageByImageId(USER_ID, IMAGE_ID)).thenReturn(imageDto);
 
-		ResultActions result = mockMvc.perform(get("/api/images")
-			.with(user(userDetails)) // 인증된 사용자 정보 추가 (필요하다면)
-			.queryParam("imageId", String.valueOf(IMAGE_ID)));
+		ResultActions result = mockMvc.perform(get("/api/images/{imageId}", IMAGE_ID)
+			.with(user(userDetails)));
 
 		result
 			.andExpect(status().isOk())
@@ -111,7 +110,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data.imageDate").value(IMAGE_DATE.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)))
 			.andExpect(jsonPath("$.data.imageUrl").value(IMAGE_URL))
 			.andDo(document("get-image-by-id-success",
-				queryParameters(
+				pathParameters(
 					parameterWithName("imageId").description("조회할 이미지 ID")
 				),
 				responseFields(
