@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.config.mybatis.spitial;
+package com.trackery.trackerybackapiserver.config.mybatis.spatial;
 
 import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -7,8 +7,8 @@ import org.springframework.context.annotation.Configuration;
 import com.trackery.trackerybackapiserver.domain.tag.enums.TagTypeHandler;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.config.mybatis.spital
- * fileName       : MybatisSpitalConfig
+ * packageName    : com.trackery.trackerybackapiserver.config.mybatis.spatial
+ * fileName       : MybatisSpatialConfig
  * author         : durururuk
  * date           : 25. 4. 18.
  * description    : Mybatis에서 Spatial 타입을 사용하기 위한 타입 핸들러입니다.
@@ -20,6 +20,7 @@ import com.trackery.trackerybackapiserver.domain.tag.enums.TagTypeHandler;
  * 25. 4. 18.		durururuk		최초 생성
  * 25. 6. 30.		inari			주석추가
  * 25. 7. 7.		inari			TagTypeHandler 추가
+ * 25. 7. 9.		inari			spital 패키지에서 spatial로 이동
  */
 @Configuration
 public class MybatisSpatialConfig {

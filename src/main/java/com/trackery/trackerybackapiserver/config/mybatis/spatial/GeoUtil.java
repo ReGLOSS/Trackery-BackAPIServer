@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.config.mybatis.spitial;
+package com.trackery.trackerybackapiserver.config.mybatis.spatial;
 
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -14,7 +14,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.config.mybatis.spital
+ * packageName    : com.trackery.trackerybackapiserver.config.mybatis.spatial
  * fileName       : GeoUtil
  * author         : durururuk
  * date           : 25. 4. 18.
@@ -25,6 +25,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
  * -----------------------------------------------------------
  * 25. 4. 18.		durururuk		최초 생성
  * 25. 6. 30.		inari			주석추가
+ * 25. 7. 9.		inari			spital 패키지에서 spatial로 이동
  */
 public class GeoUtil {
 	private static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);
