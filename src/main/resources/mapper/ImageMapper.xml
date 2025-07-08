@@ -83,21 +83,6 @@
           AND i.is_deleted = 0
     </select>
 
-    <select id="findImagesByUserId" resultMap="ImageMap">
-        SELECT i.*,
-               cp.*,
-               sgg.sgg_id,
-               sgg.sgg_name,
-               sd.sd_id,
-               sd.sd_name
-        FROM image i
-                 LEFT JOIN coord_poi cp ON i.coord_point_id = cp.coord_point_id
-                 LEFT JOIN juso_sigungu sgg ON cp.sgg_id = sgg.sgg_id
-                 LEFT JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
-        WHERE i.user_id = #{userId}
-          AND i.is_deleted = 0
-    </select>
-
     <!-- 유저 ID로 이미지 썸네일 정보 조회 -->
     <select id="findImageThumbnailsByUserId"
             parameterType="com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto"

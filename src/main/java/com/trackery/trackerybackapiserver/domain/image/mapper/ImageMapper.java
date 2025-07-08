@@ -41,8 +41,6 @@ public interface ImageMapper {
 
 	Optional<Image> findImageByImageId(@Param("imageId") Long imageId);
 
-	List<Image> findImagesByUserId(@Param("userId") Long userId);
-
 	List<ImageInfoForThumbnailDto> findImageThumbnailsByUserId(ImageSearchByUserIdDto imageSearchByUserIdDto);
 
 	/**
