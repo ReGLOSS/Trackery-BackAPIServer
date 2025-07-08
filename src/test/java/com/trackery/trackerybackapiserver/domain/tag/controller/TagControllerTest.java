@@ -22,10 +22,11 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
+import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagCreateRequestDto;
-import com.trackery.trackerybackapiserver.domain.tag.dto.TagDefaultRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagTimeRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
 import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
@@ -41,6 +42,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 7. 8.        inari       최초 생성
+ * 25. 7. 9.        inari       테스트코드 수정
  */
 @WebMvcTest(TagController.class)
 class TagControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -51,10 +53,13 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 	@MockitoBean
 	private TagService tagService;
 
+	@MockitoBean
+	private ImageService imageService;
+
 	private TagResponseDto tagResponseDto;
 	private TagCreateRequestDto createRequestDto;
 	private TagUpdateRequestDto updateRequestDto;
-	private TagDefaultRequestDto defaultRequestDto;
+	private TagTimeRequestDto defaultRequestDto;
 
 	@BeforeEach
 	void setUp() {
@@ -73,7 +78,7 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		updateRequestDto = new TagUpdateRequestDto("수정된태그");
 
-		defaultRequestDto = new TagDefaultRequestDto("2024/7/15 14:30:25");
+		defaultRequestDto = new TagTimeRequestDto("2024/7/15 14:30:25");
 	}
 
 	@Nested
@@ -181,148 +186,8 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 			verify(tagService).getSystemTags();
 		}
 
-		@Test
-		@DisplayName("이미지별 태그 조회 성공")
-		void getTagsByImageId_Success() throws Exception {
-			// given
-			Long imageId = 1L;
-			List<TagResponseDto> tags = List.of(tagResponseDto);
-			when(tagService.getTagsByImageId(imageId)).thenReturn(tags);
-
-			// when & then
-			mockMvc.perform(get("/api/tags/image/{imageId}", imageId)
-					.with(user(createTestUser())))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.code").value(200))
-				.andExpect(jsonPath("$.data").isArray())
-				.andExpect(jsonPath("$.data[0].tagId").value(1L))
-				.andDo(document("tag-get-by-image",
-					pathParameters(
-						parameterWithName("imageId").description("이미지 ID")
-					),
-					relaxedResponseFields(
-						fieldWithPath("code").description("응답 코드"),
-						fieldWithPath("message").description("응답 메시지"),
-						fieldWithPath("data[].tagId").description("태그 ID"),
-						fieldWithPath("data[].tagName").description("태그명"),
-						fieldWithPath("data[].tagType").description("태그 타입(CUSTOM, LOCATION 등)"),
-						fieldWithPath("data[].tagUseCount").description("태그 사용 횟수"),
-						fieldWithPath("data[].createdAt").description("태그 생성 시간")
-					)
-				));
-
-			verify(tagService).getTagsByImageId(imageId);
-		}
 	}
 
-	@Nested
-	@DisplayName("이미지-태그 연결 API 테스트")
-	class ImageTagConnectionTest {
-
-		@Test
-		@DisplayName("이미지에 태그 추가 성공")
-		void addTagToImage_Success() throws Exception {
-			// given
-			Long imageId = 1L;
-			Long tagId = 1L;
-			doNothing().when(tagService).addTagToImage(imageId, tagId);
-
-			// when & then
-			mockMvc.perform(post("/api/tags/image/{imageId}/tag/{tagId}", imageId, tagId)
-					.with(csrf())
-					.with(user(createTestUser())))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.code").value(200))
-				.andDo(document("tag-add-to-image",
-					pathParameters(
-						parameterWithName("imageId").description("이미지 ID"),
-						parameterWithName("tagId").description("태그 ID")
-					),
-					relaxedResponseFields(
-						fieldWithPath("code").description("응답 코드"),
-						fieldWithPath("message").description("응답 메시지")
-					)
-				));
-
-			verify(tagService).addTagToImage(imageId, tagId);
-		}
-
-		@Test
-		@DisplayName("이미지에서 태그 제거 성공")
-		void removeTagFromImage_Success() throws Exception {
-			// given
-			Long imageId = 1L;
-			Long tagId = 1L;
-			doNothing().when(tagService).removeTagFromImage(imageId, tagId);
-
-			// when & then
-			mockMvc.perform(delete("/api/tags/image/{imageId}/tag/{tagId}", imageId, tagId)
-					.with(csrf())
-					.with(user(createTestUser())))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.code").value(200))
-				.andDo(document("tag-remove-from-image",
-					pathParameters(
-						parameterWithName("imageId").description("이미지 ID"),
-						parameterWithName("tagId").description("태그 ID")
-					),
-					relaxedResponseFields(
-						fieldWithPath("code").description("응답 코드"),
-						fieldWithPath("message").description("응답 메시지")
-					)
-				));
-
-			verify(tagService).removeTagFromImage(imageId, tagId);
-		}
-
-		@Test
-		@DisplayName("이미지 태그 수정 성공")
-		void updateImageTag_Success() throws Exception {
-			// given
-			Long imageId = 1L;
-			Long tagId = 1L;
-			TagResponseDto updatedTag = TagResponseDto.builder()
-				.tagId(2L)
-				.tagName("수정된태그")
-				.tagType(TagType.CUSTOM)
-				.tagUseCount(1L)
-				.createdAt(LocalDateTime.now())
-				.build();
-
-			when(tagService.updateImageTag(imageId, tagId, "수정된태그")).thenReturn(updatedTag);
-
-			// when & then
-			mockMvc.perform(put("/api/tags/image/{imageId}/tag/{tagId}", imageId, tagId)
-					.contentType(MediaType.APPLICATION_JSON)
-					.content(objectMapper.writeValueAsString(updateRequestDto))
-					.with(csrf())
-					.with(user(createTestUser())))
-				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.code").value(200))
-				.andExpect(jsonPath("$.data.tagId").value(2L))
-				.andExpect(jsonPath("$.data.tagName").value("수정된태그"))
-				.andDo(document("tag-update-image-tag",
-					pathParameters(
-						parameterWithName("imageId").description("이미지 ID"),
-						parameterWithName("tagId").description("기존 태그 ID")
-					),
-					requestFields(
-						fieldWithPath("newTagName").description("새로운 태그명")
-					),
-					relaxedResponseFields(
-						fieldWithPath("code").description("응답 코드"),
-						fieldWithPath("message").description("응답 메시지"),
-						fieldWithPath("data.tagId").description("새로운 태그 ID"),
-						fieldWithPath("data.tagName").description("새로운 태그명"),
-						fieldWithPath("data.tagType").description("태그 타입(CUSTOM, LOCATION 등)"),
-						fieldWithPath("data.tagUseCount").description("태그 사용 횟수"),
-						fieldWithPath("data.createdAt").description("태그 생성 시간")
-					)
-				));
-
-			verify(tagService).updateImageTag(imageId, tagId, "수정된태그");
-		}
-	}
 
 	@Nested
 	@DisplayName("태그 관리자 기능 API 테스트")
