@@ -23,7 +23,7 @@ public class ImageUploadDto {
 	private String imageName;
 	private String imageType;
 	private String description;
-	private List<String> regionalTags;
+	private List<String> tags;
 	private double longitude;
 	private double latitude;
 	private String dateString;

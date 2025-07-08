@@ -182,15 +182,15 @@ public class TagService {
 	 * 지역 태그 문자열 리스트를 이미지에 연결합니다.
 	 * 시스템 태그가 존재하면 해당 타입으로, 없으면 CUSTOM 타입으로 생성합니다.
 	 * @param imageId 이미지 ID
-	 * @param regionalTags 지역 태그 문자열 리스트
+	 * @param tags 태그 문자열 리스트
 	 */
 	@Transactional
-	public void attachRegionalTagsToImage(Long imageId, List<String> regionalTags) {
-		if (regionalTags == null || regionalTags.isEmpty()) {
+	public void attachRegionalTagsToImage(Long imageId, List<String> tags) {
+		if (tags == null || tags.isEmpty()) {
 			return;
 		}
 
-		for (String tagName : regionalTags) {
+		for (String tagName : tags) {
 			if (tagName != null && !tagName.trim().isEmpty()) {
 				Tag tag = findOrCreateTagByName(tagName.trim());
 				try {

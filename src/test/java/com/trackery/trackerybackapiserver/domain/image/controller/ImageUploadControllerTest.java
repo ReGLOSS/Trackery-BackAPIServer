@@ -78,7 +78,7 @@ class ImageUploadControllerTest extends CommonMockMvcControllerTestSetUp {
 		org.springframework.test.util.ReflectionTestUtils.setField(imageUploadDto, "imageName", "test-image.jpg");
 		org.springframework.test.util.ReflectionTestUtils.setField(imageUploadDto, "imageType", "JPEG");
 		org.springframework.test.util.ReflectionTestUtils.setField(imageUploadDto, "description", "테스트 이미지 설명");
-		org.springframework.test.util.ReflectionTestUtils.setField(imageUploadDto, "regionalTags", List.of("여행", "서울"));
+		org.springframework.test.util.ReflectionTestUtils.setField(imageUploadDto, "tags", List.of("여행", "서울"));
 		org.springframework.test.util.ReflectionTestUtils.setField(imageUploadDto, "longitude", 127.0276);
 		org.springframework.test.util.ReflectionTestUtils.setField(imageUploadDto, "latitude", 37.4979);
 		org.springframework.test.util.ReflectionTestUtils.setField(imageUploadDto, "dateString", "2025-01-01T10:30:00");
@@ -99,7 +99,7 @@ class ImageUploadControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("imageName").description("이미지 파일명"),
 					fieldWithPath("imageType").description("이미지 타입 (JPEG, PNG 등)"),
 					fieldWithPath("description").description("이미지 설명"),
-					fieldWithPath("regionalTags").description("이미지 지역 태그 목록"),
+					fieldWithPath("tags").description("이미지 태그 목록"),
 					fieldWithPath("longitude").description("경도"),
 					fieldWithPath("latitude").description("위도"),
 					fieldWithPath("dateString").description("이미지 촬영 일시 (ISO 형식)"),

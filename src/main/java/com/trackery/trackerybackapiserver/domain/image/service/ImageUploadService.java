@@ -131,8 +131,8 @@ public class ImageUploadService {
 
 		imageMapper.insertImage(image);
 
-		if (imageUploadDto.getRegionalTags() != null && !imageUploadDto.getRegionalTags().isEmpty()) {
-			tagService.attachRegionalTagsToImage(image.getImageId(), imageUploadDto.getRegionalTags());
+		if (imageUploadDto.getTags() != null && !imageUploadDto.getTags().isEmpty()) {
+			tagService.attachRegionalTagsToImage(image.getImageId(), imageUploadDto.getTags());
 		}
 
 		return image;

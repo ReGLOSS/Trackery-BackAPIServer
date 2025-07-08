@@ -286,14 +286,14 @@ class TagServiceTest {
 		void attachRegionalTagsToImage_Success() {
 			// given
 			Long imageId = 1L;
-			List<String> regionalTags = List.of("서울", "한국", "도시");
+			List<String> tags = List.of("서울", "한국", "도시");
 			when(tagMapper.findExistingTagByName(any())).thenReturn(null);
 			doNothing().when(tagMapper).insertTag(any(Tag.class));
 			doNothing().when(tagMapper).insertImageTag(any());
 			doNothing().when(tagMapper).incrementTagUseCount(any());
 
 			// when
-			tagService.attachRegionalTagsToImage(imageId, regionalTags);
+			tagService.attachRegionalTagsToImage(imageId, tags);
 
 			// then
 			verify(tagMapper, times(3)).findExistingTagByName(any());
@@ -307,10 +307,10 @@ class TagServiceTest {
 		void attachRegionalTagsToImage_EmptyList() {
 			// given
 			Long imageId = 1L;
-			List<String> regionalTags = List.of();
+			List<String> tags = List.of();
 
 			// when
-			tagService.attachRegionalTagsToImage(imageId, regionalTags);
+			tagService.attachRegionalTagsToImage(imageId, tags);
 
 			// then
 			verify(tagMapper, never()).findExistingTagByName(any());
