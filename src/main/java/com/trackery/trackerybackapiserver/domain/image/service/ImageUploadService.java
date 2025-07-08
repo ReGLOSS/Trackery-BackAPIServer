@@ -131,12 +131,8 @@ public class ImageUploadService {
 
 		imageMapper.insertImage(image);
 
-		// 이미지 위치 기반 지역 태그 자동 연결 시도
-		try {
-			tagService.attachLocationTagsToImage(image.getImageId(),
-				imageUploadDto.getLatitude(), imageUploadDto.getLongitude());
-		} catch (Exception e) {
-			log.warn("Failed to attach location tags to image {}: {}", image.getImageId(), e.getMessage());
+		if (imageUploadDto.getRegionalTags() != null && !imageUploadDto.getRegionalTags().isEmpty()) {
+			tagService.attachRegionalTagsToImage(image.getImageId(), imageUploadDto.getRegionalTags());
 		}
 
 		return image;

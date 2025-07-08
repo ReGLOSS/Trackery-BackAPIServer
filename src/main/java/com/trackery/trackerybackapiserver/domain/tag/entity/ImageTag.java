@@ -22,30 +22,30 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ImageTag {
 
-    /**
-     * 이미지-태그 연관관계 고유 식별자입니다.
-     */
-    private Long imageTagId;
+	/**
+	 * 이미지-태그 연관관계 고유 식별자입니다.
+	 */
+	private Long imageTagId;
 
-    /**
-     * 이미지 ID입니다.
-     */
-    private Long imageId;
+	/**
+	 * 이미지 ID입니다.
+	 */
+	private Long imageId;
 
-    /**
-     * 태그 ID입니다.
-     */
-    private Long tagId;
+	/**
+	 * 태그 ID입니다.
+	 */
+	private Long tagId;
 
-    /**
-     * 연관관계가 생성된 날짜입니다.
-     */
-    private LocalDateTime createdAt;
+	/**
+	 * 연관관계가 생성된 날짜입니다.
+	 */
+	private LocalDateTime createdAt;
 
-    @Builder
-    public ImageTag(Long imageId, Long tagId, LocalDateTime createdAt) {
-        this.imageId = imageId;
-        this.tagId = tagId;
-        this.createdAt = createdAt;
-    }
+	@Builder
+	public ImageTag(Long imageId, Long tagId, LocalDateTime createdAt) {
+		this.imageId = imageId;
+		this.tagId = tagId;
+		this.createdAt = createdAt;
+	}
 }
