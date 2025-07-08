@@ -8,6 +8,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import com.trackery.trackerybackapiserver.domain.common.enums.CookieName;
+import com.trackery.trackerybackapiserver.domain.common.enums.SameSitePolicy;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
@@ -71,17 +72,37 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 				throw new ApiException(ErrorCode.UNAUTHORIZED);
 			});
 
-		Long userId = jwtService.parseAndVerifyRefreshToken(refreshToken);
+		try {
+			Long userId = jwtService.parseAndVerifyRefreshToken(refreshToken);
 
-		JwtUserInfoDto jwtUserInfoDto = userService.getUserInfoById(userId);
+			JwtUserInfoDto jwtUserInfoDto = userService.getUserInfoById(userId);
 
+			AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(jwtUserInfoDto.userId(),
+				jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
 
-		AuthTokenDto authTokenDto = jwtService.generateAccessTokenAndRefreshToken(jwtUserInfoDto.userId(),
-			jwtUserInfoDto.username(), jwtUserInfoDto.roleId());
+			addAuthCookiesToHeader(authTokenDto, response);
 
-		addAuthCookiesToHeader(authTokenDto, response);
+			return authTokenDto.accessToken();
 
-		return authTokenDto.accessToken();
+		} catch (ApiException e) {
+			log.error("액세스토큰 재발급 실패, ErrorCode: {}, Message: {}",
+				e.getErrorCode(), e.getMessage());
+
+			if (e.getErrorCode() == ErrorCode.UNAUTHORIZED
+				|| e.getErrorCode() == ErrorCode.INTERNAL_SERVER_ERROR) {
+				ResponseCookie clearCookie = CookieUtil.deleteCookie(
+					CookieName.REFRESH_TOKEN.getValue(), SameSitePolicy.STRICT.getValue());
+				response.addHeader("Set-Cookie", clearCookie.toString());
+			}
+
+			throw e;
+		} catch (Exception e) {
+			log.error("토큰 재발행 중 에러 발생", e);
+			ResponseCookie clearCookie = CookieUtil.deleteCookie(
+				CookieName.REFRESH_TOKEN.getValue(), SameSitePolicy.STRICT.getValue());
+			response.addHeader("Set-Cookie", clearCookie.toString());
+			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	/**

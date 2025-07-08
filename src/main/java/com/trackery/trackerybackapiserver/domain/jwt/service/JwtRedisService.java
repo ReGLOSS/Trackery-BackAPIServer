@@ -1,6 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.jwt.service;
 
-import java.util.Optional;
+import java.time.Duration;
 
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -35,8 +35,8 @@ public class JwtRedisService {
 	private final StringRedisTemplate redisTemplate;
 	private final ObjectMapper objectMapper;
 
-	private static final String REFRESH_TOKEN_REDIS_KEY = "jwtRefreshToken:";
-	private static final String ACCESS_TOKEN_BLACKLIST_KEY = "jwtBlacklist:";
+	private static final String REFRESH_TOKEN_KEY_PREFIX = "jwtRefreshToken:";
+	private static final String ACCESS_TOKEN_BLACKLIST_KEY_PREFIX = "jwtBlacklist:";
 
 	/**
 	 * 리프레시 토큰 정보를 Redis에 저장합니다.
@@ -45,14 +45,26 @@ public class JwtRedisService {
 	 * @param refreshTokenDto 리프레시 토큰, JwtId, 유저ID를 가지고 있는 DTO
 	 */
 	public void saveRefreshToken(RefreshTokenDto refreshTokenDto) {
+		if (refreshTokenDto == null || refreshTokenDto.refreshToken() == null) {
+			log.error("RefreshTokenDto 혹은 dto.refreshToken null");
+			throw new ApiException(ErrorCode.BAD_REQUEST);
+		}
+
 		try {
-			String redisKey = REFRESH_TOKEN_REDIS_KEY + refreshTokenDto.refreshToken();
+			String redisKey = REFRESH_TOKEN_KEY_PREFIX + refreshTokenDto.refreshToken();
 			String jsonRefreshTokenDto = objectMapper.writeValueAsString(refreshTokenDto);
 
-			redisTemplate.opsForValue()
-				.set(redisKey, jsonRefreshTokenDto, JwtExpirationTime.REFRESH_TOKEN.getExpirationTime());
+			Duration ttl = Duration.ofSeconds(JwtExpirationTime.REFRESH_TOKEN.getExpirationTime());
+			redisTemplate.opsForValue().set(redisKey, jsonRefreshTokenDto, ttl);
+
+			String savedValue = redisTemplate.opsForValue().get(redisKey);
+			if (savedValue == null) {
+				log.error("리프레시 토큰 저장 실패. Key: {}", redisKey);
+				throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
+			}
+
 		} catch (JsonProcessingException e) {
-			log.error("Json 파싱 중 에러 발생 : ", e);
+			log.error("리프레시 토큰 Redis에 저장 중 직렬화 오류 발생", e);
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -64,13 +76,40 @@ public class JwtRedisService {
 	 * @return : redis에 저장된 리프레시 토큰 정보 (리프레시 토큰 자체를 파싱한 것이 아닙니다.)
 	 */
 	public RefreshTokenDto getRefreshTokenInfo(String refreshToken) {
-		String redisKey = REFRESH_TOKEN_REDIS_KEY + refreshToken;
-		String jsonRefreshTokenDto = Optional.ofNullable(redisTemplate.opsForValue().get(redisKey))
-			.orElseThrow(() -> new ApiException(ErrorCode.UNAUTHORIZED));
+		if (refreshToken == null || refreshToken.trim().isEmpty()) {
+			log.warn("리프레시 토큰 비어있음");
+			throw new ApiException(ErrorCode.BAD_REQUEST);
+		}
+
+		String redisKey = REFRESH_TOKEN_KEY_PREFIX + refreshToken;
+
 		try {
+			boolean keyExists = redisTemplate.hasKey(redisKey);
+
+			if (!keyExists) {
+				log.warn("Redis에서 리프레시 토큰 조회 실패: {}", redisKey);
+				throw new ApiException(ErrorCode.UNAUTHORIZED);
+			}
+
+			String jsonRefreshTokenDto = redisTemplate.opsForValue().get(redisKey);
+
+			if (jsonRefreshTokenDto == null) {
+				log.error("리프레시 토큰 Key는 있는데 값이 null, Key: {}", redisKey);
+				redisTemplate.unlink(redisKey);
+				throw new ApiException(ErrorCode.UNAUTHORIZED);
+			}
+
+			if (jsonRefreshTokenDto.contains("\0") || !isValidJson(jsonRefreshTokenDto)) {
+				log.error("리프레시 토큰 깨짐. Key: {}, Data: {}",
+					redisKey, jsonRefreshTokenDto.replaceAll("\\p{Cntrl}", "?"));
+				redisTemplate.unlink(redisKey);
+				throw new ApiException(ErrorCode.UNAUTHORIZED);
+			}
+
 			return objectMapper.readValue(jsonRefreshTokenDto, RefreshTokenDto.class);
+
 		} catch (JsonProcessingException e) {
-			log.error("Json 매핑 중 에러 발생 : ", e);
+			log.error("리프레시 토큰 조회 후 역직렬화 중 에러 발생", e);
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -80,8 +119,15 @@ public class JwtRedisService {
 	 * @param refreshToken : 사용된 리프레시 토큰
 	 */
 	public void deleteRefreshToken(String refreshToken) {
-		String redisKey = REFRESH_TOKEN_REDIS_KEY + refreshToken;
-		redisTemplate.unlink(redisKey);
+		if (refreshToken == null || refreshToken.trim().isEmpty()) {
+			log.warn("Attempted to delete null or empty refresh token");
+			return;
+		}
+
+		String redisKey = REFRESH_TOKEN_KEY_PREFIX + refreshToken;
+
+		Boolean deleted = redisTemplate.delete(redisKey);
+		log.info("Refresh token deletion result: {}, Key: {}", deleted, redisKey);
 	}
 
 	/**
@@ -90,9 +136,14 @@ public class JwtRedisService {
 	 * @param expirationTime 토큰 만료까지 남은 시간 (초)
 	 */
 	public void addAccessTokenToBlacklist(String jti, long expirationTime) {
-		String redisKey = ACCESS_TOKEN_BLACKLIST_KEY + jti;
-		redisTemplate.opsForValue().set(redisKey, "blacklisted",
-			java.time.Duration.ofSeconds(expirationTime));
+		if (jti == null || jti.trim().isEmpty()) {
+			log.error("JTI null이거나 비어있음");
+			throw new ApiException(ErrorCode.BAD_REQUEST);
+		}
+
+		String redisKey = ACCESS_TOKEN_BLACKLIST_KEY_PREFIX + jti;
+
+		redisTemplate.opsForValue().set(redisKey, "blacklisted", Duration.ofSeconds(expirationTime));
 	}
 
 	/**
@@ -101,8 +152,24 @@ public class JwtRedisService {
 	 * @return 블랙리스트에 있으면 true, 없으면 false
 	 */
 	public boolean isAccessTokenBlacklisted(String jti) {
-		String redisKey = ACCESS_TOKEN_BLACKLIST_KEY + jti;
-		return Boolean.TRUE.equals(redisTemplate.hasKey(redisKey));
+		if (jti == null || jti.trim().isEmpty()) {
+			return false;
+		}
+
+		String redisKey = ACCESS_TOKEN_BLACKLIST_KEY_PREFIX + jti;
+
+		return redisTemplate.hasKey(redisKey);
 	}
 
+	/**
+	 * JSON 문자열 유효성 검사 헬퍼 메서드
+	 */
+	private boolean isValidJson(String jsonString) {
+		try {
+			objectMapper.readTree(jsonString);
+			return true;
+		} catch (Exception e) {
+			return false;
+		}
+	}
 }
