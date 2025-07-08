@@ -4,7 +4,6 @@ import org.mybatis.spring.boot.autoconfigure.ConfigurationCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.trackery.trackerybackapiserver.domain.tag.enums.TagTypeHandler;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.config.mybatis.spatial
@@ -40,7 +39,6 @@ public class MybatisSpatialConfig {
 				.register(org.locationtech.jts.geom.Geometry.class, handler.getClass());
 			configuration.getTypeHandlerRegistry()
 				.register(org.locationtech.jts.geom.Point.class, handler.getClass());
-			configuration.getTypeHandlerRegistry().register(new TagTypeHandler());
 		};
 	}
 }
