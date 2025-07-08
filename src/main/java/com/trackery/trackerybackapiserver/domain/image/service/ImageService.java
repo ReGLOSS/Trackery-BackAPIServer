@@ -21,7 +21,6 @@ import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
-import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 
 import lombok.RequiredArgsConstructor;
@@ -43,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 20.		 inari		 이미지 수정 및 삭제 추가
  * 25. 6. 22.		 inari		 이미지 수정시 좌표 인서트가 아닌 업데이트로 변경
  * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
+ * 25. 7. 9.		 inari		 removeAllTagsFromImage로 메서드 분리
  */
 @Slf4j
 @Service
@@ -235,13 +235,7 @@ public class ImageService {
 
 		// 이미지와 연결된 모든 태그 관계 해제 및 사용 카운트 감소
 		try {
-			List<TagResponseDto> imageTags = tagService.getTagsByImageId(imageId);
-			for (TagResponseDto tag : imageTags) {
-				tagService.removeTagFromImage(imageId, tag.getTagId());
-				log.debug("태그 연결 해제 완료 - imageId: {}, tagId: {}, tagName: {}",
-					imageId, tag.getTagId(), tag.getTagName());
-			}
-			log.info("이미지 연결 태그 정리 완료 - imageId: {}, 해제된 태그 수: {}", imageId, imageTags.size());
+			tagService.removeAllTagsFromImage(imageId);
 		} catch (Exception e) {
 			log.warn("이미지 태그 해제 중 오류 발생 - imageId: {}, 오류: {}", imageId, e.getMessage());
 			// 태그 해제 실패해도 이미지 삭제는 계속 진행

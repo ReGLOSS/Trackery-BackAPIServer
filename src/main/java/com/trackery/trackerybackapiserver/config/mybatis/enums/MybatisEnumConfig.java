@@ -29,8 +29,6 @@ public class MybatisEnumConfig {
 	 */
 	@Bean
 	public ConfigurationCustomizer mybatisEnumConfigurationCustomizer() {
-		return configuration -> {
-			configuration.getTypeHandlerRegistry().register(new TagTypeHandler());
-		};
+		return configuration -> configuration.getTypeHandlerRegistry().register(new TagTypeHandler());
 	}
 }
