@@ -247,25 +247,6 @@ public class AlbumService {
 	}
 
 	/**
-	 * 앨범 이미지를 제외한 내 이미지 조회
-	 * @param userId 유저 ID
-	 * @param albumId 앨범 ID
-	 * @param pageNum 페이지 번호
-	 * @param pageSize 페이지 크기
-	 * @return 페이지네이션 된 이미지 썸네일 DTO 리스트
-	 */
-	@SuppressWarnings("squid:S3252")
-	public PageInfo<ImageThumbnailDto> getMyImageThumbnailsWithoutAlbumImages(Long userId, Long albumId, int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);
-
-		List<ImageInfoForThumbnailDto> imageInfoForThumbnailDtos = albumMapper.findMyImagesThumbnailWithoutAlbumImages(albumId, userId);
-
-		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
-
-		return PageUtil.convert(pageInfo, imageInfo -> imageService.convertToThumbnail(imageInfo, userId));
-	}
-
-	/**
 	 * 앨범 정보 수정
 	 * @param userId 유저 ID
 	 * @param albumUpdateRequestDto 앨범 정보 수정 Request DTO

@@ -64,5 +64,6 @@ public interface AlbumMapper {
 	 */
 	List<ImageInfoForThumbnailDto> findImagesForThumbnailByAlbumId(@Param("albumId") Long albumId);
 
-	List<ImageInfoForThumbnailDto> findMyImagesThumbnailWithoutAlbumImages(@Param("albumId")Long albumId, @Param("userId") Long userId);
+	List<ImageInfoForThumbnailDto> findMyImagesThumbnailWithoutAlbumImages(@Param("albumId") Long albumId,
+		@Param("userId") Long userId);
 }

@@ -106,11 +106,13 @@ public class ImageService {
 	public PageInfo<ImageThumbnailDto> getImageListByUserId(ImageSearchByUserIdDto imageSearchByUserIdDto) {
 		PageHelper.startPage(imageSearchByUserIdDto.getPageNum(), imageSearchByUserIdDto.getPageSize());
 
-		List<ImageInfoForThumbnailDto> imageInfoForThumbnailDtos = imageMapper.findImageThumbnailsByUserId(imageSearchByUserIdDto);
+		List<ImageInfoForThumbnailDto> imageInfoForThumbnailDtos = imageMapper.findImageThumbnailsByUserId(
+			imageSearchByUserIdDto);
 
 		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
 
-		return PageUtil.convert(pageInfo, imageThumbnailDtoList -> convertToThumbnail(imageThumbnailDtoList, imageSearchByUserIdDto.getUserId()));
+		return PageUtil.convert(pageInfo,
+			imageThumbnailDtoList -> convertToThumbnail(imageThumbnailDtoList, imageSearchByUserIdDto.getUserId()));
 	}
 
 	/**
@@ -255,7 +257,7 @@ public class ImageService {
 	 */
 	public ImageThumbnailDto convertToThumbnail(ImageInfoForThumbnailDto imageInfo, Long userId) {
 		String thumbnailUrl = imageS3Service.generatePreSignedGetUrl(imageInfo.getImageName(), userId, "thumbnail");
-		
+
 		return ImageThumbnailDto.builder()
 			.imageId(imageInfo.getImageId())
 			.thumbnailUrl(thumbnailUrl)

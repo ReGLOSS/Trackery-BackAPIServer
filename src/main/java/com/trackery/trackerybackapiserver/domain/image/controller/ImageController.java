@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.github.pagehelper.PageInfo;
-import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
@@ -42,7 +41,6 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/api/images")
 public class ImageController {
 	private final ImageService imageService;
-	private final AlbumService aLbumService;
 
 	/**
 	 * 원본 이미지 단건 조회 API

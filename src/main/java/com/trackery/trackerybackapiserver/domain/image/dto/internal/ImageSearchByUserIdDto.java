@@ -8,7 +8,7 @@ import lombok.Getter;
  * fileName       : ImageSearchByUserIdDto
  * author         : durururuk
  * date           : 25. 7. 8.
- * description    : 
+ * description    : userId로 이미지 조회 시 조건을 설정할 수 있는 내부 DTO
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
