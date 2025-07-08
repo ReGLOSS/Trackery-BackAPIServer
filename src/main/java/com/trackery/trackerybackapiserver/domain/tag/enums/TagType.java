@@ -2,8 +2,6 @@ package com.trackery.trackerybackapiserver.domain.tag.enums;
 
 import java.util.Arrays;
 
-import com.fasterxml.jackson.annotation.JsonValue;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +14,8 @@ import lombok.RequiredArgsConstructor;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 2.        narilee       최초 생성
+ * 25. 7. 2.        narilee       	최초 생성
+ * 25. 7. 8.        narilee      	@JsonValue 제거
  */
 @Getter
 @RequiredArgsConstructor
@@ -30,7 +29,6 @@ public enum TagType {
 	/**
 	 * 태그 타입의 고유 코드 (데이터베이스 저장용)
 	 */
-	@JsonValue
 	private final int code;
 
 	/**

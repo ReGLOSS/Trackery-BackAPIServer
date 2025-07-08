@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.tag.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,9 +14,11 @@ import lombok.NoArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 7. 7.        inari       최초 생성
+ * 25. 7. 8.        inari       AllArgsConstructor 추가
  */
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class TagDefaultRequestDto {
 	/**
 	 * 날짜/시간 문자열 (기본 태그 생성용).
