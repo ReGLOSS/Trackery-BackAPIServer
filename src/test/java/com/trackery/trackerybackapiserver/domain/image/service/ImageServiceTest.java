@@ -28,6 +28,8 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
@@ -206,12 +208,24 @@ class ImageServiceTest {
 		class getImagesByUserIdV2Test {
 			@Test
 			@DisplayName("성공")
-			void getImageListByUserIdV2_success() {
-				when(imageMapper.findImagesByUserId(testUserId)).thenReturn(List.of(testImage1));
+			void getImageListByUserId_success() {
+				ImageSearchByUserIdDto searchDto = ImageSearchByUserIdDto.builder()
+					.userId(testUserId)
+					.pageNum(1)
+					.pageSize(10)
+					.excludeAlbumId(null)
+					.build();
+
+				ImageInfoForThumbnailDto thumbnailDto = new ImageInfoForThumbnailDto();
+				ReflectionTestUtils.setField(thumbnailDto, "imageId", testImageId);
+				ReflectionTestUtils.setField(thumbnailDto, "userId", testUserId);
+				ReflectionTestUtils.setField(thumbnailDto, "imageName", testImage1.getImageName());
+
+				when(imageMapper.findImageThumbnailsByUserId(searchDto)).thenReturn(List.of(thumbnailDto));
 				when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("thumbnail"))).thenReturn(
 					testPresignedUrl);
 
-				PageInfo<ImageThumbnailDto> pageInfo = imageService.getImageListByUserId(testUserId, 1, 10);
+				PageInfo<ImageThumbnailDto> pageInfo = imageService.getImageListByUserId(searchDto);
 
 				assertNotNull(pageInfo);
 				assertFalse(pageInfo.getList().isEmpty());
@@ -220,21 +234,28 @@ class ImageServiceTest {
 				assertEquals(testImageId, result.getImageId());
 				assertEquals(testPresignedUrl, result.getThumbnailUrl());
 
-				verify(imageMapper).findImagesByUserId(testUserId);
+				verify(imageMapper).findImageThumbnailsByUserId(searchDto);
 				verify(imageS3Service).generatePreSignedGetUrl(testImage1.getImageName(), testUserId, "thumbnail");
 			}
 
 			@Test
 			@DisplayName("성공 - 결과 데이터 없음")
-			void getImageListByUserIdV2_emptyResult() {
-				when(imageMapper.findImagesByUserId(testUserId)).thenReturn(List.of());
+			void getImageListByUserId_emptyResult() {
+				ImageSearchByUserIdDto searchDto = ImageSearchByUserIdDto.builder()
+					.userId(testUserId)
+					.pageNum(1)
+					.pageSize(10)
+					.excludeAlbumId(null)
+					.build();
 
-				PageInfo<ImageThumbnailDto> pageInfo = imageService.getImageListByUserId(testUserId, 1, 10);
+				when(imageMapper.findImageThumbnailsByUserId(searchDto)).thenReturn(List.of());
+
+				PageInfo<ImageThumbnailDto> pageInfo = imageService.getImageListByUserId(searchDto);
 
 				assertNotNull(pageInfo);
 				assertTrue(pageInfo.getList().isEmpty());
 
-				verify(imageMapper).findImagesByUserId(testUserId);
+				verify(imageMapper).findImageThumbnailsByUserId(searchDto);
 			}
 		}
 

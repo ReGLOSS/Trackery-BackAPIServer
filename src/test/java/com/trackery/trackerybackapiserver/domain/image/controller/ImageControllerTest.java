@@ -27,6 +27,7 @@ import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerT
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
@@ -140,7 +141,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 		ImageThumbnailDto imageThumbnailDto = ImageThumbnailDto.builder().imageId(IMAGE_ID).thumbnailUrl("s3.thumbnail.image.webp").build();
 		List<ImageThumbnailDto> imageThumbnailDtoList = List.of(imageThumbnailDto);
 		PageInfo<ImageThumbnailDto> pageInfo = new PageInfo<>(imageThumbnailDtoList);
-		when(imageService.getImageListByUserId(USER_ID, 1, 10)).thenReturn(pageInfo);
+		when(imageService.getImageListByUserId(any(ImageSearchByUserIdDto.class))).thenReturn(pageInfo);
 
 		ResultActions result = mockMvc.perform(get("/api/images/me")
 			.with(user(userDetails))
@@ -156,7 +157,8 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andDo(document("get-my-images-success",
 				queryParameters(
 					parameterWithName("pageNum").description("페이지 번호 (1부터 시작, 기본값 : 1)"),
-					parameterWithName("pageSize").description("페이지 크기 (기본값 : 10)")
+					parameterWithName("pageSize").description("페이지 크기 (기본값 : 10)"),
+					parameterWithName("excludeAlbumId").description("조회 결과에서 제외할 앨범 ID (선택사항)").optional()
 				),
 
 				responseFields(
@@ -186,7 +188,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 				)
 			));
 
-		verify(imageService, times(1)).getImageListByUserId(USER_ID, 1, 10);
+		verify(imageService, times(1)).getImageListByUserId(any(ImageSearchByUserIdDto.class));
 	}
 
 	@Test
