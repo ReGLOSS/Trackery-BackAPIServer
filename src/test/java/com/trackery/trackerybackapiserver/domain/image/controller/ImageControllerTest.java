@@ -28,6 +28,10 @@ import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagUpdateRequestDto;
+import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
+import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 /**
@@ -41,11 +45,15 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * -----------------------------------------------------------
  * 25. 5. 22.		durururuk		최초 생성
  * 25. 6. 18.		inari		    Spring-Rest-Docs api문서 추가
+ * 25. 7. 9.        inari       테스트코드 수정
  */
 @WebMvcTest(ImageController.class)
 class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 	@MockitoBean
 	private ImageService imageService;
+
+	@MockitoBean
+	private TagService tagService;
 
 	private static final Long IMAGE_ID = 1L;
 	private static final Long USER_ID = 2L;
@@ -367,5 +375,152 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			));
 
 		verify(imageService, times(1)).deleteImage(IMAGE_ID, USER_ID);
+	}
+
+	@Test
+	@DisplayName("이미지별 태그 조회 성공")
+	void getTagsByImageId_Success() throws Exception {
+		// given
+		TagResponseDto tagResponseDto = TagResponseDto.builder()
+			.tagId(1L)
+			.tagName("테스트태그")
+			.tagType(TagType.CUSTOM)
+			.tagUseCount(1L)
+			.createdAt(LocalDateTime.now())
+			.build();
+
+		List<TagResponseDto> tags = List.of(tagResponseDto);
+		when(tagService.getTagsByImageId(IMAGE_ID)).thenReturn(tags);
+
+		// when & then
+		mockMvc.perform(get("/api/images/{imageId}/tags", IMAGE_ID)
+				.with(user(userDetails)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.data").isArray())
+			.andExpect(jsonPath("$.data[0].tagId").value(1L))
+			.andExpect(jsonPath("$.data[0].tagName").value("테스트태그"))
+			.andDo(document("image-get-tags",
+				pathParameters(
+					parameterWithName("imageId").description("이미지 ID")
+				),
+				relaxedResponseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data[].tagId").description("태그 ID"),
+					fieldWithPath("data[].tagName").description("태그명"),
+					fieldWithPath("data[].tagType").description("태그 타입(CUSTOM, LOCATION 등)"),
+					fieldWithPath("data[].tagUseCount").description("태그 사용 횟수"),
+					fieldWithPath("data[].createdAt").description("태그 생성 시간")
+				)
+			));
+
+		verify(imageService).getOriginalImageByImageId(USER_ID, IMAGE_ID);
+		verify(tagService).getTagsByImageId(IMAGE_ID);
+	}
+
+	@Test
+	@DisplayName("이미지에 태그 추가 성공")
+	void addTagToImage_Success() throws Exception {
+		// given
+		Long tagId = 1L;
+		doNothing().when(tagService).addTagToImage(IMAGE_ID, tagId);
+
+		// when & then
+		mockMvc.perform(post("/api/images/{imageId}/tags/{tagId}", IMAGE_ID, tagId)
+				.with(user(userDetails)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andDo(document("image-add-tag",
+				pathParameters(
+					parameterWithName("imageId").description("이미지 ID"),
+					parameterWithName("tagId").description("태그 ID")
+				),
+				relaxedResponseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지")
+				)
+			));
+
+		verify(imageService).getOriginalImageByImageId(USER_ID, IMAGE_ID);
+		verify(tagService).addTagToImage(IMAGE_ID, tagId);
+	}
+
+	@Test
+	@DisplayName("이미지에서 태그 제거 성공")
+	void removeTagFromImage_Success() throws Exception {
+		// given
+		Long tagId = 1L;
+		doNothing().when(tagService).removeTagFromImage(IMAGE_ID, tagId);
+
+		// when & then
+		mockMvc.perform(delete("/api/images/{imageId}/tags/{tagId}", IMAGE_ID, tagId)
+				.with(user(userDetails)))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andDo(document("image-remove-tag",
+				pathParameters(
+					parameterWithName("imageId").description("이미지 ID"),
+					parameterWithName("tagId").description("태그 ID")
+				),
+				relaxedResponseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지")
+				)
+			));
+
+		verify(imageService).getOriginalImageByImageId(USER_ID, IMAGE_ID);
+		verify(tagService).removeTagFromImage(IMAGE_ID, tagId);
+	}
+
+	@Test
+	@DisplayName("이미지 태그 수정 성공")
+	void updateImageTag_Success() throws Exception {
+		// given
+		Long tagId = 1L;
+		TagUpdateRequestDto updateRequest = new TagUpdateRequestDto("수정된태그");
+		TagResponseDto updatedTag = TagResponseDto.builder()
+			.tagId(2L)
+			.tagName("수정된태그")
+			.tagType(TagType.CUSTOM)
+			.tagUseCount(1L)
+			.createdAt(LocalDateTime.now())
+			.build();
+
+		when(tagService.updateImageTag(IMAGE_ID, tagId, "수정된태그")).thenReturn(updatedTag);
+
+		// when & then
+		ObjectMapper objectMapper = new ObjectMapper();
+		String requestJson = objectMapper.writeValueAsString(updateRequest);
+
+		mockMvc.perform(put("/api/images/{imageId}/tags/{tagId}", IMAGE_ID, tagId)
+				.with(user(userDetails))
+				.contentType(APPLICATION_JSON)
+				.content(requestJson))
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.data.tagId").value(2L))
+			.andExpect(jsonPath("$.data.tagName").value("수정된태그"))
+			.andDo(document("image-update-tag",
+				pathParameters(
+					parameterWithName("imageId").description("이미지 ID"),
+					parameterWithName("tagId").description("기존 태그 ID")
+				),
+				requestFields(
+					fieldWithPath("newTagName").description("새로운 태그명")
+				),
+				relaxedResponseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.tagId").description("새로운 태그 ID"),
+					fieldWithPath("data.tagName").description("새로운 태그명"),
+					fieldWithPath("data.tagType").description("태그 타입(CUSTOM, LOCATION 등)"),
+					fieldWithPath("data.tagUseCount").description("태그 사용 횟수"),
+					fieldWithPath("data.createdAt").description("태그 생성 시간")
+				)
+			));
+
+		verify(imageService).getOriginalImageByImageId(USER_ID, IMAGE_ID);
+		verify(tagService).updateImageTag(IMAGE_ID, tagId, "수정된태그");
 	}
 }

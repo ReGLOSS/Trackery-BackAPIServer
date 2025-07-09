@@ -1,4 +1,4 @@
-package com.trackery.trackerybackapiserver.config.mybatis.spitial;
+package com.trackery.trackerybackapiserver.config.mybatis.spatial;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 4. 18.		durururuk		최초 생성
  * 25. 6. 18.		inari			주석 추가
+ * 25. 7. 9.		inari			spital 패키지에서 spatial로 이동
  */
 @Slf4j
 @MappedTypes({ Geometry.class, Point.class, Polygon.class, LineString.class, LinearRing.class, MultiPoint.class,

@@ -1,11 +1,15 @@
 package com.trackery.trackerybackapiserver.domain.image.controller;
 
+import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,6 +22,9 @@ import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagUpdateRequestDto;
+import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 import jakarta.validation.Valid;
@@ -34,12 +41,14 @@ import lombok.RequiredArgsConstructor;
  * -----------------------------------------------------------
  * 25. 5. 15.		durururuk		최초 생성
  * 25. 6. 20.		 inari		 이미지 수정 및 삭제 추가
+ * 25. 7. 9.		 inari		 TagController에서 일부 이동
  */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/images")
 public class ImageController {
 	private final ImageService imageService;
+	private final TagService tagService;
 
 	/**
 	 * 원본 이미지 단건 조회 API
@@ -102,5 +111,85 @@ public class ImageController {
 	) {
 		imageService.deleteImage(imageId, userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, null));
+	}
+
+	/**
+	 * 특정 이미지에 연결된 태그 목록을 조회합니다.
+	 * @param imageId 이미지 ID
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 이미지에 연결된 태그 목록
+	 */
+	@GetMapping("/{imageId}/tags")
+	public ResponseEntity<ApiResponse<List<TagResponseDto>>> getTagsByImageId(
+		@PathVariable Long imageId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		// 이미지 소유자 확인
+		imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
+		
+		List<TagResponseDto> response = tagService.getTagsByImageId(imageId);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
+	}
+
+	/**
+	 * 이미지에 태그를 연결합니다.
+	 * @param imageId 이미지 ID
+	 * @param tagId 태그 ID
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 성공 응답
+	 */
+	@PostMapping("/{imageId}/tags/{tagId}")
+	public ResponseEntity<ApiResponse<Void>> addTagToImage(
+		@PathVariable Long imageId,
+		@PathVariable Long tagId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		// 이미지 소유자 확인
+		imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
+		
+		tagService.addTagToImage(imageId, tagId);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
+	}
+
+	/**
+	 * 이미지에서 태그 연결을 제거합니다.
+	 * @param imageId 이미지 ID
+	 * @param tagId 태그 ID
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 성공 응답
+	 */
+	@DeleteMapping("/{imageId}/tags/{tagId}")
+	public ResponseEntity<ApiResponse<Void>> removeTagFromImage(
+		@PathVariable Long imageId,
+		@PathVariable Long tagId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		// 이미지 소유자 확인
+		imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
+		
+		tagService.removeTagFromImage(imageId, tagId);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
+	}
+
+	/**
+	 * 특정 이미지의 태그를 수정합니다.
+	 * @param imageId 이미지 ID
+	 * @param tagId 수정할 태그 ID
+	 * @param request 태그 수정 요청 데이터
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 수정된 태그 정보
+	 */
+	@PutMapping("/{imageId}/tags/{tagId}")
+	public ResponseEntity<ApiResponse<TagResponseDto>> updateImageTag(
+		@PathVariable Long imageId,
+		@PathVariable Long tagId,
+		@RequestBody TagUpdateRequestDto request,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		// 이미지 소유자 확인
+		imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
+		
+		TagResponseDto response = tagService.updateImageTag(imageId, tagId, request.getNewTagName());
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 }

@@ -26,6 +26,7 @@ import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.LocationNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
@@ -69,7 +70,12 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 		void success() throws Exception {
 			CoordinateDto coordinateDto = new CoordinateDto(37.5665, 126.9780);
 
-			when(locationService.getLocationNameByCoord(coordinateDto)).thenReturn("서울특별시 동작구");
+			LocationNameResponseDto locationResponse = LocationNameResponseDto.builder()
+				.locationName("서울특별시 동작구")
+				.regionalTags(List.of())
+				.build();
+
+			when(locationService.getLocationNameWithTagsByCoord(coordinateDto)).thenReturn(locationResponse);
 
 			ResultActions result = mockMvc.perform(post("/api/location/name")
 				.with(user(customUserDetails))
@@ -79,7 +85,8 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			result
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.data").value("서울특별시 동작구"));
+				.andExpect(jsonPath("$.data.locationName").value("서울특별시 동작구"))
+				.andExpect(jsonPath("$.data.regionalTags").isArray());
 
 			result.andDo(document("get-location-name-by-coordinate-success",
 				requestFields(
@@ -89,7 +96,8 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 				responseFields(
 					fieldWithPath("code").description("응답 코드"),
 					fieldWithPath("message").description("응답 메시지"),
-					fieldWithPath("data").description("주소명")
+					fieldWithPath("data.locationName").description("주소명"),
+					fieldWithPath("data.regionalTags").description("지역 태그 목록").type(JsonFieldType.ARRAY)
 				)
 			));
 		}
