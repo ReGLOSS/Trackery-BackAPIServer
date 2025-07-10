@@ -46,6 +46,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 22.		 inari		 이미지 수정시 좌표 인서트가 아닌 업데이트로 변경
  * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
  * 25. 7. 9.		 inari		 removeAllTagsFromImage로 메서드 분리
+ * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
  */
 @Slf4j
 @Service
@@ -143,6 +144,7 @@ public class ImageService {
 			.imageDate(image.getImageDate())
 			.isPublic(image.getIsPublic())
 			.imageUrl(imagePresignedUrl)
+			.tags(tagService.getTagNamesByImageId(image.getImageId()))
 			.build();
 	}
 

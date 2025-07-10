@@ -1,6 +1,9 @@
 package com.trackery.trackerybackapiserver.domain.image.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
+
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagNameResponseDto;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -15,6 +18,7 @@ import lombok.Getter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 14.		durururuk		최초 생성
+ * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
  */
 @Getter
 @Builder
@@ -31,4 +35,5 @@ public class ImageDto {
 	private LocalDateTime imageDate;
 	private Integer isPublic;
 	private String imageUrl;
+	private List<TagNameResponseDto> tags;
 }
