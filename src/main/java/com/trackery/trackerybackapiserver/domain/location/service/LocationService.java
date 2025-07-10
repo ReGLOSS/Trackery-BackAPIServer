@@ -22,7 +22,6 @@ import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.mapper.LocationMapper;
-import com.trackery.trackerybackapiserver.domain.tag.dto.TagNameResponseDto;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 27.		inari			코드 스멜 수정
  * 25. 7. 7.		inari			지역 태그 서비스 추가
  * 25. 7. 8.		inari			시군구 ID로 시도명과 시군구명을 분리한 메서드 추가
+ * 25. 7. 10.		inari			태그를 태그 도메인으로 분리
  */
 @Slf4j
 @Service
@@ -57,38 +57,19 @@ public class LocationService {
 	/**
 	 * 좌표로 시도 + 시군구 주소를 조회하는 메서드입니다.
 	 * @param coordinateDto 좌표 DTO : latitude(위도), longitude(경도) 둘 다 double 타입입니다.
-	 * @return : 시도 + 시군구 주소를 String으로 반환합니다 (예시 : 부산광역시 수영구)
+	 * @return : 시도 + 시군구 주소를 포함한 응답 DTO
 	 */
-	public String getLocationNameByCoord(CoordinateDto coordinateDto) {
+	public LocationNameResponseDto getLocationNameByCoord(CoordinateDto coordinateDto) {
 		JusoSigungu sigungu = locationMapper.findSigunguByCoordinate(coordinateDto).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND)
 		);
 
-		return String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(), sigungu.getSigunguName());
-	}
-
-	/**
-	 * 좌표로 시도 + 시군구 주소명과 지역 태그명을 조회하는 메서드입니다.
-	 * @param coordinateDto 좌표 DTO : latitude(위도), longitude(경도) 둘 다 double 타입입니다.
-	 * @return 위치명과 지역 태그명 목록을 포함한 응답 DTO
-	 */
-	public LocationNameResponseDto getLocationNameWithTagsByCoord(CoordinateDto coordinateDto) {
-		JusoSigungu sigungu = locationMapper.findSigunguByCoordinate(coordinateDto).orElseThrow(
-			() -> new ApiException(ErrorCode.NOT_FOUND)
-		);
-
-		String locationName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(),
-			sigungu.getSigunguName());
-		List<TagNameResponseDto> regionalTags = List.of(
-			TagNameResponseDto.builder().tagName(sigungu.getSido().getSidoName()).build(),
-			TagNameResponseDto.builder().tagName(sigungu.getSigunguName()).build()
-		);
-
+		String locationName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(), sigungu.getSigunguName());
 		return LocationNameResponseDto.builder()
 			.locationName(locationName)
-			.regionalTags(regionalTags)
 			.build();
 	}
+
 
 	/**
 	 * 좌표로 Point 타입 객체를 반환하는 메서드입니다.
