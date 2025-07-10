@@ -21,6 +21,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCo
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagUpdateRequestDto;
@@ -57,8 +58,8 @@ public class ImageController {
 	 * @param userDetails 인증된 사용자 정보
 	 * @return 이미지 정보 DTO
 	 */
-	@GetMapping
-	public ResponseEntity<ApiResponse<ImageDto>> getImageDto(@RequestParam Long imageId,
+	@GetMapping("/{imageId}")
+	public ResponseEntity<ApiResponse<ImageDto>> getImageDto(@PathVariable Long imageId,
 		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		ImageDto imageDto = imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
 
@@ -76,10 +77,20 @@ public class ImageController {
 	public ResponseEntity<ApiResponse<PageInfo<ImageThumbnailDto>>> getMyImagesV2(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam(defaultValue = "1") int pageNum,
-		@RequestParam(defaultValue = "10") int pageSize
+		@RequestParam(defaultValue = "10") int pageSize,
+		@RequestParam(required = false) Long excludeAlbumId
 	) {
-		PageInfo<ImageThumbnailDto> imageDtoList = imageService.getImageListByUserIdV2(userDetails.getUserId(), pageNum,
-			pageSize);
+		pageSize = Math.max(1, Math.min(100, pageSize));
+
+		ImageSearchByUserIdDto searchByUserIdDto = ImageSearchByUserIdDto.builder()
+			.userId(userDetails.getUserId())
+			.excludeAlbumId(excludeAlbumId)
+			.pageNum(pageNum)
+			.pageSize(pageSize)
+			.build();
+
+		PageInfo<ImageThumbnailDto> imageDtoList = imageService.getImageListByUserId(searchByUserIdDto);
+
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, imageDtoList));
 	}
 

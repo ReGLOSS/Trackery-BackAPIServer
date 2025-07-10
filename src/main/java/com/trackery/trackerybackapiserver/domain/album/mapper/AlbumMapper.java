@@ -9,6 +9,7 @@ import org.apache.ibatis.annotations.Param;
 import com.trackery.trackerybackapiserver.domain.album.dto.request.AlbumUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.album.mapper
@@ -55,4 +56,11 @@ public interface AlbumMapper {
 	void deleteAlbumByAlbumId(Long albumId);
 
 	void setThumbnail(@Param("albumId") Long albumId, @Param("imageId") Long imageId);
+
+	/**
+	 * 앨범의 이미지들을 썸네일 생성용으로 조회합니다.
+	 * @param albumId 앨범 ID
+	 * @return 썸네일 생성에 필요한 이미지 기본 정보
+	 */
+	List<ImageInfoForThumbnailDto> findImagesForThumbnailByAlbumId(@Param("albumId") Long albumId);
 }

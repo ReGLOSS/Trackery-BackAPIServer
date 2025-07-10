@@ -120,6 +120,7 @@ public class AlbumController {
 	@GetMapping("/{albumId}/images")
 	public ResponseEntity<ApiResponse<PageInfo<ImageThumbnailDto>>> getAlbumImages(@PathVariable Long albumId, @AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam(defaultValue = "1") int pageNum, @RequestParam(defaultValue = "10") int pageSize) {
+		pageSize = Math.max(1, Math.min(100, pageSize));
 		PageInfo<ImageThumbnailDto> result = albumService.getAlbumImages(albumId, userDetails.getUserId(), pageNum, pageSize);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}

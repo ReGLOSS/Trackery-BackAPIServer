@@ -11,9 +11,12 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.common.util.PageUtil;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
@@ -104,21 +107,17 @@ public class ImageService {
 			.build();
 	}
 
-	/**
-	 * 유저 ID로 이미지 다건 조회 썸네일 페이지네이션 버전
-	 * @param userId 유저 ID
-	 * @param pageNum 페이지 번호
-	 * @param pageSize 페이지 사이즈
-	 * @return 페이지네이션된 이미지 DTO 리스트
-	 */
-	public PageInfo<ImageThumbnailDto> getImageListByUserIdV2(Long userId, int pageNum, int pageSize) {
-		PageHelper.startPage(pageNum, pageSize);
+	@SuppressWarnings("squid:S3252")
+	public PageInfo<ImageThumbnailDto> getImageListByUserId(ImageSearchByUserIdDto imageSearchByUserIdDto) {
+		PageHelper.startPage(imageSearchByUserIdDto.getPageNum(), imageSearchByUserIdDto.getPageSize());
 
-		List<ImageThumbnailDto> imageThumbnailDtoList = imageMapper.findImagesByUserId(userId).stream()
-			.map(image -> convertImageToImageThumbnailDto(image, userId))
-			.toList();
+		List<ImageInfoForThumbnailDto> imageInfoForThumbnailDtos = imageMapper.findImageThumbnailsByUserId(
+			imageSearchByUserIdDto);
 
-		return new PageInfo<>(imageThumbnailDtoList);
+		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
+
+		return PageUtil.convert(pageInfo,
+			imageThumbnailDtoList -> convertToThumbnail(imageThumbnailDtoList, imageSearchByUserIdDto.getUserId()));
 	}
 
 	/**
@@ -261,6 +260,21 @@ public class ImageService {
 		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
 
-		return imageS3Service.generatePreSignedGetUrl(image.getImageFile(), image.getUserId(), "original");
+		return imageS3Service.generatePreSignedGetUrl(image.getImageName(), image.getUserId(), "original");
+	}
+
+	/**
+	 * ImageInfoForThumbnailDto를 ImageThumbnailDto로 변환합니다.
+	 * @param imageInfo 썸네일 생성용 이미지 정보
+	 * @param userId 사용자 ID
+	 * @return 썸네일 DTO
+	 */
+	public ImageThumbnailDto convertToThumbnail(ImageInfoForThumbnailDto imageInfo, Long userId) {
+		String thumbnailUrl = imageS3Service.generatePreSignedGetUrl(imageInfo.getImageName(), userId, "thumbnail");
+
+		return ImageThumbnailDto.builder()
+			.imageId(imageInfo.getImageId())
+			.thumbnailUrl(thumbnailUrl)
+			.build();
 	}
 }

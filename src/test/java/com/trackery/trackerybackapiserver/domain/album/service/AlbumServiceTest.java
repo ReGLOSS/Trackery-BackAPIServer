@@ -33,6 +33,7 @@ import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
@@ -438,29 +439,38 @@ class AlbumServiceTest {
 			int pageNum = 1;
 			int pageSize = 10;
 
-			AlbumImage albumImage1 = AlbumImage.builder().albumId(ALBUM_ID).imageId(1L).build();
-			AlbumImage albumImage2 = AlbumImage.builder().albumId(ALBUM_ID).imageId(2L).build();
-			AlbumImage albumImage3 = AlbumImage.builder().albumId(ALBUM_ID).imageId(3L).build();
-			List<AlbumImage> albumImages = List.of(albumImage1, albumImage2, albumImage3);
+			ImageInfoForThumbnailDto imageInfo1 = new ImageInfoForThumbnailDto();
+			ReflectionTestUtils.setField(imageInfo1, "imageId", 1L);
+			ReflectionTestUtils.setField(imageInfo1, "userId", USER_ID);
+			ReflectionTestUtils.setField(imageInfo1, "imageName", "image1.jpg");
 
-			when(albumMapper.findAlbumImagesByAlbumId(ALBUM_ID)).thenReturn(albumImages);
-			when(imageMapper.findImageByImageId(1L)).thenReturn(Optional.of(image1));
-			when(imageMapper.findImageByImageId(2L)).thenReturn(Optional.of(image2));
-			when(imageMapper.findImageByImageId(3L)).thenReturn(Optional.of(image3));
+			ImageInfoForThumbnailDto imageInfo2 = new ImageInfoForThumbnailDto();
+			ReflectionTestUtils.setField(imageInfo2, "imageId", 2L);
+			ReflectionTestUtils.setField(imageInfo2, "userId", USER_ID);
+			ReflectionTestUtils.setField(imageInfo2, "imageName", "image2.jpg");
 
-			when(imageService.convertImageToImageThumbnailDto(image1, USER_ID)).thenReturn(
+			ImageInfoForThumbnailDto imageInfo3 = new ImageInfoForThumbnailDto();
+			ReflectionTestUtils.setField(imageInfo3, "imageId", 3L);
+			ReflectionTestUtils.setField(imageInfo3, "userId", USER_ID);
+			ReflectionTestUtils.setField(imageInfo3, "imageName", "image3.jpg");
+
+			List<ImageInfoForThumbnailDto> imageInfoList = List.of(imageInfo1, imageInfo2, imageInfo3);
+
+			when(albumMapper.findImagesForThumbnailByAlbumId(ALBUM_ID)).thenReturn(imageInfoList);
+
+			when(imageService.convertToThumbnail(imageInfo1, USER_ID)).thenReturn(
 				ImageThumbnailDto.builder()
 					.imageId(1L)
 					.thumbnailUrl("thumbnail1.jpg")
 					.build()
 			);
-			when(imageService.convertImageToImageThumbnailDto(image2, USER_ID)).thenReturn(
+			when(imageService.convertToThumbnail(imageInfo2, USER_ID)).thenReturn(
 				ImageThumbnailDto.builder()
 					.imageId(2L)
 					.thumbnailUrl("thumbnail2.jpg")
 					.build()
 			);
-			when(imageService.convertImageToImageThumbnailDto(image3, USER_ID)).thenReturn(
+			when(imageService.convertToThumbnail(imageInfo3, USER_ID)).thenReturn(
 				ImageThumbnailDto.builder()
 					.imageId(3L)
 					.thumbnailUrl("thumbnail3.jpg")
@@ -477,13 +487,10 @@ class AlbumServiceTest {
 			assertEquals(2L, result.getList().get(1).getImageId());
 			assertEquals(3L, result.getList().get(2).getImageId());
 
-			verify(albumMapper).findAlbumImagesByAlbumId(ALBUM_ID);
-			verify(imageMapper).findImageByImageId(1L);
-			verify(imageMapper).findImageByImageId(2L);
-			verify(imageMapper).findImageByImageId(3L);
-			verify(imageService).convertImageToImageThumbnailDto(image1, USER_ID);
-			verify(imageService).convertImageToImageThumbnailDto(image2, USER_ID);
-			verify(imageService).convertImageToImageThumbnailDto(image3, USER_ID);
+			verify(albumMapper).findImagesForThumbnailByAlbumId(ALBUM_ID);
+			verify(imageService).convertToThumbnail(imageInfo1, USER_ID);
+			verify(imageService).convertToThumbnail(imageInfo2, USER_ID);
+			verify(imageService).convertToThumbnail(imageInfo3, USER_ID);
 		}
 
 		@Test
@@ -493,13 +500,26 @@ class AlbumServiceTest {
 			int pageNum = 1;
 			int pageSize = 10;
 
-			AlbumImage albumImage1 = AlbumImage.builder().albumId(ALBUM_ID).imageId(1L).build();
-			AlbumImage albumImage2 = AlbumImage.builder().albumId(ALBUM_ID).imageId(2L).build();
-			List<AlbumImage> albumImages = List.of(albumImage1, albumImage2);
+			ImageInfoForThumbnailDto imageInfo1 = new ImageInfoForThumbnailDto();
+			ReflectionTestUtils.setField(imageInfo1, "imageId", 1L);
+			ReflectionTestUtils.setField(imageInfo1, "userId", USER_ID);
+			ReflectionTestUtils.setField(imageInfo1, "imageName", "image1.jpg");
 
-			when(albumMapper.findAlbumImagesByAlbumId(ALBUM_ID)).thenReturn(albumImages);
-			when(imageMapper.findImageByImageId(1L)).thenReturn(Optional.of(image1));
-			when(imageMapper.findImageByImageId(2L)).thenReturn(Optional.empty()); // 이미지를 찾을 수 없음
+			ImageInfoForThumbnailDto imageInfo2 = new ImageInfoForThumbnailDto();
+			ReflectionTestUtils.setField(imageInfo2, "imageId", 2L);
+			ReflectionTestUtils.setField(imageInfo2, "userId", USER_ID);
+			ReflectionTestUtils.setField(imageInfo2, "imageName", "image2.jpg");
+
+			List<ImageInfoForThumbnailDto> imageInfoList = List.of(imageInfo1, imageInfo2);
+
+			when(albumMapper.findImagesForThumbnailByAlbumId(ALBUM_ID)).thenReturn(imageInfoList);
+			when(imageService.convertToThumbnail(imageInfo1, USER_ID)).thenReturn(
+				ImageThumbnailDto.builder()
+					.imageId(1L)
+					.thumbnailUrl("thumbnail1.jpg")
+					.build()
+			);
+			when(imageService.convertToThumbnail(imageInfo2, USER_ID)).thenThrow(new ApiException(ErrorCode.NOT_FOUND_IMAGE));
 
 			// When & Then
 			ApiException exception = assertThrows(ApiException.class,
@@ -507,9 +527,9 @@ class AlbumServiceTest {
 
 			assertEquals(ErrorCode.NOT_FOUND_IMAGE, exception.getErrorCode());
 
-			verify(albumMapper).findAlbumImagesByAlbumId(ALBUM_ID);
-			verify(imageMapper).findImageByImageId(1L);
-			verify(imageMapper).findImageByImageId(2L);
+			verify(albumMapper).findImagesForThumbnailByAlbumId(ALBUM_ID);
+			verify(imageService).convertToThumbnail(imageInfo1, USER_ID);
+			verify(imageService).convertToThumbnail(imageInfo2, USER_ID);
 		}
 
 		@Test
@@ -519,7 +539,7 @@ class AlbumServiceTest {
 			int pageNum = 1;
 			int pageSize = 10;
 
-			when(albumMapper.findAlbumImagesByAlbumId(ALBUM_ID)).thenReturn(List.of());
+			when(albumMapper.findImagesForThumbnailByAlbumId(ALBUM_ID)).thenReturn(List.of());
 
 			// When
 			PageInfo<ImageThumbnailDto> result =
@@ -530,9 +550,8 @@ class AlbumServiceTest {
 			assertTrue(result.getList().isEmpty());
 			assertEquals(0, result.getList().size());
 
-			verify(albumMapper).findAlbumImagesByAlbumId(ALBUM_ID);
-			verify(imageMapper, never()).findImageByImageId(anyLong());
-			verify(imageService, never()).convertImageToImageThumbnailDto(any(), any());
+			verify(albumMapper).findImagesForThumbnailByAlbumId(ALBUM_ID);
+			verify(imageService, never()).convertToThumbnail(any(), any());
 		}
 	}
 
