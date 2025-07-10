@@ -377,9 +377,6 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 
 		verify(imageService, times(1)).deleteImage(IMAGE_ID, USER_ID);
 	}
-<<<<<<< HEAD
-}
-=======
 
 	@Test
 	@DisplayName("이미지별 태그 조회 성공")

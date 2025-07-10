@@ -416,7 +416,6 @@ class ImageServiceTest {
 			Long testUserId = 1L;
 			Image testImage = Image.builder()
 				.imageName("테스트 이미지")
-				.imageFile("images/test.jpg")
 				.userId(testUserId)
 				.build();
 			ReflectionTestUtils.setField(testImage, "imageId", testImageId);
@@ -430,7 +429,7 @@ class ImageServiceTest {
 
 			assertEquals(testPresignedUrl, result);
 			verify(imageMapper).findImageByImageId(testImageId);
-			verify(imageS3Service).generatePreSignedGetUrl(testImage.getImageFile(), testUserId, "original");
+			verify(imageS3Service).generatePreSignedGetUrl(testImage.getImageName(), testUserId, "original");
 		}
 
 		@Test
