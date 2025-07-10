@@ -28,7 +28,9 @@ import com.trackery.trackerybackapiserver.domain.album.event.AlbumImageEditEvent
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.common.util.PageUtil;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
@@ -227,25 +229,21 @@ public class AlbumService {
 
 	/**
 	 * 앨범 이미지 조회
-	 * @param albumId 조회할 이미지 ID
+	 * @param albumId 조회할 앨범 ID
+	 * @param userId 사용자 ID
 	 * @param pageNum 페이지 번호
 	 * @param pageSize 페이지 크기
-	 * @return 페이지네이션된 이미지 DTO 리스트
+	 * @return 페이지네이션 된 이미지 썸네일 DTO 리스트
 	 */
 	@SuppressWarnings("squid:S3252")
 	public PageInfo<ImageThumbnailDto> getAlbumImages(Long albumId, Long userId, int pageNum, int pageSize) {
 		PageHelper.startPage(pageNum, pageSize);
 
-		List<AlbumImage> albumImageList = albumMapper.findAlbumImagesByAlbumId(albumId);
+		List<ImageInfoForThumbnailDto> imageInfoForThumbnailDtos = albumMapper.findImagesForThumbnailByAlbumId(albumId);
 
-		List<ImageThumbnailDto> albumImageThumbnailDtoList = albumImageList.stream()
-			.map(albumImage -> imageMapper.findImageByImageId(albumImage.getImageId()).orElseThrow(
-				() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
-			))
-			.map(image -> imageService.convertImageToImageThumbnailDto(image, userId))
-			.toList();
+		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
 
-		return new PageInfo<>(albumImageThumbnailDtoList);
+		return PageUtil.convert(pageInfo, imageInfo -> imageService.convertToThumbnail(imageInfo, userId));
 	}
 
 	/**

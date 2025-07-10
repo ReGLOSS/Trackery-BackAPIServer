@@ -96,4 +96,17 @@
         SET thumbnail_image_id = #{imageId}
         WHERE album_id = #{albumId}
     </update>
+
+    <!-- 앨범의 이미지들을 썸네일 생성용으로 조회 -->
+    <select id="findImagesForThumbnailByAlbumId"
+            resultType="com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto">
+        SELECT
+            i.image_id as imageId,
+            i.user_id as userId,
+            i.image_name as imageName
+        FROM album_image ai
+        JOIN image i ON ai.image_id = i.image_id
+        WHERE ai.album_id = #{albumId}
+          AND i.is_deleted = 0
+    </select>
 </mapper>

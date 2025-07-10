@@ -220,6 +220,24 @@ public enum ErrorCode {
 
 	/*
 	 * =================================================================================================================
+	 * 페이지네이션 관련 오류 (Pagination Errors)
+	 * =================================================================================================================
+	 */
+	/**
+	 * 페이지 정보 변환 시 원본 페이지 정보가 null일 경우 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, Source PageInfo가 null입니다.")
+	 */
+	INTERNAL_SERVER_ERROR_PAGE_SOURCE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, Source PageInfo가 null입니다."),
+	/**
+	 * 페이지 정보 변환 시 새로운 리스트가 null일 경우 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환될 새 리스트가 null입니다.")
+	 */
+	INTERNAL_SERVER_ERROR_PAGE_NEW_LIST_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환될 새 리스트가 null입니다."),
+	/**
+	 * 페이지 정보 변환 시 변환 함수가 null일 경우 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환 메서드가 null입니다.")
+	 */
+	INTERNAL_SERVER_ERROR_PAGE_CONVERTER_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환 메서드가 null입니다."),
+
+	/*
+	 * =================================================================================================================
 	 * 태그 관련 오류 (Tag Errors)
 	 * =================================================================================================================
 	 */

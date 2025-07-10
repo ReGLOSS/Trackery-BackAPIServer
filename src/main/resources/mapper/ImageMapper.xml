@@ -83,19 +83,25 @@
           AND i.is_deleted = 0
     </select>
 
-    <select id="findImagesByUserId" resultMap="ImageMap">
-        SELECT i.*,
-               cp.*,
-               sgg.sgg_id,
-               sgg.sgg_name,
-               sd.sd_id,
-               sd.sd_name
+    <!-- 유저 ID로 이미지 썸네일 정보 조회 -->
+    <select id="findImageThumbnailsByUserId"
+            parameterType="com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto"
+            resultType="com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto">
+        SELECT
+        i.image_id as imageId,
+        i.user_id as userId,
+        i.image_name as imageName
         FROM image i
-                 LEFT JOIN coord_poi cp ON i.coord_point_id = cp.coord_point_id
-                 LEFT JOIN juso_sigungu sgg ON cp.sgg_id = sgg.sgg_id
-                 LEFT JOIN juso_sido sd ON sgg.sd_id = sd.sd_id
         WHERE i.user_id = #{userId}
-          AND i.is_deleted = 0
+        AND i.is_deleted = 0
+        <if test="excludeAlbumId != null">
+            AND NOT EXISTS (
+            SELECT 1
+            FROM album_image ai
+            WHERE ai.image_id = i.image_id
+            AND ai.album_id = #{excludeAlbumId}
+            )
+        </if>
     </select>
 
     <!-- 지역별 이미지 조회 쿼리 -->

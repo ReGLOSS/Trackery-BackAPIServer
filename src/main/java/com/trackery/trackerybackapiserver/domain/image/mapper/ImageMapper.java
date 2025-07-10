@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 
 /**
@@ -39,7 +41,7 @@ public interface ImageMapper {
 
 	Optional<Image> findImageByImageId(@Param("imageId") Long imageId);
 
-	List<Image> findImagesByUserId(@Param("userId") Long userId);
+	List<ImageInfoForThumbnailDto> findImageThumbnailsByUserId(ImageSearchByUserIdDto imageSearchByUserIdDto);
 
 	/**
 	 * 특정 시도에 등록된 특정 사용자의 이미지를 조회합니다.
@@ -67,10 +69,10 @@ public interface ImageMapper {
 	 * @return 수정된 행의 수
 	 */
 	int updateImageMetadata(@Param("imageId") Long imageId,
-			@Param("imageName") String imageName,
-			@Param("imageContent") String imageContent,
-			@Param("imageDate") LocalDateTime imageDate,
-			@Param("isPublic") Integer isPublic);
+		@Param("imageName") String imageName,
+		@Param("imageContent") String imageContent,
+		@Param("imageDate") LocalDateTime imageDate,
+		@Param("isPublic") Integer isPublic);
 
 	/**
 	 * 이미지를 논리적으로 삭제합니다 (is_deleted = 1).
