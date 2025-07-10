@@ -64,7 +64,8 @@ public class LocationService {
 			() -> new ApiException(ErrorCode.NOT_FOUND)
 		);
 
-		String locationName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(), sigungu.getSigunguName());
+		String locationName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(),
+			sigungu.getSigunguName());
 		return LocationNameResponseDto.builder()
 			.locationName(locationName)
 			.build();
