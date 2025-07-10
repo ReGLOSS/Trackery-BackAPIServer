@@ -246,7 +246,7 @@ public class ImageService {
 		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
 
-		return imageS3Service.generatePreSignedGetUrl(image.getImageFile(), image.getUserId(), "original");
+		return imageS3Service.generatePreSignedGetUrl(image.getImageName(), image.getUserId(), "original");
 	}
 
 	/**
