@@ -236,6 +236,32 @@ public enum ErrorCode {
 	 */
 	INTERNAL_SERVER_ERROR_PAGE_CONVERTER_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환 메서드가 null입니다."),
 
+	/*
+	 * =================================================================================================================
+	 * 태그 관련 오류 (Tag Errors)
+	 * =================================================================================================================
+	 */
+	/**
+	 * 태그를 찾을 수 없음 (HttpStatus.NOT_FOUND, 404, "태그를 찾을 수 없습니다.")
+	 */
+	NOT_FOUND_TAG(HttpStatus.NOT_FOUND, 404, "태그를 찾을 수 없습니다."),
+	/**
+	 * 중복된 태그 이름 (HttpStatus.CONFLICT, 409, "이미 존재하는 태그 이름입니다.")
+	 */
+	DUPLICATE_TAG_NAME(HttpStatus.CONFLICT, 409, "이미 존재하는 태그 이름입니다."),
+	/**
+	 * 시스템 태그 삭제 불가 (HttpStatus.BAD_REQUEST, 400, "시스템 태그는 삭제할 수 없습니다.")
+	 */
+	BAD_REQUEST_CANNOT_DELETE_SYSTEM_TAG(HttpStatus.BAD_REQUEST, 400, "시스템 태그는 삭제할 수 없습니다."),
+	/**
+	 * 사용 중인 태그 삭제 불가 (HttpStatus.BAD_REQUEST, 400, "사용 중인 태그는 삭제할 수 없습니다.")
+	 */
+	BAD_REQUEST_CANNOT_DELETE_TAG_IN_USE(HttpStatus.BAD_REQUEST, 400, "사용 중인 태그는 삭제할 수 없습니다."),
+	/**
+	 * 사용자가 사용하지 않는 태그 (HttpStatus.BAD_REQUEST, 400, "사용자가 사용하지 않는 태그입니다.")
+	 */
+	BAD_REQUEST_TAG_NOT_USED_BY_USER(HttpStatus.BAD_REQUEST, 400, "사용자가 사용하지 않는 태그입니다."),
+
 
 	/*
 	 * =================================================================================================================

@@ -1,0 +1,76 @@
+== 태그 API
+'''
+
+=== 태그 생성 API
+==== POST /api/tags
+
+새로운 태그를 생성합니다. 같은 이름의 기존 태그가 있으면 기존 태그를 반환합니다.
+
+===== 요청
+include::{snippets}/tag-create/http-request.adoc[]
+include::{snippets}/tag-create/request-fields.adoc[]
+
+===== 응답
+include::{snippets}/tag-create/http-response.adoc[]
+include::{snippets}/tag-create/response-fields.adoc[]
+'''
+
+=== 모든 태그 조회 API
+==== GET /api/tags
+
+시스템에 등록된 모든 태그를 조회합니다.
+
+===== 요청
+include::{snippets}/tag-get-all/http-request.adoc[]
+
+===== 응답
+include::{snippets}/tag-get-all/http-response.adoc[]
+include::{snippets}/tag-get-all/response-fields.adoc[]
+'''
+
+=== 시스템 태그 조회 API
+==== GET /api/tags/system
+
+시스템에서 사전 정의된 태그들만 조회합니다.
+
+===== 요청
+include::{snippets}/tag-get-system/http-request.adoc[]
+
+===== 응답
+include::{snippets}/tag-get-system/http-response.adoc[]
+include::{snippets}/tag-get-system/response-fields.adoc[]
+'''
+
+
+
+
+
+=== 관리자 태그 삭제 API
+==== DELETE /api/tags/admin/{tagId}
+
+관리자 권한으로 사용되지 않는 태그를 삭제합니다.
+- CUSTOM 타입 태그만 삭제 가능
+- 사용 중인 태그는 삭제 불가
+
+===== 요청
+include::{snippets}/tag-delete-by-admin/http-request.adoc[]
+include::{snippets}/tag-delete-by-admin/path-parameters.adoc[]
+
+===== 응답
+include::{snippets}/tag-delete-by-admin/http-response.adoc[]
+include::{snippets}/tag-delete-by-admin/response-fields.adoc[]
+'''
+
+=== 기본 태그 생성 API
+==== POST /api/tags/default
+
+날짜/시간 정보를 기반으로 계절 및 시간대 태그를 자동 생성합니다.
+
+===== 요청
+include::{snippets}/tag-create-default/http-request.adoc[]
+include::{snippets}/tag-create-default/request-fields.adoc[]
+
+===== 응답
+include::{snippets}/tag-create-default/http-response.adoc[]
+include::{snippets}/tag-create-default/response-fields.adoc[]
+'''

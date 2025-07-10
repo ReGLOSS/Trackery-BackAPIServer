@@ -32,6 +32,7 @@ import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerT
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 6. 30.        inari       	최초 생성
+ * 25. 7. 8.         inari       	코드 수정
  */
 @WebMvcTest(DocsController.class)
 @DisplayName("DocsController 테스트")
@@ -118,4 +119,5 @@ class DocsControllerTest extends CommonMockMvcControllerTestSetUp {
 		}
 
 	}
+
 }

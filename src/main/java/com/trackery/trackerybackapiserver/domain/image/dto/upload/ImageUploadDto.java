@@ -1,5 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.image.dto.upload;
 
+import java.util.List;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +15,7 @@ import lombok.NoArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 17.		durururuk		최초 생성
+ * 25. 7. 8.		inari			태그리스트 추가
  */
 @Getter
 @NoArgsConstructor
@@ -20,7 +23,7 @@ public class ImageUploadDto {
 	private String imageName;
 	private String imageType;
 	private String description;
-	private String tags;
+	private List<String> tags;
 	private double longitude;
 	private double latitude;
 	private String dateString;

@@ -24,6 +24,7 @@ import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
+import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,6 +44,8 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 16.		 inari		 지도를 통한 이미지 조회 기능 추가
  * 25. 6. 20.		 inari		 이미지 수정 및 삭제 추가
  * 25. 6. 22.		 inari		 이미지 수정시 좌표 인서트가 아닌 업데이트로 변경
+ * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
+ * 25. 7. 9.		 inari		 removeAllTagsFromImage로 메서드 분리
  */
 @Slf4j
 @Service
@@ -51,6 +54,7 @@ public class ImageService {
 	private final ImageMapper imageMapper;
 	private final ImageS3Service imageS3Service;
 	private final LocationService locationService;
+	private final TagService tagService;
 
 	/**
 	 * 공개된 이미지 URL 목록을 조회합니다.
@@ -226,6 +230,14 @@ public class ImageService {
 
 		if (!existingImage.getUserId().equals(userId)) {
 			throw new ApiException(ErrorCode.FORBIDDEN);
+		}
+
+		// 이미지와 연결된 모든 태그 관계 해제 및 사용 카운트 감소
+		try {
+			tagService.removeAllTagsFromImage(imageId);
+		} catch (Exception e) {
+			log.warn("이미지 태그 해제 중 오류 발생 - imageId: {}, 오류: {}", imageId, e.getMessage());
+			// 태그 해제 실패해도 이미지 삭제는 계속 진행
 		}
 
 		int deletedRows = imageMapper.deleteImage(imageId);
