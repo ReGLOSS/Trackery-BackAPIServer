@@ -34,6 +34,7 @@ import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
+import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 
 /**
  *packageName    : com.trackery.trackerybackapiserver.domain.home.service
@@ -47,6 +48,7 @@ import com.trackery.trackerybackapiserver.domain.location.service.LocationServic
  * 25. 2. 14.        inari       최초 생성
  * 25. 5. 19.		durururuk	이미지 조회 단위 테스트 작성
  * 25. 6. 20.		inari		이미지 삭제 및 수정 테스트 작성
+ * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
  */
 @ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
@@ -57,6 +59,8 @@ class ImageServiceTest {
 	private ImageS3Service imageS3Service;
 	@Mock
 	private LocationService locationService;
+	@Mock
+	private TagService tagService;
 	@InjectMocks
 	private ImageService imageService;
 
@@ -169,6 +173,7 @@ class ImageServiceTest {
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("original"))).thenReturn(
 				testPresignedUrl);
 			when(imageMapper.findImageByImageId(5L)).thenReturn(Optional.of(testImage1));
+			when(tagService.getTagNamesByImageId(testImageId)).thenReturn(List.of());
 
 			ImageDto result = imageService.getOriginalImageByImageId(testUserId, 5L);
 
@@ -277,6 +282,7 @@ class ImageServiceTest {
 			when(imageMapper.findImageByImageId(testImageId)).thenReturn(Optional.of(publicImage));
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("original"))).thenReturn(
 				testPresignedUrl);
+			when(tagService.getTagNamesByImageId(testImageId)).thenReturn(List.of());
 
 			ImageDto result = imageService.getOriginalImageByImageId(testUserId, testImageId);
 
@@ -481,6 +487,7 @@ class ImageServiceTest {
 				.thenReturn(1);
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
 				"test-url");
+			when(tagService.getTagNamesByImageId(imageId)).thenReturn(List.of());
 
 			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
 
@@ -540,6 +547,7 @@ class ImageServiceTest {
 			when(locationService.updateCoordinatePoint(eq(1L), any())).thenReturn(1);
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
 				"test-url");
+			when(tagService.getTagNamesByImageId(imageId)).thenReturn(List.of());
 
 			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
 

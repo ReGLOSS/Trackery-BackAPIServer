@@ -45,7 +45,8 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * -----------------------------------------------------------
  * 25. 5. 22.		durururuk		최초 생성
  * 25. 6. 18.		inari		    Spring-Rest-Docs api문서 추가
- * 25. 7. 9.        inari       테스트코드 수정
+ * 25. 7. 9.        inari       	테스트코드 수정
+ * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
  */
 @WebMvcTest(ImageController.class)
 class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -85,6 +86,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.imageDate(IMAGE_DATE)
 			.imageUrl(IMAGE_URL)
 			.isPublic(0)
+			.tags(List.of())
 			.build();
 
 		userDetails = CustomUserDetails.builder()
@@ -135,7 +137,8 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("data.imageContent").description("이미지 설명"),
 					fieldWithPath("data.imageDate").description("이미지 촬영 일시"),
 					fieldWithPath("data.isPublic").description("공개 여부 (true: 공개, false: 비공개, null: 미설정)"),
-					fieldWithPath("data.imageUrl").description("이미지 URL")
+					fieldWithPath("data.imageUrl").description("이미지 URL"),
+					fieldWithPath("data.tags").description("이미지와 연결된 태그 목록")
 				)
 			));
 
@@ -219,6 +222,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.imageDate(IMAGE_DATE)
 			.imageUrl(IMAGE_URL)
 			.isPublic(1)
+			.tags(List.of())
 			.build();
 
 		when(imageService.updateImageMetadata(eq(IMAGE_ID), eq(USER_ID), any(ImageUpdateRequestDto.class)))
@@ -266,7 +270,8 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("data.imageContent").description("이미지 설명"),
 					fieldWithPath("data.imageDate").description("이미지 촬영 일시"),
 					fieldWithPath("data.isPublic").description("공개 여부"),
-					fieldWithPath("data.imageUrl").description("이미지 URL")
+					fieldWithPath("data.imageUrl").description("이미지 URL"),
+					fieldWithPath("data.tags").description("이미지와 연결된 태그 목록")
 				)
 			));
 
@@ -297,6 +302,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.imageDate(IMAGE_DATE)
 			.imageUrl(IMAGE_URL)
 			.isPublic(1)
+			.tags(List.of())
 			.build();
 
 		when(imageService.updateImageMetadata(eq(IMAGE_ID), eq(USER_ID), any(ImageUpdateRequestDto.class)))
@@ -344,7 +350,8 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("data.imageContent").description("수정된 이미지 설명"),
 					fieldWithPath("data.imageDate").description("이미지 촬영 일시"),
 					fieldWithPath("data.isPublic").description("수정된 공개 여부"),
-					fieldWithPath("data.imageUrl").description("이미지 URL")
+					fieldWithPath("data.imageUrl").description("이미지 URL"),
+					fieldWithPath("data.tags").description("이미지와 연결된 태그 목록")
 				)
 			));
 
