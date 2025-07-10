@@ -4,6 +4,10 @@ import java.util.List;
 import java.util.function.Function;
 
 import com.github.pagehelper.PageInfo;
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.common.util
@@ -16,6 +20,7 @@ import com.github.pagehelper.PageInfo;
  * -----------------------------------------------------------
  * 25. 7. 7.		durururuk		최초 생성
  */
+@Slf4j
 public class PageUtil {
 	private PageUtil() {
 	}
@@ -27,6 +32,12 @@ public class PageUtil {
 	 * @return 변환된 PageInfo
 	 */
 	public static <T, R> PageInfo<R> convert(PageInfo<T> source, List<R> newList) {
+		if (source == null) {
+			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR_PAGE_SOURCE_NULL);
+		}
+		if (newList == null) {
+			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR_PAGE_NEW_LIST_NULL);
+		}
 		PageInfo<R> target = new PageInfo<>(newList);
 		copyPageProperties(source, target);
 		return target;
@@ -40,7 +51,17 @@ public class PageUtil {
 	 * @return 변환된 PageInfo
 	 */
 	public static <T, R> PageInfo<R> convert(PageInfo<T> source, Function<T, R> converter) {
-		List<R> convertedList = source.getList().stream()
+		if (source == null) {
+			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR_PAGE_SOURCE_NULL);
+		}
+		if (converter == null) {
+			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR_PAGE_CONVERTER_NULL);
+		}
+		List<T> sourceList = source.getList();
+		if (sourceList == null) {
+			sourceList = List.of();
+		}
+		List<R> convertedList = sourceList.stream()
 			.map(converter)
 			.toList();
 		return convert(source, convertedList);
