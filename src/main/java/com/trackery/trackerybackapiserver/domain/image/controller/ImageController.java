@@ -70,6 +70,8 @@ public class ImageController {
 		@RequestParam(defaultValue = "10") int pageSize,
 		@RequestParam(required = false) Long excludeAlbumId
 	) {
+		pageSize = Math.max(1, Math.min(100, pageSize));
+
 		ImageSearchByUserIdDto searchByUserIdDto = ImageSearchByUserIdDto.builder()
 			.userId(userDetails.getUserId())
 			.excludeAlbumId(excludeAlbumId)
