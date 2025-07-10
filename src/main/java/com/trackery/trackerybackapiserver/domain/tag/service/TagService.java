@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -36,6 +37,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 2.        inari       최초 생성
  * 25. 7. 9.        inari       removeAllTagsFromImage 생성
  * 25. 7. 10.       inari       이미지 단건 조회시 태그 추가, 날짜 제거
+ * 25. 7. 10.		inari		기본 태그 api 추가
  */
 @Slf4j
 @Service
@@ -393,19 +395,36 @@ public class TagService {
 	}
 
 	/**
-	 * 날짜 문자열을 기반으로 기본 태그 목록을 생성합니다.
+	 * 날짜 문자열과 좌표를 기반으로 기본 태그 목록을 생성합니다.
 	 * @param dateStr 날짜 문자열 (예: "2024 / 1 / 15")
-	 * @return 생성된 계절 태그명 목록
+	 * @param latitude 위도 (선택사항)
+	 * @param longitude 경도 (선택사항)
+	 * @return 생성된 태그명 목록 (시도, 시군구, 계절 순)
 	 */
 	@Transactional
-	public List<TagNameResponseDto> createDefaultTags(String dateStr) {
+	public List<TagNameResponseDto> createDefaultTags(String dateStr, Double latitude, Double longitude) {
+		List<TagNameResponseDto> tags = new ArrayList<>();
+		// 지역 태그 생성 (시도, 시군구 순)
+		JusoSigungu sigungu = locationService.findSigunguByCoordinate(latitude, longitude);
+		if (sigungu != null) {
+			String sidoName = sigungu.getSido().getSidoName();
+			String sigunguName = sigungu.getSigunguName();
+			findOrCreateLocationTag(sidoName);
+			findOrCreateLocationTag(sigunguName);
+
+			tags.add(TagNameResponseDto.builder().tagName(sidoName).build());
+			tags.add(TagNameResponseDto.builder().tagName(sigunguName).build());
+		}
+
+		// 날짜 기반 계절 태그 생성
 		LocalDate date = parseDate(dateStr);
 		String seasonTag = getSeasonTag(date);
 		findOrCreateSeasonTag(seasonTag);
-		return List.of(
-			TagNameResponseDto.builder().tagName(seasonTag).build()
-		);
+		tags.add(TagNameResponseDto.builder().tagName(seasonTag).build());
+
+		return tags;
 	}
+
 
 	/**
 	 * 날짜 문자열을 LocalDate로 파싱합니다.
