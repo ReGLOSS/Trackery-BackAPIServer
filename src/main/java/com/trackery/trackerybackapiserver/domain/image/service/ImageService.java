@@ -48,6 +48,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
  * 25. 7. 9.		 inari		 removeAllTagsFromImage로 메서드 분리
  * 25. 7. 11.		durururuk	 내 이미지 리스트 조회 시 S3에서 이미지 조회 실패한 이미지는 제외하고 결과를 반환하게 수정
+ * 25. 7. 11.		durururuk	 중복되는 리스팅 메서드 추출
  */
 @Slf4j
 @Service
@@ -129,15 +130,7 @@ public class ImageService {
 
 		PageInfo<ImageInfoForThumbnailDto> sourcePageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
 
-		List<ImageThumbnailDto> thumbnailList = new ArrayList<>();
-		for (ImageInfoForThumbnailDto imageInfo : sourcePageInfo.getList()) {
-			ImageThumbnailDto thumbnail = convertToThumbnail(imageInfo, imageSearchByUserIdDto.getUserId());
-			if (thumbnail != null) {
-				thumbnailList.add(thumbnail);
-			}
-		}
-
-		return PageUtil.convert(sourcePageInfo, thumbnailList);
+		return convertToThumbnailPageInfo(sourcePageInfo, imageSearchByUserIdDto.getUserId());
 	}
 
 	/**
@@ -280,6 +273,26 @@ public class ImageService {
 			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
 
 		return imageS3Service.generatePreSignedGetUrl(image.getImageName(), image.getUserId(), "original");
+	}
+
+	/**
+	 * PageInfo<ImageInfoForThumbnailDto>를 PageInfo<ImageThumbnailDto>로 변환합니다.
+	 * S3에서 썸네일 조회 실패한 이미지는 결과에서 제외됩니다.
+	 * @param sourcePageInfo 원본 페이지 정보
+	 * @param userId 사용자 ID
+	 * @return 썸네일 DTO 목록을 포함한 페이지네이션 정보
+	 */
+	public PageInfo<ImageThumbnailDto> convertToThumbnailPageInfo(
+		PageInfo<ImageInfoForThumbnailDto> sourcePageInfo, Long userId) {
+		
+		List<ImageThumbnailDto> thumbnailList = new ArrayList<>();
+		for (ImageInfoForThumbnailDto imageInfo : sourcePageInfo.getList()) {
+			ImageThumbnailDto thumbnail = convertToThumbnail(imageInfo, userId);
+			if (thumbnail != null) {
+				thumbnailList.add(thumbnail);
+			}
+		}
+		return PageUtil.convert(sourcePageInfo, thumbnailList);
 	}
 
 	/**

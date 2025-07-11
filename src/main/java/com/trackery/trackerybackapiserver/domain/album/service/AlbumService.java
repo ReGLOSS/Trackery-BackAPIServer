@@ -2,7 +2,6 @@ package com.trackery.trackerybackapiserver.domain.album.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,7 +28,6 @@ import com.trackery.trackerybackapiserver.domain.album.event.AlbumImageEditEvent
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.common.util.PageUtil;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
@@ -245,15 +243,7 @@ public class AlbumService {
 
 		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
 
-		List<ImageThumbnailDto> thumbnailList = new ArrayList<>();
-		for (ImageInfoForThumbnailDto imageInfoForThumbnailDto : imageInfoForThumbnailDtos) {
-			ImageThumbnailDto thumbnailDto = imageService.convertToThumbnail(imageInfoForThumbnailDto, userId);
-			if (thumbnailDto != null) {
-				thumbnailList.add(thumbnailDto);
-			}
-		}
-
-		return PageUtil.convert(pageInfo, thumbnailList);
+		return imageService.convertToThumbnailPageInfo(pageInfo, userId);
 	}
 
 	/**
