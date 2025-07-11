@@ -18,29 +18,42 @@ import lombok.NoArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 15.		durururuk		최초 생성
- */
-
-/**
- * CoordinatePoint 엔티티 객체입니다.
- *
- * coodinatePointId Long 타입 좌표 식별번호 (예시 : 1L)
- * coordinatePointName 좌표 시도 + 시군구 명 (예시 : 부산광역시 수영구)
- * coordinatePointType 좌표 타입입니다. 기본 상태로 1을 사용중입니다. 추후 구분이 필요하면 주석 수정 부탁드립니다.
- * coordinatePointPoint 좌표의 Point 객체입니다.
- * firstRegisteredDate 처음 등록된 시간입니다.
- * lastModifiedDate 최종 수정 시간입니다.
- * sigungu 좌표가 속한 시군구 엔티티입니다. 시도 정보도 sigungu.getSido() 방식으로 찾을 수 있습니다.
+ * 25. 7. 11.		inari			자바독 수정
  */
 @Getter
 @NoArgsConstructor
 public class CoordinatePoint {
+	/**
+	 * 좌표 식별번호
+	 */
 	private Long coordinatePointId;
+	/**
+	 * 좌표 시도 + 시군구 명 (예: 부산광역시 수영구)
+	 */
 	private String coordinatePointName;
+	/**
+	 * 좌표 상세 정보
+	 */
 	private String coordinatePointDetail;
+	/**
+	 * 좌표 타입 (기본값: 1)
+	 */
 	private byte coordinatePointType;
+	/**
+	 * JTS Point 객체로 표현된 좌표 정보
+	 */
 	private Point coordinatePointPoint;
+	/**
+	 * 처음 등록된 시간
+	 */
 	private LocalDateTime firstRegisteredDate;
+	/**
+	 * 최종 수정 시간
+	 */
 	private LocalDateTime lastModifiedDate;
+	/**
+	 * 좌표가 속한 시군구 엔티티
+	 */
 	private JusoSigungu sigungu;
 
 	@Builder
