@@ -25,13 +25,14 @@ import lombok.RequiredArgsConstructor;
  * fileName       : MailController
  * author         : durururuk
  * date           : 25. 3. 5.
- * description    :
+ * description    : 이메일 관련 기능을 담당하는 REST 컨트롤러입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 3. 5.        durururuk      최초 생성
  * 25. 3. 5.        durururuk      유저 컨트롤러에서 분리
  * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
+ * 25. 7. 11.        inari      	클래스 설명 추가
  */
 @RestController
 @RequiredArgsConstructor

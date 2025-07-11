@@ -27,6 +27,7 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 21.		durururuk		최초 생성
+ * 25. 7. 11.		inari			체크스타일 수정
  */
 @RestController
 @RequestMapping("/api/images")
@@ -40,7 +41,8 @@ public class ImageUploadController {
 	 * @return 성공 시 data node에 S3 PresignedPutUrl을 반환합니다.
 	 */
 	@GetMapping("/presigned-url/put")
-	public ResponseEntity<ApiResponse<String>> requestPreSignedPutUrl(@RequestParam String imageFileName, @AuthenticationPrincipal CustomUserDetails userDetails) {
+	public ResponseEntity<ApiResponse<String>> requestPreSignedPutUrl(@RequestParam String imageFileName,
+		@AuthenticationPrincipal CustomUserDetails userDetails) {
 		String result = imageUploadService.getPresignedPutUrl(imageFileName, userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}

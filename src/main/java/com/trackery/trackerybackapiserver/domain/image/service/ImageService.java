@@ -89,6 +89,13 @@ public class ImageService {
 		log.info("공개된 이미지 주소들을 삭제합니다.");
 	}
 
+	/**
+	 * 이미지 ID로 원본 이미지 정보를 조회합니다.
+	 * @param userId 사용자 ID (권한 확인용)
+	 * @param imageId 이미지 ID
+	 * @return 이미지 정보 DTO
+	 * @throws ApiException 이미지를 찾을 수 없거나 권한이 없는 경우
+	 */
 	public ImageDto getOriginalImageByImageId(Long userId, Long imageId) {
 		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
@@ -137,6 +144,7 @@ public class ImageService {
 	/**
 	 * 이미지 객체를 이미지 DTO로 가공하는 메서드
 	 * @param image 이미지 객체
+	 * @param userId 사용자 ID
 	 * @return 이미지 정보를 담고있는 DTO
 	 */
 	public ImageDto convertImageToImageDto(Image image, Long userId) {
@@ -164,6 +172,9 @@ public class ImageService {
 
 	/**
 	 * 특정 시도에 등록된 사용자의 이미지를 조회합니다.
+	 * @param sidoId 시도 ID
+	 * @param userId 사용자 ID
+	 * @return 이미지 썸네일 목록
 	 */
 	public List<ImageThumbnailDto> getImagesBySido(Long sidoId, Long userId) {
 		log.debug("시도 ID {}의 사용자 ID {} 이미지 목록 조회", sidoId, userId);
@@ -176,6 +187,9 @@ public class ImageService {
 
 	/**
 	 * 특정 시군구에 등록된 사용자의 이미지를 조회합니다.
+	 * @param sigunguId 시군구 ID
+	 * @param userId 사용자 ID
+	 * @return 이미지 썸네일 목록
 	 */
 	public List<ImageThumbnailDto> getImagesBySigungu(Long sigunguId, Long userId) {
 		log.debug("시군구 ID {}의 사용자 ID {} 이미지 목록 조회", sigunguId, userId);
@@ -235,7 +249,7 @@ public class ImageService {
 	}
 
 	/**
-	 * 이미지를 삭제합니다 (논리적 삭제).
+	 * 이미지를 삭제합니다 (논리적 삭제) 이후 연결된 태그의 사용 카운트를 감소시킨후 연결된 태그 관계를 해제합니다.
 	 * @param imageId 삭제할 이미지 ID
 	 * @param userId 요청하는 사용자 ID (권한 확인용)
 	 */
@@ -269,6 +283,7 @@ public class ImageService {
 	 * 썸네일 이미지, 유저 프로필 사진과 같이 이미지 전체의 정보가 필요없고 이미지 S3 URL만 필요할 때 사용하는 메서드입니다.
 	 * @param imageId 이미지 ID
 	 * @return S3 Presigned URL
+	 * @throws ApiException 이미지를 찾을 수 없는 경우
 	 */
 	public String fetchS3PresignedUrlByImageId(Long imageId) {
 		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(

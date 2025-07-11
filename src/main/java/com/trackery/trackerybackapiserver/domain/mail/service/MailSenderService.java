@@ -20,12 +20,13 @@ import lombok.extern.slf4j.Slf4j;
  * fileName       : EmailSenderService
  * author         : durururuk
  * date           : 25. 3. 20.
- * description    :
+ * description    : 실제 이메일 전송을 담당하는 서비스 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 3. 20.        durururuk      최초 생성
  * 25. 3. 20.	     durururuk	    이메일 전송 관련 로직 분리
+ * 25. 7. 11.	     inari    		클래스 설명 추가
  */
 @Slf4j
 @Component

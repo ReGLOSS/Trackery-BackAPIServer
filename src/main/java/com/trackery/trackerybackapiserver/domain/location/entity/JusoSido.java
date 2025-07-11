@@ -14,18 +14,19 @@ import lombok.Setter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 15.		durururuk		최초 생성
- */
-
-/**
- * 시/도 엔티티입니다.
- *
- * sidoId 시/도 식별번호 (예시 : 11L )
- * sidoName 시/도 명 (예시 : 서울특별시 )
+ * 25. 7. 11.		inari			자바독 수정
  */
 @Getter
 @Setter
 @NoArgsConstructor
 public class JusoSido {
+	/**
+	 * 시/도 식별번호 (예: 11L)
+	 */
 	private Long sidoId;
+
+	/**
+	 * 시/도 명 (예: 서울특별시)
+	 */
 	private String sidoName;
 }

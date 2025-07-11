@@ -1,7 +1,10 @@
 package com.trackery.trackerybackapiserver.domain.user.dto;
 
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.dto
@@ -15,6 +18,8 @@ import lombok.Getter;
  * 25. 2. 25.        inari       최초 생성
  */
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @Builder
 public class OAuthLoginDto {
 

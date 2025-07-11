@@ -50,7 +50,7 @@ public class MapResponseDto {
 	 *
 	 * @param sigungu 시군구 엔티티 (시도 정보 포함)
 	 * @return MapResponseDto 인스턴스
-	 * @apiNote JusoSigungu 엔티티는 연관된 JusoSido 정보를 포함해야 합니다.
+	 * <p>JusoSigungu 엔티티는 연관된 JusoSido 정보를 포함해야 합니다.</p>
 	 */
 	public static MapResponseDto from(JusoSigungu sigungu) {
 		return MapResponseDto.builder()

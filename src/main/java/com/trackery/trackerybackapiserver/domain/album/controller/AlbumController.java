@@ -39,6 +39,7 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 19.		durururuk		최초 생성
+ * 25. 7. 11.		inari			체크스타일 수정
  */
 @RestController
 @RequiredArgsConstructor
@@ -118,10 +119,12 @@ public class AlbumController {
 	 * @return 페이지네이션된 이미지 DTO 리스트
 	 */
 	@GetMapping("/{albumId}/images")
-	public ResponseEntity<ApiResponse<PageInfo<ImageThumbnailDto>>> getAlbumImages(@PathVariable Long albumId, @AuthenticationPrincipal CustomUserDetails userDetails,
+	public ResponseEntity<ApiResponse<PageInfo<ImageThumbnailDto>>> getAlbumImages(@PathVariable Long albumId,
+		@AuthenticationPrincipal CustomUserDetails userDetails,
 		@RequestParam(defaultValue = "1") int pageNum, @RequestParam(defaultValue = "10") int pageSize) {
 		pageSize = Math.max(1, Math.min(100, pageSize));
-		PageInfo<ImageThumbnailDto> result = albumService.getAlbumImages(albumId, userDetails.getUserId(), pageNum, pageSize);
+		PageInfo<ImageThumbnailDto> result
+			= albumService.getAlbumImages(albumId, userDetails.getUserId(), pageNum, pageSize);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 

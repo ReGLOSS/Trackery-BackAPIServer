@@ -23,6 +23,7 @@ import com.trackery.trackerybackapiserver.domain.image.entity.Image;
  * 25. 2. 14.        inari       최초 생성
  * 25. 6. 16.        inari       지도를 통한 이미지 조회 기능 추가
  * 25. 6. 20.		 inari		 이미지 수정 및 삭제 추가
+ * 25. 7. 11.		 inari		 사용되지 않는 updateImageLocation 삭제
  */
 @Mapper
 public interface ImageMapper {
@@ -39,8 +40,18 @@ public interface ImageMapper {
 	 */
 	void insertImage(Image image);
 
+	/**
+	 * 이미지 ID로 이미지를 조회합니다.
+	 * @param imageId 이미지 ID
+	 * @return 이미지 엔티티 (Optional)
+	 */
 	Optional<Image> findImageByImageId(@Param("imageId") Long imageId);
 
+	/**
+	 * 사용자 ID로 이미지 썸네일 정보를 조회합니다.
+	 * @param imageSearchByUserIdDto 사용자 ID 기반 이미지 검색 조건
+	 * @return 이미지 썸네일 정보 목록
+	 */
 	List<ImageInfoForThumbnailDto> findImageThumbnailsByUserId(ImageSearchByUserIdDto imageSearchByUserIdDto);
 
 	/**
@@ -80,12 +91,4 @@ public interface ImageMapper {
 	 * @return 삭제된 행의 수
 	 */
 	int deleteImage(@Param("imageId") Long imageId);
-
-	/**
-	 * 이미지의 좌표 정보를 수정합니다.
-	 * @param imageId 이미지 ID
-	 * @param coordinatePointId 새로운 좌표 포인트 ID
-	 * @return 수정된 행의 수
-	 */
-	int updateImageLocation(@Param("imageId") Long imageId, @Param("coordinatePointId") Long coordinatePointId);
 }

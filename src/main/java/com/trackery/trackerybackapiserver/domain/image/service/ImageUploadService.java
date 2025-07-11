@@ -33,6 +33,7 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 4. 17.		durururuk		최초 생성
  * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
+ * 25. 7. 11.		 inari		 getFileNameWithoutExtension 자바독 추가
  */
 @Slf4j
 @Service
@@ -46,6 +47,7 @@ public class ImageUploadService {
 	/**
 	 * S3에 Object Put Presigned URL을 요청하는 메서드입니다.
 	 * @param imageFileName 이미지 파일명
+	 * @param userId 사용자 ID
 	 * @return S3 PresignedPutUrl
 	 */
 	public String getPresignedPutUrl(String imageFileName, Long userId) {
@@ -95,6 +97,11 @@ public class ImageUploadService {
 		}
 	}
 
+	/**
+	 * 파일명에서 확장자를 제거한 이름을 반환합니다.
+	 * @param imageFileName 이미지 파일명
+	 * @return 확장자를 제거한 파일명
+	 */
 	private String getFileNameWithoutExtension(String imageFileName) {
 		int lastDotIndex = imageFileName.lastIndexOf(".");
 		if (lastDotIndex == -1) {

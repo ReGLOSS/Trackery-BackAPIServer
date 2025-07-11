@@ -105,14 +105,9 @@ public class OAuthController {
 
 		log.info("OAuth 로그인 요청: provider={}, code={}", provider, code);
 
-		OAuthLoginDto.OAuthLoginDtoBuilder builder = OAuthLoginDto.builder()
-			.provider(provider.name())
-			.code(code);
-
 		String extractedLinkToken = extractLinkToken(provider, linkToken, state);
-		processLinkToken(extractedLinkToken, provider, builder);
+		OAuthLoginDto oAuthLoginDto = processLinkToken(extractedLinkToken, provider, code);
 
-		OAuthLoginDto oAuthLoginDto = builder.build();
 		return processOAuthLogin(oAuthLoginDto);
 	}
 
@@ -192,23 +187,37 @@ public class OAuthController {
 	 *
 	 * @param extractedLinkToken 추출된 링크 토큰
 	 * @param provider OAuth 제공자
-	 * @param builder OAuthLoginDto 빌더
+	 * @param code OAuth 인증 코드
+	 * @return 계정 연동 정보가 설정된 OAuthLoginDto
 	 */
-	private void processLinkToken(String extractedLinkToken, OAuthProvider provider,
-			OAuthLoginDto.OAuthLoginDtoBuilder builder) {
+	private OAuthLoginDto processLinkToken(String extractedLinkToken, OAuthProvider provider, String code) {
 		if (!isValidToken(extractedLinkToken)) {
 			log.info("링크 토큰 없음 - 일반 로그인 처리: provider={}", provider);
-			return;
+			return OAuthLoginDto.builder()
+					.provider(provider.name())
+					.code(code)
+					.linkAccount(false)
+					.build();
 		}
 
 		log.info("링크 토큰 감지: provider={}, token={}", provider, extractedLinkToken);
 		try {
 			Long validatedUserId = oAuthLinkTokenService.validateToken(extractedLinkToken);
-			builder.linkAccount(true).linkUserId(validatedUserId);
 			log.info("계정 연동 요청 검증 성공: provider={}, userId={}, token={}", provider, validatedUserId, extractedLinkToken);
 			oAuthLinkTokenService.deleteToken(extractedLinkToken);
+			return OAuthLoginDto.builder()
+					.provider(provider.name())
+					.code(code)
+					.linkAccount(true)
+					.linkUserId(validatedUserId)
+					.build();
 		} catch (Exception e) {
 			log.warn("계정 연동 토큰 검증 실패: {}", e.getMessage());
+			return OAuthLoginDto.builder()
+					.provider(provider.name())
+					.code(code)
+					.linkAccount(false)
+					.build();
 		}
 	}
 
