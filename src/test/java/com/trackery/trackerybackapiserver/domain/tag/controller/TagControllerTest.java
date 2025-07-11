@@ -23,11 +23,11 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
+import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagCreateRequestDto;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagDefaultRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
-import com.trackery.trackerybackapiserver.domain.tag.dto.TagTimeRequestDto;
-import com.trackery.trackerybackapiserver.domain.tag.dto.TagUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
 import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
@@ -42,6 +42,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 7. 8.        inari       최초 생성
+ * 25. 7. 9.        inari       테스트코드 수정
  * 25. 7. 9.        inari       테스트코드 수정
  */
 @WebMvcTest(TagController.class)
@@ -58,8 +59,7 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 
 	private TagResponseDto tagResponseDto;
 	private TagCreateRequestDto createRequestDto;
-	private TagUpdateRequestDto updateRequestDto;
-	private TagTimeRequestDto defaultRequestDto;
+	private TagDefaultRequestDto defaultRequestDto;
 
 	@BeforeEach
 	void setUp() {
@@ -76,9 +76,7 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 			.tagType(TagType.CUSTOM.getCode())
 			.build();
 
-		updateRequestDto = new TagUpdateRequestDto("수정된태그");
-
-		defaultRequestDto = new TagTimeRequestDto("2024/7/15 14:30:25");
+		defaultRequestDto = new TagDefaultRequestDto("2024/7/15", new CoordinateDto(37.5665, 126.9780));
 	}
 
 	@Nested
@@ -246,10 +244,9 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 		void getDefaultTags_Success() throws Exception {
 			// given
 			List<TagNameResponseDto> defaultTags = List.of(
-				TagNameResponseDto.builder().tagName("여름").build(),
-				TagNameResponseDto.builder().tagName("오후").build()
+				TagNameResponseDto.builder().tagName("여름").build()
 			);
-			when(tagService.createDefaultTags("2024/7/15 14:30:25")).thenReturn(defaultTags);
+			when(tagService.createDefaultTags("2024/7/15", 37.5665, 126.9780)).thenReturn(defaultTags);
 
 			// when & then
 			mockMvc.perform(post("/api/tags/default")
@@ -261,10 +258,11 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(jsonPath("$.code").value(200))
 				.andExpect(jsonPath("$.data").isArray())
 				.andExpect(jsonPath("$.data[0].tagName").value("여름"))
-				.andExpect(jsonPath("$.data[1].tagName").value("오후"))
 				.andDo(document("tag-create-default",
 					requestFields(
-						fieldWithPath("dateTime").description("날짜/시간 문자열 (예: 2024/7/15 14:30:25)")
+						fieldWithPath("date").description("날짜 문자열 (예: 2024/7/15)"),
+						fieldWithPath("coordinate.latitude").description("위도"),
+						fieldWithPath("coordinate.longitude").description("경도")
 					),
 					relaxedResponseFields(
 						fieldWithPath("code").description("응답 코드"),
@@ -273,7 +271,7 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 					)
 				));
 
-			verify(tagService).createDefaultTags("2024/7/15 14:30:25");
+			verify(tagService).createDefaultTags("2024/7/15", 37.5665, 126.9780);
 		}
 	}
 
