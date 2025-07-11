@@ -28,7 +28,6 @@ import com.trackery.trackerybackapiserver.domain.album.event.AlbumImageEditEvent
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
-import com.trackery.trackerybackapiserver.domain.common.util.PageUtil;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
@@ -48,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 14.		durururuk		최초 생성
+ * 25. 7. 11.		durururuk		앨범 조회 시에도 S3에서 조회 실패한 이미지는 제외한 결과 응답하게 수정
  */
 @Slf4j
 @Service
@@ -243,7 +243,7 @@ public class AlbumService {
 
 		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
 
-		return PageUtil.convert(pageInfo, imageInfo -> imageService.convertToThumbnail(imageInfo, userId));
+		return imageService.convertToThumbnailPageInfo(pageInfo, userId);
 	}
 
 	/**

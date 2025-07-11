@@ -11,6 +11,9 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.HeadObjectRequest;
+import software.amazon.awssdk.services.s3.model.NoSuchKeyException;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -27,6 +30,7 @@ import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignReques
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 21.		durururuk		최초 생성
+ * 25. 7. 11.		durururuk		PresignedUrl 생성 전에 Head 메서드로 해당 key가 존재하는지 예외 처리 추가
  */
 @Slf4j
 @Service
@@ -59,6 +63,19 @@ public class ImageS3Service {
 			}
 			default -> throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		};
+
+		try {
+			HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
+				.bucket(imageBucket)
+				.key(actualKey)
+				.build();
+			
+			s3Client.headObject(headObjectRequest);
+		} catch (NoSuchKeyException e) {
+			throw new ApiException(ErrorCode.NOT_FOUND_IMAGE_OBJECT_KEY);
+		} catch (S3Exception e) {
+			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
 
 		GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
 			.signatureDuration(Duration.ofMinutes(10))

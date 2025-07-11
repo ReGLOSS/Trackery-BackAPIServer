@@ -2,6 +2,7 @@ package com.trackery.trackerybackapiserver.domain.album.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -458,24 +459,24 @@ class AlbumServiceTest {
 
 			when(albumMapper.findImagesForThumbnailByAlbumId(ALBUM_ID)).thenReturn(imageInfoList);
 
-			when(imageService.convertToThumbnail(imageInfo1, USER_ID)).thenReturn(
+			PageInfo<ImageThumbnailDto> expectedPageInfo = new PageInfo<>();
+			List<ImageThumbnailDto> thumbnailList = List.of(
 				ImageThumbnailDto.builder()
 					.imageId(1L)
 					.thumbnailUrl("thumbnail1.jpg")
-					.build()
-			);
-			when(imageService.convertToThumbnail(imageInfo2, USER_ID)).thenReturn(
+					.build(),
 				ImageThumbnailDto.builder()
 					.imageId(2L)
 					.thumbnailUrl("thumbnail2.jpg")
-					.build()
-			);
-			when(imageService.convertToThumbnail(imageInfo3, USER_ID)).thenReturn(
+					.build(),
 				ImageThumbnailDto.builder()
 					.imageId(3L)
 					.thumbnailUrl("thumbnail3.jpg")
 					.build()
 			);
+			expectedPageInfo.setList(thumbnailList);
+			
+			when(imageService.convertToThumbnailPageInfo(any(), eq(USER_ID))).thenReturn(expectedPageInfo);
 
 			PageInfo<ImageThumbnailDto> result =
 				albumService.getAlbumImages(ALBUM_ID, USER_ID, pageNum, pageSize);
@@ -488,9 +489,7 @@ class AlbumServiceTest {
 			assertEquals(3L, result.getList().get(2).getImageId());
 
 			verify(albumMapper).findImagesForThumbnailByAlbumId(ALBUM_ID);
-			verify(imageService).convertToThumbnail(imageInfo1, USER_ID);
-			verify(imageService).convertToThumbnail(imageInfo2, USER_ID);
-			verify(imageService).convertToThumbnail(imageInfo3, USER_ID);
+			verify(imageService).convertToThumbnailPageInfo(any(), eq(USER_ID));
 		}
 
 		@Test
@@ -513,13 +512,8 @@ class AlbumServiceTest {
 			List<ImageInfoForThumbnailDto> imageInfoList = List.of(imageInfo1, imageInfo2);
 
 			when(albumMapper.findImagesForThumbnailByAlbumId(ALBUM_ID)).thenReturn(imageInfoList);
-			when(imageService.convertToThumbnail(imageInfo1, USER_ID)).thenReturn(
-				ImageThumbnailDto.builder()
-					.imageId(1L)
-					.thumbnailUrl("thumbnail1.jpg")
-					.build()
-			);
-			when(imageService.convertToThumbnail(imageInfo2, USER_ID)).thenThrow(new ApiException(ErrorCode.NOT_FOUND_IMAGE));
+			when(imageService.convertToThumbnailPageInfo(any(), eq(USER_ID)))
+				.thenThrow(new ApiException(ErrorCode.NOT_FOUND_IMAGE));
 
 			// When & Then
 			ApiException exception = assertThrows(ApiException.class,
@@ -528,8 +522,7 @@ class AlbumServiceTest {
 			assertEquals(ErrorCode.NOT_FOUND_IMAGE, exception.getErrorCode());
 
 			verify(albumMapper).findImagesForThumbnailByAlbumId(ALBUM_ID);
-			verify(imageService).convertToThumbnail(imageInfo1, USER_ID);
-			verify(imageService).convertToThumbnail(imageInfo2, USER_ID);
+			verify(imageService).convertToThumbnailPageInfo(any(), eq(USER_ID));
 		}
 
 		@Test
@@ -540,6 +533,10 @@ class AlbumServiceTest {
 			int pageSize = 10;
 
 			when(albumMapper.findImagesForThumbnailByAlbumId(ALBUM_ID)).thenReturn(List.of());
+			
+			PageInfo<ImageThumbnailDto> emptyPageInfo = new PageInfo<>();
+			emptyPageInfo.setList(List.of());
+			when(imageService.convertToThumbnailPageInfo(any(), eq(USER_ID))).thenReturn(emptyPageInfo);
 
 			// When
 			PageInfo<ImageThumbnailDto> result =
