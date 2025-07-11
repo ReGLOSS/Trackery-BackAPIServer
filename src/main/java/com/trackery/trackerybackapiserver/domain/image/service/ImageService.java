@@ -47,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 22.		 inari		 이미지 수정시 좌표 인서트가 아닌 업데이트로 변경
  * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
  * 25. 7. 9.		 inari		 removeAllTagsFromImage로 메서드 분리
+ * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
  * 25. 7. 11.		durururuk	 내 이미지 리스트 조회 시 S3에서 이미지 조회 실패한 이미지는 제외하고 결과를 반환하게 수정
  * 25. 7. 11.		durururuk	 중복되는 리스팅 메서드 추출
  */
@@ -157,6 +158,7 @@ public class ImageService {
 			.imageDate(image.getImageDate())
 			.isPublic(image.getIsPublic())
 			.imageUrl(imagePresignedUrl)
+			.tags(tagService.getTagNamesByImageId(image.getImageId()))
 			.build();
 	}
 
@@ -284,7 +286,7 @@ public class ImageService {
 	 */
 	public PageInfo<ImageThumbnailDto> convertToThumbnailPageInfo(
 		PageInfo<ImageInfoForThumbnailDto> sourcePageInfo, Long userId) {
-		
+
 		List<ImageThumbnailDto> thumbnailList = new ArrayList<>();
 		for (ImageInfoForThumbnailDto imageInfo : sourcePageInfo.getList()) {
 			ImageThumbnailDto thumbnail = convertToThumbnail(imageInfo, userId);

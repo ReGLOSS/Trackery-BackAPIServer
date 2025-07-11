@@ -43,6 +43,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 5. 15.		durururuk		최초 생성
  * 25. 6. 20.		 inari		 이미지 수정 및 삭제 추가
  * 25. 7. 9.		 inari		 TagController에서 일부 이동
+ * 25. 7. 10.		 inari		 이미지 단건 조회시 태그도 가져오도록 수정
  */
 @RestController
 @RequiredArgsConstructor
@@ -126,7 +127,7 @@ public class ImageController {
 	}
 
 	/**
-	 * 특정 이미지에 연결된 태그 목록을 조회합니다.
+	 * 특정 이미지에 연결된 태그 목록만을 조회합니다.
 	 * @param imageId 이미지 ID
 	 * @param userDetails 인증된 사용자 정보
 	 * @return 이미지에 연결된 태그 목록
@@ -138,7 +139,6 @@ public class ImageController {
 	) {
 		// 이미지 소유자 확인
 		imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
-		
 		List<TagResponseDto> response = tagService.getTagsByImageId(imageId);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
@@ -158,7 +158,6 @@ public class ImageController {
 	) {
 		// 이미지 소유자 확인
 		imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
-		
 		tagService.addTagToImage(imageId, tagId);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
@@ -178,7 +177,6 @@ public class ImageController {
 	) {
 		// 이미지 소유자 확인
 		imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
-		
 		tagService.removeTagFromImage(imageId, tagId);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
@@ -200,7 +198,6 @@ public class ImageController {
 	) {
 		// 이미지 소유자 확인
 		imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
-		
 		TagResponseDto response = tagService.updateImageTag(imageId, tagId, request.getNewTagName());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}

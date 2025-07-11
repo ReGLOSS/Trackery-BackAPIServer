@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 7. 2.        inari       최초 생성
  * 25. 7. 9.        inari       removeAllTagsFromImage 생성
+ * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
  */
 @Slf4j
 @Service
@@ -106,6 +107,21 @@ public class TagService {
 		List<Tag> tags = tagMapper.findTagsByImageId(imageId);
 		return tags.stream()
 			.map(this::convertToResponseDto)
+			.toList();
+	}
+
+	/**
+	 * 특정 이미지에 연결된 태그명만 조회합니다.
+	 * @param imageId 이미지 ID
+	 * @return 이미지에 연결된 태그명 목록
+	 */
+	@Transactional(readOnly = true)
+	public List<TagNameResponseDto> getTagNamesByImageId(Long imageId) {
+		List<Tag> tags = tagMapper.findTagsByImageId(imageId);
+		return tags.stream()
+			.map(tag -> TagNameResponseDto.builder()
+				.tagName(tag.getTagName())
+				.build())
 			.toList();
 	}
 
