@@ -20,25 +20,23 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class Album {
-	/**
-	 * albumId : 앨범 ID
-	 * userId : 앨범을 등록한 유저 ID
-	 * albumName : 앨범 제목
-	 * albumDescription : 앨범 설명
-	 * thumnailImageId : 대표이미지 ID
-	 * albumRegDate : 앨범 등록 날짜
-	 * albumModDate : 앨범 최종 수정 날짜
-	 * isPublic : 공개 여부 (0 : 비공개, 1 : 공개)
-	 * isDeleted : 삭제 여부 (0 : 활성, 1 : 삭제)
-	 */
+	/** 앨범 고유 식별자 */
 	private Long albumId;
+	/** 앨범을 소유한 사용자 ID */
 	private Long userId;
+	/** 앨범 제목 */
 	private String albumTitle;
+	/** 앨범 설명 */
 	private String albumDescription;
+	/** 앨범 대표 이미지 ID */
 	private Long thumbnailImageId;
+	/** 앨범 생성일시 */
 	private LocalDateTime albumRegDate;
+	/** 앨범 수정일시 */
 	private LocalDateTime albumModDate;
+	/** 공개 여부 (0: 비공개, 1: 공개) */
 	private Integer isPublic;
+	/** 삭제 여부 (0: 활성, 1: 삭제) */
 	private Integer isDeleted;
 
 	@Builder

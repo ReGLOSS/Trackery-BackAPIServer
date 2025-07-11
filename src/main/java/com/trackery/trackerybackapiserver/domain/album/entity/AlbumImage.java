@@ -1,4 +1,3 @@
-
 package com.trackery.trackerybackapiserver.domain.album.entity;
 
 import lombok.Builder;
@@ -19,13 +18,11 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 public class AlbumImage {
-	/**
-	 * albumImageId 앨범 이미지 ID
-	 * albumId : 앨범 ID
-	 * imageId : 이미지 ID
-	 */
+	/** 앨범 이미지 매핑 고유 식별자 */
 	private Long albumImageId;
+	/** 앨범 ID */
 	private Long albumId;
+	/** 이미지 ID */
 	private Long imageId;
 
 	@Builder

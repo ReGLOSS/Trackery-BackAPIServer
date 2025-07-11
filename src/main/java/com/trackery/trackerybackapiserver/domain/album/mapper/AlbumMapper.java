@@ -43,18 +43,52 @@ public interface AlbumMapper {
 	 */
 	Optional<Album> findByAlbumId(Long albumId);
 
+	/**
+	 * 앨범 ID로 앨범 이미지 목록 조회
+	 * @param albumId 앨범 ID
+	 * @return 앨범 이미지 목록
+	 */
 	List<AlbumImage> findAlbumImagesByAlbumId(Long albumId);
 
+	/**
+	 * 앨범 정보 업데이트
+	 * @param albumId 앨범 ID
+	 * @param albumUpdateRequestDto 앨범 업데이트 정보
+	 */
 	void updateAlbumInfo(@Param("albumId") Long albumId, @Param("dto") AlbumUpdateRequestDto albumUpdateRequestDto);
 
+	/**
+	 * 사용자 ID로 앨범 목록 조회
+	 * @param userId 사용자 ID
+	 * @return 앨범 목록
+	 */
 	List<Album> findAlbumsByUserId(Long userId);
 
+	/**
+	 * 앨범 ID와 이미지 ID로 앨범 이미지 조회
+	 * @param albumId 앨범 ID
+	 * @param imageId 이미지 ID
+	 * @return 앨범 이미지 엔티티
+	 */
 	Optional<AlbumImage> findAlbumImageByAlbumIdAndImageId(Long albumId, Long imageId);
 
+	/**
+	 * 앨범 이미지 ID로 앨범 이미지 삭제
+	 * @param albumImageId 앨범 이미지 ID
+	 */
 	void deleteAlbumImageByAlbumImageId(Long albumImageId);
 
+	/**
+	 * 앨범 ID로 앨범 삭제
+	 * @param albumId 앨범 ID
+	 */
 	void deleteAlbumByAlbumId(Long albumId);
 
+	/**
+	 * 앨범 썸네일 설정
+	 * @param albumId 앨범 ID
+	 * @param imageId 이미지 ID
+	 */
 	void setThumbnail(@Param("albumId") Long albumId, @Param("imageId") Long imageId);
 
 	/**
