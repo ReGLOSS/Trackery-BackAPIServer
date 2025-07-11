@@ -99,6 +99,12 @@ public class ImageService {
 		return convertImageToImageDto(image, userId);
 	}
 
+	/**
+	 * 이미지 엔티티를 이미지 썸네일 DTO로 변환합니다.
+	 * @param image 변환할 이미지 엔티티
+	 * @param userId 사용자 ID
+	 * @return 썸네일 URL과 이미지 ID를 포함한 썸네일 DTO
+	 */
 	public ImageThumbnailDto convertImageToImageThumbnailDto(Image image, Long userId) {
 		String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageName(), userId, "thumbnail");
 		return ImageThumbnailDto
@@ -108,6 +114,12 @@ public class ImageService {
 			.build();
 	}
 
+	/**
+	 * 사용자 ID로 이미지 목록을 페이지네이션하여 조회합니다.
+	 * S3에서 썸네일 조회 실패한 이미지는 결과에서 제외됩니다.
+	 * @param imageSearchByUserIdDto 사용자 이미지 검색 조건 (사용자 ID, 페이지 번호, 페이지 크기 등)
+	 * @return 썸네일 DTO 목록을 포함한 페이지네이션 정보
+	 */
 	@SuppressWarnings("squid:S3252")
 	public PageInfo<ImageThumbnailDto> getImageListByUserId(ImageSearchByUserIdDto imageSearchByUserIdDto) {
 		PageHelper.startPage(imageSearchByUserIdDto.getPageNum(), imageSearchByUserIdDto.getPageSize());
