@@ -19,6 +19,7 @@ import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 7. 2.        inari           최초 생성
+ * 25. 7. 11.       inari           태그 일괄 삭제시 사용 카운트 일괄 감소 추가
  */
 @Mapper
 public interface TagMapper {
