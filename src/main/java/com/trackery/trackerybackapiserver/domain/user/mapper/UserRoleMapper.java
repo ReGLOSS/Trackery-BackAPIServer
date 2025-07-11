@@ -16,6 +16,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 25.        durururuk      최초 생성
+ * 25. 7. 11.        inari     		주석 작성
  */
 @Mapper
 public interface UserRoleMapper {
@@ -26,5 +27,11 @@ public interface UserRoleMapper {
 	 */
 	void insertUserRole(UserRole userRole);
 
+	/**
+	 * 사용자 ID로 사용자 권한 정보를 조회합니다.
+	 *
+	 * @param userId 조회할 사용자 ID
+	 * @return 조회된 사용자 권한 정보
+	 */
 	Optional<UserRole> findByUserId(Long userId);
 }

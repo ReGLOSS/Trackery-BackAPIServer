@@ -43,13 +43,14 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 2. 12.        durururuk       최초 생성
- * 25. 2. 24.        inari         주석 추가
+ * 25. 2. 24.        inari         	주석 추가
  * 25. 2. 25.        durururuk      로그인 메서드 추가
  * 25. 4. 09.		 durururuk		상세 정보 조회 API 추가
  * 25. 4. 10.		 durururuk		인증 기반 비밀번호 변경 API 추가
  * 25. 6. 25.		 inari			 로그아웃 기능 추가
  * 25. 6. 26.		 inari			 회원 탈퇴 기능 추가
  * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
+ * 25. 7. 11.        inari      	자바독 수정
  */
 @RestController
 @RequestMapping("/api/users")
@@ -62,10 +63,12 @@ public class UserController {
 	private final UserService userService;
 
 	/**
-	 * 회원가입 정보를 받아서 db에 인서트하고 jwt 토큰을 발급해서 쿠키로 반환하는 API
+	 * 회원가입 정보를 받아서 데이터베이스에 저장하고 JWT 토큰을 발급해서 쿠키로 반환하는 API
 	 *
-	 * @param userRegisterDto : 회원가입 정보를 담은 DTO
-	 * @return : 성공, 실패 여부 응답
+	 * @param emailToken 이메일 인증 토큰 (쿠키에서 추출)
+	 * @param userNameToken 사용자명 검증 토큰 (쿠키에서 추출)
+	 * @param userRegisterDto 회원가입 정보를 담은 DTO
+	 * @return 회원가입 성공 응답
 	 */
 	@PostMapping("/register")
 	public ResponseEntity<ApiResponse<String>> register(@CookieValue(name = "emailToken") String emailToken,
@@ -139,7 +142,7 @@ public class UserController {
 	 * 유저의 상세 정보를 조회하는 API
 	 * 유저의 기본 정보, 간편로그인 연동 정보를 담은 DTO 반환
 	 * @param userDetails : 인증된 유저의 정보
-	 * @return DTO
+	 * @return 사용자 상세 정보 DTO
 	 */
 	@GetMapping("/details")
 	public ResponseEntity<ApiResponse<DetailedUserInfoDto>> getDetailedUserInfo(

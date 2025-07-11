@@ -47,13 +47,6 @@
             AND u.status = 1
     </select>
 
-    <!-- 주어진 이메일이 이미 존재하는지 확인하는 쿼리 -->
-    <select id="isExistsEmail" resultType="boolean" parameterType="String">
-        SELECT EXISTS (
-        SELECT 1
-        FROM user
-        WHERE email = #{email})
-    </select>
 
     <!-- 사용자 ID로 비밀번호 및 솔트 업데이트 -->
     <update id="updatePasswordByUserId" parameterType="com.trackery.trackerybackapiserver.domain.user.dto.update.UpdatePasswordDto">
