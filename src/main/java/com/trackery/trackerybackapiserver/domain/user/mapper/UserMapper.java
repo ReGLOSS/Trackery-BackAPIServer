@@ -63,7 +63,7 @@ public interface UserMapper {
 	/**
 	 * 유저명으로 User를 찾아서 반환합니다.
 	 * @param userName : 유저명
-	 * @return : Optional<User>
+	 * @return Optional&lt;User&gt;
 	 */
 	Optional<User> findByUserName(String userName);
 
