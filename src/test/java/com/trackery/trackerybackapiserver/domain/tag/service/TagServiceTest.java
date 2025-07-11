@@ -37,6 +37,7 @@ import com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 7. 8.        inari       최초 생성
+ * 25. 7. 11.        inari       최초 생성
  */
 @ExtendWith(MockitoExtension.class)
 class TagServiceTest {
@@ -488,23 +489,21 @@ class TagServiceTest {
 	class DefaultTagTest {
 
 		@Test
-		@DisplayName("날짜/시간 기반 기본 태그 생성 성공")
+		@DisplayName("날짜 기반 기본 태그 생성 성공")
 		void createDefaultTags_Success() {
 			// given
 			String dateTimeStr = "2024/7/15 14:30:25";
 			when(tagMapper.findTagByNameAndType("여름", TagType.SEASON)).thenReturn(null);
-			when(tagMapper.findTagByNameAndType("오후", TagType.TIME)).thenReturn(null);
 			doNothing().when(tagMapper).insertTag(any(Tag.class));
 
 			// when
-			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr);
+			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr, null, null);
 
 			// then
 			assertNotNull(result);
-			assertEquals(2, result.size());
+			assertEquals(1, result.size());
 			assertEquals("여름", result.get(0).getTagName());
-			assertEquals("오후", result.get(1).getTagName());
-			verify(tagMapper, times(2)).insertTag(any(Tag.class));
+			verify(tagMapper, times(1)).insertTag(any(Tag.class));
 		}
 
 		@Test
@@ -515,7 +514,7 @@ class TagServiceTest {
 
 			// when & then
 			ApiException exception = assertThrows(ApiException.class, 
-				() -> tagService.createDefaultTags(invalidDateTimeStr));
+				() -> tagService.createDefaultTags(invalidDateTimeStr, null, null));
 			assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
 		}
 
@@ -525,15 +524,14 @@ class TagServiceTest {
 			// given
 			String dateTimeStr = "2024/12/25 10:30:25";
 			when(tagMapper.findTagByNameAndType("겨울", TagType.SEASON)).thenReturn(null);
-			when(tagMapper.findTagByNameAndType("오전", TagType.TIME)).thenReturn(null);
 			doNothing().when(tagMapper).insertTag(any(Tag.class));
 
 			// when
-			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr);
+			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr, null, null);
 
 			// then
+			assertEquals(1, result.size());
 			assertEquals("겨울", result.get(0).getTagName());
-			assertEquals("오전", result.get(1).getTagName());
 		}
 
 		@Test
@@ -542,15 +540,14 @@ class TagServiceTest {
 			// given
 			String dateTimeStr = "2024/4/15 08:30:25";
 			when(tagMapper.findTagByNameAndType("봄", TagType.SEASON)).thenReturn(null);
-			when(tagMapper.findTagByNameAndType("아침", TagType.TIME)).thenReturn(null);
 			doNothing().when(tagMapper).insertTag(any(Tag.class));
 
 			// when
-			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr);
+			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr, null, null);
 
 			// then
+			assertEquals(1, result.size());
 			assertEquals("봄", result.get(0).getTagName());
-			assertEquals("아침", result.get(1).getTagName());
 		}
 
 		@Test
@@ -559,49 +556,46 @@ class TagServiceTest {
 			// given
 			String dateTimeStr = "2024/10/15 19:30:25";
 			when(tagMapper.findTagByNameAndType("가을", TagType.SEASON)).thenReturn(null);
-			when(tagMapper.findTagByNameAndType("저녁", TagType.TIME)).thenReturn(null);
 			doNothing().when(tagMapper).insertTag(any(Tag.class));
 
 			// when
-			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr);
+			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr, null, null);
 
 			// then
+			assertEquals(1, result.size());
 			assertEquals("가을", result.get(0).getTagName());
-			assertEquals("저녁", result.get(1).getTagName());
 		}
 
 		@Test
-		@DisplayName("밤 시간대 태그 생성")
+		@DisplayName("밤 시간대에도 계절 태그만 생성")
 		void createDefaultTags_Night() {
 			// given
 			String dateTimeStr = "2024/7/15 23:30:25";
 			when(tagMapper.findTagByNameAndType("여름", TagType.SEASON)).thenReturn(null);
-			when(tagMapper.findTagByNameAndType("밤", TagType.TIME)).thenReturn(null);
 			doNothing().when(tagMapper).insertTag(any(Tag.class));
 
 			// when
-			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr);
+			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr, null, null);
 
 			// then
+			assertEquals(1, result.size());
 			assertEquals("여름", result.get(0).getTagName());
-			assertEquals("밤", result.get(1).getTagName());
 		}
 
 		@Test
-		@DisplayName("점심 시간대 태그 생성")
+		@DisplayName("점심 시간대에도 계절 태그만 생성")
 		void createDefaultTags_Lunch() {
 			// given
 			String dateTimeStr = "2024/7/15 12:30:25";
 			when(tagMapper.findTagByNameAndType("여름", TagType.SEASON)).thenReturn(null);
-			when(tagMapper.findTagByNameAndType("점심", TagType.TIME)).thenReturn(null);
 			doNothing().when(tagMapper).insertTag(any(Tag.class));
 
 			// when
-			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr);
+			List<TagNameResponseDto> result = tagService.createDefaultTags(dateTimeStr, null, null);
 
 			// then
+			assertEquals(1, result.size());
 			assertEquals("여름", result.get(0).getTagName());
-			assertEquals("점심", result.get(1).getTagName());
 		}
 	}
 }

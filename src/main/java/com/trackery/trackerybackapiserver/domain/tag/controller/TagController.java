@@ -15,11 +15,12 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagCreateRequestDto;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagDefaultRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
-import com.trackery.trackerybackapiserver.domain.tag.dto.TagTimeRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -32,7 +33,8 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 7. 2.        inari       	최초 생성
- * 25. 7. 9.	 	inari		 TagController로 일부 이동
+ * 25. 7. 9.	 	inari		 	TagController로 일부 이동
+ * 25. 7. 10.		inari			기본 태그 api 추가
  */
 @RestController
 @RequestMapping("/api/tags")
@@ -94,15 +96,16 @@ public class TagController {
 	}
 
 	/**
-	 * 날짜/시간 정보를 기반으로 기본 태그명 목록을 반환합니다.
-	 * @param request 날짜/시간 정보 요청 데이터
-	 * @return 계절 및 시간대 태그명 목록
+	 * 날짜 정보와 좌표 정보를 기반으로 기본 태그명 목록을 반환합니다.
+	 * @param request 날짜 및 좌표 정보 요청 데이터
+	 * @return 계절 태그명 목록 + 지역 태그명 목록 (좌표 제공시)
 	 */
 	@PostMapping("/default")
 	public ResponseEntity<ApiResponse<List<TagNameResponseDto>>> getDefaultTags(
-			@RequestBody TagTimeRequestDto request) {
+			@RequestBody @Valid TagDefaultRequestDto request) {
 
-		List<TagNameResponseDto> response = tagService.createDefaultTags(request.getDateTime());
+		List<TagNameResponseDto> response = tagService.createDefaultTags(
+				request.getDate(), request.getCoordinate().latitude(), request.getCoordinate().longitude());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 }

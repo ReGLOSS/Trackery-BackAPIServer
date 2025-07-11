@@ -24,6 +24,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.LocationNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
@@ -42,6 +43,7 @@ import com.trackery.trackerybackapiserver.domain.location.mapper.LocationMapper;
  * -----------------------------------------------------------
  * 25. 6. 13.		Narilee			최초 생성
  * 25. 6. 22.		Narilee			좌표 업데이트 테스트 추가
+ * 25. 7. 11.		inari			태그 제거
  */
 
 @ExtendWith(MockitoExtension.class)
@@ -76,9 +78,9 @@ class LocationServiceTest {
 		void success() {
 			when(locationMapper.findSigunguByCoordinate(coordinateDto)).thenReturn(Optional.of(sigungu));
 
-			String locationName = locationService.getLocationNameByCoord(coordinateDto);
+			LocationNameResponseDto result = locationService.getLocationNameByCoord(coordinateDto);
 
-			assertEquals("서울특별시 동작구", locationName);
+			assertEquals("서울특별시 동작구", result.getLocationName());
 			verify(locationMapper, times(1)).findSigunguByCoordinate(coordinateDto);
 		}
 

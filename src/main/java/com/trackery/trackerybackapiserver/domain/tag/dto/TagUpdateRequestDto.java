@@ -31,5 +31,4 @@ public class TagUpdateRequestDto {
 	@NotBlank(message = "태그명은 필수입니다.")
 	@Size(min = 1, max = MAX_TAG_NAME_LENGTH, message = "태그명은 1자 이상 50자 이하여야 합니다.")
 	private String newTagName;
-
 }

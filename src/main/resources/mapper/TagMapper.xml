@@ -95,6 +95,14 @@
         WHERE tag_id = #{tagId}
     </update>
 
+    <!-- 특정 이미지의 모든 태그 사용 횟수 감소 -->
+    <update id="decrementTagUseCountByImageId" parameterType="Long">
+        UPDATE tag SET tag_use_count = GREATEST(tag_use_count - 1, 0)
+        WHERE tag_id IN (
+            SELECT tag_id FROM image_tag WHERE image_id = #{imageId}
+        )
+    </update>
+
     <!-- 사용되지 않는 태그만 안전하게 삭제 (사용 횟수가 0인 태그만) -->
     <delete id="deleteUnusedTag" parameterType="Long">
         DELETE FROM tag

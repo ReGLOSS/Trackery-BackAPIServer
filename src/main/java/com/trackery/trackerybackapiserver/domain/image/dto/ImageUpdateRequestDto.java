@@ -17,6 +17,14 @@ import lombok.Builder;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 6. 20.        inari       최초 생성
+ * 25. 7. 11.        inari       주석 추가 및 체크스타일 수정
+ *
+ * @param imageName 이미지 이름 (최대 100자)
+ * @param imageContent 이미지 설명 (최대 500자)
+ * @param imageDate 이미지 촬영 날짜 및 시간
+ * @param isPublic 공개 여부 (0: 비공개, 1: 공개)
+ * @param latitude 위도 (33.0 ~ 43.0, 한국 영토 범위)
+ * @param longitude 경도 (124.0 ~ 132.0, 한국 영토 범위)
  */
 @Builder
 public record ImageUpdateRequestDto(

@@ -53,7 +53,7 @@ public class Tag {
 	 * @param createdAt 생성일시
 	 */
 	@Builder
-	public Tag(final String tagName, final TagType tagType, 
+	public Tag(final String tagName, final TagType tagType,
 			final Long tagUseCount, final LocalDateTime createdAt) {
 		this.tagName = tagName;
 		this.tagType = tagType;

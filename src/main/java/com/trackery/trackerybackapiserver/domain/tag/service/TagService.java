@@ -1,8 +1,10 @@
 package com.trackery.trackerybackapiserver.domain.tag.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -34,7 +36,9 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 7. 2.        inari       최초 생성
  * 25. 7. 9.        inari       removeAllTagsFromImage 생성
- * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
+ * 25. 7. 10.       inari       이미지 단건 조회시 태그 추가, 날짜 제거
+ * 25. 7. 10.		inari		기본 태그 api 추가
+ * 25. 7. 11.		inari		태그 일괄 삭제 구현
  */
 @Slf4j
 @Service
@@ -159,18 +163,9 @@ public class TagService {
 	 */
 	@Transactional
 	public void removeAllTagsFromImage(Long imageId) {
-		List<TagResponseDto> imageTags = getTagsByImageId(imageId);
-		for (TagResponseDto tag : imageTags) {
-			try {
-				removeTagFromImage(imageId, tag.getTagId());
-				log.debug("태그 연결 해제 완료 - imageId: {}, tagId: {}, tagName: {}",
-					imageId, tag.getTagId(), tag.getTagName());
-			} catch (Exception e) {
-				log.warn("태그 연결 해제 실패 - imageId: {}, tagId: {}, tagName: {}, 오류: {}",
-					imageId, tag.getTagId(), tag.getTagName(), e.getMessage());
-			}
-		}
-		log.info("이미지 연결 태그 정리 완료 - imageId: {}, 해제된 태그 수: {}", imageId, imageTags.size());
+		tagMapper.decrementTagUseCountByImageId(imageId);
+		tagMapper.deleteImageTagsByImageId(imageId);
+		log.info("이미지 연결 태그 정리 완료 - imageId: {}", imageId);
 	}
 
 	/**
@@ -392,45 +387,75 @@ public class TagService {
 	}
 
 	/**
-	 * 날짜/시간 문자열을 기반으로 기본 태그 목록을 생성합니다.
-	 * @param dateTimeStr 날짜/시간 문자열 (예: "2024 / 1 / 15 14:30:25")
-	 * @return 생성된 계절 및 시간대 태그명 목록
+	 * 날짜 문자열과 좌표를 기반으로 기본 태그 목록을 생성합니다.
+	 * @param dateStr 날짜 문자열 (예: "2024 / 1 / 15")
+	 * @param latitude 위도 (선택사항)
+	 * @param longitude 경도 (선택사항)
+	 * @return 생성된 태그명 목록 (시도, 시군구, 계절 순)
 	 */
 	@Transactional
-	public List<TagNameResponseDto> createDefaultTags(String dateTimeStr) {
-		LocalDateTime dateTime = parseDateTime(dateTimeStr);
-		String seasonTag = getSeasonTag(dateTime);
-		String timeTag = getTimeTag(dateTime);
-		findOrCreateSystemTag(seasonTag, TagType.SEASON);
-		findOrCreateSystemTag(timeTag, TagType.TIME);
-		return List.of(
-			TagNameResponseDto.builder().tagName(seasonTag).build(),
-			TagNameResponseDto.builder().tagName(timeTag).build()
-		);
+	public List<TagNameResponseDto> createDefaultTags(String dateStr, Double latitude, Double longitude) {
+		List<TagNameResponseDto> tags = new ArrayList<>();
+		// 지역 태그 생성 (시도, 시군구 순)
+		if (latitude != null && longitude != null) {
+			JusoSigungu sigungu = locationService.findSigunguByCoordinate(latitude, longitude);
+			if (sigungu != null) {
+				String sidoName = sigungu.getSido().getSidoName();
+				String sigunguName = sigungu.getSigunguName();
+				findOrCreateLocationTag(sidoName);
+				findOrCreateLocationTag(sigunguName);
+
+				tags.add(TagNameResponseDto.builder().tagName(sidoName).build());
+				tags.add(TagNameResponseDto.builder().tagName(sigunguName).build());
+			}
+		}
+
+		// 날짜 기반 계절 태그 생성
+		LocalDate date = parseDate(dateStr);
+		String seasonTag = getSeasonTag(date);
+		findOrCreateSeasonTag(seasonTag);
+		tags.add(TagNameResponseDto.builder().tagName(seasonTag).build());
+
+		return tags;
 	}
 
+
 	/**
-	 * 날짜/시간 문자열을 LocalDateTime으로 파싱합니다.
-	 * @param dateTimeStr 날짜/시간 문자열 (예: "2024 / 1 / 15 14:30:25")
-	 * @return 파싱된 LocalDateTime
+	 * 날짜 문자열을 LocalDate로 파싱합니다.
+	 * @param dateStr 날짜 문자열 (예: "2024 / 1 / 15")
+	 * @return 파싱된 LocalDate
 	 */
-	private LocalDateTime parseDateTime(String dateTimeStr) {
+	private LocalDate parseDate(String dateStr) {
 		try {
-			String normalized = dateTimeStr.replaceAll("\\s*/\\s*", "/").trim();
-			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/M/d H:m:s");
-			return LocalDateTime.parse(normalized, formatter);
+			String normalized = normalizeDateString(dateStr);
+			String datePart = normalized.split(" ")[0];
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/M/d");
+			return LocalDate.parse(datePart, formatter);
 		} catch (Exception e) {
 			throw new ApiException(ErrorCode.BAD_REQUEST);
 		}
 	}
 
 	/**
+	 * 날짜 문자열의 공백과 슬래시를 정규화합니다.
+	 * ReDoS 취약점을 방지하기 위해 복잡한 정규식 대신 단순한 문자열 치환을 사용합니다.
+	 * @param dateStr 원본 날짜 문자열
+	 * @return 정규화된 날짜 문자열
+	 */
+	private String normalizeDateString(String dateStr) {
+		String result = dateStr.trim();
+		result = result.replace(" /", "/");
+		result = result.replace("/ ", "/");
+		return result;
+	}
+
+	/**
 	 * 날짜를 기반으로 계절 태그를 결정합니다.
-	 * @param dateTime 날짜/시간
+	 * @param date 날짜
 	 * @return 계절 태그명
 	 */
-	private String getSeasonTag(LocalDateTime dateTime) {
-		int month = dateTime.getMonthValue();
+	private String getSeasonTag(LocalDate date) {
+		int month = date.getMonthValue();
 		if (month == 12 || month <= 2) {
 			return "겨울";
 		} else if (month <= 5) {
@@ -443,46 +468,21 @@ public class TagService {
 	}
 
 	/**
-	 * 시간을 기반으로 시간대 태그를 결정합니다.
-	 * @param dateTime 날짜/시간
-	 * @return 시간대 태그명
-	 */
-	private String getTimeTag(LocalDateTime dateTime) {
-		int hour = dateTime.getHour();
-		if (hour >= 5 && hour < 9) {
-			return "아침";
-		} else if (hour >= 9 && hour < 12) {
-			return "오전";
-		} else if (hour >= 12 && hour < 14) {
-			return "점심";
-		} else if (hour >= 14 && hour < 18) {
-			return "오후";
-		} else if (hour >= 18 && hour < 22) {
-			return "저녁";
-		} else {
-			return "밤";
-		}
-	}
-
-	/**
-	 * 시스템 태그를 찾거나 새로 생성합니다.
+	 * 계절 태그를 찾거나 새로 생성합니다.
 	 * @param tagName 태그명
-	 * @param tagType 태그 타입
-	 * @return 찾았거나 생성된 시스템 태그
 	 */
-	private Tag findOrCreateSystemTag(String tagName, TagType tagType) {
-		Tag existingTag = tagMapper.findTagByNameAndType(tagName, tagType);
+	private void findOrCreateSeasonTag(String tagName) {
+		Tag existingTag = tagMapper.findTagByNameAndType(tagName, TagType.SEASON);
 		if (existingTag != null) {
-			return existingTag;
+			return;
 		}
 		Tag newTag = Tag.builder()
 			.tagName(tagName)
-			.tagType(tagType)
+			.tagType(TagType.SEASON)
 			.tagUseCount(0L)
 			.createdAt(LocalDateTime.now(ZoneId.of(ASIA_SEOUL)))
 			.build();
 		tagMapper.insertTag(newTag);
-		return newTag;
 	}
 
 	/**

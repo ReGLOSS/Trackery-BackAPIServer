@@ -45,6 +45,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 6. 16.		inari       	지도에서 사용자 이미지 조회 추가
  * 25. 7. 7.		inari			지역 태그 서비스 추가
  * 25. 7. 8.		inari			프론트에서 시도명과 시군구명을 분리해서 받을 수 있음
+ * 25. 7. 10.		inari			태그를 태그 도메인으로 분리
  */
 @RestController
 @RequestMapping("/api/location")
@@ -54,15 +55,15 @@ public class LocationController {
 	private final ImageService imageService;
 
 	/**
-	 * 좌표로 시/도 + 시군구 주소명과 지역 태그명을 받을 수 있는 API입니다.
+	 * 좌표로 시/도 + 시군구 주소명을 받을 수 있는 API입니다.
 	 *
 	 * @param coordinateDto 좌표 DTO : latitude(위도), longitude(경도)를 double 타입으로 받습니다.
-	 * @return json의 data node에 주소명과 지역 태그명 목록이 들어갑니다.
+	 * @return json의 data node에 주소명이 들어갑니다.
 	 */
 	@PostMapping("/name")
 	public ResponseEntity<ApiResponse<LocationNameResponseDto>> getLocationName(
 		@RequestBody @Valid CoordinateDto coordinateDto) {
-		LocationNameResponseDto result = locationService.getLocationNameWithTagsByCoord(coordinateDto);
+		LocationNameResponseDto result = locationService.getLocationNameByCoord(coordinateDto);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, result));
 	}
 
