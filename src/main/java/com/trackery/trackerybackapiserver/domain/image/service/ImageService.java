@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.image.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -46,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 22.		 inari		 이미지 수정시 좌표 인서트가 아닌 업데이트로 변경
  * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
  * 25. 7. 9.		 inari		 removeAllTagsFromImage로 메서드 분리
+ * 25. 7. 11.		durururuk	 내 이미지 리스트 조회 시 S3에서 이미지 조회 실패한 이미지는 제외하고 결과를 반환하게 수정
  */
 @Slf4j
 @Service
@@ -113,10 +115,17 @@ public class ImageService {
 		List<ImageInfoForThumbnailDto> imageInfoForThumbnailDtos = imageMapper.findImageThumbnailsByUserId(
 			imageSearchByUserIdDto);
 
-		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
+		PageInfo<ImageInfoForThumbnailDto> sourcePageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
 
-		return PageUtil.convert(pageInfo,
-			imageThumbnailDtoList -> convertToThumbnail(imageThumbnailDtoList, imageSearchByUserIdDto.getUserId()));
+		List<ImageThumbnailDto> thumbnailList = new ArrayList<>();
+		for (ImageInfoForThumbnailDto imageInfo : sourcePageInfo.getList()) {
+			ImageThumbnailDto thumbnail = convertToThumbnail(imageInfo, imageSearchByUserIdDto.getUserId());
+			if (thumbnail != null) {
+				thumbnailList.add(thumbnail);
+			}
+		}
+
+		return PageUtil.convert(sourcePageInfo, thumbnailList);
 	}
 
 	/**
@@ -268,11 +277,19 @@ public class ImageService {
 	 * @return 썸네일 DTO
 	 */
 	public ImageThumbnailDto convertToThumbnail(ImageInfoForThumbnailDto imageInfo, Long userId) {
-		String thumbnailUrl = imageS3Service.generatePreSignedGetUrl(imageInfo.getImageName(), userId, "thumbnail");
+		try {
+			String thumbnailUrl = imageS3Service.generatePreSignedGetUrl(imageInfo.getImageName(), userId, "thumbnail");
 
-		return ImageThumbnailDto.builder()
-			.imageId(imageInfo.getImageId())
-			.thumbnailUrl(thumbnailUrl)
-			.build();
+			return ImageThumbnailDto.builder()
+				.imageId(imageInfo.getImageId())
+				.thumbnailUrl(thumbnailUrl)
+				.build();
+		} catch (ApiException e) {
+			if (e.getErrorCode() == ErrorCode.NOT_FOUND_IMAGE_OBJECT_KEY) {
+				log.warn("S3에서 이미지 조회 실패, 이미지: {} (user: {})", imageInfo.getImageName(), userId);
+				return null;
+			}
+			throw e;
+		}
 	}
 }
