@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.image.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
@@ -46,8 +47,9 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 22.		 inari		 이미지 수정시 좌표 인서트가 아닌 업데이트로 변경
  * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
  * 25. 7. 9.		 inari		 removeAllTagsFromImage로 메서드 분리
- * 25. 7. 10.        inari       이미지 단건 조회시 태그 추가
- * 25. 7. 11.        inari       자바독 추가
+ * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
+ * 25. 7. 11.		durururuk	 내 이미지 리스트 조회 시 S3에서 이미지 조회 실패한 이미지는 제외하고 결과를 반환하게 수정
+ * 25. 7. 11.		durururuk	 중복되는 리스팅 메서드 추출
  */
 @Slf4j
 @Service
@@ -107,10 +109,10 @@ public class ImageService {
 	}
 
 	/**
-	 * 이미지 엔티티를 썸네일 DTO로 변환합니다.
-	 * @param image 이미지 엔티티
+	 * 이미지 엔티티를 이미지 썸네일 DTO로 변환합니다.
+	 * @param image 변환할 이미지 엔티티
 	 * @param userId 사용자 ID
-	 * @return 이미지 썸네일 DTO
+	 * @return 썸네일 URL과 이미지 ID를 포함한 썸네일 DTO
 	 */
 	public ImageThumbnailDto convertImageToImageThumbnailDto(Image image, Long userId) {
 		String imagePresignedUrl = imageS3Service.generatePreSignedGetUrl(image.getImageName(), userId, "thumbnail");
@@ -123,8 +125,9 @@ public class ImageService {
 
 	/**
 	 * 사용자 ID로 이미지 목록을 페이지네이션하여 조회합니다.
-	 * @param imageSearchByUserIdDto 사용자 ID 기반 이미지 검색 조건
-	 * @return 페이지네이션된 이미지 썸네일 목록
+	 * S3에서 썸네일 조회 실패한 이미지는 결과에서 제외됩니다.
+	 * @param imageSearchByUserIdDto 사용자 이미지 검색 조건 (사용자 ID, 페이지 번호, 페이지 크기 등)
+	 * @return 썸네일 DTO 목록을 포함한 페이지네이션 정보
 	 */
 	@SuppressWarnings("squid:S3252")
 	public PageInfo<ImageThumbnailDto> getImageListByUserId(ImageSearchByUserIdDto imageSearchByUserIdDto) {
@@ -133,10 +136,9 @@ public class ImageService {
 		List<ImageInfoForThumbnailDto> imageInfoForThumbnailDtos = imageMapper.findImageThumbnailsByUserId(
 			imageSearchByUserIdDto);
 
-		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
+		PageInfo<ImageInfoForThumbnailDto> sourcePageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
 
-		return PageUtil.convert(pageInfo,
-			imageThumbnailDtoList -> convertToThumbnail(imageThumbnailDtoList, imageSearchByUserIdDto.getUserId()));
+		return convertToThumbnailPageInfo(sourcePageInfo, imageSearchByUserIdDto.getUserId());
 	}
 
 	/**
@@ -291,17 +293,45 @@ public class ImageService {
 	}
 
 	/**
+	 * PageInfo<ImageInfoForThumbnailDto>를 PageInfo<ImageThumbnailDto>로 변환합니다.
+	 * S3에서 썸네일 조회 실패한 이미지는 결과에서 제외됩니다.
+	 * @param sourcePageInfo 원본 페이지 정보
+	 * @param userId 사용자 ID
+	 * @return 썸네일 DTO 목록을 포함한 페이지네이션 정보
+	 */
+	public PageInfo<ImageThumbnailDto> convertToThumbnailPageInfo(
+		PageInfo<ImageInfoForThumbnailDto> sourcePageInfo, Long userId) {
+
+		List<ImageThumbnailDto> thumbnailList = new ArrayList<>();
+		for (ImageInfoForThumbnailDto imageInfo : sourcePageInfo.getList()) {
+			ImageThumbnailDto thumbnail = convertToThumbnail(imageInfo, userId);
+			if (thumbnail != null) {
+				thumbnailList.add(thumbnail);
+			}
+		}
+		return PageUtil.convert(sourcePageInfo, thumbnailList);
+	}
+
+	/**
 	 * ImageInfoForThumbnailDto를 ImageThumbnailDto로 변환합니다.
 	 * @param imageInfo 썸네일 생성용 이미지 정보
 	 * @param userId 사용자 ID
 	 * @return 썸네일 DTO
 	 */
 	public ImageThumbnailDto convertToThumbnail(ImageInfoForThumbnailDto imageInfo, Long userId) {
-		String thumbnailUrl = imageS3Service.generatePreSignedGetUrl(imageInfo.getImageName(), userId, "thumbnail");
+		try {
+			String thumbnailUrl = imageS3Service.generatePreSignedGetUrl(imageInfo.getImageName(), userId, "thumbnail");
 
-		return ImageThumbnailDto.builder()
-			.imageId(imageInfo.getImageId())
-			.thumbnailUrl(thumbnailUrl)
-			.build();
+			return ImageThumbnailDto.builder()
+				.imageId(imageInfo.getImageId())
+				.thumbnailUrl(thumbnailUrl)
+				.build();
+		} catch (ApiException e) {
+			if (e.getErrorCode() == ErrorCode.NOT_FOUND_IMAGE_OBJECT_KEY) {
+				log.warn("S3에서 이미지 조회 실패, 이미지: {} (user: {})", imageInfo.getImageName(), userId);
+				return null;
+			}
+			throw e;
+		}
 	}
 }
