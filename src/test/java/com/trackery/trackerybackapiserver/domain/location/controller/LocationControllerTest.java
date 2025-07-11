@@ -46,6 +46,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * 25. 4. 23.		durururuk		최초 생성
  * 25. 6. 13.		inari			테스트 추가
  * 25. 6. 15.		inari			Spring-Rest-Docs api문서 추가
+ * 25. 7. 11.		inari			태그 제거
  */
 @WebMvcTest(LocationController.class)
 public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -72,10 +73,9 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			LocationNameResponseDto locationResponse = LocationNameResponseDto.builder()
 				.locationName("서울특별시 동작구")
-				.regionalTags(List.of())
 				.build();
 
-			when(locationService.getLocationNameWithTagsByCoord(coordinateDto)).thenReturn(locationResponse);
+			when(locationService.getLocationNameByCoord(coordinateDto)).thenReturn(locationResponse);
 
 			ResultActions result = mockMvc.perform(post("/api/location/name")
 				.with(user(customUserDetails))
@@ -85,8 +85,7 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			result
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.locationName").value("서울특별시 동작구"))
-				.andExpect(jsonPath("$.data.regionalTags").isArray());
+				.andExpect(jsonPath("$.data.locationName").value("서울특별시 동작구"));
 
 			result.andDo(document("get-location-name-by-coordinate-success",
 				requestFields(
@@ -96,8 +95,7 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 				responseFields(
 					fieldWithPath("code").description("응답 코드"),
 					fieldWithPath("message").description("응답 메시지"),
-					fieldWithPath("data.locationName").description("주소명"),
-					fieldWithPath("data.regionalTags").description("지역 태그 목록").type(JsonFieldType.ARRAY)
+					fieldWithPath("data.locationName").description("주소명")
 				)
 			));
 		}

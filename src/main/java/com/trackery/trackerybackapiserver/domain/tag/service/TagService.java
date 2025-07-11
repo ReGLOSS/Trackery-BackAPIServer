@@ -397,15 +397,17 @@ public class TagService {
 	public List<TagNameResponseDto> createDefaultTags(String dateStr, Double latitude, Double longitude) {
 		List<TagNameResponseDto> tags = new ArrayList<>();
 		// 지역 태그 생성 (시도, 시군구 순)
-		JusoSigungu sigungu = locationService.findSigunguByCoordinate(latitude, longitude);
-		if (sigungu != null) {
-			String sidoName = sigungu.getSido().getSidoName();
-			String sigunguName = sigungu.getSigunguName();
-			findOrCreateLocationTag(sidoName);
-			findOrCreateLocationTag(sigunguName);
+		if (latitude != null && longitude != null) {
+			JusoSigungu sigungu = locationService.findSigunguByCoordinate(latitude, longitude);
+			if (sigungu != null) {
+				String sidoName = sigungu.getSido().getSidoName();
+				String sigunguName = sigungu.getSigunguName();
+				findOrCreateLocationTag(sidoName);
+				findOrCreateLocationTag(sigunguName);
 
-			tags.add(TagNameResponseDto.builder().tagName(sidoName).build());
-			tags.add(TagNameResponseDto.builder().tagName(sigunguName).build());
+				tags.add(TagNameResponseDto.builder().tagName(sidoName).build());
+				tags.add(TagNameResponseDto.builder().tagName(sigunguName).build());
+			}
 		}
 
 		// 날짜 기반 계절 태그 생성
