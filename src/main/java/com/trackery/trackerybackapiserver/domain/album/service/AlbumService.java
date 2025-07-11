@@ -2,6 +2,7 @@ package com.trackery.trackerybackapiserver.domain.album.service;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -48,6 +49,7 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 14.		durururuk		최초 생성
+ * 25. 7. 11.		durururuk		앨범 조회 시에도 S3에서 조회 실패한 이미지는 제외한 결과 응답하게 수정
  */
 @Slf4j
 @Service
@@ -243,7 +245,15 @@ public class AlbumService {
 
 		PageInfo<ImageInfoForThumbnailDto> pageInfo = new PageInfo<>(imageInfoForThumbnailDtos);
 
-		return PageUtil.convert(pageInfo, imageInfo -> imageService.convertToThumbnail(imageInfo, userId));
+		List<ImageThumbnailDto> thumbnailList = new ArrayList<>();
+		for (ImageInfoForThumbnailDto imageInfoForThumbnailDto : imageInfoForThumbnailDtos) {
+			ImageThumbnailDto thumbnailDto = imageService.convertToThumbnail(imageInfoForThumbnailDto, userId);
+			if (thumbnailDto != null) {
+				thumbnailList.add(thumbnailDto);
+			}
+		}
+
+		return PageUtil.convert(pageInfo, thumbnailList);
 	}
 
 	/**
