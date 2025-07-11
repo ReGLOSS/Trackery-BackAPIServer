@@ -83,6 +83,12 @@ public interface TagMapper {
 	void decrementTagUseCount(@Param("tagId") Long tagId);
 
 	/**
+	 * 특정 이미지의 모든 태그 사용 횟수를 배치로 감소시킵니다.
+	 * @param imageId 이미지 ID
+	 */
+	void decrementTagUseCountByImageId(@Param("imageId") Long imageId);
+
+	/**
 	 * 사용되지 않는 태그만 안전하게 삭제합니다.
 	 * @param tagId 삭제할 태그 ID
 	 * @return 삭제된 행 수 (0이면 삭제 실패 - 태그가 사용 중)
@@ -120,7 +126,7 @@ public interface TagMapper {
 	 * @param imageId 이미지 ID
 	 * @return 이미지-태그 연결 목록
 	 */
-	List<ImageTag> findImageTagsByImageId(@Param("imageId") Long imageId);
+	List<ImageTag> findImageTagsByImrgeId(@Param("imageId") Long imageId);
 
 	/**
 	 * 특정 이미지에 특정 태그가 연결되어 있는지 확인합니다.

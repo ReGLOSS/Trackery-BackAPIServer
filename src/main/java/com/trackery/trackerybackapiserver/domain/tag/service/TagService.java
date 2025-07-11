@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 9.        inari       removeAllTagsFromImage 생성
  * 25. 7. 10.       inari       이미지 단건 조회시 태그 추가, 날짜 제거
  * 25. 7. 10.		inari		기본 태그 api 추가
+ * 25. 7. 11.		inari		태그 일괄 삭제 구현
  */
 @Slf4j
 @Service
@@ -162,18 +163,9 @@ public class TagService {
 	 */
 	@Transactional
 	public void removeAllTagsFromImage(Long imageId) {
-		List<TagResponseDto> imageTags = getTagsByImageId(imageId);
-		for (TagResponseDto tag : imageTags) {
-			try {
-				removeTagFromImage(imageId, tag.getTagId());
-				log.debug("태그 연결 해제 완료 - imageId: {}, tagId: {}, tagName: {}",
-					imageId, tag.getTagId(), tag.getTagName());
-			} catch (Exception e) {
-				log.warn("태그 연결 해제 실패 - imageId: {}, tagId: {}, tagName: {}, 오류: {}",
-					imageId, tag.getTagId(), tag.getTagName(), e.getMessage());
-			}
-		}
-		log.info("이미지 연결 태그 정리 완료 - imageId: {}, 해제된 태그 수: {}", imageId, imageTags.size());
+		tagMapper.decrementTagUseCountByImageId(imageId);
+		tagMapper.deleteImageTagsByImageId(imageId);
+		log.info("이미지 연결 태그 정리 완료 - imageId: {}", imageId);
 	}
 
 	/**
