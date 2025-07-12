@@ -25,6 +25,7 @@ import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationUtil;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagForImageResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 
 import lombok.RequiredArgsConstructor;
@@ -50,6 +51,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
  * 25. 7. 11.		durururuk	 내 이미지 리스트 조회 시 S3에서 이미지 조회 실패한 이미지는 제외하고 결과를 반환하게 수정
  * 25. 7. 11.		durururuk	 중복되는 리스팅 메서드 추출
+ * 25. 7. 12.		inari		이미지 수정시 태그 삭제 추가
  */
 @Slf4j
 @Service
@@ -153,6 +155,7 @@ public class ImageService {
 		CoordinatePoint coordPoint = image.getCoordPoint();
 		LocationInfoDto locationInfoDto = LocationUtil.getLocationInfoByCoordinatePoint(coordPoint);
 
+		List<TagForImageResponseDto> imageTags = tagService.getTagsForImageDisplay(image.getImageId());
 		return ImageDto.builder()
 			.imageId(image.getImageId())
 			.userId(image.getUserId())
@@ -166,7 +169,7 @@ public class ImageService {
 			.imageDate(image.getImageDate())
 			.isPublic(image.getIsPublic())
 			.imageUrl(imagePresignedUrl)
-			.tags(tagService.getTagNamesByImageId(image.getImageId()))
+			.tags(imageTags)
 			.build();
 	}
 
@@ -242,6 +245,20 @@ public class ImageService {
 			} catch (Exception e) {
 				log.error("이미지 위치 정보 수정 실패 - imageId: {}, 에러: {}", imageId, e.getMessage());
 				throw new ApiException(ErrorCode.UPDATE_FAILED_LOCATION);
+			}
+		}
+
+		// 태그 삭제 처리
+		if (updateRequest.tagsToRemove() != null && !updateRequest.tagsToRemove().isEmpty()) {
+			for (Long tagId : updateRequest.tagsToRemove()) {
+				try {
+					tagService.removeTagFromImage(imageId, tagId);
+					log.info("이미지에서 태그 삭제 완료 - imageId: {}, tagId: {}", imageId, tagId);
+				} catch (Exception e) {
+					log.warn("이미지에서 태그 삭제 실패 - imageId: {}, tagId: {}, 오류: {}",
+						imageId, tagId, e.getMessage());
+					// 태그 삭제 실패해도 다른 수정 작업은 계속 진행
+				}
 			}
 		}
 

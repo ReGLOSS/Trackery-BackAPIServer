@@ -1,6 +1,7 @@
 package com.trackery.trackerybackapiserver.domain.image.dto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -18,6 +19,7 @@ import lombok.Builder;
  * -----------------------------------------------------------
  * 25. 6. 20.        inari       최초 생성
  * 25. 7. 11.        inari       주석 추가 및 체크스타일 수정
+ * 25. 7. 12.        inari       삭제할 태그 리스트 추가
  *
  * @param imageName 이미지 이름 (최대 100자)
  * @param imageContent 이미지 설명 (최대 500자)
@@ -25,6 +27,7 @@ import lombok.Builder;
  * @param isPublic 공개 여부 (0: 비공개, 1: 공개)
  * @param latitude 위도 (33.0 ~ 43.0, 한국 영토 범위)
  * @param longitude 경도 (124.0 ~ 132.0, 한국 영토 범위)
+ * @param tagsToRemove 삭제할 태그 ID 목록
  */
 @Builder
 public record ImageUpdateRequestDto(
@@ -39,6 +42,7 @@ public record ImageUpdateRequestDto(
 	Double latitude,
 	@DecimalMin(value = "124.0", message = "경도는 124.0 이상이어야 합니다.")
 	@DecimalMax(value = "132.0", message = "경도는 132.0 이하여야 합니다.")
-	Double longitude
+	Double longitude,
+	List<Long> tagsToRemove
 ) {
 }

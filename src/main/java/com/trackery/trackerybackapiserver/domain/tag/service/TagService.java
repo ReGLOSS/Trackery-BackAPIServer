@@ -15,6 +15,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagCreateRequestDto;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagForImageResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.entity.ImageTag;
@@ -124,6 +125,22 @@ public class TagService {
 		List<Tag> tags = tagMapper.findTagsByImageId(imageId);
 		return tags.stream()
 			.map(tag -> TagNameResponseDto.builder()
+				.tagName(tag.getTagName())
+				.build())
+			.toList();
+	}
+
+	/**
+	 * 이미지 조회용 태그 목록을 반환합니다 (ID와 이름만 포함).
+	 * @param imageId 이미지 ID
+	 * @return 이미지에 연결된 간소화된 태그 목록
+	 */
+	@Transactional(readOnly = true)
+	public List<TagForImageResponseDto> getTagsForImageDisplay(Long imageId) {
+		List<Tag> tags = tagMapper.findTagsByImageId(imageId);
+		return tags.stream()
+			.map(tag -> TagForImageResponseDto.builder()
+				.tagId(tag.getTagId())
 				.tagName(tag.getTagName())
 				.build())
 			.toList();
