@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 10.       inari       이미지 단건 조회시 태그 추가, 날짜 제거
  * 25. 7. 10.		inari		기본 태그 api 추가
  * 25. 7. 11.		inari		태그 일괄 삭제 구현
+ * 25. 7. 12.		inari		태그 수정 구현
  */
 @Slf4j
 @Service
@@ -161,6 +162,17 @@ public class TagService {
 
 		tagMapper.insertImageTag(imageTag);
 		tagMapper.incrementTagUseCount(tagId);
+	}
+
+	/**
+	 * 태그명으로 태그를 찾거나 생성한 후 이미지에 연결합니다.
+	 * @param imageId 이미지 ID
+	 * @param tagName 태그명
+	 */
+	@Transactional
+	public void addTagToImageByName(Long imageId, String tagName) {
+		Tag tag = findOrCreateTagByName(tagName);
+		addTagToImage(imageId, tag.getTagId());
 	}
 
 	/**

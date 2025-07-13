@@ -20,6 +20,7 @@ import lombok.Builder;
  * 25. 6. 20.        inari       최초 생성
  * 25. 7. 11.        inari       주석 추가 및 체크스타일 수정
  * 25. 7. 12.        inari       삭제할 태그 리스트 추가
+ * 25. 7. 13.        inari       수정할 태그 리스트 추가
  *
  * @param imageName 이미지 이름 (최대 100자)
  * @param imageContent 이미지 설명 (최대 500자)
@@ -28,6 +29,7 @@ import lombok.Builder;
  * @param latitude 위도 (33.0 ~ 43.0, 한국 영토 범위)
  * @param longitude 경도 (124.0 ~ 132.0, 한국 영토 범위)
  * @param tagsToRemove 삭제할 태그 ID 목록
+ * @param tagsToAdd 추가할 태그명 목록
  */
 @Builder
 public record ImageUpdateRequestDto(
@@ -43,6 +45,7 @@ public record ImageUpdateRequestDto(
 	@DecimalMin(value = "124.0", message = "경도는 124.0 이상이어야 합니다.")
 	@DecimalMax(value = "132.0", message = "경도는 132.0 이하여야 합니다.")
 	Double longitude,
-	List<Long> tagsToRemove
+	List<Long> tagsToRemove,
+	List<String> tagsToAdd
 ) {
 }
