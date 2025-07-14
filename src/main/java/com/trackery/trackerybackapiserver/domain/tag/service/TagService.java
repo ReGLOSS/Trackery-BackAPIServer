@@ -416,28 +416,13 @@ public class TagService {
 	}
 
 	/**
-	 * 날짜 문자열과 좌표를 기반으로 기본 태그 목록을 생성합니다.
+	 * 날짜 문자열을 기반으로 계절 태그 목록을 생성합니다.
 	 * @param dateStr 날짜 문자열 (예: "2024 / 1 / 15")
-	 * @param latitude 위도 (선택사항)
-	 * @param longitude 경도 (선택사항)
-	 * @return 생성된 태그명 목록 (시도, 시군구, 계절 순)
+	 * @return 생성된 태그명 목록 (계절 태그)
 	 */
 	@Transactional
-	public List<TagNameResponseDto> createDefaultTags(String dateStr, Double latitude, Double longitude) {
+	public List<TagNameResponseDto> createSeasonTags(String dateStr) {
 		List<TagNameResponseDto> tags = new ArrayList<>();
-		// 지역 태그 생성 (시도, 시군구 순)
-		if (latitude != null && longitude != null) {
-			JusoSigungu sigungu = locationService.findSigunguByCoordinate(latitude, longitude);
-			if (sigungu != null) {
-				String sidoName = sigungu.getSido().getSidoName();
-				String sigunguName = sigungu.getSigunguName();
-				findOrCreateLocationTag(sidoName);
-				findOrCreateLocationTag(sigunguName);
-
-				tags.add(TagNameResponseDto.builder().tagName(sidoName).build());
-				tags.add(TagNameResponseDto.builder().tagName(sigunguName).build());
-			}
-		}
 
 		// 날짜 기반 계절 태그 생성
 		LocalDate date = parseDate(dateStr);
