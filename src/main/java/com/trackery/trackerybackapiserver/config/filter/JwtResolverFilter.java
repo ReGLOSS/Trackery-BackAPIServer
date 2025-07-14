@@ -47,17 +47,44 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 	 * 필터 흐름
 	 *  1. 쿠키에서 액세스 토큰을 가져옵니다.
 	 *   1.1. 액세스 토큰이 없고 리프레시 토큰은 있다면 액세스 토큰을 재발급합니다.
-	 *   1.2. 액세스 토큰과 리프레시 토큰이 모두 없다면 401 에러를 반환합니다.
+	 *   1.2. 액세스 토큰이 있지만 만료되었다면 리프레시 토큰으로 재발급합니다.
+	 *   1.3. 액세스 토큰과 리프레시 토큰이 모두 없다면 401 에러를 반환합니다.
 	 *  2. 액세스 토큰을 Attribute에 담아서 필터체인을 진행합니다.
 	 */
 	@Override
 	protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
 		@NonNull FilterChain filterChain) throws ServletException, IOException {
-		String accessToken = CookieUtil.extractCookieValue(request, CookieName.ACCESS_TOKEN.getValue(),
-			() -> reissueAccessTokenByRefreshToken(request, response));
+		String accessToken = getValidAccessToken(request, response);
 
 		request.setAttribute(CookieName.ACCESS_TOKEN.getValue(), accessToken);
 		filterChain.doFilter(request, response);
+	}
+
+	/**
+	 * 유효한 액세스 토큰을 가져오는 메서드
+	 * 액세스 토큰이 없거나 만료된 경우 리프레시 토큰으로 재발급합니다.
+	 *
+	 * @param request : HttpServletRequest 요청 객체
+	 * @param response : HttpServletResponse 응답 객체
+	 * @return : 유효한 액세스 토큰
+	 */
+	private String getValidAccessToken(HttpServletRequest request, HttpServletResponse response) {
+		String accessToken = CookieUtil.extractCookieValue(request, CookieName.ACCESS_TOKEN.getValue(), () -> null);
+
+		if (accessToken != null) {
+			try {
+				jwtService.verifyJwt(accessToken);
+				return accessToken;
+			} catch (ApiException e) {
+				if (e.getErrorCode() == ErrorCode.BAD_REQUEST || e.getErrorCode() == ErrorCode.UNAUTHORIZED) {
+					log.debug("액세스 토큰이 만료되었습니다. 리프레시 토큰으로 재발급을 시도합니다.");
+					return reissueAccessTokenByRefreshToken(request, response);
+				}
+				throw e;
+			}
+		}
+
+		return reissueAccessTokenByRefreshToken(request, response);
 	}
 
 	/**
