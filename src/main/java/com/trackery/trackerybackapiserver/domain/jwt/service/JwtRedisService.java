@@ -120,14 +120,14 @@ public class JwtRedisService {
 	 */
 	public void deleteRefreshToken(String refreshToken) {
 		if (refreshToken == null || refreshToken.trim().isEmpty()) {
-			log.warn("Attempted to delete null or empty refresh token");
+			log.warn("리프레시 토큰 레디스에서 삭제 실패 : key 없음");
 			return;
 		}
 
 		String redisKey = REFRESH_TOKEN_KEY_PREFIX + refreshToken;
 
 		Boolean deleted = redisTemplate.delete(redisKey);
-		log.info("Refresh token deletion result: {}, Key: {}", deleted, redisKey);
+		log.info("Refresh token deletion result: {}", deleted);
 	}
 
 	/**
