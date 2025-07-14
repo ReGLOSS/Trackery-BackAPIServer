@@ -25,7 +25,6 @@ public class TagForImageResponseDto {
 	 * 태그 ID.
 	 */
 	private Long tagId;
-	
 	/**
 	 * 태그명.
 	 */
