@@ -41,6 +41,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 10.		inari		기본 태그 api 추가
  * 25. 7. 11.		inari		태그 일괄 삭제 구현
  * 25. 7. 12.		inari		태그 수정 구현
+ * 25. 7. 14.       inari      	LOCATION태그 시도와 시군구로 분리
  */
 @Slf4j
 @Service
@@ -213,8 +214,8 @@ public class TagService {
 		String sidoName = sigungu.getSido().getSidoName();
 		String sigunguName = sigungu.getSigunguName();
 
-		Tag sidoTag = findOrCreateLocationTag(sidoName);
-		Tag sigunguTag = findOrCreateLocationTag(sigunguName);
+		Tag sidoTag = findOrCreateSidoTag(sidoName);
+		Tag sigunguTag = findOrCreateSigunguTag(sigunguName);
 
 		return List.of(sidoTag, sigunguTag);
 	}
@@ -288,20 +289,43 @@ public class TagService {
 
 
 	/**
-	 * 위치 이름으로 기존 태그를 찾거나 새로 생성합니다.
-	 * @param locationName 위치 이름
-	 * @return 찾았거나 생성된 위치 태그
+	 * 시도 이름으로 기존 태그를 찾거나 새로 생성합니다.
+	 * @param sidoName 시도 이름
+	 * @return 찾았거나 생성된 시도 태그
 	 */
-	private Tag findOrCreateLocationTag(String locationName) {
-		Tag existingTag = tagMapper.findTagByNameAndType(locationName, TagType.LOCATION);
+	private Tag findOrCreateSidoTag(String sidoName) {
+		Tag existingTag = tagMapper.findTagByNameAndType(sidoName, TagType.SIDO);
 
 		if (existingTag != null) {
 			return existingTag;
 		}
 
 		Tag newTag = Tag.builder()
-			.tagName(locationName)
-			.tagType(TagType.LOCATION)
+			.tagName(sidoName)
+			.tagType(TagType.SIDO)
+			.tagUseCount(1L)
+			.createdAt(LocalDateTime.now(ZoneId.of(ASIA_SEOUL)))
+			.build();
+
+		tagMapper.insertTag(newTag);
+		return newTag;
+	}
+
+	/**
+	 * 시군구 이름으로 기존 태그를 찾거나 새로 생성합니다.
+	 * @param sigunguName 시군구 이름
+	 * @return 찾았거나 생성된 시군구 태그
+	 */
+	private Tag findOrCreateSigunguTag(String sigunguName) {
+		Tag existingTag = tagMapper.findTagByNameAndType(sigunguName, TagType.SIGUNGU);
+
+		if (existingTag != null) {
+			return existingTag;
+		}
+
+		Tag newTag = Tag.builder()
+			.tagName(sigunguName)
+			.tagType(TagType.SIGUNGU)
 			.tagUseCount(1L)
 			.createdAt(LocalDateTime.now(ZoneId.of(ASIA_SEOUL)))
 			.build();

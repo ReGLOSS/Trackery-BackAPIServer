@@ -16,15 +16,17 @@ import lombok.RequiredArgsConstructor;
  * -----------------------------------------------------------
  * 25. 7. 2.        narilee       	최초 생성
  * 25. 7. 8.        narilee      	@JsonValue 제거
+ * 25. 7. 14.       narilee      	LOCATION태그 시도와 시군구로 분리
  */
 @Getter
 @RequiredArgsConstructor
 public enum TagType {
 	CUSTOM(0, "사용자 정의"),
-	LOCATION(1, "위치"),
-	SEASON(2, "계절"),
-	TIME(3, "시간대"),
-	WEATHER(4, "날씨");
+	SIDO(1, "시도"),
+	SIGUNGU(2, "시군구"),
+	SEASON(3, "계절"),
+	TIME(4, "시간"),
+	WEATHER(5, "날씨");
 
 	/**
 	 * 태그 타입의 고유 코드 (데이터베이스 저장용)
@@ -39,7 +41,7 @@ public enum TagType {
 	/**
 	 * 정수 코드를 사용해 해당하는 TagType enum을 반환합니다.
 	 * 
-	 * @param code 태그 타입 코드 (0: CUSTOM, 1: LOCATION, 2: SEASON, 3: TIME, 4: WEATHER)
+	 * @param code 태그 타입 코드 (0: CUSTOM, 1: SIDO, 2: SIGUNGU, 3: SEASON, 4: TIME, 5: WEATHER)
 	 * @return 해당하는 TagType enum 값
 	 * @throws IllegalArgumentException 유효하지 않은 코드인 경우
 	 */
