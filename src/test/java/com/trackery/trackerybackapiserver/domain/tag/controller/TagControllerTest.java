@@ -21,13 +21,14 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
+import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
-import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagCreateRequestDto;
-import com.trackery.trackerybackapiserver.domain.tag.dto.TagDefaultRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagSeasonRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
 import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
@@ -43,7 +44,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * -----------------------------------------------------------
  * 25. 7. 8.        inari       최초 생성
  * 25. 7. 9.        inari       테스트코드 수정
- * 25. 7. 9.        inari       테스트코드 수정
+ * 25. 7. 14.       inari       테스트 코드 수정
  */
 @WebMvcTest(TagController.class)
 class TagControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -59,7 +60,7 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 
 	private TagResponseDto tagResponseDto;
 	private TagCreateRequestDto createRequestDto;
-	private TagDefaultRequestDto defaultRequestDto;
+	private TagSeasonRequestDto defaultRequestDto;
 
 	@BeforeEach
 	void setUp() {
@@ -76,7 +77,7 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 			.tagType(TagType.CUSTOM.getCode())
 			.build();
 
-		defaultRequestDto = new TagDefaultRequestDto("2024/7/15", new CoordinateDto(37.5665, 126.9780));
+		defaultRequestDto = new TagSeasonRequestDto("2024/7/15");
 	}
 
 	@Nested
@@ -104,14 +105,14 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andDo(document("tag-create",
 					requestFields(
 						fieldWithPath("tagName").description("생성할 태그명"),
-						fieldWithPath("tagType").description("태그 타입 코드 (0: CUSTOM, 1: LOCATION, 2: SEASON, 3: TIME, 4: WEATHER)")
+						fieldWithPath("tagType").description("태그 타입 코드 (0: CUSTOM, 1: SIDO, 2: SIGUNGU, 3: SEASON, 4: TIME, 5: WEATHER)")
 					),
 					relaxedResponseFields(
 						fieldWithPath("code").description("응답 코드"),
 						fieldWithPath("message").description("응답 메시지"),
 						fieldWithPath("data.tagId").description("태그 ID"),
 						fieldWithPath("data.tagName").description("태그명"),
-						fieldWithPath("data.tagType").description("태그 타입(CUSTOM, LOCATION 등)"),
+						fieldWithPath("data.tagType").description("태그 타입(CUSTOM, SIDO, SIGUNGU 등)"),
 						fieldWithPath("data.tagUseCount").description("태그 사용 횟수"),
 						fieldWithPath("data.createdAt").description("태그 생성 시간")
 					)
@@ -146,7 +147,7 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 						fieldWithPath("message").description("응답 메시지"),
 						fieldWithPath("data[].tagId").description("태그 ID"),
 						fieldWithPath("data[].tagName").description("태그명"),
-						fieldWithPath("data[].tagType").description("태그 타입(CUSTOM, LOCATION 등)"),
+						fieldWithPath("data[].tagType").description("태그 타입(CUSTOM, SIDO, SIGUNGU 등)"),
 						fieldWithPath("data[].tagUseCount").description("태그 사용 횟수"),
 						fieldWithPath("data[].createdAt").description("태그 생성 시간")
 					)
@@ -175,7 +176,7 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 						fieldWithPath("message").description("응답 메시지"),
 						fieldWithPath("data[].tagId").description("태그 ID"),
 						fieldWithPath("data[].tagName").description("태그명"),
-						fieldWithPath("data[].tagType").description("태그 타입(CUSTOM, LOCATION 등)"),
+						fieldWithPath("data[].tagType").description("태그 타입(CUSTOM, SIDO, SIGUNGU 등)"),
 						fieldWithPath("data[].tagUseCount").description("태그 사용 횟수"),
 						fieldWithPath("data[].createdAt").description("태그 생성 시간")
 					)
@@ -236,20 +237,20 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 	}
 
 	@Nested
-	@DisplayName("기본 태그 생성 API 테스트")
-	class DefaultTagTest {
+	@DisplayName("계절 태그 생성 API 테스트")
+	class SeasonTagTest {
 
 		@Test
-		@DisplayName("기본 태그 생성 성공")
-		void getDefaultTags_Success() throws Exception {
+		@DisplayName("계절 태그 생성 성공")
+		void getSeasonTags_Success() throws Exception {
 			// given
 			List<TagNameResponseDto> defaultTags = List.of(
 				TagNameResponseDto.builder().tagName("여름").build()
 			);
-			when(tagService.createDefaultTags("2024/7/15", 37.5665, 126.9780)).thenReturn(defaultTags);
+			when(tagService.createSeasonTags("2024/7/15")).thenReturn(defaultTags);
 
 			// when & then
-			mockMvc.perform(post("/api/tags/default")
+			mockMvc.perform(post("/api/tags/season")
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(defaultRequestDto))
 					.with(csrf())
@@ -258,20 +259,180 @@ class TagControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(jsonPath("$.code").value(200))
 				.andExpect(jsonPath("$.data").isArray())
 				.andExpect(jsonPath("$.data[0].tagName").value("여름"))
-				.andDo(document("tag-create-default",
+				.andDo(document("tag-create-season",
 					requestFields(
-						fieldWithPath("date").description("날짜 문자열 (예: 2024/7/15)"),
-						fieldWithPath("coordinate.latitude").description("위도"),
-						fieldWithPath("coordinate.longitude").description("경도")
+						fieldWithPath("date").description("날짜 문자열 (예: 2024/7/15)")
 					),
 					relaxedResponseFields(
 						fieldWithPath("code").description("응답 코드"),
 						fieldWithPath("message").description("응답 메시지"),
-						fieldWithPath("data[].tagName").description("생성된 기본 태그명")
+						fieldWithPath("data[].tagName").description("생성된 계절 태그명")
 					)
 				));
 
-			verify(tagService).createDefaultTags("2024/7/15", 37.5665, 126.9780);
+			verify(tagService).createSeasonTags("2024/7/15");
+		}
+
+		@Test
+		@DisplayName("잘못된 날짜 형식으로 계절 태그 생성 요청 실패")
+		void getSeasonTags_InvalidDate() throws Exception {
+			// given
+			TagSeasonRequestDto invalidRequestDto = new TagSeasonRequestDto("invalid-date");
+			when(tagService.createSeasonTags("invalid-date"))
+				.thenThrow(new ApiException(ErrorCode.BAD_REQUEST));
+
+			// when & then
+			mockMvc.perform(post("/api/tags/season")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(invalidRequestDto))
+					.with(csrf())
+					.with(user(createTestUser())))
+				.andExpect(status().isBadRequest());
+		}
+
+		@Test
+		@DisplayName("빈 날짜로 계절 태그 생성 요청 실패")
+		void getSeasonTags_EmptyDate() throws Exception {
+			// given
+			TagSeasonRequestDto emptyRequestDto = new TagSeasonRequestDto("");
+
+			// when & then
+			mockMvc.perform(post("/api/tags/season")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(emptyRequestDto))
+					.with(csrf())
+					.with(user(createTestUser())))
+				.andExpect(status().isBadRequest());
+		}
+	}
+
+	@Nested
+	@DisplayName("태그 생성 검증 테스트")
+	class TagCreateValidationTest {
+
+		@Test
+		@DisplayName("빈 태그명으로 태그 생성 성공")
+		void createTag_EmptyTagName() throws Exception {
+			// given
+			TagCreateRequestDto requestDto = TagCreateRequestDto.builder()
+				.tagName("")
+				.tagType(TagType.CUSTOM.getCode())
+				.build();
+
+			TagResponseDto responseDto = TagResponseDto.builder()
+				.tagId(1L)
+				.tagName("")
+				.tagType(TagType.CUSTOM)
+				.tagUseCount(0L)
+				.build();
+
+			when(tagService.createTag(any(TagCreateRequestDto.class)))
+				.thenReturn(responseDto);
+
+			// when & then
+			mockMvc.perform(post("/api/tags")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(requestDto))
+					.with(csrf())
+					.with(user(createTestUser())))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.tagName").value(""));
+		}
+
+		@Test
+		@DisplayName("null 태그명으로 태그 생성 성공")
+		void createTag_NullTagName() throws Exception {
+			// given
+			TagCreateRequestDto requestDto = TagCreateRequestDto.builder()
+				.tagName(null)
+				.tagType(TagType.CUSTOM.getCode())
+				.build();
+
+			TagResponseDto responseDto = TagResponseDto.builder()
+				.tagId(2L)
+				.tagName(null)
+				.tagType(TagType.CUSTOM)
+				.tagUseCount(0L)
+				.build();
+
+			when(tagService.createTag(any(TagCreateRequestDto.class)))
+				.thenReturn(responseDto);
+
+			// when & then
+			mockMvc.perform(post("/api/tags")
+					.contentType(MediaType.APPLICATION_JSON)
+					.content(objectMapper.writeValueAsString(requestDto))
+					.with(csrf())
+					.with(user(createTestUser())))
+				.andExpect(status().isOk());
+		}
+	}
+
+	@Nested
+	@DisplayName("태그 조회 추가 테스트")
+	class AdditionalTagRetrievalTest {
+
+		@Test
+		@DisplayName("빈 태그 목록 조회 시 빈 배열 반환")
+		void getAllTags_EmptyList() throws Exception {
+			// given
+			when(tagService.getAllTags()).thenReturn(List.of());
+
+			// when & then
+			mockMvc.perform(get("/api/tags")
+					.with(user(createTestUser())))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.code").value(200))
+				.andExpect(jsonPath("$.data").isArray())
+				.andExpect(jsonPath("$.data").isEmpty());
+
+			verify(tagService).getAllTags();
+		}
+
+		@Test
+		@DisplayName("여러 태그 조회 시 올바른 순서로 반환")
+		void getAllTags_MultipleTagsOrdered() throws Exception {
+			// given
+			List<TagResponseDto> tags = List.of(
+				TagResponseDto.builder()
+					.tagId(1L)
+					.tagName("서울특별시")
+					.tagType(TagType.SIDO)
+					.tagUseCount(5L)
+					.createdAt(LocalDateTime.now())
+					.build(),
+				TagResponseDto.builder()
+					.tagId(2L)
+					.tagName("강남구")
+					.tagType(TagType.SIGUNGU)
+					.tagUseCount(3L)
+					.createdAt(LocalDateTime.now())
+					.build(),
+				TagResponseDto.builder()
+					.tagId(3L)
+					.tagName("여름")
+					.tagType(TagType.SEASON)
+					.tagUseCount(10L)
+					.createdAt(LocalDateTime.now())
+					.build()
+			);
+			when(tagService.getAllTags()).thenReturn(tags);
+
+			// when & then
+			mockMvc.perform(get("/api/tags")
+					.with(user(createTestUser())))
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.code").value(200))
+				.andExpect(jsonPath("$.data").isArray())
+				.andExpect(jsonPath("$.data").hasJsonPath())
+				.andExpect(jsonPath("$.data[0].tagName").value("서울특별시"))
+				.andExpect(jsonPath("$.data[0].tagType").value("SIDO"))
+				.andExpect(jsonPath("$.data[1].tagName").value("강남구"))
+				.andExpect(jsonPath("$.data[1].tagType").value("SIGUNGU"))
+				.andExpect(jsonPath("$.data[2].tagName").value("여름"))
+				.andExpect(jsonPath("$.data[2].tagType").value("SEASON"));
+
+			verify(tagService).getAllTags();
 		}
 	}
 

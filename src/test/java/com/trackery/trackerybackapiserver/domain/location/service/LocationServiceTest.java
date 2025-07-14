@@ -44,6 +44,7 @@ import com.trackery.trackerybackapiserver.domain.location.mapper.LocationMapper;
  * 25. 6. 13.		Narilee			최초 생성
  * 25. 6. 22.		Narilee			좌표 업데이트 테스트 추가
  * 25. 7. 11.		inari			태그 제거
+ * 25. 7. 14.       inari       	테스트 코드 수정
  */
 
 @ExtendWith(MockitoExtension.class)
@@ -80,7 +81,8 @@ class LocationServiceTest {
 
 			LocationNameResponseDto result = locationService.getLocationNameByCoord(coordinateDto);
 
-			assertEquals("서울특별시 동작구", result.getLocationName());
+			assertEquals("서울특별시", result.getSdName());
+			assertEquals("동작구", result.getSggName());
 			verify(locationMapper, times(1)).findSigunguByCoordinate(coordinateDto);
 		}
 

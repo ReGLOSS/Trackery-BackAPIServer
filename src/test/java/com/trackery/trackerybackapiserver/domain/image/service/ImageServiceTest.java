@@ -51,6 +51,7 @@ import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
  * 25. 5. 19.		durururuk	이미지 조회 단위 테스트 작성
  * 25. 6. 20.		inari		이미지 삭제 및 수정 테스트 작성
  * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
+ * 25. 7. 14.       inari       테스트 코드 수정
  */
 @ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
@@ -175,7 +176,6 @@ class ImageServiceTest {
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("original"))).thenReturn(
 				testPresignedUrl);
 			when(imageMapper.findImageByImageId(5L)).thenReturn(Optional.of(testImage1));
-			when(tagService.getTagNamesByImageId(testImageId)).thenReturn(List.of());
 
 			ImageDto result = imageService.getOriginalImageByImageId(testUserId, 5L);
 
@@ -303,7 +303,6 @@ class ImageServiceTest {
 			when(imageMapper.findImageByImageId(testImageId)).thenReturn(Optional.of(publicImage));
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("original"))).thenReturn(
 				testPresignedUrl);
-			when(tagService.getTagNamesByImageId(testImageId)).thenReturn(List.of());
 
 			ImageDto result = imageService.getOriginalImageByImageId(testUserId, testImageId);
 
@@ -507,7 +506,6 @@ class ImageServiceTest {
 				.thenReturn(1);
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
 				"test-url");
-			when(tagService.getTagNamesByImageId(imageId)).thenReturn(List.of());
 
 			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
 
@@ -565,9 +563,9 @@ class ImageServiceTest {
 			when(imageMapper.updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1)))
 				.thenReturn(1);
 			when(locationService.updateCoordinatePoint(eq(1L), any())).thenReturn(1);
+			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
 				"test-url");
-			when(tagService.getTagNamesByImageId(imageId)).thenReturn(List.of());
 
 			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
 
@@ -575,6 +573,33 @@ class ImageServiceTest {
 			verify(imageMapper, times(2)).findImageByImageId(imageId);
 			verify(imageMapper).updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1));
 			verify(locationService).updateCoordinatePoint(eq(1L), any());
+			verify(tagService, times(1)).getTagsForImageDisplay(imageId);
+		}
+
+		@Test
+		@DisplayName("성공 - 날짜 정보 포함 메타데이터 수정")
+		void updateImageMetadata_withDate_success() {
+			LocalDateTime newDate = LocalDateTime.of(2023, 6, 15, 12, 0);
+			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
+				.imageName("수정된 이미지")
+				.imageContent("수정된 설명")
+				.isPublic(1)
+				.imageDate(newDate)
+				.build();
+
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
+			when(imageMapper.updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), eq(newDate), eq(1)))
+				.thenReturn(1);
+			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
+				"test-url");
+
+			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
+
+			assertNotNull(result);
+			verify(imageMapper, times(2)).findImageByImageId(imageId);
+			verify(imageMapper).updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), eq(newDate), eq(1));
+			verify(tagService, times(1)).getTagsForImageDisplay(imageId);
 		}
 	}
 
@@ -631,6 +656,205 @@ class ImageServiceTest {
 
 			verify(imageMapper).findImageByImageId(imageId);
 			verify(imageMapper, never()).deleteImage(any());
+		}
+
+		@Test
+		@DisplayName("성공 - 태그 연결된 이미지 삭제 시 태그 연결 해제")
+		void deleteImage_WithTagsSuccess() {
+			// given
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
+			when(imageMapper.deleteImage(imageId)).thenReturn(1);
+			doNothing().when(tagService).removeAllTagsFromImage(imageId);
+
+			// when
+			assertDoesNotThrow(() -> imageService.deleteImage(imageId, userId));
+
+			// then
+			verify(imageMapper).findImageByImageId(imageId);
+			verify(tagService).removeAllTagsFromImage(imageId);
+			verify(imageMapper).deleteImage(imageId);
+		}
+	}
+
+	@Nested
+	@DisplayName("이미지 태그 관련 테스트")
+	class ImageTagTest {
+		private final Long imageId = 1L;
+		private final Long userId = 2L;
+		
+		@Test
+		@DisplayName("성공 - 이미지 단건 조회 시 태그 포함")
+		void getOriginalImageByImageId_WithTags() {
+			// given
+			JusoSido sido = new JusoSido();
+			ReflectionTestUtils.setField(sido, "sidoId", 1L);
+			ReflectionTestUtils.setField(sido, "sidoName", "서울특별시");
+
+			JusoSigungu sigungu = new JusoSigungu();
+			ReflectionTestUtils.setField(sigungu, "sigunguId", 1L);
+			ReflectionTestUtils.setField(sigungu, "sigunguName", "강남구");
+			ReflectionTestUtils.setField(sigungu, "sido", sido);
+
+			Coordinate coordinate = new Coordinate(127.0495556, 37.5398056);
+			PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
+			org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory(precisionModel, 4326);
+			Point testPoint = geometryFactory.createPoint(coordinate);
+
+			CoordinatePoint coordPoint = new CoordinatePoint();
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointId", 1L);
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointName", "테스트 좌표");
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointPoint", testPoint);
+			ReflectionTestUtils.setField(coordPoint, "sigungu", sigungu);
+			
+			Image image = Image.builder()
+				.imageName("테스트 이미지")
+				.userId(userId)
+				.coordPoint(coordPoint)
+				.build();
+			ReflectionTestUtils.setField(image, "imageId", imageId);
+			
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(image));
+			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
+			when(imageS3Service.generatePreSignedGetUrl(any(), any(), any())).thenReturn("http://test.url");
+
+			// when
+			ImageDto result = imageService.getOriginalImageByImageId(userId, imageId);
+
+			// then
+			assertNotNull(result);
+			assertEquals(imageId, result.getImageId());
+			assertNotNull(result.getTags());
+			verify(tagService).getTagsForImageDisplay(imageId);
+		}
+		
+		@Test
+		@DisplayName("성공 - 이미지 목록 조회 시 태그 포함")
+		void getImageListByUserId_WithTags() {
+			// given
+			ImageSearchByUserIdDto searchDto = ImageSearchByUserIdDto.builder()
+				.userId(userId)
+				.build();
+			
+			ImageInfoForThumbnailDto thumbnailDto = new ImageInfoForThumbnailDto();
+			ReflectionTestUtils.setField(thumbnailDto, "imageId", 1L);
+			ReflectionTestUtils.setField(thumbnailDto, "userId", userId);
+			ReflectionTestUtils.setField(thumbnailDto, "imageName", "테스트 이미지");
+			
+			when(imageMapper.findImageThumbnailsByUserId(any())).thenReturn(List.of(thumbnailDto));
+			when(imageS3Service.generatePreSignedGetUrl(any(), any(), any())).thenReturn("http://test.url");
+			
+			// when
+			PageInfo<ImageThumbnailDto> result = imageService.getImageListByUserId(searchDto);
+
+			// then
+			assertNotNull(result);
+			assertNotNull(result.getList());
+			verify(imageMapper).findImageThumbnailsByUserId(any());
+		}
+
+		@Test
+		@DisplayName("성공 - 이미지 업데이트 시 태그 추가/삭제")
+		void updateImageMetadata_WithTagOperations() {
+			// given
+			JusoSido sido = new JusoSido();
+			ReflectionTestUtils.setField(sido, "sidoId", 1L);
+			ReflectionTestUtils.setField(sido, "sidoName", "서울특별시");
+
+			JusoSigungu sigungu = new JusoSigungu();
+			ReflectionTestUtils.setField(sigungu, "sigunguId", 1L);
+			ReflectionTestUtils.setField(sigungu, "sigunguName", "강남구");
+			ReflectionTestUtils.setField(sigungu, "sido", sido);
+
+			Coordinate coordinate = new Coordinate(127.0495556, 37.5398056);
+			PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
+			org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory(precisionModel, 4326);
+			Point testPoint = geometryFactory.createPoint(coordinate);
+
+			CoordinatePoint coordPoint = new CoordinatePoint();
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointId", 1L);
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointName", "테스트 좌표");
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointPoint", testPoint);
+			ReflectionTestUtils.setField(coordPoint, "sigungu", sigungu);
+
+			Image existingImage = Image.builder()
+				.imageName("기존 이미지")
+				.userId(userId)
+				.coordPoint(coordPoint)
+				.build();
+			ReflectionTestUtils.setField(existingImage, "imageId", imageId);
+			
+			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
+				.imageName("수정된 이미지")
+				.tagsToAdd(List.of("새태그1", "새태그2"))
+				.tagsToRemove(List.of(1L, 2L))
+				.build();
+			
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
+			when(imageMapper.updateImageMetadata(any(), any(), any(), any(), any())).thenReturn(1);
+			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
+			when(imageS3Service.generatePreSignedGetUrl(any(), any(), any())).thenReturn("http://test.url");
+			doNothing().when(tagService).addTagToImageByName(any(), any());
+			doNothing().when(tagService).removeTagFromImage(any(), any());
+
+			// when
+			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
+
+			// then
+			assertNotNull(result);
+			verify(tagService).addTagToImageByName(imageId, "새태그1");
+			verify(tagService).addTagToImageByName(imageId, "새태그2");
+			verify(tagService).removeTagFromImage(imageId, 1L);
+			verify(tagService).removeTagFromImage(imageId, 2L);
+		}
+
+		@Test
+		@DisplayName("성공 - 좌표 변경 시 위치 기반 태그 자동 생성")
+		void updateImageMetadata_WithLocationChange() {
+			// given
+			JusoSido sido = new JusoSido();
+			ReflectionTestUtils.setField(sido, "sidoId", 1L);
+			ReflectionTestUtils.setField(sido, "sidoName", "서울특별시");
+
+			JusoSigungu sigungu = new JusoSigungu();
+			ReflectionTestUtils.setField(sigungu, "sigunguId", 1L);
+			ReflectionTestUtils.setField(sigungu, "sigunguName", "강남구");
+			ReflectionTestUtils.setField(sigungu, "sido", sido);
+
+			Coordinate coordinate = new Coordinate(127.0495556, 37.5398056);
+			PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
+			org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory(precisionModel, 4326);
+			Point testPoint = geometryFactory.createPoint(coordinate);
+
+			CoordinatePoint coordPoint = new CoordinatePoint();
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointId", 1L);
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointName", "테스트 좌표");
+			ReflectionTestUtils.setField(coordPoint, "coordinatePointPoint", testPoint);
+			ReflectionTestUtils.setField(coordPoint, "sigungu", sigungu);
+			
+			Image existingImage = Image.builder()
+				.imageName("기존 이미지")
+				.userId(userId)
+				.coordPoint(coordPoint)
+				.build();
+			ReflectionTestUtils.setField(existingImage, "imageId", imageId);
+			
+			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
+				.latitude(37.5665)
+				.longitude(126.978)
+				.build();
+			
+			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
+			when(imageMapper.updateImageMetadata(any(), any(), any(), any(), any())).thenReturn(1);
+			when(locationService.updateCoordinatePoint(eq(1L), any())).thenReturn(1);
+			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
+			when(imageS3Service.generatePreSignedGetUrl(any(), any(), any())).thenReturn("http://test.url");
+
+			// when
+			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
+
+			// then
+			assertNotNull(result);
+			verify(locationService).updateCoordinatePoint(eq(1L), any());
 		}
 	}
 }
