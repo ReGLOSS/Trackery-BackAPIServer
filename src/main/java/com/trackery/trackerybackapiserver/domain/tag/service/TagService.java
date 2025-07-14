@@ -42,6 +42,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 11.		inari		태그 일괄 삭제 구현
  * 25. 7. 12.		inari		태그 수정 구현
  * 25. 7. 14.       inari      	LOCATION태그 시도와 시군구로 분리
+ * 25. 7. 14.       inari       프론트에서 태그 요청시 정렬해서 보내게 수정
  */
 @Slf4j
 @Service
@@ -134,6 +135,8 @@ public class TagService {
 
 	/**
 	 * 이미지 조회용 태그 목록을 반환합니다 (ID와 이름만 포함).
+	 * 태그 타입(TagType)에 따라 정렬됩니다. (SIDO, SIGUNGU, SEASON, TIME, WEATHER, CUSTOM 순서)
+	 *
 	 * @param imageId 이미지 ID
 	 * @return 이미지에 연결된 간소화된 태그 목록
 	 */
@@ -141,11 +144,37 @@ public class TagService {
 	public List<TagForImageResponseDto> getTagsForImageDisplay(Long imageId) {
 		List<Tag> tags = tagMapper.findTagsByImageId(imageId);
 		return tags.stream()
+			.sorted((tag1, tag2) -> {
+				// 태그 타입에 따른 사용자 정의 정렬 순서 정의
+				int order1 = getTagTypeOrder(tag1.getTagType());
+				int order2 = getTagTypeOrder(tag2.getTagType());
+				return Integer.compare(order1, order2);
+			})
 			.map(tag -> TagForImageResponseDto.builder()
 				.tagId(tag.getTagId())
 				.tagName(tag.getTagName())
 				.build())
 			.toList();
+	}
+
+	/**
+	 * 태그 타입에 따른 정렬 순서를 반환합니다.
+	 * SIDO(1), SIGUNGU(2), SEASON(3), TIME(4), WEATHER(5) 순서로 우선순위를 가지며,
+	 * CUSTOM(0)은 가장 마지막에 정렬됩니다.
+	 *
+	 * @param tagType 태그 타입
+	 * @return 정렬 순서 (낮은 숫자가 우선)
+	 */
+	private int getTagTypeOrder(TagType tagType) {
+		return switch (tagType) {
+			case SIDO -> 1;
+			case SIGUNGU -> 2;
+			case SEASON -> 3;
+			case TIME -> 4;
+			case WEATHER -> 5;
+			case CUSTOM -> 6; // CUSTOM (0)은 가장 마지막에 정렬
+			default -> Integer.MAX_VALUE; // 정의되지 않은 타입은 마지막으로
+		};
 	}
 
 	/**
