@@ -126,7 +126,7 @@ public class JwtRedisService {
 
 		String redisKey = REFRESH_TOKEN_KEY_PREFIX + refreshToken;
 
-		Boolean deleted = redisTemplate.delete(redisKey);
+		Boolean deleted = redisTemplate.unlink(redisKey);
 		log.info("Refresh token deletion result: {}", deleted);
 	}
 

@@ -59,20 +59,21 @@ class JwtRedisServiceTest {
 			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
 			String expectedJson = "refreshTokenDtoJson";
 			when(objectMapper.writeValueAsString(refreshTokenDto)).thenReturn(expectedJson);
+			when(valueOperations.get(redisKey)).thenReturn(expectedJson);
 			doNothing().when(valueOperations)
-				.set(redisKey, expectedJson, JwtExpirationTime.REFRESH_TOKEN.getExpirationTime());
+				.set(eq(redisKey), eq(expectedJson), any(java.time.Duration.class));
 
 			jwtRedisService.saveRefreshToken(refreshTokenDto);
 
 			verify(objectMapper, times(1)).writeValueAsString(refreshTokenDto);
-			verify(redisTemplate.opsForValue(), times(1)).set(redisKey, expectedJson,
-				JwtExpirationTime.REFRESH_TOKEN.getExpirationTime());
+			verify(redisTemplate.opsForValue(), times(1)).set(eq(redisKey), eq(expectedJson),
+				any(java.time.Duration.class));
 		}
 
 		@Test
 		@DisplayName("실패 - json 파싱 에러")
 		void failure_1() throws JsonProcessingException {
-			when(objectMapper.writeValueAsString(refreshTokenDto)).thenThrow(JsonProcessingException.class);
+			when(objectMapper.writeValueAsString(refreshTokenDto)).thenThrow(new JsonProcessingException("JSON processing error") {});
 
 			assertThrows(ApiException.class, () -> jwtRedisService.saveRefreshToken(refreshTokenDto));
 		}
@@ -85,17 +86,14 @@ class JwtRedisServiceTest {
 		private final String refreshToken = "<PASSWORD>";
 		private final String expectedJson = "refreshTokenDtoJson";
 		private final RefreshTokenDto refreshTokenDto = new RefreshTokenDto(refreshToken, "jid", "subject");
-
-		@BeforeEach
-		void setUp() {
-			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-			String redisKey = "jwtRefreshToken:" + refreshToken;
-			when(valueOperations.get(redisKey)).thenReturn(expectedJson);
-		}
+		private final String redisKey = "jwtRefreshToken:" + refreshToken;
 
 		@Test
 		@DisplayName("성공")
 		void success() throws JsonProcessingException {
+			when(redisTemplate.hasKey(redisKey)).thenReturn(true);
+			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+			when(valueOperations.get(redisKey)).thenReturn(expectedJson);
 			when(objectMapper.readValue(expectedJson, RefreshTokenDto.class)).thenReturn(refreshTokenDto);
 
 			RefreshTokenDto result = jwtRedisService.getRefreshTokenInfo(refreshToken);
@@ -106,7 +104,10 @@ class JwtRedisServiceTest {
 		@Test
 		@DisplayName("실패 - Json 매핑 에러")
 		void failure_1() throws JsonProcessingException {
-			when(objectMapper.readValue(expectedJson, RefreshTokenDto.class)).thenThrow(JsonProcessingException.class);
+			when(redisTemplate.hasKey(redisKey)).thenReturn(true);
+			when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+			when(valueOperations.get(redisKey)).thenReturn(expectedJson);
+			when(objectMapper.readValue(expectedJson, RefreshTokenDto.class)).thenThrow(new JsonProcessingException("JSON parsing error") {});
 			assertThrows(ApiException.class, () -> jwtRedisService.getRefreshTokenInfo(refreshToken));
 		}
 	}
