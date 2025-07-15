@@ -98,6 +98,13 @@ public interface AlbumMapper {
 	 */
 	List<ImageInfoForThumbnailDto> findImagesForThumbnailByAlbumId(@Param("albumId") Long albumId);
 
+	/**
+	 * 이미지 ID로 해당 이미지가 포함된 앨범 ID 목록 조회
+	 * @param imageId 이미지 ID
+	 * @return 앨범 ID 목록
+	 */
+	List<Long> findAlbumIdsByImageId(@Param("imageId") Long imageId);
+
 	//모든 앨범에서 어떤 이미지 삭제
 	void deleteAllAlbumImagesByImageId(@Param("imageId") Long imageId);
 }

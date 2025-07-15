@@ -110,6 +110,12 @@
           AND i.is_deleted = 0
     </select>
 
+    <select id="findAlbumIdsByImageId" resultType="Long">
+        SELECT album_id
+        FROM album_image
+        WHERE image_id = #{imageId}
+    </select>
+
     <delete id="deleteAllAlbumImagesByImageId">
         DELETE FROM album_image
         WHERE image_id = #{imageId}
