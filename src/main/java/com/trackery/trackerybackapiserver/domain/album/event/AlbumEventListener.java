@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.album.event;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
+import com.trackery.trackerybackapiserver.domain.album.service.AlbumService;
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumThumbnailService;
 
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import lombok.RequiredArgsConstructor;
  * fileName       : AlbumThumbnailEventListener
  * author         : durururuk
  * date           : 25. 6. 20.
- * description    : 앨범 썸네일 이벤트 리스너
+ * description    : 앨범 이벤트 리스너
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
@@ -20,8 +21,9 @@ import lombok.RequiredArgsConstructor;
  */
 @Component
 @RequiredArgsConstructor
-public class AlbumThumbnailEventListener {
+public class AlbumEventListener {
 	private final AlbumThumbnailService albumThumbnailService;
+	private final AlbumService albumService;
 
 	/**
 	 * 앨범 이미지가 추가/삭제됐을 때 썸네일 서비스로 이벤트를 전달해주는 이벤트리스너
