@@ -43,6 +43,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 7.		inari			지역 태그 서비스 추가
  * 25. 7. 8.		inari			시군구 ID로 시도명과 시군구명을 분리한 메서드 추가
  * 25. 7. 10.		inari			태그를 태그 도메인으로 분리
+ * 25. 7. 15.		inari			updateImageLocation을 이미지 서비스에서 이동
  */
 @Slf4j
 @Service
@@ -142,7 +143,6 @@ public class LocationService {
 	 * @param coordinateDto 새로운 좌표 DTO
 	 * @return 업데이트된 행 수
 	 */
-	@Transactional
 	public int updateCoordinatePoint(Long coordinatePointId, CoordinateDto coordinateDto) {
 		Point point = getPointByCoord(coordinateDto);
 		JusoSigungu sigungu = getSigunguByPoint(point);
@@ -264,5 +264,31 @@ public class LocationService {
 		log.debug("사용자 통계 조회 완료 - 이미지 {}개, 앨범 {}개, 시군구 {}개",
 			stats.getImageCount(), stats.getAlbumCount(), stats.getSigunguCount());
 		return stats;
+	}
+
+	/**
+	 * 위치 정보가 제공된 경우 기존 CoordinatePoint의 위치 정보를 수정합니다.
+	 * @param coordinatePointId 수정할 좌표 포인트 ID
+	 * @param latitude 새로운 위도
+	 * @param longitude 새로운 경도
+	 * @param imageId 로그용 이미지 ID
+	 * @throws ApiException 위치 정보 수정 실패 시
+	 */
+	@Transactional
+	public void updateImageLocation(Long coordinatePointId, Double latitude, Double longitude, Long imageId) {
+		if (latitude == null || longitude == null) {
+			return;
+		}
+
+		try {
+			CoordinateDto coordinateDto = new CoordinateDto(latitude, longitude);
+			updateCoordinatePoint(coordinatePointId, coordinateDto);
+
+			log.info("이미지 위치 정보 수정 완료 - imageId: {}, coord_point_id: {}, 새로운 위치: {}, {}",
+				imageId, coordinatePointId, latitude, longitude);
+		} catch (Exception e) {
+			log.error("이미지 위치 정보 수정 실패 - imageId: {}, 에러: {}", imageId, e.getMessage());
+			throw new ApiException(ErrorCode.UPDATE_FAILED_LOCATION);
+		}
 	}
 }

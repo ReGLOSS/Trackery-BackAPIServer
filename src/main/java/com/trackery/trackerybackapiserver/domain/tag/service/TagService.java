@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagCreateRequestDto;
@@ -43,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 12.		inari		태그 수정 구현
  * 25. 7. 14.       inari      	LOCATION태그 시도와 시군구로 분리
  * 25. 7. 14.       inari       프론트에서 태그 요청시 정렬해서 보내게 수정
+ * 25. 7. 15.       inari       processTagRemoval, processTagAddition 이미지 서비스에서 이동
  */
 @Slf4j
 @Service
@@ -550,6 +552,52 @@ public class TagService {
 			.createdAt(LocalDateTime.now(ZoneId.of(ASIA_SEOUL)))
 			.build();
 		tagMapper.insertTag(newTag);
+	}
+
+	/**
+	 * 이미지 수정 요청에서 삭제할 태그들을 처리합니다.
+	 * @param imageId 이미지 ID
+	 * @param updateRequest 수정 요청 데이터
+	 */
+	@Transactional
+	public void processTagRemoval(Long imageId, ImageUpdateRequestDto updateRequest) {
+		if (updateRequest.tagsToRemove() == null || updateRequest.tagsToRemove().isEmpty()) {
+			return;
+		}
+
+		for (Long tagId : updateRequest.tagsToRemove()) {
+			try {
+				removeTagFromImage(imageId, tagId);
+				log.info("이미지에서 태그 삭제 완료 - imageId: {}, tagId: {}", imageId, tagId);
+			} catch (Exception e) {
+				log.warn("이미지에서 태그 삭제 실패 - imageId: {}, tagId: {}, 오류: {}",
+					imageId, tagId, e.getMessage());
+			}
+		}
+	}
+
+	/**
+	 * 이미지 수정 요청에서 추가할 태그들을 처리합니다.
+	 * @param imageId 이미지 ID
+	 * @param updateRequest 수정 요청 데이터
+	 */
+	@Transactional
+	public void processTagAddition(Long imageId, ImageUpdateRequestDto updateRequest) {
+		if (updateRequest.tagsToAdd() == null || updateRequest.tagsToAdd().isEmpty()) {
+			return;
+		}
+
+		for (String tagName : updateRequest.tagsToAdd()) {
+			if (tagName != null && !tagName.trim().isEmpty()) {
+				try {
+					addTagToImageByName(imageId, tagName.trim());
+					log.info("이미지에 태그 추가 완료 - imageId: {}, tagName: {}", imageId, tagName.trim());
+				} catch (Exception e) {
+					log.warn("이미지에 태그 추가 실패 - imageId: {}, tagName: {}, 오류: {}",
+						imageId, tagName.trim(), e.getMessage());
+				}
+			}
+		}
 	}
 
 	/**
