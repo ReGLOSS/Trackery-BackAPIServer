@@ -15,6 +15,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagCreateRequestDto;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagForImageResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.entity.ImageTag;
@@ -39,6 +40,9 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 10.       inari       이미지 단건 조회시 태그 추가, 날짜 제거
  * 25. 7. 10.		inari		기본 태그 api 추가
  * 25. 7. 11.		inari		태그 일괄 삭제 구현
+ * 25. 7. 12.		inari		태그 수정 구현
+ * 25. 7. 14.       inari      	LOCATION태그 시도와 시군구로 분리
+ * 25. 7. 14.       inari       프론트에서 태그 요청시 정렬해서 보내게 수정
  */
 @Slf4j
 @Service
@@ -130,6 +134,50 @@ public class TagService {
 	}
 
 	/**
+	 * 이미지 조회용 태그 목록을 반환합니다 (ID와 이름만 포함).
+	 * 태그 타입(TagType)에 따라 정렬됩니다. (SIDO, SIGUNGU, SEASON, TIME, WEATHER, CUSTOM 순서)
+	 *
+	 * @param imageId 이미지 ID
+	 * @return 이미지에 연결된 간소화된 태그 목록
+	 */
+	@Transactional(readOnly = true)
+	public List<TagForImageResponseDto> getTagsForImageDisplay(Long imageId) {
+		List<Tag> tags = tagMapper.findTagsByImageId(imageId);
+		return tags.stream()
+			.sorted((tag1, tag2) -> {
+				// 태그 타입에 따른 사용자 정의 정렬 순서 정의
+				int order1 = getTagTypeOrder(tag1.getTagType());
+				int order2 = getTagTypeOrder(tag2.getTagType());
+				return Integer.compare(order1, order2);
+			})
+			.map(tag -> TagForImageResponseDto.builder()
+				.tagId(tag.getTagId())
+				.tagName(tag.getTagName())
+				.build())
+			.toList();
+	}
+
+	/**
+	 * 태그 타입에 따른 정렬 순서를 반환합니다.
+	 * SIDO(1), SIGUNGU(2), SEASON(3), TIME(4), WEATHER(5) 순서로 우선순위를 가지며,
+	 * CUSTOM(0)은 가장 마지막에 정렬됩니다.
+	 *
+	 * @param tagType 태그 타입
+	 * @return 정렬 순서 (낮은 숫자가 우선)
+	 */
+	private int getTagTypeOrder(TagType tagType) {
+		return switch (tagType) {
+			case SIDO -> 1;
+			case SIGUNGU -> 2;
+			case SEASON -> 3;
+			case TIME -> 4;
+			case WEATHER -> 5;
+			case CUSTOM -> 6; // CUSTOM (0)은 가장 마지막에 정렬
+			default -> Integer.MAX_VALUE; // 정의되지 않은 타입은 마지막으로
+		};
+	}
+
+	/**
 	 * 이미지에 태그를 연결합니다.
 	 * @param imageId 이미지 ID
 	 * @param tagId 태그 ID
@@ -144,6 +192,17 @@ public class TagService {
 
 		tagMapper.insertImageTag(imageTag);
 		tagMapper.incrementTagUseCount(tagId);
+	}
+
+	/**
+	 * 태그명으로 태그를 찾거나 생성한 후 이미지에 연결합니다.
+	 * @param imageId 이미지 ID
+	 * @param tagName 태그명
+	 */
+	@Transactional
+	public void addTagToImageByName(Long imageId, String tagName) {
+		Tag tag = findOrCreateTagByName(tagName);
+		addTagToImage(imageId, tag.getTagId());
 	}
 
 	/**
@@ -184,8 +243,8 @@ public class TagService {
 		String sidoName = sigungu.getSido().getSidoName();
 		String sigunguName = sigungu.getSigunguName();
 
-		Tag sidoTag = findOrCreateLocationTag(sidoName);
-		Tag sigunguTag = findOrCreateLocationTag(sigunguName);
+		Tag sidoTag = findOrCreateSidoTag(sidoName);
+		Tag sigunguTag = findOrCreateSigunguTag(sigunguName);
 
 		return List.of(sidoTag, sigunguTag);
 	}
@@ -259,20 +318,43 @@ public class TagService {
 
 
 	/**
-	 * 위치 이름으로 기존 태그를 찾거나 새로 생성합니다.
-	 * @param locationName 위치 이름
-	 * @return 찾았거나 생성된 위치 태그
+	 * 시도 이름으로 기존 태그를 찾거나 새로 생성합니다.
+	 * @param sidoName 시도 이름
+	 * @return 찾았거나 생성된 시도 태그
 	 */
-	private Tag findOrCreateLocationTag(String locationName) {
-		Tag existingTag = tagMapper.findTagByNameAndType(locationName, TagType.LOCATION);
+	private Tag findOrCreateSidoTag(String sidoName) {
+		Tag existingTag = tagMapper.findTagByNameAndType(sidoName, TagType.SIDO);
 
 		if (existingTag != null) {
 			return existingTag;
 		}
 
 		Tag newTag = Tag.builder()
-			.tagName(locationName)
-			.tagType(TagType.LOCATION)
+			.tagName(sidoName)
+			.tagType(TagType.SIDO)
+			.tagUseCount(1L)
+			.createdAt(LocalDateTime.now(ZoneId.of(ASIA_SEOUL)))
+			.build();
+
+		tagMapper.insertTag(newTag);
+		return newTag;
+	}
+
+	/**
+	 * 시군구 이름으로 기존 태그를 찾거나 새로 생성합니다.
+	 * @param sigunguName 시군구 이름
+	 * @return 찾았거나 생성된 시군구 태그
+	 */
+	private Tag findOrCreateSigunguTag(String sigunguName) {
+		Tag existingTag = tagMapper.findTagByNameAndType(sigunguName, TagType.SIGUNGU);
+
+		if (existingTag != null) {
+			return existingTag;
+		}
+
+		Tag newTag = Tag.builder()
+			.tagName(sigunguName)
+			.tagType(TagType.SIGUNGU)
 			.tagUseCount(1L)
 			.createdAt(LocalDateTime.now(ZoneId.of(ASIA_SEOUL)))
 			.build();
@@ -387,28 +469,13 @@ public class TagService {
 	}
 
 	/**
-	 * 날짜 문자열과 좌표를 기반으로 기본 태그 목록을 생성합니다.
+	 * 날짜 문자열을 기반으로 계절 태그 목록을 생성합니다.
 	 * @param dateStr 날짜 문자열 (예: "2024 / 1 / 15")
-	 * @param latitude 위도 (선택사항)
-	 * @param longitude 경도 (선택사항)
-	 * @return 생성된 태그명 목록 (시도, 시군구, 계절 순)
+	 * @return 생성된 태그명 목록 (계절 태그)
 	 */
 	@Transactional
-	public List<TagNameResponseDto> createDefaultTags(String dateStr, Double latitude, Double longitude) {
+	public List<TagNameResponseDto> createSeasonTags(String dateStr) {
 		List<TagNameResponseDto> tags = new ArrayList<>();
-		// 지역 태그 생성 (시도, 시군구 순)
-		if (latitude != null && longitude != null) {
-			JusoSigungu sigungu = locationService.findSigunguByCoordinate(latitude, longitude);
-			if (sigungu != null) {
-				String sidoName = sigungu.getSido().getSidoName();
-				String sigunguName = sigungu.getSigunguName();
-				findOrCreateLocationTag(sidoName);
-				findOrCreateLocationTag(sigunguName);
-
-				tags.add(TagNameResponseDto.builder().tagName(sidoName).build());
-				tags.add(TagNameResponseDto.builder().tagName(sigunguName).build());
-			}
-		}
 
 		// 날짜 기반 계절 태그 생성
 		LocalDate date = parseDate(dateStr);

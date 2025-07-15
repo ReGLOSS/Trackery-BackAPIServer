@@ -55,19 +55,18 @@ public class LocationService {
 	private static final String SIDO_SIGUNGU_FORMAT = "%s %s";
 
 	/**
-	 * 좌표로 시도 + 시군구 주소를 조회하는 메서드입니다.
+	 * 좌표로 시도명과 시군구명을 분리하여 조회하는 메서드입니다.
 	 * @param coordinateDto 좌표 DTO : latitude(위도), longitude(경도) 둘 다 double 타입입니다.
-	 * @return : 시도 + 시군구 주소를 포함한 응답 DTO
+	 * @return : 시도명과 시군구명을 분리한 응답 DTO
 	 */
 	public LocationNameResponseDto getLocationNameByCoord(CoordinateDto coordinateDto) {
 		JusoSigungu sigungu = locationMapper.findSigunguByCoordinate(coordinateDto).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND)
 		);
 
-		String locationName = String.format(SIDO_SIGUNGU_FORMAT, sigungu.getSido().getSidoName(),
-			sigungu.getSigunguName());
 		return LocationNameResponseDto.builder()
-			.locationName(locationName)
+			.sdName(sigungu.getSido().getSidoName())
+			.sggName(sigungu.getSigunguName())
 			.build();
 	}
 

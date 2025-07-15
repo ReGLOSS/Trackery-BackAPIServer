@@ -15,9 +15,9 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagCreateRequestDto;
-import com.trackery.trackerybackapiserver.domain.tag.dto.TagDefaultRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagResponseDto;
+import com.trackery.trackerybackapiserver.domain.tag.dto.TagSeasonRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 
 import jakarta.validation.Valid;
@@ -96,16 +96,15 @@ public class TagController {
 	}
 
 	/**
-	 * 날짜 정보와 좌표 정보를 기반으로 기본 태그명 목록을 반환합니다.
-	 * @param request 날짜 및 좌표 정보 요청 데이터
-	 * @return 계절 태그명 목록 + 지역 태그명 목록 (좌표 제공시)
+	 * 날짜 정보를 기반으로 계절 태그명 목록을 반환합니다.
+	 * @param request 날짜 정보 요청 데이터
+	 * @return 계절 태그명 목록
 	 */
-	@PostMapping("/default")
-	public ResponseEntity<ApiResponse<List<TagNameResponseDto>>> getDefaultTags(
-			@RequestBody @Valid TagDefaultRequestDto request) {
+	@PostMapping("/season")
+	public ResponseEntity<ApiResponse<List<TagNameResponseDto>>> getSeasonTags(
+			@RequestBody @Valid TagSeasonRequestDto request) {
 
-		List<TagNameResponseDto> response = tagService.createDefaultTags(
-				request.getDate(), request.getCoordinate().latitude(), request.getCoordinate().longitude());
+		List<TagNameResponseDto> response = tagService.createSeasonTags(request.getDate());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 }

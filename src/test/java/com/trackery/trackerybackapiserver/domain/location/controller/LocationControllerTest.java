@@ -47,6 +47,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * 25. 6. 13.		inari			테스트 추가
  * 25. 6. 15.		inari			Spring-Rest-Docs api문서 추가
  * 25. 7. 11.		inari			태그 제거
+ * 25. 7. 14.       inari       	테스트 코드 수정
  */
 @WebMvcTest(LocationController.class)
 public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -72,7 +73,8 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 			CoordinateDto coordinateDto = new CoordinateDto(37.5665, 126.9780);
 
 			LocationNameResponseDto locationResponse = LocationNameResponseDto.builder()
-				.locationName("서울특별시 동작구")
+				.sdName("서울특별시")
+				.sggName("동작구")
 				.build();
 
 			when(locationService.getLocationNameByCoord(coordinateDto)).thenReturn(locationResponse);
@@ -85,7 +87,8 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			result
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.locationName").value("서울특별시 동작구"));
+				.andExpect(jsonPath("$.data.sdName").value("서울특별시"))
+				.andExpect(jsonPath("$.data.sggName").value("동작구"));
 
 			result.andDo(document("get-location-name-by-coordinate-success",
 				requestFields(
@@ -95,7 +98,8 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 				responseFields(
 					fieldWithPath("code").description("응답 코드"),
 					fieldWithPath("message").description("응답 메시지"),
-					fieldWithPath("data.locationName").description("주소명")
+					fieldWithPath("data.sdName").description("시도명"),
+					fieldWithPath("data.sggName").description("시군구명")
 				)
 			));
 		}

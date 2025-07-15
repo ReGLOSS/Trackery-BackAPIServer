@@ -61,16 +61,16 @@ include::{snippets}/tag-delete-by-admin/http-response.adoc[]
 include::{snippets}/tag-delete-by-admin/response-fields.adoc[]
 '''
 
-=== 기본 태그 생성 API
-==== POST /api/tags/default
+=== 계절 태그 생성 API
+==== POST /api/tags/season
 
 날짜/시간 정보를 기반으로 계절 및 시간대 태그를 자동 생성합니다.
 
 ===== 요청
-include::{snippets}/tag-create-default/http-request.adoc[]
-include::{snippets}/tag-create-default/request-fields.adoc[]
+include::{snippets}/tag-create-season/http-request.adoc[]
+include::{snippets}/tag-create-season/request-fields.adoc[]
 
 ===== 응답
-include::{snippets}/tag-create-default/http-response.adoc[]
-include::{snippets}/tag-create-default/response-fields.adoc[]
+include::{snippets}/tag-create-season/http-response.adoc[]
+include::{snippets}/tag-create-season/response-fields.adoc[]
 '''

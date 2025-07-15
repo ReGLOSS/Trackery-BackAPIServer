@@ -48,6 +48,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * 25. 6. 18.		inari		    Spring-Rest-Docs api문서 추가
  * 25. 7. 9.        inari       	테스트코드 수정
  * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
+ * 25. 7. 14.       inari       	테스트 코드 수정
  */
 @WebMvcTest(ImageController.class)
 class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -255,7 +256,9 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("imageDate").description("수정할 이미지 촬영 날짜 (선택사항)").optional(),
 					fieldWithPath("isPublic").description("수정할 공개 여부 (0: 비공개, 1: 공개, 선택사항)").optional(),
 					fieldWithPath("latitude").description("수정할 위도 (33.0-43.0, 선택사항)").optional(),
-					fieldWithPath("longitude").description("수정할 경도 (124.0-132.0, 선택사항)").optional()
+					fieldWithPath("longitude").description("수정할 경도 (124.0-132.0, 선택사항)").optional(),
+					fieldWithPath("tagsToRemove").description("삭제할 태그 ID 목록 (선택사항)").optional(),
+					fieldWithPath("tagsToAdd").description("추가할 태그명 목록 (선택사항)").optional()
 				),
 				responseFields(
 					fieldWithPath("code").description("상태 코드"),
@@ -335,7 +338,9 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("imageDate").description("수정할 이미지 촬영 날짜").optional(),
 					fieldWithPath("isPublic").description("수정할 공개 여부 (0: 비공개, 1: 공개)"),
 					fieldWithPath("latitude").description("수정할 위도 (33.0-43.0)"),
-					fieldWithPath("longitude").description("수정할 경도 (124.0-132.0)")
+					fieldWithPath("longitude").description("수정할 경도 (124.0-132.0)"),
+					fieldWithPath("tagsToRemove").description("삭제할 태그 ID 목록 (선택사항)").optional(),
+					fieldWithPath("tagsToAdd").description("추가할 태그명 목록 (선택사항)").optional()
 				),
 				responseFields(
 					fieldWithPath("code").description("상태 코드"),
@@ -417,7 +422,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("message").description("응답 메시지"),
 					fieldWithPath("data[].tagId").description("태그 ID"),
 					fieldWithPath("data[].tagName").description("태그명"),
-					fieldWithPath("data[].tagType").description("태그 타입(CUSTOM, LOCATION 등)"),
+					fieldWithPath("data[].tagType").description("태그 타입(CUSTOM, SIDO, SIGUNGU 등)"),
 					fieldWithPath("data[].tagUseCount").description("태그 사용 횟수"),
 					fieldWithPath("data[].createdAt").description("태그 생성 시간")
 				)
@@ -522,7 +527,7 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("message").description("응답 메시지"),
 					fieldWithPath("data.tagId").description("새로운 태그 ID"),
 					fieldWithPath("data.tagName").description("새로운 태그명"),
-					fieldWithPath("data.tagType").description("태그 타입(CUSTOM, LOCATION 등)"),
+					fieldWithPath("data.tagType").description("태그 타입(CUSTOM, SIDO, SIGUNGU 등)"),
 					fieldWithPath("data.tagUseCount").description("태그 사용 횟수"),
 					fieldWithPath("data.createdAt").description("태그 생성 시간")
 				)
