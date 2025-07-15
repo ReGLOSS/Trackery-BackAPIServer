@@ -200,8 +200,10 @@ public class AlbumService {
 		return result;
 	}
 
-	/*
-	모든 앨범에서 어떤 이미지 삭제
+	/**
+	 * 모든 앨범에서 특정 이미지를 삭제하는 메서드
+	 * 이미지 삭제 후 앨범 썸네일 서비스로 이벤트를 발행합니다.
+	 * @param imageId 삭제할 이미지 ID
 	 */
 	public void deleteImageFromAllAlbum(Long imageId) {
 		List<Long> affectedAlbumIds = albumMapper.findAlbumIdsByImageId(imageId);
