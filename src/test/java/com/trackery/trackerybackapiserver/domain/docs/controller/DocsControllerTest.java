@@ -14,11 +14,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
 
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 
@@ -37,9 +35,6 @@ import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerT
 @WebMvcTest(DocsController.class)
 @DisplayName("DocsController 테스트")
 class DocsControllerTest extends CommonMockMvcControllerTestSetUp {
-
-	@Autowired
-	private MockMvc mockMvc;
 
 	@Nested
 	@DisplayName("API 문서 조회")
