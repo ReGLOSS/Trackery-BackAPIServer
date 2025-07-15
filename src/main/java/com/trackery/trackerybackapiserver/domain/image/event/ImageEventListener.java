@@ -28,7 +28,7 @@ public class ImageEventListener {
 	@EventListener
 	public void handleImageDeleteEvent(ImageDeleteEvent event) {
 		try {
-			albumService.deleteAllImageFromAlbum(event.imageId());
+			albumService.deleteImageFromAllAlbum(event.imageId());
 			log.info("모든 앨범에서 이미지 삭제 완료 - imageId: {}", event.imageId());
 		} catch (Exception e) {
 			log.error("앨범에서 이미지 삭제 실패 - imageId: {}, 오류: {}", event.imageId(), e.getMessage());
