@@ -5,12 +5,16 @@ import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -36,9 +40,10 @@ import com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 8.        inari       최초 생성
+ * 25. 7. 8.         inari       최초 생성
  * 25. 7. 11.        inari       최초 생성
  * 25. 7. 14.        inari       테스트 코드 수정
+ * 25. 7. 15.        inari       코드 스멜 수정
  */
 @ExtendWith(MockitoExtension.class)
 class TagServiceTest {
@@ -519,28 +524,22 @@ class TagServiceTest {
 			assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
 		}
 
-		@Test
-		@DisplayName("겨울 계절 태그 생성")
-		void createSeasonTags_Winter() {
-			// given
-			String dateTimeStr = "2024/12/25 10:30:25";
-			when(tagMapper.findTagByNameAndType("겨울", TagType.SEASON)).thenReturn(null);
-			doNothing().when(tagMapper).insertTag(any(Tag.class));
-
-			// when
-			List<TagNameResponseDto> result = tagService.createSeasonTags(dateTimeStr);
-
-			// then
-			assertEquals(1, result.size());
-			assertEquals("겨울", result.get(0).getTagName());
+		static Stream<Arguments> provideSeasonTestData() {
+			return Stream.of(
+				Arguments.of("2024/12/25 10:30:25", "겨울", "겨울 계절 태그 생성"),
+				Arguments.of("2024/4/15 08:30:25", "봄", "봄 계절 태그 생성"),
+				Arguments.of("2024/10/15 19:30:25", "가을", "가을 계절 태그 생성"),
+				Arguments.of("2024/7/15 23:30:25", "여름", "밤 시간대에도 계절 태그만 생성"),
+				Arguments.of("2024/7/15 12:30:25", "여름", "점심 시간대에도 계절 태그만 생성")
+			);
 		}
 
-		@Test
-		@DisplayName("봄 계절 태그 생성")
-		void createSeasonTags_Spring() {
+		@ParameterizedTest
+		@MethodSource("provideSeasonTestData")
+		@DisplayName("다양한 날짜와 시간에 따른 계절 태그 생성")
+		void createSeasonTags_VariousSeasons(String dateTimeStr, String expectedSeason, String testDescription) {
 			// given
-			String dateTimeStr = "2024/4/15 08:30:25";
-			when(tagMapper.findTagByNameAndType("봄", TagType.SEASON)).thenReturn(null);
+			when(tagMapper.findTagByNameAndType(expectedSeason, TagType.SEASON)).thenReturn(null);
 			doNothing().when(tagMapper).insertTag(any(Tag.class));
 
 			// when
@@ -548,55 +547,7 @@ class TagServiceTest {
 
 			// then
 			assertEquals(1, result.size());
-			assertEquals("봄", result.get(0).getTagName());
-		}
-
-		@Test
-		@DisplayName("가을 계절 태그 생성")
-		void createSeasonTags_Autumn() {
-			// given
-			String dateTimeStr = "2024/10/15 19:30:25";
-			when(tagMapper.findTagByNameAndType("가을", TagType.SEASON)).thenReturn(null);
-			doNothing().when(tagMapper).insertTag(any(Tag.class));
-
-			// when
-			List<TagNameResponseDto> result = tagService.createSeasonTags(dateTimeStr);
-
-			// then
-			assertEquals(1, result.size());
-			assertEquals("가을", result.get(0).getTagName());
-		}
-
-		@Test
-		@DisplayName("밤 시간대에도 계절 태그만 생성")
-		void createSeasonTags_Night() {
-			// given
-			String dateTimeStr = "2024/7/15 23:30:25";
-			when(tagMapper.findTagByNameAndType("여름", TagType.SEASON)).thenReturn(null);
-			doNothing().when(tagMapper).insertTag(any(Tag.class));
-
-			// when
-			List<TagNameResponseDto> result = tagService.createSeasonTags(dateTimeStr);
-
-			// then
-			assertEquals(1, result.size());
-			assertEquals("여름", result.get(0).getTagName());
-		}
-
-		@Test
-		@DisplayName("점심 시간대에도 계절 태그만 생성")
-		void createSeasonTags_Lunch() {
-			// given
-			String dateTimeStr = "2024/7/15 12:30:25";
-			when(tagMapper.findTagByNameAndType("여름", TagType.SEASON)).thenReturn(null);
-			doNothing().when(tagMapper).insertTag(any(Tag.class));
-
-			// when
-			List<TagNameResponseDto> result = tagService.createSeasonTags(dateTimeStr);
-
-			// then
-			assertEquals(1, result.size());
-			assertEquals("여름", result.get(0).getTagName());
+			assertEquals(expectedSeason, result.get(0).getTagName());
 		}
 	}
 
