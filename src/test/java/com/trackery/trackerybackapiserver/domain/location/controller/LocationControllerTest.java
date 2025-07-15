@@ -26,6 +26,7 @@ import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
@@ -411,6 +412,42 @@ public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {
 					fieldWithPath("code").description("응답 코드"),
 					fieldWithPath("message").description("응답 메시지"),
 					fieldWithPath("data").description("이미지 목록").type(JsonFieldType.ARRAY)
+				)
+			));
+		}
+	}
+
+	@Nested
+	@DisplayName("시군구 위치 정보 조회 API 테스트")
+	class getSigunguLocationInfoTest {
+		@Test
+		@DisplayName("시군구 ID로 위치 정보 조회 성공")
+		void success() throws Exception {
+			LocationInfoDto response = new LocationInfoDto(0.0, 0.0, "서울특별시", "동작구");
+
+			when(locationService.getSigunguLocationInfoById(11200L)).thenReturn(response);
+
+			ResultActions result = mockMvc.perform(get("/api/location/sigungu/{sigunguId}/location-info", 11200L)
+				.with(user(customUserDetails)));
+
+			result
+				.andExpect(status().isOk())
+				.andExpect(jsonPath("$.data.latitude").value(0.0))
+				.andExpect(jsonPath("$.data.longitude").value(0.0))
+				.andExpect(jsonPath("$.data.sidoName").value("서울특별시"))
+				.andExpect(jsonPath("$.data.sigunguName").value("동작구"));
+
+			result.andDo(document("get-sigungu-location-info-success",
+				pathParameters(
+					parameterWithName("sigunguId").description("시군구 ID")
+				),
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data.latitude").description("위도"),
+					fieldWithPath("data.longitude").description("경도"),
+					fieldWithPath("data.sidoName").description("시도명"),
+					fieldWithPath("data.sigunguName").description("시군구명")
 				)
 			));
 		}
