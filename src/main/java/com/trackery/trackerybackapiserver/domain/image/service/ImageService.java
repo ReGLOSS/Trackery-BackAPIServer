@@ -5,8 +5,10 @@ import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -19,6 +21,7 @@ import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
+import com.trackery.trackerybackapiserver.domain.image.event.ImageDeleteEvent;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
@@ -63,6 +66,7 @@ public class ImageService {
 	private final ImageS3Service imageS3Service;
 	private final LocationService locationService;
 	private final TagService tagService;
+	private final ApplicationEventPublisher applicationEventPublisher;
 
 	/**
 	 * 공개된 이미지 URL 목록을 조회합니다.
@@ -71,6 +75,7 @@ public class ImageService {
 	 *
 	 * @return 공개된 이미지 URL 목록
 	 */
+	@Transactional(readOnly = true)
 	@Cacheable(value = "publicImageUrls")
 	public List<String> getPublicImageUrls() {
 		log.info("공개된 이미지의 주소들을 가져옵니다.");
@@ -100,6 +105,7 @@ public class ImageService {
 	 * @return 이미지 정보 DTO
 	 * @throws ApiException 이미지를 찾을 수 없거나 권한이 없는 경우
 	 */
+	@Transactional(readOnly = true)
 	public ImageDto getOriginalImageByImageId(Long userId, Long imageId) {
 		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE)
@@ -134,6 +140,7 @@ public class ImageService {
 	 * @return 썸네일 DTO 목록을 포함한 페이지네이션 정보
 	 */
 	@SuppressWarnings("squid:S3252")
+	@Transactional(readOnly = true)
 	public PageInfo<ImageThumbnailDto> getImageListByUserId(ImageSearchByUserIdDto imageSearchByUserIdDto) {
 		PageHelper.startPage(imageSearchByUserIdDto.getPageNum(), imageSearchByUserIdDto.getPageSize());
 
@@ -181,6 +188,7 @@ public class ImageService {
 	 * @param userId 사용자 ID
 	 * @return 이미지 썸네일 목록
 	 */
+	@Transactional(readOnly = true)
 	public List<ImageThumbnailDto> getImagesBySido(Long sidoId, Long userId) {
 		log.debug("시도 ID {}의 사용자 ID {} 이미지 목록 조회", sidoId, userId);
 		List<Image> images = imageMapper.findImagesBySidoIdAndUserId(sidoId, userId);
@@ -196,6 +204,7 @@ public class ImageService {
 	 * @param userId 사용자 ID
 	 * @return 이미지 썸네일 목록
 	 */
+	@Transactional(readOnly = true)
 	public List<ImageThumbnailDto> getImagesBySigungu(Long sigunguId, Long userId) {
 		log.debug("시군구 ID {}의 사용자 ID {} 이미지 목록 조회", sigunguId, userId);
 		List<Image> images = imageMapper.findImagesBySigunguIdAndUserId(sigunguId, userId);
@@ -212,6 +221,7 @@ public class ImageService {
 	 * @param updateRequest 수정할 데이터
 	 * @return 수정된 이미지 정보
 	 */
+	@Transactional
 	@CacheEvict(value = "publicImageUrls", allEntries = true)
 	public ImageDto updateImageMetadata(Long imageId, Long userId, ImageUpdateRequestDto updateRequest) {
 		Image existingImage = validateImageUpdatePermission(imageId, userId);
@@ -334,6 +344,7 @@ public class ImageService {
 	 * @param imageId 삭제할 이미지 ID
 	 * @param userId 요청하는 사용자 ID (권한 확인용)
 	 */
+	@Transactional
 	@CacheEvict(value = "publicImageUrls", allEntries = true)
 	public void deleteImage(Long imageId, Long userId) {
 		Image existingImage = imageMapper.findImageByImageId(imageId)
@@ -357,6 +368,8 @@ public class ImageService {
 			throw new ApiException(ErrorCode.NOT_FOUND_IMAGE);
 		}
 
+		applicationEventPublisher.publishEvent(new ImageDeleteEvent(imageId));
+
 		log.info("이미지 삭제 완료 - imageId: {}, userId: {}", imageId, userId);
 	}
 
@@ -366,6 +379,7 @@ public class ImageService {
 	 * @return S3 Presigned URL
 	 * @throws ApiException 이미지를 찾을 수 없는 경우
 	 */
+	@Transactional(readOnly = true)
 	public String fetchS3PresignedUrlByImageId(Long imageId) {
 		Image image = imageMapper.findImageByImageId(imageId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));

@@ -2,7 +2,6 @@ package com.trackery.trackerybackapiserver.domain.album.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-import static org.mockito.ArgumentMatchers.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +29,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEd
 import com.trackery.trackerybackapiserver.domain.album.dto.response.MyAlbumResponseDto;
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.entity.AlbumImage;
+import com.trackery.trackerybackapiserver.domain.album.event.AlbumImageEditEvent;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
@@ -593,6 +593,84 @@ class AlbumServiceTest {
 			assertEquals(ErrorCode.FORBIDDEN, exception.getErrorCode());
 			verify(albumMapper).findByAlbumId(ALBUM_ID);
 			verify(albumMapper, never()).deleteAlbumByAlbumId(anyLong());
+		}
+	}
+
+	@Nested
+	@DisplayName("모든 앨범에서 이미지 삭제 테스트")
+	class DeleteImageFromAllAlbumTest {
+
+		@Test
+		@DisplayName("성공 - 이미지가 여러 앨범에 있을 때 모든 앨범에서 삭제되고 이벤트 발행")
+		void testDeleteImageFromAllAlbum_Success() {
+			Long imageId = 1L;
+			List<Long> affectedAlbumIds = List.of(1L, 2L, 3L);
+			
+			Album album1 = Album.builder().userId(USER_ID).build();
+			ReflectionTestUtils.setField(album1, "albumId", 1L);
+			
+			Album album2 = Album.builder().userId(USER_ID).build();
+			ReflectionTestUtils.setField(album2, "albumId", 2L);
+			
+			Album album3 = Album.builder().userId(USER_ID).build();
+			ReflectionTestUtils.setField(album3, "albumId", 3L);
+
+			when(albumMapper.findAlbumIdsByImageId(imageId)).thenReturn(affectedAlbumIds);
+			when(albumMapper.findByAlbumId(1L)).thenReturn(Optional.of(album1));
+			when(albumMapper.findByAlbumId(2L)).thenReturn(Optional.of(album2));
+			when(albumMapper.findByAlbumId(3L)).thenReturn(Optional.of(album3));
+			
+			doNothing().when(albumMapper).deleteAllAlbumImagesByImageId(imageId);
+
+			assertDoesNotThrow(() -> albumService.deleteImageFromAllAlbum(imageId));
+
+			verify(albumMapper).findAlbumIdsByImageId(imageId);
+			verify(albumMapper).deleteAllAlbumImagesByImageId(imageId);
+			verify(albumMapper).findByAlbumId(1L);
+			verify(albumMapper).findByAlbumId(2L);
+			verify(albumMapper).findByAlbumId(3L);
+			verify(applicationEventPublisher, times(3)).publishEvent(any(AlbumImageEditEvent.class));
+		}
+
+		@Test
+		@DisplayName("성공 - 이미지가 아무 앨범에도 없을 때")
+		void testDeleteImageFromAllAlbum_NoAlbums() {
+			Long imageId = 1L;
+			List<Long> affectedAlbumIds = List.of();
+
+			when(albumMapper.findAlbumIdsByImageId(imageId)).thenReturn(affectedAlbumIds);
+			doNothing().when(albumMapper).deleteAllAlbumImagesByImageId(imageId);
+
+			assertDoesNotThrow(() -> albumService.deleteImageFromAllAlbum(imageId));
+
+			verify(albumMapper).findAlbumIdsByImageId(imageId);
+			verify(albumMapper).deleteAllAlbumImagesByImageId(imageId);
+			verify(albumMapper, never()).findByAlbumId(any());
+			verify(applicationEventPublisher, never()).publishEvent(any(AlbumImageEditEvent.class));
+		}
+
+		@Test
+		@DisplayName("성공 - 일부 앨범이 삭제된 경우 해당 앨범은 건너뛰기")
+		void testDeleteImageFromAllAlbum_SomeAlbumsDeleted() {
+			Long imageId = 1L;
+			List<Long> affectedAlbumIds = List.of(1L, 2L);
+			
+			Album album1 = Album.builder().userId(USER_ID).build();
+			ReflectionTestUtils.setField(album1, "albumId", 1L);
+
+			when(albumMapper.findAlbumIdsByImageId(imageId)).thenReturn(affectedAlbumIds);
+			when(albumMapper.findByAlbumId(1L)).thenReturn(Optional.of(album1));
+			when(albumMapper.findByAlbumId(2L)).thenReturn(Optional.empty());
+			
+			doNothing().when(albumMapper).deleteAllAlbumImagesByImageId(imageId);
+
+			assertDoesNotThrow(() -> albumService.deleteImageFromAllAlbum(imageId));
+
+			verify(albumMapper).findAlbumIdsByImageId(imageId);
+			verify(albumMapper).deleteAllAlbumImagesByImageId(imageId);
+			verify(albumMapper).findByAlbumId(1L);
+			verify(albumMapper).findByAlbumId(2L);
+			verify(applicationEventPublisher, times(1)).publishEvent(any(AlbumImageEditEvent.class));
 		}
 	}
 }

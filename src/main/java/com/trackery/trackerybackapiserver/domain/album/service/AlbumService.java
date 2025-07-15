@@ -201,6 +201,34 @@ public class AlbumService {
 	}
 
 	/**
+	 * 모든 앨범에서 특정 이미지를 삭제하는 메서드
+	 * 이미지 삭제 후 앨범 썸네일 서비스로 이벤트를 발행합니다.
+	 * @param imageId 삭제할 이미지 ID
+	 */
+	public void deleteImageFromAllAlbum(Long imageId) {
+		List<Long> affectedAlbumIds = albumMapper.findAlbumIdsByImageId(imageId);
+
+		albumMapper.deleteAllAlbumImagesByImageId(imageId);
+
+		for (Long albumId : affectedAlbumIds) {
+			Album album = albumMapper.findByAlbumId(albumId).orElse(null);
+			if (album != null) {
+				AlbumImageEditResponseDto responseDto = AlbumImageEditResponseDto.builder()
+					.albumId(albumId)
+					.succeededImageCount(1)
+					.failedImageCount(0)
+					.succeededImageIds(Set.of(imageId))
+					.failedImageIds(Map.of())
+					.build();
+
+				applicationEventPublisher.publishEvent(
+					new AlbumImageEditEvent(album, responseDto, AlbumImageEditOperation.DELETE)
+				);
+			}
+		}
+	}
+
+	/**
 	 * 앨범 메타데이터 조회
 	 * @param userId 요청한 유저 ID
 	 * @param albumId 조회할 앨범 ID

@@ -21,4 +21,3 @@ public record AlbumImageEditEvent(
 	AlbumImageEditOperation albumImageEditOperation
 ) {
 }
-
