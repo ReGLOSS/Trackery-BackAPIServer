@@ -588,7 +588,7 @@ class ImageServiceTest {
 				.build();
 
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
-			when(imageMapper.updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), eq(newDate), eq(1)))
+			when(imageMapper.updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", newDate, 1))
 				.thenReturn(1);
 			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
 			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
@@ -598,7 +598,7 @@ class ImageServiceTest {
 
 			assertNotNull(result);
 			verify(imageMapper, times(2)).findImageByImageId(imageId);
-			verify(imageMapper).updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), eq(newDate), eq(1));
+			verify(imageMapper).updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", newDate, 1);
 			verify(tagService, times(1)).getTagsForImageDisplay(imageId);
 		}
 	}
