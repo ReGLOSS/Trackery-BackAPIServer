@@ -200,6 +200,14 @@ public class AlbumService {
 		return result;
 	}
 
+	/*
+	모든 앨범에서 어떤 이미지 삭제
+	 */
+	public void deleteAllImageFromAlbum(Long imageId) {
+		albumMapper.deleteAllAlbumImagesByImageId(imageId);
+	}
+
+
 	/**
 	 * 앨범 메타데이터 조회
 	 * @param userId 요청한 유저 ID

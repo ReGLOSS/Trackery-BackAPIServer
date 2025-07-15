@@ -109,4 +109,9 @@
         WHERE ai.album_id = #{albumId}
           AND i.is_deleted = 0
     </select>
+
+    <delete id="deleteAllAlbumImagesByImageId">
+        DELETE FROM album_image
+        WHERE image_id = #{imageId}
+    </delete>
 </mapper>
