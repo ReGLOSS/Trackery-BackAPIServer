@@ -203,10 +203,28 @@ public class AlbumService {
 	/*
 	모든 앨범에서 어떤 이미지 삭제
 	 */
-	public void deleteAllImageFromAlbum(Long imageId) {
-		albumMapper.deleteAllAlbumImagesByImageId(imageId);
-	}
+	public void deleteImageFromAllAlbum(Long imageId) {
+		List<Long> affectedAlbumIds = albumMapper.findAlbumIdsByImageId(imageId);
 
+		albumMapper.deleteAllAlbumImagesByImageId(imageId);
+
+		for (Long albumId : affectedAlbumIds) {
+			Album album = albumMapper.findByAlbumId(albumId).orElse(null);
+			if (album != null) {
+				AlbumImageEditResponseDto responseDto = AlbumImageEditResponseDto.builder()
+					.albumId(albumId)
+					.succeededImageCount(1)
+					.failedImageCount(0)
+					.succeededImageIds(Set.of(imageId))
+					.failedImageIds(Map.of())
+					.build();
+
+				applicationEventPublisher.publishEvent(
+					new AlbumImageEditEvent(album, responseDto, AlbumImageEditOperation.DELETE)
+				);
+			}
+		}
+	}
 
 	/**
 	 * 앨범 메타데이터 조회
