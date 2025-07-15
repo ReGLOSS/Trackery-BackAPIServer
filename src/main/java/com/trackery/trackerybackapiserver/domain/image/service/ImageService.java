@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +20,7 @@ import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
+import com.trackery.trackerybackapiserver.domain.image.event.ImageDeleteEvent;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
@@ -63,6 +65,7 @@ public class ImageService {
 	private final ImageS3Service imageS3Service;
 	private final LocationService locationService;
 	private final TagService tagService;
+	private final ApplicationEventPublisher applicationEventPublisher;
 
 	/**
 	 * 공개된 이미지 URL 목록을 조회합니다.
@@ -356,6 +359,8 @@ public class ImageService {
 		if (deletedRows == 0) {
 			throw new ApiException(ErrorCode.NOT_FOUND_IMAGE);
 		}
+
+		applicationEventPublisher.publishEvent(new ImageDeleteEvent(imageId));
 
 		log.info("이미지 삭제 완료 - imageId: {}, userId: {}", imageId, userId);
 	}
