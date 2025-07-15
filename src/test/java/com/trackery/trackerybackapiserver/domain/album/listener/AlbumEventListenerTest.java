@@ -16,7 +16,7 @@ import com.trackery.trackerybackapiserver.domain.album.dto.response.AlbumImageEd
 import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.enums.AlbumImageEditOperation;
 import com.trackery.trackerybackapiserver.domain.album.event.AlbumImageEditEvent;
-import com.trackery.trackerybackapiserver.domain.album.event.AlbumThumbnailEventListener;
+import com.trackery.trackerybackapiserver.domain.album.event.AlbumEventListener;
 import com.trackery.trackerybackapiserver.domain.album.service.AlbumThumbnailService;
 
 /**
@@ -32,13 +32,13 @@ import com.trackery.trackerybackapiserver.domain.album.service.AlbumThumbnailSer
  * 25. 6. 28.		inari			코드 스멜 수정
  */
 @ExtendWith(MockitoExtension.class)
-class AlbumThumbnailEventListenerTest {
+class AlbumEventListenerTest {
 
 	@Mock
 	private AlbumThumbnailService albumThumbnailService;
 
 	@InjectMocks
-	private AlbumThumbnailEventListener albumThumbnailEventListener;
+	private AlbumEventListener albumEventListener;
 
 	private static final Long ALBUM_ID = 1L;
 	private static final Long IMAGE_ID = 2L;
@@ -69,7 +69,7 @@ class AlbumThumbnailEventListenerTest {
 		doNothing().when(albumThumbnailService).handleAlbumThumbnailChange(album, dto, AlbumImageEditOperation.ADD);
 
 		// when
-		albumThumbnailEventListener.handleAlbumEditEvent(addEvent);
+		albumEventListener.handleAlbumEditEvent(addEvent);
 
 		// then
 		verify(albumThumbnailService, times(1)).handleAlbumThumbnailChange(album, dto, AlbumImageEditOperation.ADD);
@@ -79,14 +79,14 @@ class AlbumThumbnailEventListenerTest {
 	void 이미지_삭제_이벤트_처리_성공() {
 		doNothing().when(albumThumbnailService).handleAlbumThumbnailChange(album, dto, AlbumImageEditOperation.DELETE);
 
-		albumThumbnailEventListener.handleAlbumEditEvent(deleteEvent);
+		albumEventListener.handleAlbumEditEvent(deleteEvent);
 
 		verify(albumThumbnailService, times(1)).handleAlbumThumbnailChange(album, dto, AlbumImageEditOperation.DELETE);
 	}
 
 	@Test
 	void 서비스_메서드에_올바른_파라미터_전달_확인() {
-		albumThumbnailEventListener.handleAlbumEditEvent(addEvent);
+		albumEventListener.handleAlbumEditEvent(addEvent);
 
 		verify(albumThumbnailService).handleAlbumThumbnailChange(
 			// eq(album)이 불필요한 이유는 album이 객체 참조이고, Mockito가 기본적으로 equals() 메서드로 객체를 비교하기 때문
