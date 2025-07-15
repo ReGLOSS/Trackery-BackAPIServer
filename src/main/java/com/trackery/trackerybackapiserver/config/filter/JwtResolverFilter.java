@@ -35,11 +35,13 @@ import lombok.extern.slf4j.Slf4j;
  * -----------------------------------------------------------
  * 25. 2. 19.        durururuk       최초 생성
  * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
+ * 25. 7. 15.        inari      	"Set-Cookie" 상수 전환
  */
 @Slf4j
 @RequiredArgsConstructor
 public class JwtResolverFilter extends OncePerRequestFilter {
 
+	public static final String SET_COOKIE = "Set-Cookie";
 	private final JwtService jwtService;
 	private final UserService userService;
 
@@ -119,7 +121,7 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 				|| e.getErrorCode() == ErrorCode.INTERNAL_SERVER_ERROR) {
 				ResponseCookie clearCookie = CookieUtil.deleteCookie(
 					CookieName.REFRESH_TOKEN.getValue(), SameSitePolicy.STRICT.getValue());
-				response.addHeader("Set-Cookie", clearCookie.toString());
+				response.addHeader(SET_COOKIE, clearCookie.toString());
 			}
 
 			throw e;
@@ -127,7 +129,7 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 			log.error("토큰 재발행 중 에러 발생", e);
 			ResponseCookie clearCookie = CookieUtil.deleteCookie(
 				CookieName.REFRESH_TOKEN.getValue(), SameSitePolicy.STRICT.getValue());
-			response.addHeader("Set-Cookie", clearCookie.toString());
+			response.addHeader(SET_COOKIE, clearCookie.toString());
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 	}
@@ -143,7 +145,7 @@ public class JwtResolverFilter extends OncePerRequestFilter {
 		ResponseCookie refreshTokenCookie = CookieUtil.createHttpOnlyCookie(
 			CookieName.REFRESH_TOKEN.getValue(), authTokenDto.refreshToken(), Duration.ofDays(7));
 
-		response.addHeader("Set-Cookie", accessTokenCookie.toString());
-		response.addHeader("Set-Cookie", refreshTokenCookie.toString());
+		response.addHeader(SET_COOKIE, accessTokenCookie.toString());
+		response.addHeader(SET_COOKIE, refreshTokenCookie.toString());
 	}
 }
