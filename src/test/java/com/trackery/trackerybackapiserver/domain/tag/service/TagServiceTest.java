@@ -4,19 +4,26 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSido;
 import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
@@ -36,9 +43,10 @@ import com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 8.        inari       최초 생성
+ * 25. 7. 8.         inari       최초 생성
  * 25. 7. 11.        inari       최초 생성
  * 25. 7. 14.        inari       테스트 코드 수정
+ * 25. 7. 15.        inari       코드 스멜 수정, 테스트코드 추가
  */
 @ExtendWith(MockitoExtension.class)
 class TagServiceTest {
@@ -64,7 +72,7 @@ class TagServiceTest {
 			.createdAt(LocalDateTime.now())
 			.build();
 		// Set tagId using reflection since it's not included in the builder
-		org.springframework.test.util.ReflectionTestUtils.setField(testTag, "tagId", 1L);
+		ReflectionTestUtils.setField(testTag, "tagId", 1L);
 
 		createRequestDto = new TagCreateRequestDto("새태그", null);
 	}
@@ -421,7 +429,7 @@ class TagServiceTest {
 				.tagUseCount(0L)
 				.createdAt(LocalDateTime.now())
 				.build();
-			org.springframework.test.util.ReflectionTestUtils.setField(newTag, "tagId", 2L);
+			ReflectionTestUtils.setField(newTag, "tagId", 2L);
 
 			when(tagMapper.findTagById(tagId)).thenReturn(testTag);
 			when(tagMapper.isImageTagConnected(imageId, tagId)).thenReturn(true);
@@ -430,7 +438,7 @@ class TagServiceTest {
 			// Mock insertTag to set the ID of the tag after insertion
 			doAnswer(invocation -> {
 				Tag tag = invocation.getArgument(0);
-				org.springframework.test.util.ReflectionTestUtils.setField(tag, "tagId", 2L);
+				ReflectionTestUtils.setField(tag, "tagId", 2L);
 				return null;
 			}).when(tagMapper).insertTag(any(Tag.class));
 			
@@ -519,28 +527,22 @@ class TagServiceTest {
 			assertEquals(ErrorCode.BAD_REQUEST, exception.getErrorCode());
 		}
 
-		@Test
-		@DisplayName("겨울 계절 태그 생성")
-		void createSeasonTags_Winter() {
-			// given
-			String dateTimeStr = "2024/12/25 10:30:25";
-			when(tagMapper.findTagByNameAndType("겨울", TagType.SEASON)).thenReturn(null);
-			doNothing().when(tagMapper).insertTag(any(Tag.class));
-
-			// when
-			List<TagNameResponseDto> result = tagService.createSeasonTags(dateTimeStr);
-
-			// then
-			assertEquals(1, result.size());
-			assertEquals("겨울", result.get(0).getTagName());
+		static Stream<Arguments> provideSeasonTestData() {
+			return Stream.of(
+				Arguments.of("2024/12/25 10:30:25", "겨울", "겨울 계절 태그 생성"),
+				Arguments.of("2024/4/15 08:30:25", "봄", "봄 계절 태그 생성"),
+				Arguments.of("2024/10/15 19:30:25", "가을", "가을 계절 태그 생성"),
+				Arguments.of("2024/7/15 23:30:25", "여름", "밤 시간대에도 계절 태그만 생성"),
+				Arguments.of("2024/7/15 12:30:25", "여름", "점심 시간대에도 계절 태그만 생성")
+			);
 		}
 
-		@Test
-		@DisplayName("봄 계절 태그 생성")
-		void createSeasonTags_Spring() {
+		@ParameterizedTest
+		@MethodSource("provideSeasonTestData")
+		@DisplayName("다양한 날짜와 시간에 따른 계절 태그 생성")
+		void createSeasonTags_VariousSeasons(String dateTimeStr, String expectedSeason, String testDescription) {
 			// given
-			String dateTimeStr = "2024/4/15 08:30:25";
-			when(tagMapper.findTagByNameAndType("봄", TagType.SEASON)).thenReturn(null);
+			when(tagMapper.findTagByNameAndType(expectedSeason, TagType.SEASON)).thenReturn(null);
 			doNothing().when(tagMapper).insertTag(any(Tag.class));
 
 			// when
@@ -548,55 +550,7 @@ class TagServiceTest {
 
 			// then
 			assertEquals(1, result.size());
-			assertEquals("봄", result.get(0).getTagName());
-		}
-
-		@Test
-		@DisplayName("가을 계절 태그 생성")
-		void createSeasonTags_Autumn() {
-			// given
-			String dateTimeStr = "2024/10/15 19:30:25";
-			when(tagMapper.findTagByNameAndType("가을", TagType.SEASON)).thenReturn(null);
-			doNothing().when(tagMapper).insertTag(any(Tag.class));
-
-			// when
-			List<TagNameResponseDto> result = tagService.createSeasonTags(dateTimeStr);
-
-			// then
-			assertEquals(1, result.size());
-			assertEquals("가을", result.get(0).getTagName());
-		}
-
-		@Test
-		@DisplayName("밤 시간대에도 계절 태그만 생성")
-		void createSeasonTags_Night() {
-			// given
-			String dateTimeStr = "2024/7/15 23:30:25";
-			when(tagMapper.findTagByNameAndType("여름", TagType.SEASON)).thenReturn(null);
-			doNothing().when(tagMapper).insertTag(any(Tag.class));
-
-			// when
-			List<TagNameResponseDto> result = tagService.createSeasonTags(dateTimeStr);
-
-			// then
-			assertEquals(1, result.size());
-			assertEquals("여름", result.get(0).getTagName());
-		}
-
-		@Test
-		@DisplayName("점심 시간대에도 계절 태그만 생성")
-		void createSeasonTags_Lunch() {
-			// given
-			String dateTimeStr = "2024/7/15 12:30:25";
-			when(tagMapper.findTagByNameAndType("여름", TagType.SEASON)).thenReturn(null);
-			doNothing().when(tagMapper).insertTag(any(Tag.class));
-
-			// when
-			List<TagNameResponseDto> result = tagService.createSeasonTags(dateTimeStr);
-
-			// then
-			assertEquals(1, result.size());
-			assertEquals("여름", result.get(0).getTagName());
+			assertEquals(expectedSeason, result.get(0).getTagName());
 		}
 	}
 
@@ -660,7 +614,7 @@ class TagServiceTest {
 				.tagUseCount(1L)
 				.createdAt(LocalDateTime.now())
 				.build();
-			org.springframework.test.util.ReflectionTestUtils.setField(sidoTag, "tagId", 1L);
+			ReflectionTestUtils.setField(sidoTag, "tagId", 1L);
 
 			Tag sigunguTag = Tag.builder()
 				.tagName("강남구")
@@ -668,7 +622,7 @@ class TagServiceTest {
 				.tagUseCount(1L)
 				.createdAt(LocalDateTime.now())
 				.build();
-			org.springframework.test.util.ReflectionTestUtils.setField(sigunguTag, "tagId", 2L);
+			ReflectionTestUtils.setField(sigunguTag, "tagId", 2L);
 
 			Tag customTag = Tag.builder()
 				.tagName("커스텀태그")
@@ -676,7 +630,7 @@ class TagServiceTest {
 				.tagUseCount(1L)
 				.createdAt(LocalDateTime.now())
 				.build();
-			org.springframework.test.util.ReflectionTestUtils.setField(customTag, "tagId", 3L);
+			ReflectionTestUtils.setField(customTag, "tagId", 3L);
 
 			// 무순서로 리스트 생성
 			List<Tag> unorderedTags = List.of(customTag, sidoTag, sigunguTag);
@@ -740,6 +694,260 @@ class TagServiceTest {
 			// then
 			verify(tagMapper).decrementTagUseCountByImageId(imageId);
 			verify(tagMapper).deleteImageTagsByImageId(imageId);
+		}
+	}
+
+	@Nested
+	@DisplayName("태그 삭제 처리 테스트")
+	class ProcessTagRemovalTest {
+
+		@Test
+		@DisplayName("이미지 수정 요청에서 태그 삭제 처리 성공")
+		void processTagRemoval_Success() {
+			// given
+			Long imageId = 1L;
+			List<Long> tagsToRemove = List.of(1L, 2L, 3L);
+			
+			// ImageUpdateRequestDto mock
+			com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto updateRequest = 
+				com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto.builder()
+					.tagsToRemove(tagsToRemove)
+					.build();
+			
+			doNothing().when(tagMapper).deleteImageTag(any(), any());
+			doNothing().when(tagMapper).decrementTagUseCount(any());
+
+			// when
+			tagService.processTagRemoval(imageId, updateRequest);
+
+			// then
+			verify(tagMapper, times(3)).deleteImageTag(eq(imageId), any());
+			verify(tagMapper, times(3)).decrementTagUseCount(any());
+		}
+
+		@Test
+		@DisplayName("삭제할 태그가 없는 경우 아무것도 하지 않음")
+		void processTagRemoval_EmptyList() {
+			// given
+			Long imageId = 1L;
+			ImageUpdateRequestDto updateRequest =
+				ImageUpdateRequestDto.builder()
+					.tagsToRemove(List.of())
+					.build();
+
+			// when
+			tagService.processTagRemoval(imageId, updateRequest);
+
+			// then
+			verify(tagMapper, never()).deleteImageTag(any(), any());
+			verify(tagMapper, never()).decrementTagUseCount(any());
+		}
+
+		@Test
+		@DisplayName("삭제할 태그가 null인 경우 아무것도 하지 않음")
+		void processTagRemoval_NullList() {
+			// given
+			Long imageId = 1L;
+			ImageUpdateRequestDto updateRequest =
+				ImageUpdateRequestDto.builder()
+					.tagsToRemove(null)
+					.build();
+
+			// when
+			tagService.processTagRemoval(imageId, updateRequest);
+
+			// then
+			verify(tagMapper, never()).deleteImageTag(any(), any());
+			verify(tagMapper, never()).decrementTagUseCount(any());
+		}
+
+		@Test
+		@DisplayName("태그 삭제 중 예외 발생 시 로그 출력 후 계속 진행")
+		void processTagRemoval_ExceptionHandling() {
+			// given
+			Long imageId = 1L;
+			List<Long> tagsToRemove = List.of(1L, 2L);
+			
+			ImageUpdateRequestDto updateRequest =
+				ImageUpdateRequestDto.builder()
+					.tagsToRemove(tagsToRemove)
+					.build();
+			
+			// 첫 번째 태그 삭제 시 예외 발생
+			doThrow(new RuntimeException("Database error")).when(tagMapper).deleteImageTag(imageId, 1L);
+			// 두 번째 태그 삭제는 정상 처리
+			doNothing().when(tagMapper).deleteImageTag(imageId, 2L);
+			doNothing().when(tagMapper).decrementTagUseCount(2L);
+
+			// when
+			tagService.processTagRemoval(imageId, updateRequest);
+
+			// then
+			verify(tagMapper, times(2)).deleteImageTag(eq(imageId), any());
+			verify(tagMapper, times(1)).decrementTagUseCount(2L);
+		}
+	}
+
+	@Nested
+	@DisplayName("태그 추가 처리 테스트")
+	class ProcessTagAdditionTest {
+
+		@Test
+		@DisplayName("이미지 수정 요청에서 태그 추가 처리 성공")
+		void processTagAddition_Success() {
+			// given
+			Long imageId = 1L;
+			List<String> tagsToAdd = List.of("새태그1", "새태그2", "새태그3");
+			
+			ImageUpdateRequestDto updateRequest =
+				ImageUpdateRequestDto.builder()
+					.tagsToAdd(tagsToAdd)
+					.build();
+			
+			// 각 태그명에 대해 기존 태그 없음으로 설정
+			when(tagMapper.findExistingTagByName(any())).thenReturn(null);
+			doNothing().when(tagMapper).insertTag(any());
+			doNothing().when(tagMapper).insertImageTag(any());
+			doNothing().when(tagMapper).incrementTagUseCount(any());
+
+			// when
+			tagService.processTagAddition(imageId, updateRequest);
+
+			// then
+			verify(tagMapper, times(3)).findExistingTagByName(any());
+			verify(tagMapper, times(3)).insertTag(any());
+			verify(tagMapper, times(3)).insertImageTag(any());
+			verify(tagMapper, times(3)).incrementTagUseCount(any());
+		}
+
+		@Test
+		@DisplayName("기존 태그가 있는 경우 새로 생성하지 않고 기존 태그 사용")
+		void processTagAddition_ExistingTag() {
+			// given
+			Long imageId = 1L;
+			List<String> tagsToAdd = List.of("기존태그");
+			
+			ImageUpdateRequestDto updateRequest =
+				ImageUpdateRequestDto.builder()
+					.tagsToAdd(tagsToAdd)
+					.build();
+			
+			when(tagMapper.findExistingTagByName("기존태그")).thenReturn(testTag);
+			doNothing().when(tagMapper).insertImageTag(any());
+			doNothing().when(tagMapper).incrementTagUseCount(any());
+
+			// when
+			tagService.processTagAddition(imageId, updateRequest);
+
+			// then
+			verify(tagMapper, times(1)).findExistingTagByName("기존태그");
+			verify(tagMapper, never()).insertTag(any());
+			verify(tagMapper, times(1)).insertImageTag(any());
+			verify(tagMapper, times(1)).incrementTagUseCount(any());
+		}
+
+		@Test
+		@DisplayName("추가할 태그가 없는 경우 아무것도 하지 않음")
+		void processTagAddition_EmptyList() {
+			// given
+			Long imageId = 1L;
+			ImageUpdateRequestDto updateRequest =
+				ImageUpdateRequestDto.builder()
+					.tagsToAdd(List.of())
+					.build();
+
+			// when
+			tagService.processTagAddition(imageId, updateRequest);
+
+			// then
+			verify(tagMapper, never()).findExistingTagByName(any());
+			verify(tagMapper, never()).insertTag(any());
+			verify(tagMapper, never()).insertImageTag(any());
+			verify(tagMapper, never()).incrementTagUseCount(any());
+		}
+
+		@Test
+		@DisplayName("추가할 태그가 null인 경우 아무것도 하지 않음")
+		void processTagAddition_NullList() {
+			// given
+			Long imageId = 1L;
+			ImageUpdateRequestDto updateRequest =
+				ImageUpdateRequestDto.builder()
+					.tagsToAdd(null)
+					.build();
+
+			// when
+			tagService.processTagAddition(imageId, updateRequest);
+
+			// then
+			verify(tagMapper, never()).findExistingTagByName(any());
+			verify(tagMapper, never()).insertTag(any());
+			verify(tagMapper, never()).insertImageTag(any());
+			verify(tagMapper, never()).incrementTagUseCount(any());
+		}
+
+		@Test
+		@DisplayName("빈 문자열이나 공백 태그는 무시")
+		void processTagAddition_FilterEmptyAndWhitespace() {
+			// given
+			Long imageId = 1L;
+			List<String> tagsToAdd = new ArrayList<>();
+			tagsToAdd.add("유효한태그");
+			tagsToAdd.add("");
+			tagsToAdd.add("   ");
+			tagsToAdd.add(null);
+			tagsToAdd.add("또다른태그");
+			
+			ImageUpdateRequestDto updateRequest =
+				ImageUpdateRequestDto.builder()
+					.tagsToAdd(tagsToAdd)
+					.build();
+			
+			when(tagMapper.findExistingTagByName(any())).thenReturn(null);
+			doNothing().when(tagMapper).insertTag(any());
+			doNothing().when(tagMapper).insertImageTag(any());
+			doNothing().when(tagMapper).incrementTagUseCount(any());
+
+			// when
+			tagService.processTagAddition(imageId, updateRequest);
+
+			// then
+			// 유효한 태그 2개만 처리되어야 함
+			verify(tagMapper, times(2)).findExistingTagByName(any());
+			verify(tagMapper, times(2)).insertTag(any());
+			verify(tagMapper, times(2)).insertImageTag(any());
+			verify(tagMapper, times(2)).incrementTagUseCount(any());
+		}
+
+		@Test
+		@DisplayName("태그 추가 중 예외 발생 시 로그 출력 후 계속 진행")
+		void processTagAddition_ExceptionHandling() {
+			// given
+			Long imageId = 1L;
+			List<String> tagsToAdd = List.of("실패태그", "성공태그");
+			
+			ImageUpdateRequestDto updateRequest =
+				ImageUpdateRequestDto.builder()
+					.tagsToAdd(tagsToAdd)
+					.build();
+			
+			// 첫 번째 태그 추가 시 예외 발생
+			when(tagMapper.findExistingTagByName("실패태그")).thenReturn(null);
+			doThrow(new RuntimeException("Database error")).when(tagMapper).insertTag(any());
+			
+			// 두 번째 태그는 정상 처리
+			when(tagMapper.findExistingTagByName("성공태그")).thenReturn(testTag);
+			doNothing().when(tagMapper).insertImageTag(any());
+			doNothing().when(tagMapper).incrementTagUseCount(any());
+
+			// when
+			tagService.processTagAddition(imageId, updateRequest);
+
+			// then
+			verify(tagMapper, times(2)).findExistingTagByName(any());
+			verify(tagMapper, times(1)).insertTag(any());
+			verify(tagMapper, times(1)).insertImageTag(any());
+			verify(tagMapper, times(1)).incrementTagUseCount(any());
 		}
 	}
 }

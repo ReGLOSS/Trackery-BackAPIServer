@@ -178,7 +178,7 @@
             <if test="imageName != null">image_name = #{imageName},</if>
             <if test="imageContent != null">image_contents = #{imageContent},</if>
             <if test="imageDate != null">image_date = #{imageDate},</if>
-            <if test="isPublic != null">is_public = #{isPublic},</if>
+            <if test="isPublic != null">is_public = #{isPublic}</if>
         </set>
         WHERE image_id = #{imageId}
         AND is_deleted = 0

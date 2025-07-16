@@ -24,6 +24,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateRequestDto;
+import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationNameResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.MapResponseDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.UserStatsDto;
@@ -44,7 +45,7 @@ import com.trackery.trackerybackapiserver.domain.location.mapper.LocationMapper;
  * 25. 6. 13.		Narilee			최초 생성
  * 25. 6. 22.		Narilee			좌표 업데이트 테스트 추가
  * 25. 7. 11.		inari			태그 제거
- * 25. 7. 14.       inari       	테스트 코드 수정
+ * 25. 7. 14.       inari       	누락된 테스트 코드 추가
  */
 
 @ExtendWith(MockitoExtension.class)
@@ -440,6 +441,80 @@ class LocationServiceTest {
 		}
 	}
 
+	@Nested
+	@DisplayName("좌표로 시군구 조회 테스트")
+	class findSigunguByCoordinateTest {
+		@Test
+		@DisplayName("성공 - 좌표로 시군구 정보 반환")
+		void success() {
+			double latitude = 37.5665;
+			double longitude = 126.9780;
+			JusoSido seoul = createSido(11L, "서울특별시");
+			JusoSigungu dongjak = createSigungu(11200L, "동작구", seoul);
+
+			when(locationMapper.findSigunguByPoint(any(Point.class))).thenReturn(Optional.of(dongjak));
+
+			JusoSigungu result = locationService.findSigunguByCoordinate(latitude, longitude);
+
+			assertNotNull(result);
+			assertEquals("동작구", result.getSigunguName());
+			assertEquals(11200L, result.getSigunguId());
+			assertEquals("서울특별시", result.getSido().getSidoName());
+			assertEquals(11L, result.getSido().getSidoId());
+			verify(locationMapper, times(1)).findSigunguByPoint(any(Point.class));
+		}
+
+		@Test
+		@DisplayName("실패 - 좌표로 시군구를 찾을 수 없는 경우 null 반환")
+		void notFound() {
+			double latitude = 0.0;
+			double longitude = 0.0;
+
+			when(locationMapper.findSigunguByPoint(any(Point.class))).thenReturn(Optional.empty());
+
+			JusoSigungu result = locationService.findSigunguByCoordinate(latitude, longitude);
+
+			assertNull(result);
+			verify(locationMapper, times(1)).findSigunguByPoint(any(Point.class));
+		}
+	}
+
+	@Nested
+	@DisplayName("시군구 ID로 위치 정보 조회 테스트")
+	class getSigunguLocationInfoByIdTest {
+		@Test
+		@DisplayName("성공 - 시군구 ID로 위치 정보 반환")
+		void success() {
+			Long sigunguId = 11200L;
+			JusoSido seoul = createSido(11L, "서울특별시");
+			JusoSigungu dongjak = createSigungu(sigunguId, "동작구", seoul);
+
+			when(locationMapper.findSigunguById(sigunguId)).thenReturn(Optional.of(dongjak));
+
+			LocationInfoDto result = locationService.getSigunguLocationInfoById(sigunguId);
+
+			assertNotNull(result);
+			assertEquals(0.0, result.latitude());
+			assertEquals(0.0, result.longitude());
+			assertEquals("서울특별시", result.sidoName());
+			assertEquals("동작구", result.sigunguName());
+			verify(locationMapper, times(1)).findSigunguById(sigunguId);
+		}
+
+		@Test
+		@DisplayName("실패 - 존재하지 않는 시군구 ID")
+		void notFound() {
+			Long sigunguId = 99999L;
+			when(locationMapper.findSigunguById(sigunguId)).thenReturn(Optional.empty());
+
+			ApiException exception = assertThrows(ApiException.class,
+				() -> locationService.getSigunguLocationInfoById(sigunguId));
+
+			assertEquals(ErrorCode.NOT_FOUND_SIGUNGU, exception.getErrorCode());
+			verify(locationMapper, times(1)).findSigunguById(sigunguId);
+		}
+	}
+
 	private JusoSido createSido(Long sidoId, String sidoName) {
 		JusoSido sido = new JusoSido();
 		sido.setSidoId(sidoId);
@@ -453,6 +528,77 @@ class LocationServiceTest {
 		sigungu.setSigunguName(sigunguName);
 		sigungu.setSido(sido);
 		return sigungu;
+	}
+
+	@Nested
+	@DisplayName("이미지 위치 정보 업데이트 테스트")
+	class updateImageLocationTest {
+		@Test
+		@DisplayName("성공 - 위치 정보 수정")
+		void success() {
+			Long coordinatePointId = 1L;
+			Double latitude = 37.5665;
+			Double longitude = 126.9780;
+			Long imageId = 1L;
+			
+			JusoSido seoul = createSido(11L, "서울특별시");
+			JusoSigungu dongjak = createSigungu(11200L, "동작구", seoul);
+			
+			when(locationMapper.findSigunguByPoint(any(Point.class))).thenReturn(Optional.of(dongjak));
+			when(locationMapper.updateCoordinatePointById(eq(coordinatePointId), eq("서울특별시 동작구"),
+				any(Point.class), eq(11200L), any(LocalDateTime.class))).thenReturn(1);
+			
+			assertDoesNotThrow(() -> locationService.updateImageLocation(coordinatePointId, latitude, longitude, imageId));
+			
+			verify(locationMapper, times(1)).findSigunguByPoint(any(Point.class));
+			verify(locationMapper, times(1)).updateCoordinatePointById(eq(coordinatePointId), eq("서울특별시 동작구"),
+				any(Point.class), eq(11200L), any(LocalDateTime.class));
+		}
+
+		@Test
+		@DisplayName("성공 - latitude가 null인 경우 처리하지 않음")
+		void skipWhenLatitudeIsNull() {
+			Long coordinatePointId = 1L;
+			Double latitude = null;
+			Double longitude = 126.9780;
+			Long imageId = 1L;
+			
+			assertDoesNotThrow(() -> locationService.updateImageLocation(coordinatePointId, latitude, longitude, imageId));
+			
+			verify(locationMapper, never()).findSigunguByPoint(any(Point.class));
+			verify(locationMapper, never()).updateCoordinatePointById(any(), any(), any(), any(), any());
+		}
+
+		@Test
+		@DisplayName("성공 - longitude가 null인 경우 처리하지 않음")
+		void skipWhenLongitudeIsNull() {
+			Long coordinatePointId = 1L;
+			Double latitude = 37.5665;
+			Double longitude = null;
+			Long imageId = 1L;
+			
+			assertDoesNotThrow(() -> locationService.updateImageLocation(coordinatePointId, latitude, longitude, imageId));
+			
+			verify(locationMapper, never()).findSigunguByPoint(any(Point.class));
+			verify(locationMapper, never()).updateCoordinatePointById(any(), any(), any(), any(), any());
+		}
+
+		@Test
+		@DisplayName("실패 - 좌표 업데이트 실패 시 ApiException 발생")
+		void failureWhenUpdateFails() {
+			Long coordinatePointId = 1L;
+			Double latitude = 37.5665;
+			Double longitude = 126.9780;
+			Long imageId = 1L;
+			
+			when(locationMapper.findSigunguByPoint(any(Point.class))).thenThrow(new RuntimeException("Database error"));
+			
+			ApiException exception = assertThrows(ApiException.class,
+				() -> locationService.updateImageLocation(coordinatePointId, latitude, longitude, imageId));
+			
+			assertEquals(ErrorCode.UPDATE_FAILED_LOCATION, exception.getErrorCode());
+			verify(locationMapper, times(1)).findSigunguByPoint(any(Point.class));
+		}
 	}
 
 	@Nested

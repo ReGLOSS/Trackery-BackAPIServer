@@ -23,7 +23,6 @@ import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchB
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.event.ImageDeleteEvent;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
-import com.trackery.trackerybackapiserver.domain.location.dto.CoordinateDto;
 import com.trackery.trackerybackapiserver.domain.location.dto.LocationInfoDto;
 import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint;
 import com.trackery.trackerybackapiserver.domain.location.service.LocationService;
@@ -51,12 +50,13 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 22.		 inari		 이미지 수정시 좌표 인서트가 아닌 업데이트로 변경
  * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
  * 25. 7. 9.		 inari		 removeAllTagsFromImage로 메서드 분리
- * 25. 7. 10.        inari       	이미지 단건 조회시 태그 추가
+ * 25. 7. 10.        inari       이미지 단건 조회시 태그 추가
  * 25. 7. 11.		durururuk	 내 이미지 리스트 조회 시 S3에서 이미지 조회 실패한 이미지는 제외하고 결과를 반환하게 수정
  * 25. 7. 11.		durururuk	 중복되는 리스팅 메서드 추출
- * 25. 7. 12.		inari		이미지 수정시 태그 삭제 추가
- * 25. 7. 13.		inari		이미지 수정시 태그 수정 추가
- * 25. 7. 14.		inari		updateImageMetadata 코드 복잡도 수정
+ * 25. 7. 12.		inari		 이미지 수정시 태그 삭제 추가
+ * 25. 7. 13.		inari		 이미지 수정시 태그 수정 추가
+ * 25. 7. 14.		inari		 updateImageMetadata 코드 복잡도 수정
+ * 25. 7. 15.		inari		 updateImageLocation, processTagRemoval, processTagAddition 각 도메인으로 이동
  */
 @Slf4j
 @Service
@@ -224,24 +224,7 @@ public class ImageService {
 	@Transactional
 	@CacheEvict(value = "publicImageUrls", allEntries = true)
 	public ImageDto updateImageMetadata(Long imageId, Long userId, ImageUpdateRequestDto updateRequest) {
-		Image existingImage = validateImageUpdatePermission(imageId, userId);
-
-		updateBasicImageMetadata(imageId, updateRequest);
-		updateLocationIfProvided(imageId, existingImage, updateRequest);
-		processTagRemoval(imageId, updateRequest);
-		processTagAddition(imageId, updateRequest);
-
-		return getOriginalImageByImageId(userId, imageId);
-	}
-
-	/**
-	 * 이미지 수정 권한을 검증합니다.
-	 * @param imageId 이미지 ID
-	 * @param userId 사용자 ID
-	 * @return 검증된 이미지 엔티티
-	 * @throws ApiException 이미지를 찾을 수 없거나 권한이 없는 경우
-	 */
-	private Image validateImageUpdatePermission(Long imageId, Long userId) {
+		// 이미지 수정 권한 검증
 		Image existingImage = imageMapper.findImageByImageId(imageId)
 			.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
 
@@ -249,15 +232,7 @@ public class ImageService {
 			throw new ApiException(ErrorCode.FORBIDDEN);
 		}
 
-		return existingImage;
-	}
-
-	/**
-	 * 기본 이미지 메타데이터를 수정합니다.
-	 * @param imageId 이미지 ID
-	 * @param updateRequest 수정 요청 데이터
-	 */
-	private void updateBasicImageMetadata(Long imageId, ImageUpdateRequestDto updateRequest) {
+		// 기본 이미지 메타데이터 수정
 		imageMapper.updateImageMetadata(
 			imageId,
 			updateRequest.imageName(),
@@ -265,78 +240,17 @@ public class ImageService {
 			updateRequest.imageDate(),
 			updateRequest.isPublic()
 		);
-	}
 
-	/**
-	 * 위치 정보가 제공된 경우 위치 정보를 수정합니다.
-	 * @param imageId 이미지 ID
-	 * @param existingImage 기존 이미지 정보
-	 * @param updateRequest 수정 요청 데이터
-	 */
-	private void updateLocationIfProvided(Long imageId, Image existingImage, ImageUpdateRequestDto updateRequest) {
-		if (updateRequest.latitude() == null || updateRequest.longitude() == null) {
-			return;
-		}
+		// 위치 정보 수정
+		Long existingCoordPointId = existingImage.getCoordPoint().getCoordinatePointId();
+		locationService.updateImageLocation(existingCoordPointId, updateRequest.latitude(),
+			updateRequest.longitude(), imageId);
 
-		try {
-			CoordinateDto coordinateDto = new CoordinateDto(
-				updateRequest.latitude(),
-				updateRequest.longitude()
-			);
+		// 태그 삭제 및 추가 처리
+		tagService.processTagRemoval(imageId, updateRequest);
+		tagService.processTagAddition(imageId, updateRequest);
 
-			Long existingCoordPointId = existingImage.getCoordPoint().getCoordinatePointId();
-			locationService.updateCoordinatePoint(existingCoordPointId, coordinateDto);
-
-			log.info("이미지 위치 정보 수정 완료 - imageId: {}, coord_point_id: {}, 새로운 위치: {}, {}",
-				imageId, existingCoordPointId, updateRequest.latitude(), updateRequest.longitude());
-		} catch (Exception e) {
-			log.error("이미지 위치 정보 수정 실패 - imageId: {}, 에러: {}", imageId, e.getMessage());
-			throw new ApiException(ErrorCode.UPDATE_FAILED_LOCATION);
-		}
-	}
-
-	/**
-	 * 삭제할 태그들을 처리합니다.
-	 * @param imageId 이미지 ID
-	 * @param updateRequest 수정 요청 데이터
-	 */
-	private void processTagRemoval(Long imageId, ImageUpdateRequestDto updateRequest) {
-		if (updateRequest.tagsToRemove() == null || updateRequest.tagsToRemove().isEmpty()) {
-			return;
-		}
-
-		for (Long tagId : updateRequest.tagsToRemove()) {
-			try {
-				tagService.removeTagFromImage(imageId, tagId);
-				log.info("이미지에서 태그 삭제 완료 - imageId: {}, tagId: {}", imageId, tagId);
-			} catch (Exception e) {
-				log.warn("이미지에서 태그 삭제 실패 - imageId: {}, tagId: {}, 오류: {}",
-					imageId, tagId, e.getMessage());
-			}
-		}
-	}
-
-	/**
-	 * 추가할 태그들을 처리합니다.
-	 * @param imageId 이미지 ID
-	 * @param updateRequest 수정 요청 데이터
-	 */
-	private void processTagAddition(Long imageId, ImageUpdateRequestDto updateRequest) {
-		if (updateRequest.tagsToAdd() == null || updateRequest.tagsToAdd().isEmpty()) {
-			return;
-		}
-
-		for (String tagName : updateRequest.tagsToAdd()) {
-			if (tagName != null && !tagName.trim().isEmpty()) {
-				try {
-					tagService.addTagToImageByName(imageId, tagName.trim());
-					log.info("이미지에 태그 추가 완료 - imageId: {}, tagName: {}", imageId, tagName.trim());
-				} catch (Exception e) {
-					log.warn("이미지에 태그 추가 실패 - imageId: {}, tagName: {}, 오류: {}",
-						imageId, tagName.trim(), e.getMessage());
-				}
-			}
-		}
+		return getOriginalImageByImageId(userId, imageId);
 	}
 
 	/**

@@ -20,6 +20,7 @@ import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
  * -----------------------------------------------------------
  * 25. 7. 2.        inari           최초 생성
  * 25. 7. 11.       inari           태그 일괄 삭제시 사용 카운트 일괄 감소 추가
+ * 25. 7. 15.       inari           사용하지 않는 매퍼 삭제
  */
 @Mapper
 public interface TagMapper {
@@ -121,13 +122,6 @@ public interface TagMapper {
 	 * @param imageId 이미지 ID
 	 */
 	void deleteImageTagsByImageId(@Param("imageId") Long imageId);
-
-	/**
-	 * 이미지 ID로 이미지-태그 연결 목록을 조회합니다.
-	 * @param imageId 이미지 ID
-	 * @return 이미지-태그 연결 목록
-	 */
-	List<ImageTag> findImageTagsByImrgeId(@Param("imageId") Long imageId);
 
 	/**
 	 * 특정 이미지에 특정 태그가 연결되어 있는지 확인합니다.
