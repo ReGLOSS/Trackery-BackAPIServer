@@ -1,4 +1,3 @@
-
 package com.trackery.trackerybackapiserver.domain.album.dto.response;
 
 import java.util.Map;
@@ -10,8 +9,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.album.dto
- * fileName       : AlbumImageInsertResponseDto
+ * packageName    : com.trackery.trackerybackapiserver.domain.album.dto.response
+ * fileName       : AlbumImageEditResponseDto
  * author         : durururuk
  * date           : 25. 5. 21.
  * description    : 앨범 이미지 추가 응답 DTO
@@ -19,6 +18,9 @@ import lombok.NoArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 21.		durururuk		최초 생성
+ * 25. 5. 21.		durururuk		JavaDoc 작성
+ * 25. 5. 21.		durururuk		체크스타일 경고 수정
+ * 25. 6. 11.		durururuk		앨범 이미지 삭제 기능 구현
  */
 @Getter
 @Builder

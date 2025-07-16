@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Bean;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 6. 13.		durururuk		최초 생성
+ * 25. 6. 13.		durururuk		앨범 생성, 앨범에 이미지 추가 API 문서화 코드 작성
  */
 @TestConfiguration
 public class RestDocsConfiguration {

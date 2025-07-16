@@ -31,6 +31,7 @@ import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 6. 20.		durururuk		최초 생성
+ * 25. 6. 23.		durururuk		AlbumThumbnailService 단위테스트 작성
  */
 @ExtendWith(MockitoExtension.class)
 class AlbumThumbnailServiceTest {

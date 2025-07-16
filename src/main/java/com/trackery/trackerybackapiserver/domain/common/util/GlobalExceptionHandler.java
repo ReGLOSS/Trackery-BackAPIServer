@@ -14,7 +14,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.common.response.util
+ * packageName    : com.trackery.trackerybackapiserver.domain.common.util
  * fileName       : GlobalExceptionHandler
  * author         : durururuk
  * date           : 25. 2. 13.
@@ -24,10 +24,22 @@ import lombok.extern.slf4j.Slf4j;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 13.        durururuk       최초 생성
+ * 25. 2. 13.		durururuk		최초 생성
+ * 25. 2. 13.		durururuk		예외 발생 시 응답을 생성하는 핸들러 작성
+ * 25. 2. 13.		durururuk		Validation 관련 예외 발생 시 처리할 수 있게 ApiExceptionHandler 수정
+ * 25. 2. 13.		durururuk		사용하지 않는 import 제거
+ * 25. 2. 13.		durururuk		핸들러 주석 추가, 줄바꿈 서식 변경
+ * 25. 2. 14.		durururuk		Validation 실패 예외, 잘못된 RequestBody 예외 처리하는 ErrorCode, 핸들러 수정
+ * 25. 2. 14.		durururuk		회원가입 할 때 비밀번호를 해싱해서 저장하게 수정
+ * 25. 2. 14.		durururuk		서식 수정
+ * 25. 2. 15.		durururuk		ApiExceptionHandler 사용처에 맞게 이름 변경
+ * 25. 2. 17.		inari		공통응답 테스트코드 추가
  * 25. 2. 21.        inari			 상세 주석 추가
+ * 25. 2. 24.		inari		자바독 주석 추가
+ * 25. 3. 26.		inari		provider enum 적용
  * 25. 3. 26.        inari			 handleMethodArgumentTypeMismatchException 추가
  * 25. 3. 26.        inari			 handleRuntimeException 추가
+ * 25. 4. 8.		inari		GlobalExceptionHandle로 예외 위임
  */
 @Slf4j
 @RestControllerAdvice

@@ -27,7 +27,12 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 21.		durururuk		최초 생성
- * 25. 7. 11.		inari			체크스타일 수정
+ * 25. 4. 21.		durururuk		이미지 업로드 기능 구현
+ * 25. 4. 23.		durururuk		ImageUploadController JavaDoc 주석 작성
+ * 25. 4. 24.		durururuk		ImageUploadController MockMvc 단위테스트 코드 작성
+ * 25. 6. 16.		inari		체크스타일 적용
+ * 25. 7. 1.		durururuk		key 관리를 편하게 하기 위해서 imageName에서 확장자 제거
+ * 25. 7. 11.		inari		image 도메인의 자바독 누락 및 체크스타일 해결
  */
 @RestController
 @RequestMapping("/api/images")

@@ -9,12 +9,14 @@ import lombok.NoArgsConstructor;
  * packageName    : com.trackery.trackerybackapiserver.domain.user.dto
  * fileName       : OAuthLinkRequestDto
  * author         : inari
- * date           : 25. 3. 26.
+ * date           : 25. 2. 28.
  * description    : OAuth 계정 요청 정보를 담는 DTO 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 26.        inari       최초 생성
+ * 25. 2. 28.		inari		최초 생성
+ * 25. 2. 28.		inari		구현중
+ * 25. 3. 26.		inari		연동유무를 세션에서 토큰으로 이전
  */
 @Getter
 @Builder

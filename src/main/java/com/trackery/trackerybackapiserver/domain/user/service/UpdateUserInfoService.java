@@ -25,6 +25,9 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 12.		durururuk		최초 생성
+ * 25. 4. 12.		durururuk		유저명 변경 기능 구현
+ * 25. 4. 14.		durururuk		이메일 수정 API 추가, 주석 작성
+ * 25. 4. 14.		durururuk		UpdateUserInfo Controller, Serivce 단위테스트 작성
  */
 @Service
 @Transactional

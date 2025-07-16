@@ -33,7 +33,11 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 23.		durururuk		최초 생성
- * 25. 6. 18.		inari		    Spring-Rest-Docs api문서 추가
+ * 25. 4. 24.		durururuk		ImageUploadController MockMvc 단위테스트 코드 작성
+ * 25. 6. 18.		inari		모든 api 문서화
+ * 25. 7. 1.		durururuk		변경된 서비스 로직에 맞게 테스트코드 수정
+ * 25. 7. 8.		inari		테스트코드 추가 및 문서화
+ * 25. 7. 9.		inari		regionalTags를 Tags로 수정 및 관련 메서드 및 변수 변경
  */
 @WebMvcTest(ImageUploadController.class)
 class ImageUploadControllerTest extends CommonMockMvcControllerTestSetUp {

@@ -11,12 +11,12 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * fileName       : AuthServiceTest
  * author         : durururuk
  * date           : 25. 3. 27.
- * description    : AuthService 단위테스트 작성
+ * description    : AuthService 단위테스트
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 27.        durururuk      최초 생성
- * 25. 3. 27.        durururuk      toAuthUserDto 단위테스트 작성
+ * 25. 3. 27.		durururuk		최초 생성
+ * 25. 3. 27.		durururuk		인증 api 단위테스트 수정
  */
 class AuthServiceTest {
     private final AuthService authService = new AuthService();

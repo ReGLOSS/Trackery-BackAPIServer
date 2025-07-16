@@ -15,7 +15,9 @@ import com.trackery.trackerybackapiserver.domain.tag.enums.TagTypeHandler;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 9.		inari			최초 생성
+ * 25. 7. 9.		inari		최초 생성
+ * 25. 7. 9.		inari		MybatisEnumConfig를 분리
+ * 25. 7. 9.		inari		체크스타일 수정 및 메서드 분리
  */
 @Configuration
 public class MybatisEnumConfig {

@@ -12,7 +12,8 @@ import lombok.RequiredArgsConstructor;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 6. 27.        inari       최초 생성
+ * 25. 6. 27.		inari		최초 생성
+ * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
  */
 @Getter
 @RequiredArgsConstructor

@@ -12,9 +12,10 @@ import lombok.Getter;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 7.        inari       최초 생성
- * 25. 7. 11.       inari       태그 리스트 삭제
- * 25. 7. 14.       inari       locationName을 sdName과 sggName으로 분리
+ * 25. 7. 7.		inari		최초 생성
+ * 25. 7. 7.		inari		이미지 업로드시 시도,시군구 태그 추가 기능 구현
+ * 25. 7. 11.		inari		태그 리스트 삭제
+ * 25. 7. 14.		inari		locationName을 sdName + sggName으로 수정
  */
 @Getter
 @Builder

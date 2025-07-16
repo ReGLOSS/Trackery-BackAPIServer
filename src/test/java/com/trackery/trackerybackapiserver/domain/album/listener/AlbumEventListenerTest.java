@@ -21,7 +21,7 @@ import com.trackery.trackerybackapiserver.domain.album.service.AlbumThumbnailSer
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.album.listener
- * fileName       : AlbumThumbnailEventListenerTest
+ * fileName       : AlbumEventListenerTest
  * author         : durururuk
  * date           : 25. 6. 23.
  * description    : AlbumThumbnailEventListener 테스트
@@ -29,7 +29,10 @@ import com.trackery.trackerybackapiserver.domain.album.service.AlbumThumbnailSer
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 6. 23.		durururuk		최초 생성
- * 25. 6. 28.		inari			코드 스멜 수정
+ * 25. 6. 23.		durururuk		앨범 썸네일 이벤트 리스너 테스트 코드 작성
+ * 25. 6. 23.		durururuk		앨범 썸네일 이벤트 리스너 테스트 코드 작성
+ * 25. 6. 28.		inari		테스트 코드의 잘못된 eq()수정 및 컨트롤러 문서화 추가
+ * 25. 7. 15.		durururuk		앨범 썸네일 이벤트 리스너 이름 변경
  */
 @ExtendWith(MockitoExtension.class)
 class AlbumEventListenerTest {

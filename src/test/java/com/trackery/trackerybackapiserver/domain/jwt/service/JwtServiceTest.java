@@ -22,19 +22,33 @@ import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- packageName    : com.trackery.trackerybackapiserver.domain.common.util
-
- fileName       : JwtUtilTest
- author         : durururuk
- date           : 25. 2. 18.
- description    : JwtUtil 테스트코드
- ===========================================================
- DATE              AUTHOR             NOTE
- -----------------------------------------------------------
- 25. 2. 18.        durururuk        최초 생성
- 25. 2. 20.		   durururuk        jwt 생성 및 검증 테스트 코드 추가
- 25. 4. 01.        durururuk		parseAndVerifyRefreshToken 테스트 코드 작성
- 25. 4. 01.        durururuk		JWT 검증 실패 시 예외 에러 메시지 수정
+ * packageName    : com.trackery.trackerybackapiserver.domain.jwt.service
+ * fileName       : JwtServiceTest
+ * author         : durururuk
+ * date           : 25. 2. 18.
+ * description    : JwtService 테스트코드
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 2. 18.		durururuk		최초 생성
+ * 25. 2. 18.		durururuk		JWT 토큰 추가 메서드 추가
+ * 25. 2. 19.		durururuk		Jwt 적용을 위한 필터 작성, 추가
+ * 25. 2. 19.		durururuk		코딩 컨벤션에 맞게 정리
+ * 25. 2. 19.		durururuk		Jwt 생성 시 역할 정보를 담도록 추가, jwt 필터에도 반영, 로직 개선
+ * 25. 2. 20.		durururuk		회원가입 시 JWT를 담은 헤더를 같이 반환하도록 추가
+ * 25. 3. 4.		durururuk		이메일 인증 요청 기능 추가
+ * 25. 3. 14.		durururuk		리팩터링
+ * 25. 3. 14.		durururuk		이메일토큰 테스트코드 추가
+ * 25. 3. 14.		durururuk		유저명 사용가능할 시 userNameToken 쿠키에 추가
+ * 25. 3. 28.		durururuk		리프레시 토큰 레디스 저장 기능 구현
+ * 25. 3. 28.		durururuk		바뀐 로직에 맞게 테스트 코드 수정
+ * 25. 3. 28.		durururuk		리프레시 토큰 생성 테스트 코드 작성
+ * 25. 3. 31.		durururuk		JwtService 테스트코드 추가
+ * 25. 4. 1.		durururuk		JwtResolverFilter에 있던 분리된 메서드들 각자 있어야 할 클래스로 이동
+ * 25. 4. 1.		durururuk		extractCookieValue 테스트 코드 작성
+ * 25. 4. 1.		durururuk		extractCookieValue 테스트 코드 작성
+ * 25. 4. 1.		durururuk		JWT 검증 실패 시 예외 에러메시지 수정
+ * 25. 6. 19.		durururuk		기존 액세스 토큰의 시간 1시간을 그대로 가져오던 이메일 인증 토큰, 유저명 중복 확인 토큰을 각각 처리하게 수정
  */
 @Slf4j
 @ExtendWith(MockitoExtension.class)

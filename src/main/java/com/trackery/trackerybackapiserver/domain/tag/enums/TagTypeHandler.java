@@ -18,7 +18,8 @@ import org.apache.ibatis.type.MappedTypes;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 7.        inari           최초 생성
+ * 25. 7. 7.		inari		최초 생성
+ * 25. 7. 7.		inari		tagtype enum으로 관리하도록 설정(DB에서는 숫자로 들어감)
  */
 @MappedTypes(TagType.class)
 public class TagTypeHandler extends BaseTypeHandler<TagType> {

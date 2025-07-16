@@ -36,15 +36,22 @@ import lombok.extern.slf4j.Slf4j;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 2.        inari       최초 생성
- * 25. 7. 9.        inari       removeAllTagsFromImage 생성
- * 25. 7. 10.       inari       이미지 단건 조회시 태그 추가, 날짜 제거
- * 25. 7. 10.		inari		기본 태그 api 추가
- * 25. 7. 11.		inari		태그 일괄 삭제 구현
- * 25. 7. 12.		inari		태그 수정 구현
- * 25. 7. 14.       inari      	LOCATION태그 시도와 시군구로 분리
- * 25. 7. 14.       inari       프론트에서 태그 요청시 정렬해서 보내게 수정
- * 25. 7. 15.       inari       processTagRemoval, processTagAddition 이미지 서비스에서 이동
+ * 25. 7. 2.		inari		최초 생성
+ * 25. 7. 8.		inari		태그 도메인 구현
+ * 25. 7. 9.		inari		regionalTags를 Tags로 수정 및 관련 메서드 및 변수 변경
+ * 25. 7. 9.		inari		체크스타일 수정 및 메서드 분리
+ * 25. 7. 10.		inari		이미지 단건 조회시 태그 추가
+ * 25. 7. 10.		inari		태그 생성시 계절만 사용
+ * 25. 7. 11.		inari		기본 태그 생성 기능 추가
+ * 25. 7. 11.		inari		기본 태그 생성시 좌표대신 시도, 시군구 이름 받게 설정
+ * 25. 7. 11.		inari		기존 매퍼에 존재하던 이미지 삭제시 태그 일괄 삭제 기능 적용하여 N+1 문제 해결
+ * 25. 7. 11.		inari		test코드 추가
+ * 25. 7. 13.		inari		이미지 수정시 태그 삭제 기능 구현
+ * 25. 7. 14.		inari		이미지 수정시 태그 추가 기능 구현
+ * 25. 7. 14.		inari		/api/tags/default에서 좌표 삭제후 /api/tags/season으로 변경
+ * 25. 7. 14.		inari		TagType enum에 추가하고 locationName 파라미터대신 sidoName, sigunguName으로 분리
+ * 25. 7. 14.		inari		TagType에 따른 태그 정렬 추가
+ * 25. 7. 15.		inari		ImageService에 있던 updateImageLocation, processTagRemoval, processTagAddition 각 도메인으로 이동
  */
 @Slf4j
 @Service

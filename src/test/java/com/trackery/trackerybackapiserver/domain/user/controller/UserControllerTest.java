@@ -1,10 +1,9 @@
 package com.trackery.trackerybackapiserver.domain.user.controller;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
-import static org.springframework.restdocs.payload.PayloadDocumentation.relaxedResponseFields;
 import static org.springframework.restdocs.request.RequestDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Spy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -46,13 +44,36 @@ import jakarta.servlet.http.Cookie;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 14.        durururuk      최초 생성
- * 25. 2. 14.        durururuk      로그인 컨트롤러 테스트 코드 작성
- * 25. 4. 09.		 durururuk	   	유저 상세정보 조회 API 단위테스트 코드 작성
- * 25. 4. 10.		 durururuk	    인증 기반 비밀번호 변경 컨트롤러 mockMvc 테스트 작성
- * 25. 6. 17.		 inari		    Spring-Rest-Docs api문서 추가
- * 25. 6. 25.		 inari		    로그아웃 테스트 작성
- * 25. 6. 26.		 inari		    회원 탈퇴 테스트 작성
+ * 25. 2. 14.		durururuk		최초 생성
+ * 25. 2. 14.		durururuk		UserController 성공 케이스 테스트 코드 작성
+ * 25. 2. 17.		durururuk		Java 컨벤션에 맞게 username -> userName 수정
+ * 25. 2. 17.		durururuk		클래스 JavaDoc 설명 추가
+ * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 19.		durururuk		MockMvc 테스트코드 작성을 도와주는 추상 클래스 추가
+ * 25. 2. 19.		durururuk		코딩 컨벤션에 맞게 정리
+ * 25. 2. 19.		durururuk		테스트 하고자 하는 컨트롤러만 로드하게 수정
+ * 25. 2. 20.		durururuk		변경된 로직에 맞게 테스트코드 수정
+ * 25. 2. 20.		durururuk		변경된 로직에 맞게 테스트코드 수정
+ * 25. 2. 21.		durururuk		CustomWebSecurityConfig으로 퍼블릭 uri 관리 일원화
+ * 25. 2. 24.		durururuk		회원가입 시 인증 헤더 -> http-only 쿠키 방식으로 변경
+ * 25. 2. 26.		durururuk		로그인 컨트롤러 테스트 코드 작성
+ * 25. 3. 14.		durururuk		바뀐 로직에 맞게 테스트코드 수정
+ * 25. 3. 14.		durururuk		수정된 로직에 맞게 테스트 코드 수정
+ * 25. 3. 28.		durururuk		변경된 로직에 맞게 테스트 코드 수정
+ * 25. 3. 28.		durururuk		바뀐 로직에 맞게 테스트 코드 수정
+ * 25. 3. 29.		durururuk		코드 가독성을 위해 List.of(accessToken, refreshToken) 구조에서 DTO 방식으로 변경
+ * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
+ * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
+ * 25. 4. 9.		durururuk		유저 상세정보 조회 API 단위테스트 코드 작성
+ * 25. 4. 9.		durururuk		유저 상세정보 조회 API 단위테스트 코드 작성
+ * 25. 4. 10.		durururuk		인증 기반 비밀번호 변경 컨트롤러 mockMvc 테스트 작성
+ * 25. 4. 10.		durururuk		final이 될 수 있는 변수 final화, 로직 수정으로 사용되지 않는 메서드 삭제
+ * 25. 4. 12.		durururuk		유저명 변경 기능 구현
+ * 25. 4. 14.		durururuk		UpdateUserInfo Controller, Serivce 단위테스트 작성
+ * 25. 6. 17.		inari		user 도메인 테스트를 Spring-Rest-Docs에 맞게 리팩터링 및 문서 추가하였습니다.
+ * 25. 6. 25.		inari		테스트 코드 추가
+ * 25. 6. 26.		inari		탈퇴시 테스트코드 작성 및 문서화
+ * 25. 6. 26.		inari		탈퇴시 서비스에서 컨트롤러로 쿠키삭제 처리 피드백 반영
  */
 @WebMvcTest(UserController.class)
 class UserControllerTest extends CommonMockMvcControllerTestSetUp {

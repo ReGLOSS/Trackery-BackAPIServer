@@ -15,6 +15,7 @@ import com.trackery.trackerybackapiserver.domain.location.entity.CoordinatePoint
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 15.		durururuk		최초 생성
+ * 25. 5. 15.		durururuk		이미지 조회 기능 구현
  */
 public class LocationUtil {
 	private LocationUtil() {

@@ -7,7 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.user.config
+ * packageName    : com.trackery.trackerybackapiserver.config
  * fileName       : OAuthProperties
  * author         : inari
  * date           : 25. 2. 26.

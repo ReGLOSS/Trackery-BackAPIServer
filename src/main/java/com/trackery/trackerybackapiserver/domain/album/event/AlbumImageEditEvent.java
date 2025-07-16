@@ -5,7 +5,7 @@ import com.trackery.trackerybackapiserver.domain.album.entity.Album;
 import com.trackery.trackerybackapiserver.domain.album.enums.AlbumImageEditOperation;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.album.service
+ * packageName    : com.trackery.trackerybackapiserver.domain.album.event
  * fileName       : AlbumImageEditEvent
  * author         : durururuk
  * date           : 25. 6. 20.

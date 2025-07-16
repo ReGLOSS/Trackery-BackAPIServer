@@ -16,6 +16,8 @@ import org.springframework.restdocs.request.ParameterDescriptor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 6. 24.		durururuk		최초 생성
+ * 25. 6. 24.		durururuk		페이지네이션 문서화 클래스 작성
+ * 25. 6. 24.		durururuk		쿼리 파라미터도 문서화 클래스에서 받아올 수 있게 수정
  */
 public class PaginationDocumentationUtils {
 	public static FieldDescriptor[] getPageableResponseFields() {

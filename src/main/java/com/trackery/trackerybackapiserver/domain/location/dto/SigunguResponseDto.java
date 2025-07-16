@@ -7,14 +7,16 @@ import lombok.Value;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.location.dto
- * fileName       : CoordinateRequestDto
+ * fileName       : SigunguResponseDto
  * author         : inari
- * date           : 25. 5. 30.
+ * date           : 25. 6. 13.
  * description    : 시군구 정보 응답 DTO입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 6. 13.        inari       최초 생성
+ * 25. 6. 13.		inari		최초 생성
+ * 25. 6. 13.		inari		시군구 조회 기능 추가
+ * 25. 6. 15.		inari		체크스타일 수정
  */
 @Value
 @Builder

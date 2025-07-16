@@ -38,13 +38,21 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 3.         inari       최초 생성
- * 25. 6. 24.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
- * 25. 6. 25.        inari		 리프레시 토큰 발급 테스트 추가
- * 25. 6. 27.		 inari	   	 로그인시 lastlogin 갱신 추가 및 이미 연동된 계정 타유저 접근 차단
- * 25. 6. 27.		 inari	   	 코드 복잡도 해결을 위해 메서드 분리 테스트
- * 25. 6. 28.		 inari	   	 코드 스멜 수정
- * 25. 7. 1.         inari		 isNewUser 파라미터 테스트 코드 추가
+ * 25. 3. 3.		inari		최초 생성
+ * 25. 3. 3.		inari		테스트코드 추가
+ * 25. 3. 5.		inari		간편로그인시 프로필사진 테스트 제거
+ * 25. 3. 5.		durururuk		dev와 병합하면서 생긴 오류 수정
+ * 25. 3. 5.		inari		커버리지 리팩터링
+ * 25. 3. 27.		inari		상세 주석 추가 및 테스트코드 수정
+ * 25. 3. 28.		durururuk		refresh-token/ 리프레시 토큰 레디스 저장 기능 구현
+ * 25. 6. 24.		inari		기능 개선 및 테스트코드 수정 및 추가
+ * 25. 6. 25.		inari		테스트코드 추가
+ * 25. 6. 25.		inari		주석 추가
+ * 25. 6. 27.		inari		테스트에 마지막 로그인 시간 추가
+ * 25. 6. 27.		inari		테스트코드 작성
+ * 25. 6. 28.		inari		코드 복잡도 15이하로 메서드 리팩터링 테스트코드 수정
+ * 25. 6. 28.		inari		테스트 코드의 잘못된 eq()수정 및 컨트롤러 문서화 추가
+ * 25. 7. 1.		inari		테스트코드 추가
  */
 @ExtendWith(MockitoExtension.class)
 class OAuthServiceTest {

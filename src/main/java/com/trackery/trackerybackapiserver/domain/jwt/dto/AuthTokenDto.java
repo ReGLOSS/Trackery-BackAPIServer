@@ -9,7 +9,7 @@ package com.trackery.trackerybackapiserver.domain.jwt.dto;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 29.        durururuk      최초 생성
+ * 25. 3. 29.		durururuk		최초 생성
  */
 public record AuthTokenDto(String accessToken, String refreshToken) {
 }

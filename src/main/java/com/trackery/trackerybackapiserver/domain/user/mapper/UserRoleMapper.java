@@ -11,12 +11,13 @@ import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
  * fileName       : UserRoleMapper
  * author         : durururuk
  * date           : 25. 2. 25.
- * description    :
+ * description    : 유저 권한 전반 기능을 하는 Mapper 인터페이스
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 25.        durururuk      최초 생성
- * 25. 7. 11.        inari     		주석 작성
+ * 25. 2. 25.		durururuk		최초 생성
+ * 25. 2. 25.		durururuk		userRole 매퍼 추가, userMapper에 있던 userRoleInsert 이동
+ * 25. 7. 11.		inari		user 도메인의 자바독 누락 및 체크스타일 해결
  */
 @Mapper
 public interface UserRoleMapper {

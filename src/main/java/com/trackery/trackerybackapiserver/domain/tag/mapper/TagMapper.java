@@ -18,9 +18,12 @@ import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 2.        inari           최초 생성
- * 25. 7. 11.       inari           태그 일괄 삭제시 사용 카운트 일괄 감소 추가
- * 25. 7. 15.       inari           사용하지 않는 매퍼 삭제
+ * 25. 7. 2.		inari		최초 생성
+ * 25. 7. 3.		inari		매퍼와 엔티티 추가
+ * 25. 7. 8.		inari		태그 도메인 구현
+ * 25. 7. 11.		inari		기존 매퍼에 존재하던 이미지 삭제시 태그 일괄 삭제 기능 적용하여 N+1 문제 해결
+ * 25. 7. 11.		inari		주석 추가
+ * 25. 7. 15.		inari		사용하지 않는 매퍼 삭제
  */
 @Mapper
 public interface TagMapper {

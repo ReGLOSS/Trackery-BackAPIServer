@@ -32,8 +32,20 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 17.		durururuk		최초 생성
- * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
- * 25. 7. 11.		 inari		 getFileNameWithoutExtension 자바독 추가
+ * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
+ * 25. 4. 21.		durururuk		이미지 업로드 DTO 작성
+ * 25. 4. 21.		durururuk		이미지 업로드 기능 구현
+ * 25. 4. 21.		durururuk		더 이상 사용되지 않는 클래스 삭제
+ * 25. 4. 21.		durururuk		개발 중 테스트용 코드 남아있던 것 삭제
+ * 25. 4. 23.		durururuk		LocationService JavaDoc 주석 추가
+ * 25. 4. 23.		durururuk		ImageUploadService JavaDoc 주석 작성
+ * 25. 4. 23.		durururuk		ImageUploadService Mock 단위 테스트 작성
+ * 25. 4. 25.		durururuk		이미지 메타데이터 저장 후 이미지를 s3 임시 폴더에서 이미지 폴더로 이동시키는 작업 추가
+ * 25. 7. 1.		durururuk		key 관리를 편하게 하기 위해서 imageName에서 확장자 제거
+ * 25. 7. 8.		inari		이미지 업로드시 태그 추가
+ * 25. 7. 8.		inari		이미지 업로드시 일반 태그 추가
+ * 25. 7. 9.		inari		regionalTags를 Tags로 수정 및 관련 메서드 및 변수 변경
+ * 25. 7. 11.		inari		image 도메인의 자바독 누락 및 체크스타일 해결
  */
 @Slf4j
 @Service

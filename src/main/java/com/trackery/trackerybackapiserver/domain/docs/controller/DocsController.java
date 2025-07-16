@@ -23,7 +23,9 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 6. 12.        inari       최초 생성
+ * 25. 6. 12.		inari		최초 생성
+ * 25. 6. 12.		inari		핸들러에서 컨트롤러로 변경
+ * 25. 6. 16.		inari		체크스타일 적용
  */
 @RestController
 @RequestMapping("/api/docs")

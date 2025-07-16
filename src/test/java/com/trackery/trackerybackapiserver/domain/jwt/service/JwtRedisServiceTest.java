@@ -1,10 +1,8 @@
-
 package com.trackery.trackerybackapiserver.domain.jwt.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -19,7 +17,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
-import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.jwt.service
@@ -30,8 +27,12 @@ import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 28.       durururuk      최초 생성
- * 25. 3. 29.		durururuk	   테스트 코드 작성
+ * 25. 3. 28.		durururuk		최초 생성
+ * 25. 3. 28.		durururuk		리프레시 토큰 레디스 저장 단위 테스트 코드 작성
+ * 25. 3. 29.		durururuk		JwtRedisService 테스트 코드 작성
+ * 25. 6. 19.		durururuk		기존 액세스 토큰의 시간 1시간을 그대로 가져오던 이메일 인증 토큰, 유저명 중복 확인 토큰을 각각 처리하게 수정
+ * 25. 6. 19.		durururuk		테스트코드 수정
+ * 25. 7. 14.		durururuk		테스트코드 수정
  */
 @ExtendWith(MockitoExtension.class)
 class JwtRedisServiceTest {

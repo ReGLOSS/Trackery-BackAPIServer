@@ -28,16 +28,31 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 import jakarta.servlet.http.Cookie;
 
 /**
- *packageName    : com.trackery.trackerybackapiserver.domain.common.util
-
- fileName       : GlobalExceptionHandlerTest
- author         : durururuk
- date           : 25. 2. 15.
- description    : GlobalExceptionHandler 테스트
- ===========================================================
- DATE              AUTHOR             NOTE
- -----------------------------------------------------------
- 25. 2. 15.        durururuk       최초 생성*/
+ * packageName    : com.trackery.trackerybackapiserver.domain.common.util
+ * fileName       : GlobalExceptionHandlerTest
+ * author         : durururuk
+ * date           : 25. 2. 15.
+ * description    : GlobalExceptionHandler 테스트
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 02. 17.		durururuk		최초 생성
+ * 25. 2. 17.		durururuk		GlobalExceptionHandler 테스트 코드 작성
+ * 25. 2. 17.		inari		공통응답 테스트코드 추가
+ * 25. 2. 18.		durururuk		GlobalExceptionHandlerTest에서 테스트용 API를 사용하지 않고 기존 API를 활용하게 수정
+ * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 18.		inari		GlobalExceptionHandlerTest에 캐시설정 추가
+ * 25. 2. 19.		durururuk		MockMvc 테스트코드 작성을 도와주는 추상 클래스 추가
+ * 25. 2. 19.		durururuk		코딩 컨벤션에 맞게 정리
+ * 25. 2. 19.		durururuk		테스트 하고자 하는 컨트롤러만 로드하게 수정
+ * 25. 2. 20.		durururuk		변경된 로직에 맞게 테스트코드 수정
+ * 25. 2. 20.		durururuk		변경된 로직에 맞게 테스트코드 수정
+ * 25. 2. 21.		durururuk		CustomWebSecurityConfig으로 퍼블릭 uri 관리 일원화
+ * 25. 2. 24.		durururuk		회원가입 시 인증 헤더 -> http-only 쿠키 방식으로 변경
+ * 25. 3. 14.		durururuk		수정된 로직에 맞게 테스트 코드 수정
+ * 25. 3. 27.		inari		상세 주석 추가 및 테스트코드 수정
+ * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
+ */
 @WebMvcTest(UserController.class)
 @AutoConfigureMockMvc(addFilters = false)
 class GlobalExceptionHandlerTest extends CommonMockMvcControllerTestSetUp {

@@ -7,7 +7,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.web.SecurityFilterChain;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain
+ * packageName    : com.trackery.trackerybackapiserver.domain.config
  * fileName       : MockMvcUnitTestSecurityConfig
  * author         : durururuk
  * date           : 25. 3. 29.
@@ -16,7 +16,8 @@ import org.springframework.security.web.SecurityFilterChain;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 29.        durururuk      최초 생성
+ * 25. 3. 29.		durururuk		최초 생성
+ * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
  */
 @TestConfiguration
 public class MockMvcUnitTestSecurityConfig {

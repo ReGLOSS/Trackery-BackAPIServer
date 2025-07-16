@@ -17,6 +17,7 @@ import lombok.NoArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 29.		durururuk		최초 생성
+ * 25. 5. 29.		durururuk		내 앨범 간단 조회 기능 구현
  */
 @Getter
 @Builder

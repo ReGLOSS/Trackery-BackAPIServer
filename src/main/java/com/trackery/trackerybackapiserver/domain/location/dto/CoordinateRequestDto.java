@@ -12,11 +12,13 @@ import lombok.NoArgsConstructor;
  * author         : inari
  * date           : 25. 5. 30.
  * description    : 지리 좌표(위도, 경도) 정보를 담는 요청 DTO입니다.
- *                  좌표 기반 시군구 검색에 사용되며, 한국 영토 범위 내의 좌표만 허용합니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 5. 30.        inari       최초 생성
+ * 25. 5. 30.		inari		최초 생성
+ * 25. 5. 30.		inari		제작중
+ * 25. 6. 10.		inari		location과 통합
+ * 25. 6. 15.		inari		체크스타일 수정
  */
 @Data
 @NoArgsConstructor

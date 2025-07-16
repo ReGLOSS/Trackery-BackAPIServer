@@ -26,10 +26,13 @@ import jakarta.servlet.http.HttpServletRequest;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 26.       durururuk       최초 생성
- * 25. 2. 26.       durururuk       액세스토큰 쿠키 생성 성공 케이스 단위테스트 작성
- * 25. 4. 01.		durururuk		extractCookie 테스트 코드 작성
- * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
+ * 25. 2. 26.		durururuk		최초 생성
+ * 25. 2. 26.		durururuk		액세스토큰 쿠키 생성 성공 케이스 단위테스트 작성
+ * 25. 3. 14.		durururuk		비밀번호 찾기 기능 리팩터링
+ * 25. 3. 14.		durururuk		테스트 코드 작성
+ * 25. 3. 28.		durururuk		refresh-token/ Cookie 유효시간 수정
+ * 25. 4. 1.		durururuk		refresh-token/ extractCookieValue 테스트 코드 작성
+ * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
  */
 class CookieUtilTest {
 

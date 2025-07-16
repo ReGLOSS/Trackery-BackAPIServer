@@ -23,7 +23,9 @@ import lombok.RequiredArgsConstructor;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 4. 15.        inari       최초 생성
+ * 25. 4. 15.		inari		최초 생성
+ * 25. 4. 28.		inari		완성
+ * 25. 6. 28.		inari		체크스타일 적용
  */
 @RestController
 @RequestMapping("/api/users/profile")

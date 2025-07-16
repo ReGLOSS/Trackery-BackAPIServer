@@ -41,9 +41,22 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 15.		durururuk		최초 생성
- * 25. 6. 20.		 inari		 이미지 수정 및 삭제 추가
- * 25. 7. 9.		 inari		 TagController에서 일부 이동
- * 25. 7. 10.		 inari		 이미지 단건 조회시 태그도 가져오도록 수정
+ * 25. 5. 15.		durururuk		이미지 조회 기능 폴더 지정 오류로 안 되던 문제 수정
+ * 25. 5. 15.		durururuk		서식 수정
+ * 25. 5. 19.		durururuk		ImageController JavaDoc 주석 작성
+ * 25. 6. 17.		durururuk		images/me 페이지네이션 버전 임시 작성
+ * 25. 6. 17.		durururuk		getImageListByUserIdV2 서비스 테스트 코드 작성
+ * 25. 6. 18.		durururuk		javadoc 주석 작성
+ * 25. 6. 20.		inari		이미지 수정 및 삭제기능 추가
+ * 25. 6. 20.		inari		pr 코멘트받은 내용 수정
+ * 25. 6. 23.		durururuk		imageController에서도 deprecated된 API 삭제
+ * 25. 7. 1.		durururuk		이미지 썸네일을 조회하는 메서드에서 썸네일 DTO를 반환하게 변경
+ * 25. 7. 8.		durururuk		내 이미지 조회 시 조회 결과에서 제외될 앨범 ID 파라미터 추가
+ * 25. 7. 8.		durururuk		개발 도중 흔적 제거
+ * 25. 7. 8.		durururuk		이미지 단건 조회 api 엔드포인트 pathVariable 방식으로 수정
+ * 25. 7. 9.		inari		태그 컨트롤러에 있던 일부 매핑을 이미지로 이전함으로써 RESTful한 URL 구조로 변경
+ * 25. 7. 10.		durururuk		PageSize 파라미터 검증 추가
+ * 25. 7. 10.		inari		이미지 단건 조회시 태그 추가
  */
 @RestController
 @RequiredArgsConstructor

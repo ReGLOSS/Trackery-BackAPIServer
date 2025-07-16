@@ -17,13 +17,31 @@ import com.trackery.trackerybackapiserver.domain.user.entity.User;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 12.        durururuk     최초 생성
- * 25. 2. 24.        inari         주석 추가
- * 25. 2. 25.        inari         fingByEmail, isExistsEmail 추가
- * 25. 3. 6.		 durururuk	   비밀번호 업데이트 추가
- * 25. 6. 26.		 inari	   	   자바독 추가 및 회원 탈퇴 기능 추가
- * 25. 6. 27.		 inari	   	   로그인시 lastlogin 갱신 추가
- * 25. 7. 11.		 inari		   사용되지 않는 insertUserRole,isExistsEmail 제거
+ * 25. 2. 12.		durururuk		최초 생성
+ * 25. 2. 12.		durururuk		기본 회원가입 기능 구현
+ * 25. 2. 14.		durururuk		닉네임 중복 체크하는 api 구현
+ * 25. 2. 17.		durururuk		username 중복 체크 SQL count(*) -> EXISTS()로 수정
+ * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 19.		durururuk		UserDetails, UserDetailsService 구현체 작성,
+ * 25. 2. 19.		durururuk		회원가입 시 UserRole에 기본값 인서트되게 기능 추가
+ * 25. 2. 21.		durururuk		사용자명 중복체크 메서드명 더 명확하게 수정, 반대로 작동하던 로직 수정
+ * 25. 2. 21.		durururuk		이원화
+ * 25. 2. 24.		inari		자바독 주석 추가
+ * 25. 2. 25.		durururuk		유저명으로 user 엔티티 불러오는 쿼리 추가
+ * 25. 2. 28.		inari		구현중
+ * 25. 3. 11.		durururuk		비밀번호 변경 기능 작성
+ * 25. 3. 11.		durururuk		비밀번호 변경 컨트롤러 작성
+ * 25. 4. 10.		durururuk		이메일 토큰 기반 비밀번호 변경 url 변경, 인증 기반 비밀번호 변경 기능 구현
+ * 25. 4. 10.		durururuk		final이 될 수 있는 변수 final화, 로직 수정으로 사용되지 않는 메서드 삭제
+ * 25. 4. 12.		durururuk		닉네임 변경 기능 구현
+ * 25. 4. 12.		durururuk		유저명 변경 기능 구현
+ * 25. 4. 14.		durururuk		이메일 수정 API 추가, 주석 작성
+ * 25. 4. 14.		durururuk		사용되지 않는 변수 삭제
+ * 25. 6. 26.		inari		회원 탈퇴 매퍼 작성
+ * 25. 6. 26.		inari		자바독 추가
+ * 25. 6. 27.		inari		로그인시 마지막 로그인 갱신되도록 수정
+ * 25. 7. 11.		inari		user 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 7. 11.		inari		자바독 오류 해결 및 자바독 주입
  */
 @Mapper
 public interface UserMapper {

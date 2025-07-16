@@ -29,11 +29,15 @@ import com.trackery.trackerybackapiserver.domain.location.service.LocationServic
  * fileName       : ImageUploadServiceTest
  * author         : durururuk
  * date           : 25. 4. 23.
- * description    : 
+ * description    : ImageUploadService 단위 테스트
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 23.		durururuk		최초 생성
+ * 25. 4. 23.		durururuk		ImageUploadService Mock 단위 테스트 작성
+ * 25. 4. 25.		durururuk		이미지 메타데이터 저장 후 이미지를 s3 임시 폴더에서 이미지 폴더로 이동시키는 작업 추가
+ * 25. 7. 1.		durururuk		변경된 서비스 로직에 맞게 테스트코드 수정
+ * 25. 7. 1.		durururuk		더 이상 쓰이지 않는 변수 정리, 재사용 가능한 지역변수 전역변수화
  */
 @ExtendWith(MockitoExtension.class)
 class ImageUploadServiceTest {

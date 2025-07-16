@@ -34,21 +34,70 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.service
- * fileName       : UserMapper
+ * fileName       : UserService
  * author         : durururuk
  * date           : 25. 2. 12.
  * description    : 사용자 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 12.        durururuk       최초 생성
- * 25. 2. 24.        inari           주석 추가
- * 25. 2. 25.        durururuk       로그인 메서드 추가
- * 25. 2. 26.        durururuk       로그인 시 비활성유저인지 확인하는 로직 추가
- * 25. 4. 09.		 durururuk		 유저 상세 정보를 조회할 수 있는 메서드 추가
- * 25. 6. 25.		 inari			 로그아웃 기능 추가
- * 25. 6. 26.		 inari			 회원 탈퇴 기능 추가
- * 25. 6. 27.		 inari	   	   	 로그인시 lastlogin 갱신 추가
+ * 25. 2. 12.		durururuk		최초 생성
+ * 25. 2. 12.		durururuk		기본 회원가입 기능 구현
+ * 25. 2. 12.		durururuk		네이버 체크 스타일에 맞게 서식 수정
+ * 25. 2. 14.		durururuk		User 생성 방식 빌더 패턴으로 변경
+ * 25. 2. 14.		durururuk		회원가입, 닉네임 중복체크 api 퍼블릭으로 허용, 컨트롤러, 서비스에 주석 추가
+ * 25. 2. 14.		durururuk		회원가입 할 때 비밀번호를 해싱해서 저장하게 수정
+ * 25. 2. 14.		durururuk		userName -> username 오타 수정
+ * 25. 2. 17.		durururuk		userName -> username 오타 수정
+ * 25. 2. 17.		durururuk		username 중복 체크 SQL count(*) -> EXISTS()로 수정
+ * 25. 2. 17.		durururuk		Java 컨벤션에 맞게 username -> userName 수정
+ * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 19.		durururuk		회원가입 시 UserRole에 기본값 인서트되게 기능 추가
+ * 25. 2. 20.		durururuk		회원가입 시 JWT를 담은 헤더를 같이 반환하도록 추가
+ * 25. 2. 21.		durururuk		사용자명 중복체크 메서드명 더 명확하게 수정, 반대로 작동하던 로직 수정
+ * 25. 2. 21.		durururuk		사용자명 중복체크 예외 처리 추가
+ * 25. 2. 21.		durururuk		중복체크 실패 시 예외처리 -> data : false로 다시 변경
+ * 25. 2. 24.		inari		자바독 주석 추가
+ * 25. 2. 24.		durururuk		회원가입 시 인증 헤더 -> http-only 쿠키 방식으로 변경
+ * 25. 2. 25.		durururuk		로그인 서비스, 컨트롤러 추가
+ * 25. 2. 26.		durururuk		로그인 서비스 단위테스트 작성
+ * 25. 2. 26.		durururuk		로그인 시 비활성유저인지 확인하는 로직 추가
+ * 25. 3. 4.		durururuk		이메일 인증 요청 기능 추가
+ * 25. 3. 4.		durururuk		이메일 요청 검증 기능 추가
+ * 25. 3. 5.		durururuk		이메일 관련 기능 user 도메인에서 분리
+ * 25. 3. 11.		durururuk		비밀번호 변경 기능 작성
+ * 25. 3. 11.		durururuk		이메일 전송 로직 분리
+ * 25. 3. 11.		durururuk		비밀번호 변경 컨트롤러 작성
+ * 25. 3. 14.		durururuk		비밀번호 찾기 기능 리팩터링
+ * 25. 3. 14.		durururuk		예외처리 필터 작성
+ * 25. 3. 14.		durururuk		리팩터링
+ * 25. 3. 14.		durururuk		유저명 사용가능할 시 userNameToken 쿠키에 추가
+ * 25. 3. 14.		durururuk		주석 수정
+ * 25. 3. 14.		durururuk		수정된 로직에 맞게 테스트 코드 수정
+ * 25. 3. 28.		durururuk		리프레시 토큰 레디스 저장 기능 구현
+ * 25. 3. 28.		durururuk		회원가입, 로그인에서 토큰 관련 로직 분리
+ * 25. 3. 28.		durururuk		userService에 있던 토큰 관련 로직 JwtService로 이동
+ * 25. 3. 28.		durururuk		리프레시 토큰을 통한 액세스 토큰 재발급 기능 구현
+ * 25. 3. 29.		durururuk		코드 가독성을 위해 List.of(accessToken, refreshToken) 구조에서 DTO 방식으로 변경
+ * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
+ * 25. 3. 29.		durururuk		JwtRedisService 테스트 코드 작성
+ * 25. 3. 31.		Durururuk		User Entity에 잘못 설정돼있던 타입 timeStamp를 dateTime으로 수정
+ * 25. 4. 1.		durururuk		Bean 순환 문제 해결
+ * 25. 4. 9.		durururuk		상세 정보 조회 API 추가
+ * 25. 4. 9.		durururuk		에러코드 상세하게 변경
+ * 25. 4. 10.		durururuk		이메일 토큰 기반 비밀번호 변경 url 변경, 인증 기반 비밀번호 변경 기능 구현
+ * 25. 4. 10.		durururuk		이메일 기반 비밀번호 변경 변경된 로직에 맞게 테스트 코드 수정
+ * 25. 4. 12.		durururuk		닉네임 변경 기능 구현
+ * 25. 4. 12.		durururuk		유저명 변경 기능 구현
+ * 25. 4. 28.		inari		완성
+ * 25. 4. 29.		durururuk		유저 프로필 조회 기능에서 프로필사진 객체명이 아닌 s3 presigned url을 요청해서 반환합니다.
+ * 25. 6. 19.		durururuk		기존 액세스 토큰의 시간 1시간을 그대로 가져오던 이메일 인증 토큰, 유저명 중복 확인 토큰을 각각 처리하게 수정
+ * 25. 6. 25.		inari		로그아웃 기능 추가
+ * 25. 6. 26.		inari		회원 탈퇴 기능 작성
+ * 25. 6. 26.		inari		탈퇴시 간편로그인 삭제
+ * 25. 6. 26.		inari		탈퇴시 서비스에서 컨트롤러로 쿠키삭제 처리 피드백 반영
+ * 25. 6. 27.		inari		로그인시 마지막 로그인 갱신되도록 수정
+ * 25. 7. 1.		durururuk		다른 서비스 클래스에서도 변경된 로직에 맞게끔 수정
  */
 @Slf4j
 @Service

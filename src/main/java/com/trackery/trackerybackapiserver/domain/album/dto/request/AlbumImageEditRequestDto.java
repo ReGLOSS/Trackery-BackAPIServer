@@ -6,8 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.album.dto
- * fileName       : AlbumImageInsertRequestDto
+ * packageName    : com.trackery.trackerybackapiserver.domain.album.dto.request
+ * fileName       : AlbumImageEditRequestDto
  * author         : durururuk
  * date           : 25. 5. 21.
  * description    : 앨범 이미지 추가 요청 DTO

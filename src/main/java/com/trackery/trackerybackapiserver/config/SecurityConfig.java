@@ -29,17 +29,43 @@ import lombok.RequiredArgsConstructor;
  * packageName    : com.trackery.trackerybackapiserver.config
  * fileName       : SecurityConfig
  * author         : inari
- * date           : 25. 2. 06.
+ * date           : 25. 2. 6.
  * description    : 애플리캐이션의 보안 설정을 정의하는 구성 클래스입니다.
  * 					이 클래스는 Spring Security 관련 설정을 담당합니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 06.        inari       최초 생성
- * 25. 2. 21.        durururuk   JWT 추가
- * 25. 2. 21.        inari       상세 주석 추가
- * 25. 2. 27.        inari       간편 로그인 경로 추가
- * 25. 6. 12.        inari       docs 경로 추가
+ * 25. 2. 6.		inari		최초 생성
+ * 25. 2. 12.		durururuk		기본 회원가입 기능 구현
+ * 25. 2. 12.		durururuk		임시 시큐리티 전체 허용 해제, dto 검증을 위한 spring-boot-starter-validation 종속성 추가
+ * 25. 2. 12.		durururuk		UserDto validation 추가
+ * 25. 2. 13.		durururuk		기본 로그인폼 비활성화, 응답 확인용 임시 클래스 작성
+ * 25. 2. 13.		durururuk		프로젝트 도메인 CORS 허용, 이외 제한 추가, 세션 현재 사용 안함 설정 추가, 추후 JWT 토큰 관련 코드 추가 필요
+ * 25. 2. 13.		durururuk		허용 HTTP 메서드에 "PATCH" 추가
+ * 25. 2. 13.		durururuk		시큐리티 설정에서 회원가입 url 허용하도록 추가
+ * 25. 2. 14.		durururuk		회원가입, 닉네임 중복체크 api 퍼블릭으로 허용, 컨트롤러, 서비스에 주석 추가
+ * 25. 2. 14.		inari		랜덤이미지 가져오기 구현
+ * 25. 2. 14.		inari		매퍼 오타 수정 및 DB연결 테스트
+ * 25. 2. 14.		durururuk		UserController 성공 케이스 테스트 코드 작성
+ * 25. 2. 17.		inari		공통응답 테스트코드 추가
+ * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 19.		durururuk		Jwt 적용을 위한 필터 작성, 추가
+ * 25. 2. 21.		durururuk		CustomWebSecurityConfig으로 퍼블릭 uri 관리 일원화
+ * 25. 2. 24.		inari		자바독 주석 추가
+ * 25. 2. 24.		durururuk		회원가입 시 인증 헤더 -> http-only 쿠키 방식으로 변경
+ * 25. 2. 24.		durururuk		회원가입 시 인증 헤더 -> http-only 쿠키 방식으로 변경
+ * 25. 2. 25.		durururuk		로그인 서비스, 컨트롤러 추가
+ * 25. 3. 4.		durururuk		이메일 인증 요청 기능 추가
+ * 25. 3. 4.		durururuk		이메일 요청 검증 기능 추가
+ * 25. 3. 11.		durururuk		비밀번호 변경 기능 작성
+ * 25. 3. 11.		durururuk		비밀번호 변경 컨트롤러 작성
+ * 25. 3. 14.		durururuk		예외처리 필터 작성
+ * 25. 3. 28.		durururuk		리프레시 토큰 레디스 저장 기능 구현
+ * 25. 3. 28.		durururuk		리프레시 토큰을 통한 액세스 토큰 재발급 기능 구현
+ * 25. 3. 28.		durururuk		필터 순서 수정
+ * 25. 4. 1.		durururuk		Bean 순환 문제 해결
+ * 25. 4. 10.		durururuk		이메일 토큰 기반 비밀번호 변경 url 변경, 인증 기반 비밀번호 변경 기능 구현
+ * 25. 6. 24.		inari		SecurityConfig publicUri에 docs 경로 추가
  */
 @Configuration
 @EnableWebSecurity

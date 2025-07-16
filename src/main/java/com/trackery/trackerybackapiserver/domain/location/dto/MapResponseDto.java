@@ -17,7 +17,11 @@ import lombok.NoArgsConstructor;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 5. 30.        inari       최초 생성
+ * 25. 5. 30.		inari		최초 생성
+ * 25. 5. 30.		inari		제작중
+ * 25. 6. 10.		inari		location과 통합
+ * 25. 6. 15.		inari		체크스타일 수정
+ * 25. 7. 11.		inari		자바독 오류 해결 및 자바독 주입
  */
 @Data
 @NoArgsConstructor

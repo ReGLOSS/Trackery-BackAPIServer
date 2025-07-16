@@ -36,14 +36,30 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 15.		durururuk		최초 생성
- * 25. 6. 13.		inari			시군구 ID로 시군구 정보를 조회 메서드 추가
- * 25. 6. 14.		inari			홈화면 전국지도용 통계 추가
- * 25. 6. 22.		inari			좌표 업데이트 메서드 추가
- * 25. 6. 27.		inari			코드 스멜 수정
- * 25. 7. 7.		inari			지역 태그 서비스 추가
- * 25. 7. 8.		inari			시군구 ID로 시도명과 시군구명을 분리한 메서드 추가
- * 25. 7. 10.		inari			태그를 태그 도메인으로 분리
- * 25. 7. 15.		inari			updateImageLocation을 이미지 서비스에서 이동
+ * 25. 4. 15.		durururuk		좌표로 지역 찾아오는 기능 구현
+ * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
+ * 25. 4. 21.		durururuk		insert CoordinatePoint 기능 작성
+ * 25. 4. 21.		durururuk		이미지 업로드 기능 구현
+ * 25. 4. 21.		durururuk		개발 중 테스트용 코드 남아있던 것 삭제
+ * 25. 4. 23.		durururuk		LocationService JavaDoc 주석 추가
+ * 25. 4. 23.		durururuk		LocationMapper JavaDoc 주석 추가
+ * 25. 4. 23.		durururuk		LocationService Mock 단위 테스트 작성
+ * 25. 6. 10.		inari		location과 통합
+ * 25. 6. 11.		durururuk		앨범 이미지 삭제 기능 구현
+ * 25. 6. 13.		inari		시군구 조회 기능 추가
+ * 25. 6. 13.		inari		시군구 조회 로깅 추가
+ * 25. 6. 15.		inari		체크스타일 수정
+ * 25. 6. 16.		inari		전국지도용 통계 추가
+ * 25. 6. 16.		inari		location 도메인과 image 도메인 리팩토링 및 지도 이미지 조회기능 추가
+ * 25. 6. 16.		inari		state에서 시도 제거
+ * 25. 6. 22.		inari		이미지 메타데이터 수정시 좌표 인서트가 아닌 업데이트로 변경
+ * 25. 6. 27.		inari		LocationService 매직 스트링을 상수로 변경하여 코드 스멜 해결
+ * 25. 7. 7.		inari		이미지 업로드시 시도,시군구 태그 추가 기능 구현
+ * 25. 7. 8.		inari		이미지 업로드시 지역기반으로 자동으로 시도, 시군구 태그 생성
+ * 25. 7. 11.		inari		기본 태그기능 로케이션에서 태그 도메인으로 이동
+ * 25. 7. 11.		inari		체크스타일 수정
+ * 25. 7. 14.		inari		locationName을 sdName + sggName으로 수정
+ * 25. 7. 15.		inari		ImageService에 있던 updateImageLocation, processTagRemoval, processTagAddition 각 도메인으로 이동
  */
 @Slf4j
 @Service

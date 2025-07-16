@@ -21,17 +21,48 @@ import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.common.util
- * fileName       : JwtUtil
+ * packageName    : com.trackery.trackerybackapiserver.domain.jwt.service
+ * fileName       : JwtService
  * author         : durururuk
  * date           : 25. 2. 18.
  * description    : JWT 토큰 생성, 검증, 파싱을 담당하는 유틸리티 클래스
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 18.       durururuk       최초 생성
+ * 25. 2. 18.		durururuk		최초 생성
+ * 25. 2. 18.		durururuk		JWT 토큰 추가 메서드 추가
+ * 25. 2. 19.		durururuk		Jwt 적용을 위한 필터 작성, 추가
+ * 25. 2. 19.		durururuk		코딩 컨벤션에 맞게 정리
+ * 25. 2. 19.		durururuk		Jwt 생성 시 역할 정보를 담도록 추가, jwt 필터에도 반영, 로직 개선
+ * 25. 2. 20.		durururuk		회원가입 시 JWT를 담은 헤더를 같이 반환하도록 추가
+ * 25. 2. 20.		durururuk		주석 추가
+ * 25. 2. 24.		inari		자바독 주석 추가
+ * 25. 3. 4.		durururuk		이메일 인증 요청 기능 추가
+ * 25. 3. 5.		durururuk		주석 추가
+ * 25. 3. 14.		durururuk		예외처리 필터 작성
+ * 25. 3. 14.		durururuk		예외처리 필터 작성
+ * 25. 3. 14.		durururuk		유저명 사용가능할 시 userNameToken 쿠키에 추가
+ * 25. 3. 27.		durururuk		액세스토큰쿠키 유지시간 jwt 만료시간과 같게 수정
  * 25. 3. 28.		durururuk		리프레시 토큰 생성 메서드 추가
- * 25. 6. 25.		inari			액세스 토큰 블랙리스트 기능 추가
+ * 25. 3. 28.		durururuk		리프레시 토큰 레디스 저장 기능 구현
+ * 25. 3. 28.		durururuk		userService에 있던 토큰 관련 로직 JwtService로 이동
+ * 25. 3. 28.		durururuk		주석 추가
+ * 25. 3. 28.		durururuk		리프레시 토큰을 통한 액세스 토큰 재발급 기능 구현
+ * 25. 3. 28.		durururuk		필터 순서 수정
+ * 25. 3. 29.		durururuk		코드 가독성을 위해 List.of(accessToken, refreshToken) 구조에서 DTO 방식으로 변경
+ * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
+ * 25. 3. 29.		durururuk		주석 작성
+ * 25. 3. 29.		durururuk		JwtRedisService 테스트 코드 작성
+ * 25. 3. 31.		Durururuk		JwtService 테스트코드 추가
+ * 25. 4. 1.		Durururuk		JwtResolverFilter에 있던 분리된 메서드들 각자 있어야 할 클래스로 이동
+ * 25. 4. 1.		durururuk		Bean 순환 문제 해결
+ * 25. 4. 1.		durururuk		JWT 검증 실패 시 예외 에러메시지 수정
+ * 25. 4. 8.		durururuk		액세스 토큰 10분 으로 돼있던 문제 수정
+ * 25. 6. 19.		durururuk		JWT 토큰 만료시간 enum으로 관리하게 수정
+ * 25. 6. 19.		durururuk		기존 액세스 토큰의 시간 1시간을 그대로 가져오던 이메일 인증 토큰, 유저명 중복 확인 토큰을 각각 처리하게 수정
+ * 25. 6. 19.		durururuk		변경된 로직에 맞게 javaDoc 작성
+ * 25. 6. 19.		durururuk		기존 JwtService에 선언돼있던 액세스토큰, 리프레시 토큰 만료시간 삭제
+ * 25. 6. 25.		inari		jwt 액세스토큰 블랙리스트 추가
  */
 @Slf4j
 @Component

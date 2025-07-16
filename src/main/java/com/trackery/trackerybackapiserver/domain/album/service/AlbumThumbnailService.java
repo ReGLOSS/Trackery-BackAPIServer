@@ -25,6 +25,12 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 6. 20.		durururuk		최초 생성
+ * 25. 6. 20.		durururuk		AlbumThumbnailService 생성
+ * 25. 6. 20.		durururuk		앨범 썸네일 자동 생성 로직 작성
+ * 25. 6. 20.		durururuk		이벤트 관련 클래스 이벤트 패키지로 이동
+ * 25. 6. 20.		durururuk		이벤트를 발행할 때 앨범 정보도 같이 넘겨줘서 Album 두 번 조회하지 않게 수정
+ * 25. 6. 20.		durururuk		주석 수정
+ * 25. 6. 23.		durururuk		이미지 추가에 성공한 이미지가 없을 경우 예외가 아닌 썸네일 관련 로직이 작동하지 않게 수정, 현재 썸네일이 없을 경우 이미지 삭제 시 썸네일 작동하지 않게 수정
  */
 @Slf4j
 @Service

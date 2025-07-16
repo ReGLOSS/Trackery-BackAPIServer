@@ -14,7 +14,7 @@ import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 import lombok.RequiredArgsConstructor;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.home.controller
+ * packageName    : com.trackery.trackerybackapiserver.domain.image.controller
  * fileName       : LandingImagesController
  * author         : inari
  * date           : 25. 2. 14.
@@ -22,7 +22,14 @@ import lombok.RequiredArgsConstructor;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 14.        inari       최초 생성
+ * 25. 2. 14.		inari		최초 생성
+ * 25. 2. 14.		inari		랜덤이미지 가져오기 구현
+ * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 18.		inari		컨트롤러 ResponseEntity 반영
+ * 25. 2. 24.		inari		자바독 주석 추가
+ * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
+ * 25. 4. 21.		durururuk		이미지 업로드 기능 구현
+ * 25. 4. 21.		durururuk		더 이상 사용되지 않는 클래스 삭제
  */
 @RestController
 @RequestMapping("/api/home")

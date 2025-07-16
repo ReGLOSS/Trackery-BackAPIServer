@@ -15,7 +15,11 @@ import lombok.NoArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 17.		durururuk		최초 생성
- * 25. 7. 8.		inari			태그리스트 추가
+ * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
+ * 25. 4. 21.		durururuk		이미지 업로드 DTO 작성
+ * 25. 4. 24.		durururuk		클래스 설명 주석 작성
+ * 25. 7. 8.		inari		이미지 업로드시 일반 태그 추가
+ * 25. 7. 9.		inari		regionalTags를 Tags로 수정 및 관련 메서드 및 변수 변경
  */
 @Getter
 @NoArgsConstructor

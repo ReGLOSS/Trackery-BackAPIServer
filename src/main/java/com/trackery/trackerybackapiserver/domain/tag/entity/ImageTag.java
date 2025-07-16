@@ -16,7 +16,10 @@ import lombok.NoArgsConstructor;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 3.        inari           최초 생성
+ * 25. 7. 3.		inari		최초 생성
+ * 25. 7. 3.		inari		매퍼와 엔티티 추가
+ * 25. 7. 8.		inari		이미지 업로드시 일반 태그 추가
+ * 25. 7. 11.		inari		수정
  */
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

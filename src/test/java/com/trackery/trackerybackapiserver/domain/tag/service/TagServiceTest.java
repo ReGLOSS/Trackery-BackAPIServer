@@ -43,10 +43,13 @@ import com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 8.         inari       최초 생성
- * 25. 7. 11.        inari       최초 생성
- * 25. 7. 14.        inari       테스트 코드 수정
- * 25. 7. 15.        inari       코드 스멜 수정, 테스트코드 추가
+ * 25. 7. 8.		inari		최초 생성
+ * 25. 7. 8.		inari		태그 테스트 작성
+ * 25. 7. 9.		inari		regionalTags를 Tags로 수정 및 관련 메서드 및 변수 변경
+ * 25. 7. 11.		inari		test코드 추가
+ * 25. 7. 14.		inari		테스트코드 수정 및 adoc 변경
+ * 25. 7. 15.		inari		단일 테스트로 변경하여 코드스멜 해결
+ * 25. 7. 15.		inari		테스트 코드 작성 및 문서 수정
  */
 @ExtendWith(MockitoExtension.class)
 class TagServiceTest {

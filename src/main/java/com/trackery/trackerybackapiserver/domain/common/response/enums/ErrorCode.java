@@ -15,14 +15,34 @@ import lombok.Getter;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 13.        durururuk       최초 생성
- * 25. 2. 21.        inari			 상세 주석 추가
- * 25. 2. 25.        inari			 Duplicate_EMAIL 추가
- * 25. 2. 26.        inari			 UNAUTHORIZED_OAUTH_FAILED, BAD_REQUEST_INVALID_OAUTH_PROVIDER 추가
- * 25. 3. 20.        inari			 BAD_REQUEST_INVALID_INPUT 추가
- * 25. 5. 30.        inari			 지도관련 NOT_FOUND 추가
- * 25. 6. 20.        inari			 이미지 수정 관련 UPDATE_FAILED 추가
- * 25. 6. 27.        inari			 주석 추가 및 정리
+ * 25. 2. 13.		durururuk		최초 생성
+ * 25. 2. 13.		durururuk		기본 응답 포맷 작성
+ * 25. 2. 14.		durururuk		Validation 실패 예외, 잘못된 RequestBody 예외 처리하는 ErrorCode, 핸들러 수정
+ * 25. 2. 14.		durururuk		회원가입 할 때 비밀번호를 해싱해서 저장하게 수정
+ * 25. 2. 17.		inari		공통응답 테스트코드 추가
+ * 25. 2. 18.		durururuk		JWT 토큰 추가 메서드 추가
+ * 25. 2. 19.		inari		이미지가 비었을시 에러코드로 변경
+ * 25. 2. 19.		durururuk		UserDetails, UserDetailsService 구현체 작성,
+ * 25. 2. 24.		inari		자바독 주석 추가
+ * 25. 2. 25.		durururuk		userRole 매퍼 추가, userMapper에 있던 userRoleInsert 이동
+ * 25. 2. 28.		inari		구현중
+ * 25. 3. 20.		inari		getUserInfo의 복잡도 15이하로 변경
+ * 25. 3. 26.		inari		토큰 생성시 검증부분 추가
+ * 25. 3. 31.		Durururuk		refresh-token/ ENUM 컨벤션 수정
+ * 25. 4. 9.		durururuk		에러코드 상세하게 변경
+ * 25. 4. 10.		durururuk		에러코드 수정
+ * 25. 4. 12.		durururuk		닉네임 변경 기능 구현
+ * 25. 4. 21.		durururuk		이미지 업로드 기능 구현
+ * 25. 5. 6.		durururuk		이미지 업로드 시 객체 존재 여부 확인 로직 추가
+ * 25. 5. 15.		durururuk		이미지 조회 기능 폴더 지정 오류로 안 되던 문제 수정
+ * 25. 5. 21.		durururuk		앨범에 이미지 추가하는 기능 작성
+ * 25. 5. 30.		inari		제작중
+ * 25. 6. 20.		inari		pr 코멘트받은 내용 수정
+ * 25. 6. 24.		inari		에러코드 및 필요한 설정 추가
+ * 25. 6. 27.		inari		에러코드 정리
+ * 25. 6. 27.		inari		이미 연동된 간편로그인 타유저 접근 차단
+ * 25. 7. 7.		inari		프로퍼티 에러코드 추가
+ * 25. 7. 10.		durururuk		PageUtil convert 메서드 null 체크 추가
  */
 @Getter
 @AllArgsConstructor
@@ -226,15 +246,18 @@ public enum ErrorCode {
 	/**
 	 * 페이지 정보 변환 시 원본 페이지 정보가 null일 경우 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, Source PageInfo가 null입니다.")
 	 */
-	INTERNAL_SERVER_ERROR_PAGE_SOURCE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, Source PageInfo가 null입니다."),
+	INTERNAL_SERVER_ERROR_PAGE_SOURCE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500,
+		"PageInfo 변환 중 오류 발생, Source PageInfo가 null입니다."),
 	/**
 	 * 페이지 정보 변환 시 새로운 리스트가 null일 경우 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환될 새 리스트가 null입니다.")
 	 */
-	INTERNAL_SERVER_ERROR_PAGE_NEW_LIST_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환될 새 리스트가 null입니다."),
+	INTERNAL_SERVER_ERROR_PAGE_NEW_LIST_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500,
+		"PageInfo 변환 중 오류 발생, 변환될 새 리스트가 null입니다."),
 	/**
 	 * 페이지 정보 변환 시 변환 함수가 null일 경우 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환 메서드가 null입니다.")
 	 */
-	INTERNAL_SERVER_ERROR_PAGE_CONVERTER_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환 메서드가 null입니다."),
+	INTERNAL_SERVER_ERROR_PAGE_CONVERTER_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500,
+		"PageInfo 변환 중 오류 발생, 변환 메서드가 null입니다."),
 
 	/*
 	 * =================================================================================================================
@@ -276,7 +299,6 @@ public enum ErrorCode {
 	 * 유틸리티 클래스의 객체가 생성됨 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "유틸리티 클래스 객체가 생성되었습니다.")
 	 */
 	INTERNAL_SERVER_ERROR_UTIL_CLASS_INSTANTIATED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "유틸리티 클래스 객체가 생성되었습니다.");
-
 
 	/**
 	 * HTTP 상태 코드

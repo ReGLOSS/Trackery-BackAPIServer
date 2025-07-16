@@ -21,7 +21,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.common.controller
+ * packageName    : com.trackery.trackerybackapiserver.domain.mail.controller
  * fileName       : MailController
  * author         : durururuk
  * date           : 25. 3. 5.
@@ -29,10 +29,17 @@ import lombok.RequiredArgsConstructor;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 5.        durururuk      최초 생성
- * 25. 3. 5.        durururuk      유저 컨트롤러에서 분리
- * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
- * 25. 7. 11.        inari      	클래스 설명 추가
+ * 25. 3. 5.		durururuk		최초 생성
+ * 25. 3. 5.		durururuk		이메일 관련 기능 user 도메인에서 분리
+ * 25. 3. 5.		durururuk		메일 컨트롤러 mockMvc 테스트 작성
+ * 25. 3. 11.		durururuk		이메일 전송 로직 분리
+ * 25. 3. 14.		durururuk		비밀번호 찾기 기능 리팩터링
+ * 25. 3. 14.		durururuk		테스트 코드 작성
+ * 25. 3. 20.		durururuk		수정 된 로직에 맞게 테스트 코드 작성
+ * 25. 3. 25.		durururuk		유저명 찾기 컨트롤러 메서드 추가, 테스트 코드 작성
+ * 25. 3. 28.		durururuk		refresh-token/ Cookie 유효시간 수정
+ * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
+ * 25. 7. 11.		inari		mail 도메인의 자바독 누락 및 체크스타일 해결
  */
 @RestController
 @RequiredArgsConstructor

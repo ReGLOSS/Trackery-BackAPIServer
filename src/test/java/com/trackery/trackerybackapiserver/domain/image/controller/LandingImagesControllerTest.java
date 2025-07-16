@@ -21,7 +21,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 
 /**
- *packageName    : com.trackery.trackerybackapiserver.domain.home.controller
+ * packageName    : com.trackery.trackerybackapiserver.domain.image.controller
  * fileName       : LandingImagesControllerTest
  * author         : inari
  * date           : 25. 2. 14.
@@ -29,8 +29,12 @@ import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 14.        inari       최초 생성
- * 25. 6. 11.        inari       adoc 문서 추가
+ * 25. 2. 14.		inari		최초 생성
+ * 25. 2. 14.		inari		랜덤이미지 가져오기 구현
+ * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 18.		inari		랜딩페이지 테스트코드 복구
+ * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
+ * 25. 6. 11.		inari		adoc 문서 추가
  */
 @ExtendWith(RestDocumentationExtension.class)
 class LandingImagesControllerTest {

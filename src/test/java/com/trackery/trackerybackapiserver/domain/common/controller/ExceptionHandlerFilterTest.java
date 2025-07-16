@@ -33,9 +33,11 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 14.        durururuk      최초 생성
+ * 25. 3. 14.		durururuk		최초 생성
+ * 25. 3. 14.		durururuk		예외처리 필터 작성
+ * 25. 3. 28.		durururuk		리프레시 토큰을 통한 액세스 토큰 재발급 기능 구현
+ * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
  */
-
 @Import(SecurityConfig.class)
 @WebMvcTest(TestController.class)
 class ExceptionHandlerFilterTest {

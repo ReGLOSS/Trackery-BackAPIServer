@@ -15,6 +15,9 @@ import lombok.NoArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 29.		durururuk		최초 생성
+ * 25. 5. 29.		durururuk		내 앨범 간단 조회 기능 구현
+ * 25. 6. 11.		durururuk		앨범 이미지 삭제 기능 구현
+ * 25. 6. 23.		durururuk		앨범 목록 조회 시 썸네일도 함께 조회할 수 있도록 수정
  */
 @Getter
 @Builder

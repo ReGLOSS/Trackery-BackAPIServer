@@ -4,11 +4,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.user.dto
- * fileName       : ChangeUserNameDto
+ * packageName    : com.trackery.trackerybackapiserver.domain.user.dto.update
+ * fileName       : UpdateUserNameDto
  * author         : durururuk
  * date           : 25. 4. 12.
- * description    : 
+ * description    : 유저명 수정 요청 DTO
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------

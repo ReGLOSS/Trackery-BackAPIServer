@@ -17,7 +17,10 @@ import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 26.        inari       최초 생성
+ * 25. 3. 26.		inari		최초 생성
+ * 25. 3. 26.		inari		provider enum 적용
+ * 25. 6. 12.		inari		index.html을 프론트에서 접근가능하도록 핸들러 및 플러그인 pom.xml에 추가
+ * 25. 6. 12.		inari		핸들러에서 컨트롤러로 변경
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {

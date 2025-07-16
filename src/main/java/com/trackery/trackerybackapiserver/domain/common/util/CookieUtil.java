@@ -27,10 +27,19 @@ import jakarta.servlet.http.HttpServletRequest;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 25.        durururuk      최초 생성
- * 25. 2. 26.        durururuk      액세스토큰쿠키 생성 메서드 작성
- * 25. 6. 25.        inari      	쿠키 삭제시 파라미터 추가
- * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
+ * 25. 2. 25.		durururuk		최초 생성
+ * 25. 2. 26.		durururuk		액세스 토큰 쿠키 생성 메서드 클래스 분리
+ * 25. 3. 14.		durururuk		비밀번호 찾기 기능 리팩터링
+ * 25. 3. 14.		durururuk		유저명 사용가능할 시 userNameToken 쿠키에 추가
+ * 25. 3. 26.		durururuk		accessToken 쿠키 jwt 만료시간에 맞게 maxAge 1시간으로 수정
+ * 25. 3. 27.		durururuk		액세스토큰쿠키 유지시간 jwt 만료시간과 같게 수정
+ * 25. 3. 28.		durururuk		Cookie 유효시간 수정
+ * 25. 4. 1.		durururuk		JwtResolverFilter에 있던 분리된 메서드들 각자 있어야 할 클래스로 이동
+ * 25. 4. 12.		durururuk		유저명 변경 기능 구현
+ * 25. 6. 23.		inari		테스트 코드 작성
+ * 25. 6. 25.		inari		쿠키 삭제시 sameSite에 넣을 파라미터 추가
+ * 25. 6. 25.		inari		주석 추가
+ * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
  */
 public class CookieUtil {
 	/**

@@ -26,6 +26,20 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
+/**
+ * packageName    : com.trackery.trackerybackapiserver.domain.image.service
+ * fileName       : ImageS3ServiceTest
+ * author         : durururuk
+ * date           : 25. 5. 21.
+ * description    : ImageS3Service 단위 테스트
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 5. 21.		durururuk		최초 생성
+ * 25. 5. 21.		durururuk		ImageS3ServiceTest 작성
+ * 25. 7. 1.		durururuk		변경된 서비스 로직에 맞게 테스트코드 수정
+ * 25. 7. 1.		durururuk		더 이상 쓰이지 않는 변수 정리, 재사용 가능한 지역변수 전역변수화
+ */
 @ExtendWith(MockitoExtension.class)
 class ImageS3ServiceTest {
 
