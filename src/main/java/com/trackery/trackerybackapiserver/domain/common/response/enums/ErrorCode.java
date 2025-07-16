@@ -246,15 +246,18 @@ public enum ErrorCode {
 	/**
 	 * 페이지 정보 변환 시 원본 페이지 정보가 null일 경우 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, Source PageInfo가 null입니다.")
 	 */
-	INTERNAL_SERVER_ERROR_PAGE_SOURCE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, Source PageInfo가 null입니다."),
+	INTERNAL_SERVER_ERROR_PAGE_SOURCE_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500,
+		"PageInfo 변환 중 오류 발생, Source PageInfo가 null입니다."),
 	/**
 	 * 페이지 정보 변환 시 새로운 리스트가 null일 경우 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환될 새 리스트가 null입니다.")
 	 */
-	INTERNAL_SERVER_ERROR_PAGE_NEW_LIST_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환될 새 리스트가 null입니다."),
+	INTERNAL_SERVER_ERROR_PAGE_NEW_LIST_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500,
+		"PageInfo 변환 중 오류 발생, 변환될 새 리스트가 null입니다."),
 	/**
 	 * 페이지 정보 변환 시 변환 함수가 null일 경우 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환 메서드가 null입니다.")
 	 */
-	INTERNAL_SERVER_ERROR_PAGE_CONVERTER_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500, "PageInfo 변환 중 오류 발생, 변환 메서드가 null입니다."),
+	INTERNAL_SERVER_ERROR_PAGE_CONVERTER_NULL(HttpStatus.INTERNAL_SERVER_ERROR, 500,
+		"PageInfo 변환 중 오류 발생, 변환 메서드가 null입니다."),
 
 	/*
 	 * =================================================================================================================
@@ -296,7 +299,6 @@ public enum ErrorCode {
 	 * 유틸리티 클래스의 객체가 생성됨 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "유틸리티 클래스 객체가 생성되었습니다.")
 	 */
 	INTERNAL_SERVER_ERROR_UTIL_CLASS_INSTANTIATED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "유틸리티 클래스 객체가 생성되었습니다.");
-
 
 	/**
 	 * HTTP 상태 코드

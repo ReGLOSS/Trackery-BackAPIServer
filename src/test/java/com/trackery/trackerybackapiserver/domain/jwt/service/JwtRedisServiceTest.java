@@ -3,7 +3,6 @@ package com.trackery.trackerybackapiserver.domain.jwt.service;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -18,7 +17,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.RefreshTokenDto;
-import com.trackery.trackerybackapiserver.domain.jwt.enums.JwtExpirationTime;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.jwt.service

@@ -78,7 +78,7 @@ public class ImageS3Service {
 				.bucket(imageBucket)
 				.key(actualKey)
 				.build();
-			
+
 			s3Client.headObject(headObjectRequest);
 		} catch (NoSuchKeyException e) {
 			throw new ApiException(ErrorCode.NOT_FOUND_IMAGE_OBJECT_KEY);
