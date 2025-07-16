@@ -24,9 +24,20 @@ import lombok.extern.slf4j.Slf4j;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 28.       durururuk       최초 생성
- * 25. 3. 28.		durururuk		리프레시 토큰 저장, 조회, 삭제 기능 구현
- * 25. 6. 25.		inari			액세스 토큰 블랙리스트 기능 추가
+ * 25. 3. 28.		durururuk		최초 생성
+ * 25. 3. 28.		durururuk		리프레시 토큰 레디스 저장 기능 구현
+ * 25. 3. 28.		durururuk		리프레시 토큰을 통한 액세스 토큰 재발급 기능 구현
+ * 25. 3. 28.		durururuk		레디스 키 상수화
+ * 25. 3. 29.		durururuk		코드 가독성을 위해 List.of(accessToken, refreshToken) 구조에서 DTO 방식으로 변경
+ * 25. 3. 29.		durururuk		주석 작성
+ * 25. 3. 29.		durururuk		주석 작성
+ * 25. 6. 19.		durururuk		redis에서 리프레시 토큰이 만료되어 key를 가져올 수 없을 때 예외 처리 추가
+ * 25. 6. 19.		durururuk		Redis 데이터 삭제 시 처리 방식을 delete에서 비동기 방식인 unlink로 변경
+ * 25. 6. 19.		durururuk		JWT 토큰 만료시간 enum으로 관리하게 수정
+ * 25. 6. 25.		Nari-Lee		jwt 액세스토큰 블랙리스트 추가
+ * 25. 7. 9.		durururuk		리프레시 토큰으로 액세스토큰 재발급시 예외처리 강화 및 로깅 추가
+ * 25. 7. 14.		durururuk		로그에서 민감정보 삭제
+ * 25. 7. 14.		durururuk		테스트코드 수정
  */
 @Slf4j
 @Service

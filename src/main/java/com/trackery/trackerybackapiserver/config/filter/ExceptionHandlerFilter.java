@@ -17,7 +17,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.config
+ * packageName    : com.trackery.trackerybackapiserver.config.filter
  * fileName       : ExceptionHandlerFilter
  * author         : durururuk
  * date           : 25. 3. 14.
@@ -25,7 +25,10 @@ import jakarta.servlet.http.HttpServletResponse;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 14.        durururuk      최초 생성
+ * 25. 3. 14.		durururuk		최초 생성
+ * 25. 3. 14.		durururuk		예외처리 필터 작성
+ * 25. 3. 28.		durururuk		필터 순서 수정
+ * 25. 3. 28.		durururuk		리프레쉬 토큰으로 액세스 토큰 재발급 시, 쿠키에 다시 추가되게 수정
  */
 public class ExceptionHandlerFilter extends OncePerRequestFilter {
 

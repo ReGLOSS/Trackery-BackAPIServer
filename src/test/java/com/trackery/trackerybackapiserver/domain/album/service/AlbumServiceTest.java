@@ -39,6 +39,31 @@ import com.trackery.trackerybackapiserver.domain.image.entity.Image;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 
+/**
+ * packageName    : com.trackery.trackerybackapiserver.domain.album.service
+ * fileName       : AlbumServiceTest
+ * author         : durururuk
+ * date           : 25. 5. 29.
+ * description    : 앨범 서비스 단위 테스트
+ * ===========================================================
+ * DATE              AUTHOR             NOTE
+ * -----------------------------------------------------------
+ * 25. 05. 29.		durururuk		최초 생성
+ * 25. 5. 29.		durururuk		AlbumService 단위 테스트 작성
+ * 25. 6. 11.		durururuk		앨범 이미지 삭제 기능 구현
+ * 25. 6. 12.		durururuk		AlbumServiceTest 새로 추가된 메서드들 유닛 테스트 작성
+ * 25. 6. 16.		durururuk		문서에서 필드 타입 NULL로 나오는 일부 필드들 문제 수정
+ * 25. 6. 16.		durururuk		엔드포인트에 맞게 컨트롤러 테스트코드, API 문서 수정
+ * 25. 6. 16.		durururuk		예외 검증 단계에서 두 개의 메서드를 사용해서 경고가 나오던 부분 수정
+ * 25. 6. 20.		durururuk		변경된 로직에 맞게 Service 테스트 코드 수정
+ * 25. 6. 23.		durururuk		수정된 로직에 맞게 Service 테스트 코드 수정
+ * 25. 6. 23.		durururuk		deprecated된 앨범 상세 정보 조회API 관련 코드 삭제
+ * 25. 6. 24.		durururuk		서비스 테스트 코드 작성
+ * 25. 7. 1.		durururuk		변경된 서비스 로직에 맞게 테스트코드 수정
+ * 25. 7. 8.		durururuk		변경된 로직에 맞게 테스트 코드 수정
+ * 25. 7. 11.		durururuk		변경된 로직에 맞게 테스트 코드 수정
+ * 25. 7. 15.		durururuk		앨범 이미지 삭제 메서드 테스트 코드 추가
+ */
 @ExtendWith(MockitoExtension.class)
 class AlbumServiceTest {
 	@Mock

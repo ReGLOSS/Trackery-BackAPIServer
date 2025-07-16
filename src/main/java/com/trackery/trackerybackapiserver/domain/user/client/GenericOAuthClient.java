@@ -29,19 +29,24 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.client
  * fileName       : GenericOAuthClient
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 2. 26.
  * description    : 모든 간편 로그인 서비스를 하나의 클래스에서 처리하는 클라이언트입니다.
  * 					간편 로그인 서비스에서 액세스 토큰을 얻고 사용자 정보를 가져옵니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 26.        inari       최초 생성
- * 25. 2. 28.        inari       리프레시 토큰 제거, 깃허브 로그인시 이메일 요청 추가
- * 25. 3. 05.        inari       프로필 사진 제거
- * 25. 3. 20.        inari       소나큐브 코드스멜 개선
- * 25. 3. 27.        inari		 provider를 enum으로 변경
- * 25. 6. 25.        inari		 코드 스멜 수정
+ * 25. 2. 28.		Nari-Lee		최초 생성
+ * 25. 2. 28.       Nari-Lee        리프레시 토큰 제거, 깃허브 로그인시 이메일 요청 추가
+ * 25. 3. 5.		Nari-Lee		간편로그인시 프로필사진 제거
+ * 25. 3. 20.		Nari-Lee		EnumMap으로 변경
+ * 25. 3. 20.		Nari-Lee		중복 리터럴을 상수로 전환
+ * 25. 3. 20.		Nari-Lee		람다식의 불필요한 괄호 제거
+ * 25. 3. 20.		Nari-Lee		getUserInfo의 복잡도 15이하로 변경
+ * 25. 3. 26.		Nari-Lee		토큰 생성시 검증부분 추가
+ * 25. 3. 27.		Nari-Lee		provider enum 적용
+ * 25. 3. 27.		Nari-Lee		상세 주석 추가 및 테스트코드 수정
+ * 25. 6. 25.		Nari-Lee		코드 스멜 수정
  */
 @Slf4j
 @Component

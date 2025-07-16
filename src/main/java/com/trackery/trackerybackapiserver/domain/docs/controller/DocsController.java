@@ -17,13 +17,15 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.docs.controller
  * fileName       : DocsController
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 6. 12.
  * description    : Spring REST Docs 문서를 제공하는 컨트롤러입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 6. 12.        inari       최초 생성
+ * 25. 6. 12.		Nari-Lee		최초 생성
+ * 25. 6. 12.		Nari-Lee		핸들러에서 컨트롤러로 변경
+ * 25. 6. 16.		Nari-Lee		체크스타일 적용
  */
 @RestController
 @RequestMapping("/api/docs")

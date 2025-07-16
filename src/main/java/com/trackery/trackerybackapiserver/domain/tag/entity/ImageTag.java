@@ -10,13 +10,16 @@ import lombok.NoArgsConstructor;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.tag.entity
  * fileName       : ImageTag
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 7. 3.
  * description    : 이미지와 태그의 연관관계를 나타내는 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 3.        inari           최초 생성
+ * 25. 7. 3.		Nari-Lee		최초 생성
+ * 25. 7. 3.		Nari-Lee		매퍼와 엔티티 추가
+ * 25. 7. 8.		Nari-Lee		이미지 업로드시 일반 태그 추가
+ * 25. 7. 11.		Nari-Lee		수정
  */
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

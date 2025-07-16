@@ -41,19 +41,37 @@ import com.trackery.trackerybackapiserver.domain.location.service.LocationServic
 import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
 
 /**
- *packageName    : com.trackery.trackerybackapiserver.domain.home.service
+ * packageName    : com.trackery.trackerybackapiserver.domain.image.service
  * fileName       : ImageServiceTest
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 2. 14.
  * description    : ImageService의 테스트 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 14.       inari       최초 생성
- * 25. 5. 19.		durururuk	이미지 조회 단위 테스트 작성
- * 25. 6. 20.		inari		이미지 삭제 및 수정 테스트 작성
- * 25. 7. 10.       inari       이미지 단건 조회시 태그 추가
- * 25. 7. 14.       inari       누락된 테스트코드 추가
+ * 25. 2. 14.		durururuk		최초 생성
+ * 25. 2. 14.		Nari-Lee		랜덤이미지 가져오기 구현
+ * 25. 2. 17.		Nari-Lee		테스트 코드 수정
+ * 25. 2. 18.		Nari-Lee		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 18.		Nari-Lee		랜딩페이지 테스트코드 복구
+ * 25. 2. 19.		Nari-Lee		테스트코드 수정
+ * 25. 3. 14.		durururuk		테스트 코드 작성
+ * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
+ * 25. 5. 15.		durururuk		이미지 조회 기능 구현
+ * 25. 5. 19.		durururuk		ImageServiceTest 단위 테스트 작성
+ * 25. 6. 17.		durururuk		getImageListByUserIdV2 서비스 테스트 코드 작성
+ * 25. 6. 20.		Nari-Lee		이미지 수정 및 삭제기능 추가
+ * 25. 6. 22.		Nari-Lee		테스트파일 수정
+ * 25. 7. 1.		durururuk		변경된 서비스 로직에 맞게 테스트코드 수정
+ * 25. 7. 1.		durururuk		더 이상 쓰이지 않는 변수 정리, 재사용 가능한 지역변수 전역변수화
+ * 25. 7. 8.		durururuk		내 이미지 조회 시 조회 결과에서 제외될 앨범 ID 파라미터 추가
+ * 25. 7. 8.		durururuk		변경된 로직에 맞게 테스트 코드 수정
+ * 25. 7. 10.		Nari-Lee		이미지 단건 조회시 태그 추가
+ * 25. 7. 10.		durururuk		변경된 로직에 맞게 테스트 코드 수정
+ * 25. 7. 14.		Nari-Lee		테스트코드 수정 및 adoc 변경
+ * 25. 7. 15.		Nari-Lee		필요없는 eq 삭제
+ * 25. 7. 15.		durururuk		이벤트 publish 관련 모킹 추가
+ * 25. 7. 15.		Nari-Lee		ImageServiceTest 테스트 코드 작성
  */
 @ExtendWith(MockitoExtension.class)
 class ImageServiceTest {

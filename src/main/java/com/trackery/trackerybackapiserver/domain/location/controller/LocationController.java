@@ -40,12 +40,23 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 15.		durururuk		최초 생성
- * 25. 6. 13.		inari         	시군구 ID로 시군구 정보를 조회 메서드 추가
- * 25. 6. 14.		inari       	홈화면 전국지도용 통계 추가
- * 25. 6. 16.		inari       	지도에서 사용자 이미지 조회 추가
- * 25. 7. 7.		inari			지역 태그 서비스 추가
- * 25. 7. 8.		inari			프론트에서 시도명과 시군구명을 분리해서 받을 수 있음
- * 25. 7. 10.		inari			태그를 태그 도메인으로 분리
+ * 25. 4. 15.		durururuk		좌표로 지역 찾아오는 기능 구현
+ * 25. 4. 17.		durururuk		좌표로 이름을 받아오는 api url 수정
+ * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
+ * 25. 4. 21.		durururuk		이미지 업로드 DTO 작성
+ * 25. 4. 21.		durururuk		개발 중 테스트용 코드 남아있던 것 삭제
+ * 25. 4. 23.		durururuk		LocationController JavaDoc 주석 작성
+ * 25. 4. 24.		durururuk		클래스 설명 주석 작성
+ * 25. 6. 10.		Nari-Lee		location과 통합
+ * 25. 6. 13.		Nari-Lee		시군구 조회 기능 추가
+ * 25. 6. 16.		Nari-Lee		전국지도용 통계 추가
+ * 25. 6. 16.		Nari-Lee		location 도메인과 image 도메인 리팩토링 및 지도 이미지 조회기능 추가
+ * 25. 6. 16.		Nari-Lee		체크스타일 적용
+ * 25. 6. 16.		Nari-Lee		state에서 시도 제거
+ * 25. 7. 1.		durururuk		다른 서비스 클래스에서도 변경된 로직에 맞게끔 수정
+ * 25. 7. 7.		Nari-Lee		이미지 업로드시 시도,시군구 태그 추가 기능 구현
+ * 25. 7. 8.		Nari-Lee		이미지 업로드시 지역기반으로 자동으로 시도, 시군구 태그 생
+ * 25. 7. 11.		Nari-Lee		기본 태그기능 로케이션에서 태그 도메인으로 이동
  */
 @RestController
 @RequestMapping("/api/location")

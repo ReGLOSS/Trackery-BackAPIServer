@@ -23,14 +23,17 @@ import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerT
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.docs.controller
  * fileName       : DocsControllerTest
- * author         : Claude Code
+ * author         : Nari-Lee
  * date           : 25. 6. 30.
  * description    : DocsController의 테스트 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 6. 30.        inari       	최초 생성
- * 25. 7. 8.         inari       	코드 수정
+ * 25. 6. 30.		Nari-Lee		최초 생성
+ * 25. 6. 30.		Nari-Lee		docs 컨트롤러 테스트코드 및 api문서 추가
+ * 25. 6. 30.		Nari-Lee		테스트코드 수정
+ * 25. 7. 8.		Nari-Lee		테스트코드 추가 및 문서화
+ * 25. 7. 16.		Nari-Lee		DocsControllerTest 테스트 코드 작성
  */
 @WebMvcTest(DocsController.class)
 @DisplayName("DocsController 테스트")

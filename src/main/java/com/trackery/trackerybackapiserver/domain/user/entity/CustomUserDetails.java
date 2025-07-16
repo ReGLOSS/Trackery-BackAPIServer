@@ -19,8 +19,14 @@ import lombok.Getter;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 19.        durururuk       최초 생성
- * 25. 7. 11.        inari       	 자바독 주석 추가
+ * 25. 2. 19.		durururuk		최초 생성
+ * 25. 2. 19.		durururuk		UserDetails, UserDetailsService 구현체 작성,
+ * 25. 2. 19.		durururuk		Jwt 생성 시 역할 정보를 담도록 추가, jwt 필터에도 반영, 로직 개선
+ * 25. 2. 24.		Nari-Lee		자바독 주석 추가
+ * 25. 3. 26.		durururuk		api/auth/me 테스트 코드 작성
+ * 25. 3. 26.		durururuk		api/auth/me 테스트 코드 작성
+ * 25. 3. 27.		durururuk		CustomUserDetails에서 userName도 함께 담도록 수정
+ * 25. 7. 11.		Nari-Lee		user 도메인의 자바독 누락 및 체크스타일 해결
  */
 @Getter
 public class CustomUserDetails implements UserDetails {

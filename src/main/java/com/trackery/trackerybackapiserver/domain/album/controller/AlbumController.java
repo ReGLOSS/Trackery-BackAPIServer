@@ -39,7 +39,25 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 19.		durururuk		최초 생성
- * 25. 7. 11.		inari			체크스타일 수정
+ * 25. 5. 20.		durururuk		앨범 생성 기능 작성
+ * 25. 5. 21.		durururuk		앨범에 이미지 추가하는 기능 작성
+ * 25. 5. 21.		durururuk		앨범에 이미지 추가하는 기능 응답 구체적으로 변경
+ * 25. 5. 21.		durururuk		JavaDoc 작성
+ * 25. 5. 21.		durururuk		앨범 생성 기능 응답 구체적으로 수정, JavaDoc 주석 작성
+ * 25. 5. 21.		durururuk		체크스타일 경고 수정
+ * 25. 5. 22.		durururuk		앨범 조회 기능 구현
+ * 25. 5. 22.		durururuk		앨범 정보 수정 기능 구현
+ * 25. 5. 29.		durururuk		JavaDoc 주석 작성
+ * 25. 5. 29.		durururuk		AlbumController 단위 테스트 작성
+ * 25. 5. 29.		durururuk		내 앨범 간단 조회 기능 구현
+ * 25. 6. 11.		durururuk		앨범 이미지 삭제 기능 구현
+ * 25. 6. 12.		durururuk		JavaDoc 주석 작성
+ * 25. 6. 16.		durururuk		파라미터가 아닌 url에 앨범 ID를 포함해서 요청할 수 있도록 수정
+ * 25. 6. 23.		durururuk		분리된 기능 컨트롤러 코드 작성
+ * 25. 6. 23.		durururuk		deprecated된 앨범 상세 정보 조회API 관련 코드 삭제
+ * 25. 7. 1.		durururuk		앨범 이미지 리스트를 조회할 때 기존 원본이미지 조회에서 이미지 썸네일을 조회하게 변경
+ * 25. 7. 10.		durururuk		PageSize 파라미터 검증 추가
+ * 25. 7. 11.		Nari-Lee		album 도메인의 자바독 누락 및 체크스타일 해결
  */
 @RestController
 @RequiredArgsConstructor

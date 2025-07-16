@@ -45,10 +45,18 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 23.		durururuk		최초 생성
- * 25. 6. 13.		inari			테스트 추가
- * 25. 6. 15.		inari			Spring-Rest-Docs api문서 추가
- * 25. 7. 11.		inari			태그 제거
- * 25. 7. 14.       inari       	테스트 코드 수정
+ * 25. 4. 23.		durururuk		LocationController MockMvc 단위테스트 코드 작성
+ * 25. 6. 13.		Nari-Lee		location에 추가된 테스트 코드 추가
+ * 25. 6. 16.		Nari-Lee		location 도메인과 image 도메인 리팩토링 및 지도 이미지 조회기능 추가
+ * 25. 6. 16.		Nari-Lee		state에서 시도 제거
+ * 25. 6. 17.		Nari-Lee		location adoc 추가
+ * 25. 6. 17.		Nari-Lee		user 도메인 테스트를 Spring-Rest-Docs에 맞게 리팩터링 및 문서 추가하였습니다.
+ * 25. 7. 1.		durururuk		변경된 서비스 로직에 맞게 테스트코드 수정
+ * 25. 7. 1.		durururuk		더 이상 쓰이지 않는 변수 정리, 재사용 가능한 지역변수 전역변수화
+ * 25. 7. 8.		Nari-Lee		테스트코드 추가 및 문서화
+ * 25. 7. 11.		Nari-Lee		test코드 추가
+ * 25. 7. 14.		Nari-Lee		테스트코드 수정 및 adoc 변경
+ * 25. 7. 15.		Nari-Lee		테스트 코드 작성 및 문서 수정
  */
 @WebMvcTest(LocationController.class)
 public class LocationControllerTest extends CommonMockMvcControllerTestSetUp {

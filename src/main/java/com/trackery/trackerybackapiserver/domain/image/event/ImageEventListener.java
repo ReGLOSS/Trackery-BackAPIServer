@@ -18,6 +18,8 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 7. 15.		durururuk		최초 생성
+ * 25. 7. 15.		durururuk		이미지 이벤트 리스너 작성
+ * 25. 7. 15.		durururuk		빈칸 제거
  */
 @Slf4j
 @Component

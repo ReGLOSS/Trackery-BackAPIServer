@@ -18,7 +18,6 @@ import com.trackery.trackerybackapiserver.domain.auth.dto.AuthUserDto;
 import com.trackery.trackerybackapiserver.domain.auth.service.AuthService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
-
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.auth.controller
  * fileName       : AuthControllerTest
@@ -26,12 +25,15 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * date           : 25. 3. 26.
  * description    : AuthController 단위테스트코드
  * ===========================================================
- * DATE             AUTHOR            NOTE
+ * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 26.       durururuk		최초 생성
+ * 25. 3. 26.		durururuk		최초 생성
  * 25. 3. 26.		durururuk		api/auth/me 테스트 코드 작성
- * 25. 3. 26.		durururuk		바뀐 로직에 맞게 테스트 코드 수정
- * 25. 6. 18.		inari		    Spring-Rest-Docs api문서 추가
+ * 25. 3. 27.		durururuk		인증 api 단위테스트 수정
+ * 25. 3. 28.		durururuk		리프레시 토큰 레디스 저장 기능 구현
+ * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
+ * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
+ * 25. 6. 18.		Nari-Lee		Spring-Rest-Docs api문서 추가
  */
 @WebMvcTest(AuthController.class)
 class AuthControllerTest extends CommonMockMvcControllerTestSetUp {

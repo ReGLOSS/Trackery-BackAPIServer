@@ -34,29 +34,55 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.home.service
+ * packageName    : com.trackery.trackerybackapiserver.domain.image.service
  * fileName       : ImageService
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 2. 14.
  * description    : 이미지 관련 비즈니스 로직을 처리하는 서비스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 14.        inari       최초 생성
- * 25. 2. 19.        inari       이미지를 불러오지 못했을시 예외 처리
- * 25. 5. 15.		durururuk	 이미지 단건/다건 조회 기능 작성
- * 25. 6. 16.		 inari		 지도를 통한 이미지 조회 기능 추가
- * 25. 6. 20.		 inari		 이미지 수정 및 삭제 추가
- * 25. 6. 22.		 inari		 이미지 수정시 좌표 인서트가 아닌 업데이트로 변경
- * 25. 7. 7.		 inari		 이미지 좌표 인서트시 태그 추가
- * 25. 7. 9.		 inari		 removeAllTagsFromImage로 메서드 분리
- * 25. 7. 10.        inari       이미지 단건 조회시 태그 추가
- * 25. 7. 11.		durururuk	 내 이미지 리스트 조회 시 S3에서 이미지 조회 실패한 이미지는 제외하고 결과를 반환하게 수정
- * 25. 7. 11.		durururuk	 중복되는 리스팅 메서드 추출
- * 25. 7. 12.		inari		 이미지 수정시 태그 삭제 추가
- * 25. 7. 13.		inari		 이미지 수정시 태그 수정 추가
- * 25. 7. 14.		inari		 updateImageMetadata 코드 복잡도 수정
- * 25. 7. 15.		inari		 updateImageLocation, processTagRemoval, processTagAddition 각 도메인으로 이동
+ * 25. 2. 14.		durururuk		최초 생성
+ * 25. 2. 14.		Nari-Lee		랜덤이미지 가져오기 구현
+ * 25. 2. 14.		Nari-Lee		매퍼 오타 수정 및 DB연결 테스트
+ * 25. 2. 18.		Nari-Lee		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 18.		Nari-Lee		ImageService 트랜잭션 제거
+ * 25. 2. 19.		Nari-Lee		이미지가 비었을시 에러코드로 변경
+ * 25. 2. 19.		Nari-Lee		주석 추가
+ * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
+ * 25. 4. 21.		durururuk		이미지 업로드 DTO 작성
+ * 25. 4. 21.		durururuk		이미지 업로드 기능 구현
+ * 25. 5. 15.		durururuk		이미지 조회 기능 구현
+ * 25. 5. 15.		durururuk		javadoc 주석 추가
+ * 25. 6. 16.		Nari-Lee		location 도메인과 image 도메인 리팩토링 및 지도 이미지 조회기능 추가
+ * 25. 6. 16.		durururuk		앨범 API 문서 설명 작성
+ * 25. 6. 16.		Nari-Lee		체크스타일 적용
+ * 25. 6. 17.		durururuk		getImageListByUserIdV2 서비스 테스트 코드 작성
+ * 25. 6. 20.		Nari-Lee		이미지 수정 및 삭제기능 추가
+ * 25. 6. 20.		Nari-Lee		pr 코멘트받은 내용 수정
+ * 25. 6. 20.		Nari-Lee		ImageService 500에러 최소화 및 adoc수정
+ * 25. 6. 22.		Nari-Lee		이미지 메타데이터 수정시 좌표 인서트가 아닌 업데이트로 변경
+ * 25. 6. 23.		durururuk		앨범 목록 조회 시 썸네일도 함께 조회할 수 있도록 수정
+ * 25. 6. 23.		durururuk		기존 앨범 정보 조회에서 이미지와 앨범 정보를 전부 한 번에 조회하던 것을 분리
+ * 25. 7. 1.		durururuk		deprecated된 이미지 서비스 메서드 삭제
+ * 25. 7. 1.		durururuk		이미지 썸네일을 조회하는 메서드에서 썸네일 DTO를 반환하게 변경
+ * 25. 7. 1.		durururuk		앨범 이미지 리스트를 조회할 때 기존 원본이미지 조회에서 이미지 썸네일을 조회하게 변경
+ * 25. 7. 7.		durururuk		쿼리가 산발적으로 돼있어서 페이지네이션 정보가 실제 값과 일치하지 않던 문제 수정
+ * 25. 7. 8.		durururuk		내 이미지 조회 시 조회 결과에서 제외될 앨범 ID 파라미터 추가
+ * 25. 7. 8.		durururuk		개발 도중 흔적 제거
+ * 25. 7. 8.		Nari-Lee		이미지 업로드시 태그 추가
+ * 25. 7. 9.		Nari-Lee		체크스타일 수정 및 메서드 분리
+ * 25. 7. 10.		durururuk		단순 이미지 로드 작업에 예전 로직이 들어있던 문제 수정
+ * 25. 7. 10.		Nari-Lee		이미지 단건 조회시 태그 추가
+ * 25. 7. 11.		durururuk		내 이미지 리스트 조회 시 S3에서 이미지 조회 실패한 이미지는 제외하고 결과를 반환하게 수정
+ * 25. 7. 11.		Nari-Lee		image 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 7. 11.		durururuk		JavaDoc주석 추가
+ * 25. 7. 11.		durururuk		중복되는 리스팅 메서드 추출
+ * 25. 7. 13.		Nari-Lee		이미지 수정시 태그 삭제 기능 구현
+ * 25. 7. 14.		Nari-Lee		이미지 수정시 태그 추가 기능 구현
+ * 25. 7. 15.		durururuk		이미지 삭제 시 이벤트 발행하게 수정
+ * 25. 7. 15.		durururuk		ImageService @Transactional 어노테이션 추가
+ * 25. 7. 15.		Nari-Lee		ImageService에 있던 updateImageLocation, processTagRemoval, processTagAddition 각 도메인으로 이동
  */
 @Slf4j
 @Service

@@ -14,7 +14,10 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 27.        durururuk      최초 생성
+ * 25. 3. 27.		durururuk		최초 생성
+ * 25. 3. 27.		durururuk		/api/auth/me api userId, userName, userRoleId도 같이 응답하도록 수정
+ * 25. 3. 27.		durururuk		인증 api 단위테스트 수정
+ * 25. 3. 27.		durururuk		주석 작성
  */
 @Service
 public class AuthService {

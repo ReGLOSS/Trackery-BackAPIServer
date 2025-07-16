@@ -13,6 +13,8 @@ import lombok.Getter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 7. 8.		durururuk		최초 생성
+ * 25. 7. 8.		durururuk		내 이미지 조회 시 조회 결과에서 제외될 앨범 ID 파라미터 추가
+ * 25. 7. 8.		durururuk		개발 도중 흔적 제거
  */
 @Getter
 @Builder

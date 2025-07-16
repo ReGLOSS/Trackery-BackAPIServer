@@ -22,6 +22,8 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 21.		durururuk		최초 생성
+ * 25. 4. 21.		durururuk		AWS Config 작성
+ * 25. 4. 21.		durururuk		이미지 업로드 기능 구현
  */
 @Slf4j
 @Configuration

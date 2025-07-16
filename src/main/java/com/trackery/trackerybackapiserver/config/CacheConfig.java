@@ -9,15 +9,15 @@ import org.springframework.context.annotation.Configuration;
 /**
  * packageName    : com.trackery.trackerybackapiserver.config
  * fileName       : CacheConfig
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 2. 14.
  * description    : 캐시 설정을 담당하는 클래스입니다.
- * 					메모리 기반의 캐시를 지원합니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 14.        inari       최초 생성
- * 25. 2. 21.        inari       상세 주석 추가
+ * 25. 2. 14.		Nari-Lee		최초 생성
+ * 25. 2. 14.		Nari-Lee		랜덤이미지 가져오기 구현
+ * 25. 2. 24.		Nari-Lee		자바독 주석 추가
  */
 @Configuration
 @EnableCaching

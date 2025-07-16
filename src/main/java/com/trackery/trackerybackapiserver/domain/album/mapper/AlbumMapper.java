@@ -21,6 +21,26 @@ import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoFor
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 14.		durururuk		최초 생성
+ * 25. 5. 14.		durururuk		앨범 기능 기본 entity, mapper 생성
+ * 25. 5. 15.		durururuk		이미지 조회 기능 구현
+ * 25. 5. 15.		durururuk		서식 수정
+ * 25. 5. 20.		durururuk		앨범 생성 기능 작성
+ * 25. 5. 21.		durururuk		앨범에 이미지 추가하는 기능 작성
+ * 25. 5. 21.		durururuk		JavaDoc 작성
+ * 25. 5. 22.		durururuk		앨범 조회 기능 구현
+ * 25. 5. 22.		durururuk		앨범 정보 수정 기능 구현
+ * 25. 5. 29.		durururuk		내 앨범 간단 조회 기능 구현
+ * 25. 6. 11.		durururuk		앨범 이미지 삭제 기능 구현
+ * 25. 6. 12.		durururuk		JavaDoc 주석 작성
+ * 25. 6. 16.		durururuk		파라미터가 아닌 url에 앨범 ID를 포함해서 요청할 수 있도록 수정
+ * 25. 6. 20.		durururuk		앨범 썸네일 자동 생성 로직 작성
+ * 25. 7. 7.		durururuk		쿼리가 산발적으로 돼있어서 페이지네이션 정보가 실제 값과 일치하지 않던 문제 수정
+ * 25. 7. 8.		durururuk		내 이미지 조회 시 조회 결과에서 제외될 앨범 ID 파라미터 추가
+ * 25. 7. 8.		durururuk		개발 도중 흔적 제거
+ * 25. 7. 8.		durururuk		사용되지 않는 메서드 정리
+ * 25. 7. 11.		Nari-Lee		album 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 7. 15.		durururuk		앨범_이미지 테이블에서 이미지 삭제 메서드 추가
+ * 25. 7. 15.		durururuk		앨범 이미지 삭제 전 영향을 받는 앨범 ID 조회 쿼리 추가
  */
 @Mapper
 public interface AlbumMapper {

@@ -47,7 +47,40 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 14.		durururuk		최초 생성
+ * 25. 5. 15.		durururuk		이미지 조회 기능 구현
+ * 25. 5. 20.		durururuk		앨범 생성 기능 작성
+ * 25. 5. 21.		durururuk		앨범에 이미지 추가하는 기능 작성
+ * 25. 5. 21.		durururuk		앨범에 이미지 추가하는 기능 응답 구체적으로 변경
+ * 25. 5. 21.		durururuk		JavaDoc 작성
+ * 25. 5. 21.		durururuk		앨범 생성 기능 응답 구체적으로 수정, JavaDoc 주석 작성
+ * 25. 5. 21.		durururuk		체크스타일 경고 수정
+ * 25. 5. 22.		durururuk		앨범 조회 기능 구현
+ * 25. 5. 22.		durururuk		앨범 정보 수정 기능 구현
+ * 25. 5. 29.		durururuk		JavaDoc 주석 작성
+ * 25. 5. 29.		durururuk		AlbumService 단위 테스트 작성
+ * 25. 5. 29.		durururuk		내 앨범 간단 조회 기능 구현
+ * 25. 6. 11.		durururuk		앨범 이미지 삭제 기능 구현
+ * 25. 6. 12.		durururuk		JavaDoc 주석 작성
+ * 25. 6. 16.		durururuk		앨범 API 문서 설명 작성
+ * 25. 6. 16.		durururuk		파라미터가 아닌 url에 앨범 ID를 포함해서 요청할 수 있도록 수정
+ * 25. 6. 20.		durururuk		이벤트 리스너 작성
+ * 25. 6. 20.		durururuk		단순 조회 작업에 @Transactional(readOnly = true) 어노테이션 추가
+ * 25. 6. 20.		durururuk		이벤트 관련 클래스 이벤트 패키지로 이동
+ * 25. 6. 20.		durururuk		이벤트를 발행할 때 앨범 정보도 같이 넘겨줘서 Album 두 번 조회하지 않게 수정
+ * 25. 6. 23.		durururuk		앨범 목록 조회 시 썸네일도 함께 조회할 수 있도록 수정
+ * 25. 6. 23.		durururuk		기존 앨범 정보 조회에서 이미지와 앨범 정보를 전부 한 번에 조회하던 것을 분리
+ * 25. 6. 23.		durururuk		JavaDoc 주석 작성
+ * 25. 6. 23.		durururuk		deprecated된 앨범 상세 정보 조회API 관련 코드 삭제
+ * 25. 7. 1.		durururuk		앨범 이미지 리스트를 조회할 때 기존 원본이미지 조회에서 이미지 썸네일을 조회하게 변경
+ * 25. 7. 7.		durururuk		쿼리가 산발적으로 돼있어서 페이지네이션 정보가 실제 값과 일치하지 않던 문제 수정
+ * 25. 7. 7.		durururuk		PageUtil로 페이징 정보를 처리하는 로직 이관
+ * 25. 7. 8.		durururuk		내 이미지 조회 시 조회 결과에서 제외될 앨범 ID 파라미터 추가
+ * 25. 7. 8.		durururuk		개발 도중 흔적 제거
  * 25. 7. 11.		durururuk		앨범 조회 시에도 S3에서 조회 실패한 이미지는 제외한 결과 응답하게 수정
+ * 25. 7. 11.		durururuk		중복되는 리스팅 메서드 추출
+ * 25. 7. 15.		durururuk		앨범_이미지 테이블에서 이미지 삭제 메서드 추가
+ * 25. 7. 15.		durururuk		특정 이미지 모든 앨범에서 삭제 시 썸네일 수정 이벤트 발행을 위한 로직 추가
+ * 25. 7. 15.		durururuk		deleteImageFromAllAlbum javaDoc 주석 추가
  */
 @Slf4j
 @Service

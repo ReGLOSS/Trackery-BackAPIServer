@@ -25,17 +25,41 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.config
- * fileName       : JwtFilter
+ * packageName    : com.trackery.trackerybackapiserver.config.filter
+ * fileName       : JwtResolverFilter
  * author         : durururuk
  * date           : 25. 2. 19.
  * description    : 액세스 토큰을 가져오는 필터입니다
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 19.        durururuk       최초 생성
- * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
- * 25. 7. 15.        inari      	"Set-Cookie" 상수 전환
+ * 25. 2. 19.		durururuk		최초 생성
+ * 25. 2. 19.		durururuk		Jwt 적용을 위한 필터 작성, 추가
+ * 25. 2. 19.		durururuk		Jwt 생성 시 역할 정보를 담도록 추가, jwt 필터에도 반영, 로직 개선
+ * 25. 2. 20.		durururuk		회원가입 시 JWT를 담은 헤더를 같이 반환하도록 추가
+ * 25. 2. 20.		durururuk		주석 추가
+ * 25. 2. 21.		durururuk		CustomWebSecurityConfig으로 퍼블릭 uri 관리 일원화
+ * 25. 2. 21.		durururuk		사용자명 중복체크 메서드명 더 명확하게 수정, 반대로 작동하던 로직 수정
+ * 25. 2. 24.		Nari-Lee		자바독 주석 추가
+ * 25. 2. 24.		durururuk		회원가입 시 인증 헤더 -> http-only 쿠키 방식으로 변경
+ * 25. 3. 14.		durururuk		예외처리 필터 작성
+ * 25. 3. 27.		durururuk		CustomUserDetails에서 userName도 함께 담도록 수정
+ * 25. 3. 28.		durururuk		리프레시 토큰 레디스 저장 기능 구현
+ * 25. 3. 28.		durururuk		JwtFilter 메서드 분리
+ * 25. 3. 28.		durururuk		리프레시 토큰을 통한 액세스 토큰 재발급 기능 구현
+ * 25. 3. 28.		durururuk		필터 순서 수정
+ * 25. 3. 28.		durururuk		리프레쉬 토큰으로 액세스 토큰 재발급 시, 쿠키에 다시 추가되게 수정
+ * 25. 3. 28.		durururuk		리프레시 토큰 재발급 시 기존 리프레시 토큰 레디스에서 삭제되게 수정
+ * 25. 3. 29.		durururuk		코드 가독성을 위해 List.of(accessToken, refreshToken) 구조에서 DTO 방식으로 변경
+ * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
+ * 25. 3. 29.		durururuk		주석 작성
+ * 25. 4. 1.		Durururuk		JwtResolverFilter 메서드 분리
+ * 25. 4. 1.		Durururuk		JwtResolverFilter에 있던 분리된 메서드들 각자 있어야 할 클래스로 이동
+ * 25. 4. 1.		durururuk		Bean 순환 문제 해결
+ * 25. 6. 27.		Nari-Lee		쿠키 이름 및 정책 enum으로 수정
+ * 25. 7. 9.		durururuk		리프레시 토큰으로 액세스토큰 재발급시 예외처리 강화 및 로깅 추가
+ * 25. 7. 14.		durururuk		액세스토큰이 쿠키에 있지만 만료된 경우 예외 처리 추가
+ * 25. 7. 15.		Nari-Lee		"Set-Cookie" 상수로 전환
  */
 @Slf4j
 @RequiredArgsConstructor

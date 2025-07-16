@@ -45,6 +45,19 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 29.		durururuk		최초 생성
+ * 25. 5. 29.		durururuk		AlbumController 단위 테스트 작성
+ * 25. 6. 11.		durururuk		앨범 이미지 삭제 기능 구현
+ * 25. 6. 12.		durururuk		AlbumControllerTest 새로운 API 유닛테스트 작성
+ * 25. 6. 13.		durururuk		앨범 생성, 앨범에 이미지 추가 API 문서화 코드 작성
+ * 25. 6. 13.		durururuk		앨범 관련 API 컨트롤러 테스트 코드에 문서화 코드 작성
+ * 25. 6. 16.		durururuk		문서에서 필드 타입 NULL로 나오는 일부 필드들 문제 수정
+ * 25. 6. 16.		durururuk		엔드포인트에 맞게 컨트롤러 테스트코드, API 문서 수정
+ * 25. 6. 23.		durururuk		수정된 로직에 맞게 Controller 테스트 코드 수정
+ * 25. 6. 23.		durururuk		deprecated된 앨범 상세 정보 조회API 관련 코드 삭제
+ * 25. 6. 24.		durururuk		getAlbumMetadata 컨트롤러 테스트 코드, 문서화 코드 작성
+ * 25. 6. 24.		durururuk		앨범 이미지 조회 API 테스트코드, 문서화 코드 작성
+ * 25. 6. 24.		durururuk		쿼리 파라미터도 문서화 클래스에서 받아올 수 있게 수정
+ * 25. 7. 1.		durururuk		변경된 서비스 로직에 맞게 테스트코드 수정
  */
 @WebMvcTest(AlbumController.class)
 class AlbumControllerTest extends CommonMockMvcControllerTestSetUp {

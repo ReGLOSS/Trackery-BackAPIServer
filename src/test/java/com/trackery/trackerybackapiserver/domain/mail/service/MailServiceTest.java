@@ -22,7 +22,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.common.service
+ * packageName    : com.trackery.trackerybackapiserver.domain.mail.service
  * fileName       : MailServiceTest
  * author         : durururuk
  * date           : 25. 3. 5.
@@ -30,11 +30,19 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 5.        durururuk      최초 생성
- * 25. 3. 5.		durururuk      메일 서비스 단위 테스트 코드 작성
- * 25. 3. 14.		durururuk	   분리된 로직에 맞게 테스트 코드 재작성
- * 25. 3. 25.		durururuk	   유저명 찾기 테스트 코드 작성
- * 25. 3. 25.		durururuk	   invocation -> when.thenReturn으로 수정
+ * 25. 3. 5.		durururuk		최초 생성
+ * 25. 3. 5.		durururuk		메일 서비스 단위 테스트 코드 작성
+ * 25. 3. 11.		durururuk		이메일 전송 로직 분리
+ * 25. 3. 14.		durururuk		테스트 코드 작성
+ * 25. 3. 14.		durururuk		예외처리 필터 작성
+ * 25. 3. 14.		durururuk		리팩토링
+ * 25. 3. 14.		durururuk		유저명 사용가능할 시 userNameToken 쿠키에 추가
+ * 25. 3. 20.		durururuk		수정 된 로직에 맞게 테스트 코드 작성
+ * 25. 3. 25.		durururuk		유저명 찾기 기능 구현, 테스트 코드 작성
+ * 25. 3. 25.		durururuk		invocation -> when.thenReturn으로 수정
+ * 25. 3. 25.		durururuk		주석 추가
+ * 25. 3. 28.		durururuk		리프레시 토큰 레디스 저장 기능 구현
+ * 25. 6. 19.		durururuk		기존 액세스 토큰의 시간 1시간을 그대로 가져오던 이메일 인증 토큰, 유저명 중복 확인 토큰을 각각 처리하게 수정
  */
 @ExtendWith(MockitoExtension.class)
 class MailServiceTest {

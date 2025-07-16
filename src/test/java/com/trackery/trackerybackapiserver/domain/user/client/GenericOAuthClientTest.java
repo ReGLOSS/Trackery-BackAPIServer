@@ -29,13 +29,17 @@ import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.client
  * fileName       : GenericOAuthClientTest
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 3. 3.
- * description    :
+ * description    : GenericOAuthClient 단위 테스트
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 3.        inari       최초 생성
+ * 25. 3. 3.		Nari-Lee		최초 생성
+ * 25. 3. 3.		Nari-Lee		테스트코드 추가
+ * 25. 3. 5.		Nari-Lee		간편로그인시 프로필사진 테스트 제거
+ * 25. 3. 14.		durururuk		리팩터링
+ * 25. 3. 27.		Nari-Lee		상세 주석 추가 및 테스트코드 수정
  */
 @ExtendWith(MockitoExtension.class)
 class GenericOAuthClientTest {

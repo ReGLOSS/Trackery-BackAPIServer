@@ -22,16 +22,18 @@ import jakarta.mail.internet.MimeMessage;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.mail.service
- * fileName       : EmailSenderServiceTest
+ * fileName       : MailSenderServiceTest
  * author         : durururuk
  * date           : 25. 3. 20.
- * description    :
+ * description    : EmailSenderService 단위 테스트
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 20.        durururuk      최초 생성
- * 25. 3. 25.		 durururuk		유저명 찾기 이메일 기능 테스트 코드 작성
- * 25. 3. 25.		 durururuk      이메일 발송 실패 예외 처리 테스트 코드 작성
+ * 25. 3. 20.		durururuk		최초 생성
+ * 25. 3. 20.		durururuk		수정 된 로직에 맞게 테스트 코드 작성
+ * 25. 3. 25.		durururuk		유저명 찾기 기능 구현, 테스트 코드 작성
+ * 25. 3. 25.		durururuk		이메일 발송 실패 예외 처리 테스트 코드 작성
+ * 25. 3. 25.		durururuk		invocation -> when.thenReturn으로 수정
  */
 @ExtendWith(MockitoExtension.class)
 class MailSenderServiceTest {

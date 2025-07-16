@@ -6,7 +6,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.dto
- * fileName       : DetailedUserDto
+ * fileName       : DetailedUserInfoDto
  * author         : durururuk
  * date           : 25. 4. 9.
  * description    : 유저 상세정보를 담고 있는 DTO

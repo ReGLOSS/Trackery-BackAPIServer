@@ -17,16 +17,18 @@ import lombok.extern.slf4j.Slf4j;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.mail.service
- * fileName       : EmailSenderService
+ * fileName       : MailSenderService
  * author         : durururuk
  * date           : 25. 3. 20.
  * description    : 실제 이메일 전송을 담당하는 서비스 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 20.        durururuk      최초 생성
- * 25. 3. 20.	     durururuk	    이메일 전송 관련 로직 분리
- * 25. 7. 11.	     inari    		클래스 설명 추가
+ * 25. 3. 20.		durururuk		최초 생성
+ * 25. 3. 20.		durururuk		이메일 전송 관련 로직 분리
+ * 25. 3. 25.		durururuk		유저명 찾기 기능 구현, 테스트 코드 작성
+ * 25. 3. 25.		durururuk		이메일 발송 실패 예외 처리 테스트 코드 작성
+ * 25. 7. 11.		Nari-Lee		mail 도메인의 자바독 누락 및 체크스타일 해결
  */
 @Slf4j
 @Component

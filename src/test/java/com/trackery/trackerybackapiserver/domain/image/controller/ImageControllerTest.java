@@ -45,10 +45,22 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 5. 22.		durururuk		최초 생성
- * 25. 6. 18.		inari		    Spring-Rest-Docs api문서 추가
- * 25. 7. 9.        inari       	테스트코드 수정
- * 25. 7. 10.       inari       	이미지 단건 조회시 태그 추가
- * 25. 7. 14.       inari       	테스트 코드 수정
+ * 25. 5. 22.		durururuk		ImageControllerTest 작성
+ * 25. 5. 29.		durururuk		AlbumController 단위 테스트 작성
+ * 25. 6. 18.		durururuk		getImageListByUserIdV2 컨트롤러 테스트 코드, 문서화 코드 작성
+ * 25. 6. 18.		Nari-Lee		모든 api 문서화
+ * 25. 6. 20.		Nari-Lee		이미지 수정 및 삭제기능 추가
+ * 25. 6. 20.		Nari-Lee		이미지 컨트롤러 테스트 수정
+ * 25. 6. 23.		durururuk		imageController에서도 deprecated된 API 삭제
+ * 25. 6. 25.		Nari-Lee		문서화 추가
+ * 25. 7. 1.		durururuk		변경된 서비스 로직에 맞게 테스트코드 수정
+ * 25. 7. 8.		durururuk		내 이미지 조회 시 조회 결과에서 제외될 앨범 ID 파라미터 추가
+ * 25. 7. 8.		durururuk		변경된 로직에 맞게 테스트 코드 수정
+ * 25. 7. 8.		durururuk		이미지 단건 조회 api 엔드포인트 pathVariable 방식으로 수정
+ * 25. 7. 9.		Nari-Lee		테스트코드 수정 및 문서 작성
+ * 25. 7. 10.		Nari-Lee		이미지 단건 조회시 태그 추가
+ * 25. 7. 10.		durururuk		변경된 로직에 맞게 테스트 코드 수정
+ * 25. 7. 14.		Nari-Lee		테스트코드 수정 및 adoc 변경
  */
 @WebMvcTest(ImageController.class)
 class ImageControllerTest extends CommonMockMvcControllerTestSetUp {

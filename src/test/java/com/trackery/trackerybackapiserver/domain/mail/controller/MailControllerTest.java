@@ -25,7 +25,7 @@ import com.trackery.trackerybackapiserver.domain.common.dto.VerifyEmailDto;
 import com.trackery.trackerybackapiserver.domain.mail.service.MailService;
 
 /**
- * packageName    : com.trackery.trackerybackapiserver.domain.common.controller
+ * packageName    : com.trackery.trackerybackapiserver.domain.mail.controller
  * fileName       : MailControllerTest
  * author         : durururuk
  * date           : 25. 3. 5.
@@ -33,9 +33,14 @@ import com.trackery.trackerybackapiserver.domain.mail.service.MailService;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 5.        durururuk      최초 생성
- * 25. 3. 5.		durururuk	   컨트롤러 테스트 코드 작성
- * 25. 6. 18.      inari          Spring REST Docs API 문서 추가
+ * 25. 3. 5.		durururuk		최초 생성
+ * 25. 3. 5.		durururuk		메일 컨트롤러 mockMvc 테스트 작성
+ * 25. 3. 14.		durururuk		테스트 코드 작성
+ * 25. 3. 14.		durururuk		리팩토링
+ * 25. 3. 20.		durururuk		수정 된 로직에 맞게 테스트 코드 작성
+ * 25. 3. 25.		durururuk		유저명 찾기 컨트롤러 메서드 추가, 테스트 코드 작성
+ * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
+ * 25. 6. 18.		Nari-Lee		모든 api 문서화
  */
 @WithMockUser
 @WebMvcTest(MailController.class)
