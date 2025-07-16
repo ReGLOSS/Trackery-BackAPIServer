@@ -23,8 +23,8 @@ import lombok.NoArgsConstructor;
  * 25. 2. 14.		durururuk		비밀번호에 공백 허용하지 않게 수정
  * 25. 2. 14.		durururuk		userName -> username 오타 수정
  * 25. 2. 17.		durururuk		Java 컨벤션에 맞게 username -> userName 수정
- * 25. 2. 18.		Nari-Lee		dev 병합후 랜딩페이지 엔드포인트 수정
- * 25. 2. 24.		Nari-Lee		자바독 주석 추가
+ * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 24.		inari		자바독 주석 추가
  * 25. 3. 14.		durururuk		수정된 로직에 맞게 테스트 코드 수정
  * 25. 3. 20.		durururuk		사용하지 않는 import 제거
  */

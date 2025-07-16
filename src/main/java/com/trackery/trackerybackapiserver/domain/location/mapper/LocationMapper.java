@@ -28,13 +28,13 @@ import com.trackery.trackerybackapiserver.domain.location.entity.JusoSigungu;
  * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
  * 25. 4. 21.		durururuk		insert CoordinatePoint 기능 작성
  * 25. 4. 23.		durururuk		LocationMapper JavaDoc 주석 추가
- * 25. 6. 10.		Nari-Lee		location과 통합
- * 25. 6. 13.		Nari-Lee		시군구 조회 기능 추가
- * 25. 6. 15.		Nari-Lee		체크스타일 수정
- * 25. 6. 16.		Nari-Lee		전국지도용 통계 추가
- * 25. 6. 22.		Nari-Lee		이미지 메타데이터 수정시 좌표 인서트가 아닌 업데이트로 변경
- * 25. 6. 23.		Nari-Lee		코드스멜 수정
- * 25. 6. 24.		Nari-Lee		코드스멜 해결
+ * 25. 6. 10.		inari		location과 통합
+ * 25. 6. 13.		inari		시군구 조회 기능 추가
+ * 25. 6. 15.		inari		체크스타일 수정
+ * 25. 6. 16.		inari		전국지도용 통계 추가
+ * 25. 6. 22.		inari		이미지 메타데이터 수정시 좌표 인서트가 아닌 업데이트로 변경
+ * 25. 6. 23.		inari		코드스멜 수정
+ * 25. 6. 24.		inari		코드스멜 해결
  */
 @Mapper
 public interface LocationMapper {

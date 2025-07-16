@@ -17,15 +17,15 @@ import lombok.RequiredArgsConstructor;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.controller
  * fileName       : UserProfileController
- * author         : Nari-Lee
+ * author         : inari
  * date           : 25. 4. 15.
  * description    : 사이드바에서 사용할 유저 프로필을 조회할때 사용하는 컨트롤러입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 4. 15.		Nari-Lee		최초 생성
- * 25. 4. 28.		Nari-Lee		완성
- * 25. 6. 28.		Nari-Lee		체크스타일 적용
+ * 25. 4. 15.		inari		최초 생성
+ * 25. 4. 28.		inari		완성
+ * 25. 6. 28.		inari		체크스타일 적용
  */
 @RestController
 @RequestMapping("/api/users/profile")

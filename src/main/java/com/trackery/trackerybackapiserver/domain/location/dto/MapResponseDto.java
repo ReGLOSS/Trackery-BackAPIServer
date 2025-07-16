@@ -10,18 +10,18 @@ import lombok.NoArgsConstructor;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.location.dto
  * fileName       : MapResponseDto
- * author         : Nari-Lee
+ * author         : inari
  * date           : 25. 5. 30.
  * description    : 지도 API의 통합 응답 DTO입니다.
  *                  시도명, 시군구명과 각각의 ID를 포함하여 프론트엔드에서 쉽게 사용할 수 있도록 합니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 5. 30.		Nari-Lee		최초 생성
- * 25. 5. 30.		Nari-Lee		제작중
- * 25. 6. 10.		Nari-Lee		location과 통합
- * 25. 6. 15.		Nari-Lee		체크스타일 수정
- * 25. 7. 11.		Nari-Lee		자바독 오류 해결 및 자바독 주입
+ * 25. 5. 30.		inari		최초 생성
+ * 25. 5. 30.		inari		제작중
+ * 25. 6. 10.		inari		location과 통합
+ * 25. 6. 15.		inari		체크스타일 수정
+ * 25. 7. 11.		inari		자바독 오류 해결 및 자바독 주입
  */
 @Data
 @NoArgsConstructor

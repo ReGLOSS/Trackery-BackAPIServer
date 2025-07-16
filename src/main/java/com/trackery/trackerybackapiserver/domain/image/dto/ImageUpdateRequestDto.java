@@ -11,16 +11,16 @@ import lombok.Builder;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.image.dto
  * fileName       : ImageUpdateRequestDto
- * author         : Nari-Lee
+ * author         : inari
  * date           : 25. 6. 20.
  * description    : 이미지 메타데이터 수정 요청 DTO
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 6. 20.		Nari-Lee		최초 생성
- * 25. 7. 11.       Nari-Lee		주석 추가 및 체크스타일 수정
- * 25. 7. 12.		Nari-Lee		삭제할 태그 리스트 추가
- * 25. 7. 13.		Nari-Lee		수정할 태그 리스트 추가
+ * 25. 6. 20.		inari		최초 생성
+ * 25. 7. 11.       inari		주석 추가 및 체크스타일 수정
+ * 25. 7. 12.		inari		삭제할 태그 리스트 추가
+ * 25. 7. 13.		inari		수정할 태그 리스트 추가
  *
  * @param imageName 이미지 이름 (최대 100자)
  * @param imageContent 이미지 설명 (최대 500자)

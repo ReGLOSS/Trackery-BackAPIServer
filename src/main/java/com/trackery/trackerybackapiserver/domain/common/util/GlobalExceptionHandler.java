@@ -33,13 +33,13 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 14.		durururuk		회원가입 할 때 비밀번호를 해싱해서 저장하게 수정
  * 25. 2. 14.		durururuk		서식 수정
  * 25. 2. 15.		durururuk		ApiExceptionHandler 사용처에 맞게 이름 변경
- * 25. 2. 17.		Nari-Lee		공통응답 테스트코드 추가
+ * 25. 2. 17.		inari		공통응답 테스트코드 추가
  * 25. 2. 21.        inari			 상세 주석 추가
- * 25. 2. 24.		Nari-Lee		자바독 주석 추가
- * 25. 3. 26.		Nari-Lee		provider enum 적용
+ * 25. 2. 24.		inari		자바독 주석 추가
+ * 25. 3. 26.		inari		provider enum 적용
  * 25. 3. 26.        inari			 handleMethodArgumentTypeMismatchException 추가
  * 25. 3. 26.        inari			 handleRuntimeException 추가
- * 25. 4. 8.		Nari-Lee		GlobalExceptionHandle로 예외 위임
+ * 25. 4. 8.		inari		GlobalExceptionHandle로 예외 위임
  */
 @Slf4j
 @RestControllerAdvice

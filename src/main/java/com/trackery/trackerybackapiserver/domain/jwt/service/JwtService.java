@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 19.		durururuk		Jwt 생성 시 역할 정보를 담도록 추가, jwt 필터에도 반영, 로직 개선
  * 25. 2. 20.		durururuk		회원가입 시 JWT를 담은 헤더를 같이 반환하도록 추가
  * 25. 2. 20.		durururuk		주석 추가
- * 25. 2. 24.		Nari-Lee		자바독 주석 추가
+ * 25. 2. 24.		inari		자바독 주석 추가
  * 25. 3. 4.		durururuk		이메일 인증 요청 기능 추가
  * 25. 3. 5.		durururuk		주석 추가
  * 25. 3. 14.		durururuk		예외처리 필터 작성
@@ -62,7 +62,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 19.		durururuk		기존 액세스 토큰의 시간 1시간을 그대로 가져오던 이메일 인증 토큰, 유저명 중복 확인 토큰을 각각 처리하게 수정
  * 25. 6. 19.		durururuk		변경된 로직에 맞게 javaDoc 작성
  * 25. 6. 19.		durururuk		기존 JwtService에 선언돼있던 액세스토큰, 리프레시 토큰 만료시간 삭제
- * 25. 6. 25.		Nari-Lee		jwt 액세스토큰 블랙리스트 추가
+ * 25. 6. 25.		inari		jwt 액세스토큰 블랙리스트 추가
  */
 @Slf4j
 @Component

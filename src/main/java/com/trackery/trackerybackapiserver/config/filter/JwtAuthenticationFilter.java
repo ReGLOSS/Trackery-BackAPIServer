@@ -40,7 +40,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 28.		durururuk		필터 순서 수정
  * 25. 3. 28.		durururuk		리프레쉬 토큰으로 액세스 토큰 재발급 시, 쿠키에 다시 추가되게 수정
  * 25. 3. 29.		durururuk		주석 작성
- * 25. 6. 27.		Nari-Lee		쿠키 이름 및 정책 enum으로 수정
+ * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
  */
 @Slf4j
 @RequiredArgsConstructor

@@ -38,8 +38,8 @@ import lombok.RequiredArgsConstructor;
  * 25. 3. 20.		durururuk		수정 된 로직에 맞게 테스트 코드 작성
  * 25. 3. 25.		durururuk		유저명 찾기 컨트롤러 메서드 추가, 테스트 코드 작성
  * 25. 3. 28.		durururuk		refresh-token/ Cookie 유효시간 수정
- * 25. 6. 27.		Nari-Lee		쿠키 이름 및 정책 enum으로 수정
- * 25. 7. 11.		Nari-Lee		mail 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
+ * 25. 7. 11.		inari		mail 도메인의 자바독 누락 및 체크스타일 해결
  */
 @RestController
 @RequiredArgsConstructor

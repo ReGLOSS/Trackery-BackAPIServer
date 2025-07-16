@@ -40,8 +40,8 @@ import jakarta.servlet.http.Cookie;
  * 25. 4. 14.		durururuk		최초 생성
  * 25. 4. 14.		durururuk		UpdateUserInfo Controller, Serivce 단위테스트 작성
  * 25. 4. 14.		durururuk		사용되지 않는 변수 삭제
- * 25. 6. 17.		Nari-Lee		user 도메인 테스트를 Spring-Rest-Docs에 맞게 리팩터링 및 문서 추가하였습니다.
- * 25. 6. 25.		Nari-Lee		문서화 추가
+ * 25. 6. 17.		inari		user 도메인 테스트를 Spring-Rest-Docs에 맞게 리팩터링 및 문서 추가하였습니다.
+ * 25. 6. 25.		inari		문서화 추가
  */
 @WebMvcTest(UpdateUserInfoController.class)
 class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {

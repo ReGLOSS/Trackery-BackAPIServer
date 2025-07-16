@@ -12,16 +12,16 @@ import lombok.NoArgsConstructor;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.image.entity
  * fileName       : Image
- * author         : Nari-Lee
+ * author         : inari
  * date           : 25. 2. 14.
  * description    : 이미지의 기본 정보를 나타내는 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 14.		Nari-Lee		최초 생성
- * 25. 2. 14.		Nari-Lee		매퍼생성
- * 25. 2. 14.		Nari-Lee		랜덤이미지 가져오기 구현
- * 25. 2. 19.		Nari-Lee		이미지가 비었을시 에러코드로 변경
+ * 25. 2. 14.		inari		최초 생성
+ * 25. 2. 14.		inari		매퍼생성
+ * 25. 2. 14.		inari		랜덤이미지 가져오기 구현
+ * 25. 2. 19.		inari		이미지가 비었을시 에러코드로 변경
  * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
  * 25. 4. 21.		durururuk		이미지 업로드 DTO 작성
  * 25. 4. 21.		durururuk		AWS Config 작성

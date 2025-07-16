@@ -6,14 +6,14 @@ import lombok.Getter;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.dto
  * fileName       : UserProfileDto
- * author         : Nari-Lee
+ * author         : inari
  * date           : 25. 4. 15.
  * description    : 사용자 프로필 정보를 담는 DTO 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 4. 15.		Nari-Lee		최초 생성
- * 25. 4. 28.		Nari-Lee		완성
+ * 25. 4. 15.		inari		최초 생성
+ * 25. 4. 28.		inari		완성
  * 25. 4. 29.		durururuk		유저 프로필 조회 기능에서 프로필사진 객체명이 아닌 s3 presigned url을 요청해서 반환합니다.
  */
 @Getter

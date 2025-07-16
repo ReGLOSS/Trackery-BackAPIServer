@@ -22,8 +22,8 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
  * 25. 2. 14.		durururuk		비밀번호 암호화 유틸리티 클래스 생성
  * 25. 2. 14.		durururuk		PasswordUtil 테스트코드 작성
  * 25. 2. 17.		durururuk		클래스 JavaDoc 설명 추가
- * 25. 2. 18.		Nari-Lee		dev 병합후 랜딩페이지 엔드포인트 수정
- * 25. 2. 24.		Nari-Lee		자바독 주석 추가
+ * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 24.		inari		자바독 주석 추가
  */
 public class PasswordUtil {
 

@@ -33,7 +33,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * 25. 3. 28.		durururuk		리프레시 토큰 레디스 저장 기능 구현
  * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
  * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
- * 25. 6. 18.		Nari-Lee		Spring-Rest-Docs api문서 추가
+ * 25. 6. 18.		inari		Spring-Rest-Docs api문서 추가
  */
 @WebMvcTest(AuthController.class)
 class AuthControllerTest extends CommonMockMvcControllerTestSetUp {

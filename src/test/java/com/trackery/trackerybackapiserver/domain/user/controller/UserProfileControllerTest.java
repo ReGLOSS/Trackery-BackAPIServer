@@ -31,16 +31,16 @@ import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.controller
  * fileName       : UserProfileControllerTest
- * author         : Nari-Lee
+ * author         : inari
  * date           : 25. 4. 28.
  * description    : UserProfileController 테스트 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 4. 28.		Nari-Lee		최초 생성
- * 25. 4. 28.		Nari-Lee		완성
+ * 25. 4. 28.		inari		최초 생성
+ * 25. 4. 28.		inari		완성
  * 25. 4. 29.		durururuk		변경된 로직에 맞게 테스트 코드 수정
- * 25. 6. 17.		Nari-Lee		user 도메인 테스트를 Spring-Rest-Docs에 맞게 리팩터링 및 문서 추가하였습니다.
+ * 25. 6. 17.		inari		user 도메인 테스트를 Spring-Rest-Docs에 맞게 리팩터링 및 문서 추가하였습니다.
  */
 @WebMvcTest(UserProfileController.class)
 class UserProfileControllerTest extends CommonMockMvcControllerTestSetUp {

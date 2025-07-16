@@ -12,18 +12,18 @@ import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.tag.mapper
  * fileName       : TagMapper
- * author         : Nari-Lee
+ * author         : inari
  * date           : 25. 7. 2.
  * description    : 태그 관련 데이터베이스 매퍼 인터페이스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 2.		Nari-Lee		최초 생성
- * 25. 7. 3.		Nari-Lee		매퍼와 엔티티 추가
- * 25. 7. 8.		Nari-Lee		태그 도메인 구현
- * 25. 7. 11.		Nari-Lee		기존 매퍼에 존재하던 이미지 삭제시 태그 일괄 삭제 기능 적용하여 N+1 문제 해결
- * 25. 7. 11.		Nari-Lee		주석 추가
- * 25. 7. 15.		Nari-Lee		사용하지 않는 매퍼 삭제
+ * 25. 7. 2.		inari		최초 생성
+ * 25. 7. 3.		inari		매퍼와 엔티티 추가
+ * 25. 7. 8.		inari		태그 도메인 구현
+ * 25. 7. 11.		inari		기존 매퍼에 존재하던 이미지 삭제시 태그 일괄 삭제 기능 적용하여 N+1 문제 해결
+ * 25. 7. 11.		inari		주석 추가
+ * 25. 7. 15.		inari		사용하지 않는 매퍼 삭제
  */
 @Mapper
 public interface TagMapper {

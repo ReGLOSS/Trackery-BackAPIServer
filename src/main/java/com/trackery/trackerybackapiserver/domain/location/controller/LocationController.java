@@ -47,16 +47,16 @@ import lombok.RequiredArgsConstructor;
  * 25. 4. 21.		durururuk		개발 중 테스트용 코드 남아있던 것 삭제
  * 25. 4. 23.		durururuk		LocationController JavaDoc 주석 작성
  * 25. 4. 24.		durururuk		클래스 설명 주석 작성
- * 25. 6. 10.		Nari-Lee		location과 통합
- * 25. 6. 13.		Nari-Lee		시군구 조회 기능 추가
- * 25. 6. 16.		Nari-Lee		전국지도용 통계 추가
- * 25. 6. 16.		Nari-Lee		location 도메인과 image 도메인 리팩토링 및 지도 이미지 조회기능 추가
- * 25. 6. 16.		Nari-Lee		체크스타일 적용
- * 25. 6. 16.		Nari-Lee		state에서 시도 제거
+ * 25. 6. 10.		inari		location과 통합
+ * 25. 6. 13.		inari		시군구 조회 기능 추가
+ * 25. 6. 16.		inari		전국지도용 통계 추가
+ * 25. 6. 16.		inari		location 도메인과 image 도메인 리팩토링 및 지도 이미지 조회기능 추가
+ * 25. 6. 16.		inari		체크스타일 적용
+ * 25. 6. 16.		inari		state에서 시도 제거
  * 25. 7. 1.		durururuk		다른 서비스 클래스에서도 변경된 로직에 맞게끔 수정
- * 25. 7. 7.		Nari-Lee		이미지 업로드시 시도,시군구 태그 추가 기능 구현
- * 25. 7. 8.		Nari-Lee		이미지 업로드시 지역기반으로 자동으로 시도, 시군구 태그 생
- * 25. 7. 11.		Nari-Lee		기본 태그기능 로케이션에서 태그 도메인으로 이동
+ * 25. 7. 7.		inari		이미지 업로드시 시도,시군구 태그 추가 기능 구현
+ * 25. 7. 8.		inari		이미지 업로드시 지역기반으로 자동으로 시도, 시군구 태그 생
+ * 25. 7. 11.		inari		기본 태그기능 로케이션에서 태그 도메인으로 이동
  */
 @RestController
 @RequestMapping("/api/location")

@@ -17,7 +17,7 @@ import lombok.Setter;
  * 25. 4. 15.		durururuk		좌표로 지역 찾아오는 기능 구현
  * 25. 4. 23.		durururuk		시/군/구 엔티티 Javadoc 주석 작성
  * 25. 4. 24.		durururuk		클래스 설명 주석 작성
- * 25. 7. 11.		Nari-Lee		location 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 7. 11.		inari		location 도메인의 자바독 누락 및 체크스타일 해결
  */
 @Getter
 @Setter

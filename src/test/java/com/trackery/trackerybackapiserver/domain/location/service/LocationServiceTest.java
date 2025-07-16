@@ -45,12 +45,12 @@ import com.trackery.trackerybackapiserver.domain.location.mapper.LocationMapper;
  * 25. 4. 23.		durururuk		최초 생성
  * 25. 4. 23.		durururuk		LocationService Mock 단위 테스트 작성
  * 25. 4. 24.		durururuk		ImageUploadController MockMvc 단위테스트 코드 작성
- * 25. 6. 13.		Nari-Lee		location에 추가된 테스트 코드 추가
- * 25. 6. 16.		Nari-Lee		state에서 시도 제거
- * 25. 6. 22.		Nari-Lee		이미지 메타데이터 수정시 좌표 인서트가 아닌 업데이트로 변경
- * 25. 7. 11.		Nari-Lee		test코드 추가
- * 25. 7. 14.		Nari-Lee		테스트코드 수정 및 adoc 변경
- * 25. 7. 15.		Nari-Lee		테스트 코드 작성 및 문서 수정
+ * 25. 6. 13.		inari		location에 추가된 테스트 코드 추가
+ * 25. 6. 16.		inari		state에서 시도 제거
+ * 25. 6. 22.		inari		이미지 메타데이터 수정시 좌표 인서트가 아닌 업데이트로 변경
+ * 25. 7. 11.		inari		test코드 추가
+ * 25. 7. 14.		inari		테스트코드 수정 및 adoc 변경
+ * 25. 7. 15.		inari		테스트 코드 작성 및 문서 수정
  */
 @ExtendWith(MockitoExtension.class)
 class LocationServiceTest {

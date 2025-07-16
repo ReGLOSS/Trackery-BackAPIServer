@@ -38,7 +38,7 @@ import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoFor
  * 25. 7. 8.		durururuk		내 이미지 조회 시 조회 결과에서 제외될 앨범 ID 파라미터 추가
  * 25. 7. 8.		durururuk		개발 도중 흔적 제거
  * 25. 7. 8.		durururuk		사용되지 않는 메서드 정리
- * 25. 7. 11.		Nari-Lee		album 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 7. 11.		inari		album 도메인의 자바독 누락 및 체크스타일 해결
  * 25. 7. 15.		durururuk		앨범_이미지 테이블에서 이미지 삭제 메서드 추가
  * 25. 7. 15.		durururuk		앨범 이미지 삭제 전 영향을 받는 앨범 ID 조회 쿼리 추가
  */

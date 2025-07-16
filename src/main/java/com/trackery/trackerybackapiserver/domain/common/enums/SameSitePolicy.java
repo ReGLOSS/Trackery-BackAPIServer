@@ -6,14 +6,14 @@ import lombok.RequiredArgsConstructor;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.common.enums
  * fileName       : SameSitePolicy
- * author         : Nari-Lee
+ * author         : inari
  * date           : 25. 6. 27.
  * description    : HTTP 쿠키의 SameSite 정책을 정의한 enum 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 6. 27.		Nari-Lee		최초 생성
- * 25. 6. 27.		Nari-Lee		쿠키 이름 및 정책 enum으로 수정
+ * 25. 6. 27.		inari		최초 생성
+ * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
  */
 @Getter
 @RequiredArgsConstructor

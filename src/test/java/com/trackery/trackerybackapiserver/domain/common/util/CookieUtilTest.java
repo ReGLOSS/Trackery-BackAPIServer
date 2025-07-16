@@ -32,7 +32,7 @@ import jakarta.servlet.http.HttpServletRequest;
  * 25. 3. 14.		durururuk		테스트 코드 작성
  * 25. 3. 28.		durururuk		refresh-token/ Cookie 유효시간 수정
  * 25. 4. 1.		durururuk		refresh-token/ extractCookieValue 테스트 코드 작성
- * 25. 6. 27.		Nari-Lee		쿠키 이름 및 정책 enum으로 수정
+ * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
  */
 class CookieUtilTest {
 

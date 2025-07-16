@@ -21,7 +21,7 @@ import lombok.Getter;
  * 25. 2. 13.		durururuk		기본 응답 포맷 작성
  * 25. 2. 13.		durururuk		예외 발생 시 응답을 생성하는 핸들러 작성
  * 25. 2. 13.		durururuk		주석 추가
- * 25. 2. 24.		Nari-Lee		자바독 주석 추가
+ * 25. 2. 24.		inari		자바독 주석 추가
  */
 @Getter
 @AllArgsConstructor

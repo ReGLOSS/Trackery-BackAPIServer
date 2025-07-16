@@ -24,8 +24,8 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
  * -----------------------------------------------------------
  * 25. 4. 18.		durururuk		최초 생성
  * 25. 4. 21.		durururuk		mybatis에서 spatial 타입을 사용하기 위한 타입 핸들러 적용
- * 25. 6. 30.		Nari-Lee		mybatis 패키지내 spitial 패키지 오타 수정 및 주석 추가 및 코드스멜 제거
- * 25. 7. 9.		Nari-Lee		spital 패키지에서 spatial로 이동
+ * 25. 6. 30.		inari		mybatis 패키지내 spitial 패키지 오타 수정 및 주석 추가 및 코드스멜 제거
+ * 25. 7. 9.		inari		spital 패키지에서 spatial로 이동
  */
 public class GeoUtil {
 	private static GeometryFactory geometryFactory = new GeometryFactory(new PrecisionModel(), 4326);

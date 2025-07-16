@@ -22,8 +22,8 @@ import lombok.NoArgsConstructor;
  * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
  * 25. 4. 23.		durururuk		CoordinatePoint 엔티티 주석 작성
  * 25. 4. 24.		durururuk		클래스 설명 주석 작성
- * 25. 6. 15.		Nari-Lee		체크스타일 수정
- * 25. 7. 11.		Nari-Lee		location 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 6. 15.		inari		체크스타일 수정
+ * 25. 7. 11.		inari		location 도메인의 자바독 누락 및 체크스타일 해결
  */
 @Getter
 @NoArgsConstructor

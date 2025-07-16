@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test;
  * 25. 2. 14.		durururuk		최초 생성
  * 25. 2. 14.		durururuk		PasswordUtil 테스트코드 작성
  * 25. 2. 17.		durururuk		클래스 JavaDoc 설명 추가
- * 25. 2. 18.		Nari-Lee		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
  */
 class PasswordUtilTest {
 

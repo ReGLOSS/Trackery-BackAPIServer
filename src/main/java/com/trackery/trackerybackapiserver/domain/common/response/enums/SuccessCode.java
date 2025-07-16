@@ -17,7 +17,7 @@ import lombok.Getter;
  * -----------------------------------------------------------
  * 25. 2. 13.		durururuk		최초 생성
  * 25. 2. 13.		durururuk		기본 응답 포맷 작성
- * 25. 2. 24.		Nari-Lee		자바독 주석 추가
+ * 25. 2. 24.		inari		자바독 주석 추가
  */
 @Getter
 @AllArgsConstructor

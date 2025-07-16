@@ -42,10 +42,10 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 4. 23.		durururuk		ImageUploadService Mock 단위 테스트 작성
  * 25. 4. 25.		durururuk		이미지 메타데이터 저장 후 이미지를 s3 임시 폴더에서 이미지 폴더로 이동시키는 작업 추가
  * 25. 7. 1.		durururuk		key 관리를 편하게 하기 위해서 imageName에서 확장자 제거
- * 25. 7. 8.		Nari-Lee		이미지 업로드시 태그 추가
- * 25. 7. 8.		Nari-Lee		이미지 업로드시 일반 태그 추가
- * 25. 7. 9.		Nari-Lee		regionalTags를 Tags로 수정 및 관련 메서드 및 변수 변경
- * 25. 7. 11.		Nari-Lee		image 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 7. 8.		inari		이미지 업로드시 태그 추가
+ * 25. 7. 8.		inari		이미지 업로드시 일반 태그 추가
+ * 25. 7. 9.		inari		regionalTags를 Tags로 수정 및 관련 메서드 및 변수 변경
+ * 25. 7. 11.		inari		image 도메인의 자바독 누락 및 체크스타일 해결
  */
 @Slf4j
 @Service

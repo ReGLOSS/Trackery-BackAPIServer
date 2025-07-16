@@ -20,7 +20,7 @@ import lombok.NoArgsConstructor;
  * 25. 5. 20.		durururuk		앨범 생성 기능 작성
  * 25. 5. 21.		durururuk		앨범에 이미지 추가하는 기능 작성
  * 25. 5. 21.		durururuk		JavaDoc 작성
- * 25. 7. 11.		Nari-Lee		album 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 7. 11.		inari		album 도메인의 자바독 누락 및 체크스타일 해결
  */
 @Getter
 @NoArgsConstructor

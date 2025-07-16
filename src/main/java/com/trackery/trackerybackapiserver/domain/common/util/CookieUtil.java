@@ -36,10 +36,10 @@ import jakarta.servlet.http.HttpServletRequest;
  * 25. 3. 28.		durururuk		Cookie 유효시간 수정
  * 25. 4. 1.		durururuk		JwtResolverFilter에 있던 분리된 메서드들 각자 있어야 할 클래스로 이동
  * 25. 4. 12.		durururuk		유저명 변경 기능 구현
- * 25. 6. 23.		Nari-Lee		테스트 코드 작성
- * 25. 6. 25.		Nari-Lee		쿠키 삭제시 sameSite에 넣을 파라미터 추가
- * 25. 6. 25.		Nari-Lee		주석 추가
- * 25. 6. 27.		Nari-Lee		쿠키 이름 및 정책 enum으로 수정
+ * 25. 6. 23.		inari		테스트 코드 작성
+ * 25. 6. 25.		inari		쿠키 삭제시 sameSite에 넣을 파라미터 추가
+ * 25. 6. 25.		inari		주석 추가
+ * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
  */
 public class CookieUtil {
 	/**

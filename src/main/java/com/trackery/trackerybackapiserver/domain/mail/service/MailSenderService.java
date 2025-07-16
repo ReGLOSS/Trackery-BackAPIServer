@@ -28,7 +28,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 20.		durururuk		이메일 전송 관련 로직 분리
  * 25. 3. 25.		durururuk		유저명 찾기 기능 구현, 테스트 코드 작성
  * 25. 3. 25.		durururuk		이메일 발송 실패 예외 처리 테스트 코드 작성
- * 25. 7. 11.		Nari-Lee		mail 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 7. 11.		inari		mail 도메인의 자바독 누락 및 체크스타일 해결
  */
 @Slf4j
 @Component

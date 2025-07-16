@@ -18,10 +18,10 @@ import org.springframework.context.annotation.Configuration;
  * 25. 4. 18.		durururuk		최초 생성
  * 25. 4. 21.		durururuk		mybatis에서 spatial 타입을 사용하기 위한 타입 핸들러 적용
  * 25. 5. 15.		durururuk		이미지 조회 기능 폴더 지정 오류로 안 되던 문제 수정
- * 25. 6. 30.		Nari-Lee		mybatis 패키지내 spitial 패키지 오타 수정 및 주석 추가 및 코드스멜 제거
- * 25. 7. 7.		Nari-Lee		tagtype enum으로 관리하도록 설정(DB에서는 숫자로 들어감)
- * 25. 7. 9.		Nari-Lee		spital 패키지에서 spatial로 이동
- * 25. 7. 9.		Nari-Lee		MybatisEnumConfig를 분리
+ * 25. 6. 30.		inari		mybatis 패키지내 spitial 패키지 오타 수정 및 주석 추가 및 코드스멜 제거
+ * 25. 7. 7.		inari		tagtype enum으로 관리하도록 설정(DB에서는 숫자로 들어감)
+ * 25. 7. 9.		inari		spital 패키지에서 spatial로 이동
+ * 25. 7. 9.		inari		MybatisEnumConfig를 분리
  */
 @Configuration
 public class MybatisSpatialConfig {

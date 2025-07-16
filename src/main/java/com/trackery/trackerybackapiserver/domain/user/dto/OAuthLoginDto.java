@@ -9,16 +9,16 @@ import lombok.NoArgsConstructor;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.dto
  * fileName       : OAuthLoginDto
- * author         : Nari-Lee
+ * author         : inari
  * date           : 25. 2. 25.
  * description    : 간편 로그인 요청 정보를 담는 DTO 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 25.		Nari-Lee		최초 생성
- * 25. 2. 28.		Nari-Lee		구현중
- * 25. 6. 24.		Nari-Lee		에러코드 및 필요한 설정 추가
- * 25. 7. 11.		Nari-Lee		자바독 오류 해결 및 자바독 주입
+ * 25. 2. 25.		inari		최초 생성
+ * 25. 2. 28.		inari		구현중
+ * 25. 6. 24.		inari		에러코드 및 필요한 설정 추가
+ * 25. 7. 11.		inari		자바독 오류 해결 및 자바독 주입
  */
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

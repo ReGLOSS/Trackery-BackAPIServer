@@ -10,19 +10,19 @@ import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.mapper
  * fileName       : OAuthMapper
- * author         : Nari-Lee
+ * author         : inari
  * date           : 25. 2. 24.
  * description    : 간편 로그인 사용자 데이터 처리를 위한 MyBatis Mapper 인터페이스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 24.		Nari-Lee		최초 생성
- * 25. 2. 24.		Nari-Lee		매퍼생성
- * 25. 2. 28.		Nari-Lee		구현중
- * 25. 3. 26.		Nari-Lee		연동유무를 세션에서 토큰으로 이전
+ * 25. 2. 24.		inari		최초 생성
+ * 25. 2. 24.		inari		매퍼생성
+ * 25. 2. 28.		inari		구현중
+ * 25. 3. 26.		inari		연동유무를 세션에서 토큰으로 이전
  * 25. 4. 9.		durururuk		유저 정보를 찾을 때 role 정보도 같이 조회하게끔 쿼리 수정
  * 25. 4. 9.		durururuk		유저 상세정보 조회 API 단위테스트 코드 작성
- * 25. 6. 26.		Nari-Lee		탈퇴시 간편로그인 연동 삭제 매퍼 추가
+ * 25. 6. 26.		inari		탈퇴시 간편로그인 연동 삭제 매퍼 추가
  */
 @Mapper
 public interface OAuthMapper {

@@ -49,10 +49,10 @@ import lombok.RequiredArgsConstructor;
  * 25. 2. 14.		durururuk		registerUser 메서드 @Valid 추가
  * 25. 2. 14.		durururuk		닉네임 중복 체크하는 api 구현
  * 25. 2. 14.		durururuk		회원가입, 닉네임 중복체크 api 퍼블릭으로 허용, 컨트롤러, 서비스에 주석 추가
- * 25. 2. 18.		Nari-Lee		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
  * 25. 2. 20.		durururuk		회원가입 시 JWT를 담은 헤더를 같이 반환하도록 추가
  * 25. 2. 20.		durururuk		header -> authHeader 변수명 수정
- * 25. 2. 24.		Nari-Lee		자바독 주석 추가
+ * 25. 2. 24.		inari		자바독 주석 추가
  * 25. 2. 24.		durururuk		회원가입 시 인증 헤더 -> http-only 쿠키 방식으로 변경
  * 25. 2. 25.		durururuk		로그인 서비스, 컨트롤러 추가
  * 25. 2. 26.		durururuk		액세스 토큰 쿠키 생성 메서드 클래스 분리
@@ -76,11 +76,11 @@ import lombok.RequiredArgsConstructor;
  * 25. 4. 10.		durururuk		인증 기반 비밀번호 변경 컨트롤러 mockMvc 테스트 작성
  * 25. 4. 12.		durururuk		닉네임 변경 기능 구현
  * 25. 4. 12.		durururuk		유저명 변경 기능 구현
- * 25. 6. 25.		Nari-Lee		로그아웃 기능 추가
- * 25. 6. 26.		Nari-Lee		회원 탈퇴 기능 작성
- * 25. 6. 26.		Nari-Lee		탈퇴시 서비스에서 컨트롤러로 쿠키삭제 처리 피드백 반영
- * 25. 6. 27.		Nari-Lee		쿠키 이름 및 정책 enum으로 수정
- * 25. 7. 11.		Nari-Lee		user 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 6. 25.		inari		로그아웃 기능 추가
+ * 25. 6. 26.		inari		회원 탈퇴 기능 작성
+ * 25. 6. 26.		inari		탈퇴시 서비스에서 컨트롤러로 쿠키삭제 처리 피드백 반영
+ * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
+ * 25. 7. 11.		inari		user 도메인의 자바독 누락 및 체크스타일 해결
  */
 @RestController
 @RequestMapping("/api/users")

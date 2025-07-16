@@ -40,7 +40,7 @@ import com.trackery.trackerybackapiserver.domain.mail.service.MailService;
  * 25. 3. 20.		durururuk		수정 된 로직에 맞게 테스트 코드 작성
  * 25. 3. 25.		durururuk		유저명 찾기 컨트롤러 메서드 추가, 테스트 코드 작성
  * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
- * 25. 6. 18.		Nari-Lee		모든 api 문서화
+ * 25. 6. 18.		inari		모든 api 문서화
  */
 @WithMockUser
 @WebMvcTest(MailController.class)

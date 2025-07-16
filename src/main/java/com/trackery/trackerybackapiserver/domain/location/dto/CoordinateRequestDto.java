@@ -9,16 +9,16 @@ import lombok.NoArgsConstructor;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.location.dto
  * fileName       : CoordinateRequestDto
- * author         : Nari-Lee
+ * author         : inari
  * date           : 25. 5. 30.
  * description    : 지리 좌표(위도, 경도) 정보를 담는 요청 DTO입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 5. 30.		Nari-Lee		최초 생성
- * 25. 5. 30.		Nari-Lee		제작중
- * 25. 6. 10.		Nari-Lee		location과 통합
- * 25. 6. 15.		Nari-Lee		체크스타일 수정
+ * 25. 5. 30.		inari		최초 생성
+ * 25. 5. 30.		inari		제작중
+ * 25. 6. 10.		inari		location과 통합
+ * 25. 6. 15.		inari		체크스타일 수정
  */
 @Data
 @NoArgsConstructor

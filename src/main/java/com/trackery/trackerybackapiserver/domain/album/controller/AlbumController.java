@@ -57,7 +57,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 6. 23.		durururuk		deprecated된 앨범 상세 정보 조회API 관련 코드 삭제
  * 25. 7. 1.		durururuk		앨범 이미지 리스트를 조회할 때 기존 원본이미지 조회에서 이미지 썸네일을 조회하게 변경
  * 25. 7. 10.		durururuk		PageSize 파라미터 검증 추가
- * 25. 7. 11.		Nari-Lee		album 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 7. 11.		inari		album 도메인의 자바독 누락 및 체크스타일 해결
  */
 @RestController
 @RequiredArgsConstructor
