@@ -35,7 +35,9 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 14.		durururuk		최초 생성
- * 25. 4. 14.		durururuk		mock 단위테스트 작성
+ * 25. 4. 14.		durururuk		UpdateUserInfo Controller, Serivce 단위테스트 작성
+ * 25. 4. 14.		durururuk		유저 찾지 못한 경우 테스트 작성
+ * 25. 4. 14.		durururuk		사용되지 않는 변수 삭제
  */
 @ExtendWith(MockitoExtension.class)
 class UpdateUserInfoServiceTest {

@@ -10,14 +10,17 @@ import com.trackery.trackerybackapiserver.domain.user.enums.OAuthProvider;
 /**
  * packageName    : com.trackery.trackerybackapiserver.config
  * fileName       : WebConfig
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 3. 26.
  * description    : 웹 설정 관련 클래스입니다.
  *                  OAuth 제공자 문자열을 OAuthProvider 열거형으로 변환하는 컨버터를 등록합니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 26.        inari       최초 생성
+ * 25. 3. 26.		Nari-Lee		최초 생성
+ * 25. 3. 26.		Nari-Lee		provider enum 적용
+ * 25. 6. 12.		Nari-Lee		index.html을 프론트에서 접근가능하도록 핸들러 및 플러그인 pom.xml에 추가
+ * 25. 6. 12.		Nari-Lee		핸들러에서 컨트롤러로 변경
  */
 @Configuration
 public class WebConfig implements WebMvcConfigurer {

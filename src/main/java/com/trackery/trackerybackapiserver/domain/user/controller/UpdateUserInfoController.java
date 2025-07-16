@@ -36,8 +36,11 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 12.		durururuk		최초 생성
+ * 25. 4. 12.		durururuk		유저명 변경 기능 구현
  * 25. 4. 14.		durururuk		이메일 수정 API 추가, 주석 작성
- * 25. 6. 27.        inari      	쿠키 이름과 정책 enum으로 변경
+ * 25. 4. 14.		durururuk		UpdateUserInfo Controller, Serivce 단위테스트 작성
+ * 25. 6. 25.		Nari-Lee		쿠키 삭제시 sameSite에 넣을 파라미터 추가
+ * 25. 6. 27.		Nari-Lee		쿠키 이름 및 정책 enum으로 수정
  */
 @Slf4j
 @RestController

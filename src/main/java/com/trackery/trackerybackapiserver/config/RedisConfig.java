@@ -16,8 +16,10 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 3.        durururuk      최초 생성
- * 25. 3. 3.        durururuk      RedisConnectionFactory, RedisTemplate Bean 작성
+ * 25. 3. 3.		durururuk		최초 생성
+ * 25. 3. 3.		durururuk		RedisConnectionFactory, RedisTemplate Bean 작성
+ * 25. 3. 4.		durururuk		이메일 인증 요청 기능 추가
+ * 25. 7. 14.		durururuk		Key는 String, Value는 Jacoson2Json 활용해서 직렬화 문제 수정
  */
 @Configuration
 public class RedisConfig {

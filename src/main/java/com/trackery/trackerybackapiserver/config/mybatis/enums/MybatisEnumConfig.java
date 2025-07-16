@@ -9,13 +9,15 @@ import com.trackery.trackerybackapiserver.domain.tag.enums.TagTypeHandler;
 /**
  * packageName    : com.trackery.trackerybackapiserver.config.mybatis.enums
  * fileName       : MybatisEnumConfig
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 7. 9.
  * description    : Mybatis에서 Enum 타입을 사용하기 위한 타입 핸들러입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 9.		inari			최초 생성
+ * 25. 7. 9.		Nari-Lee		최초 생성
+ * 25. 7. 9.		Nari-Lee		MybatisEnumConfig를 분리
+ * 25. 7. 9.		Nari-Lee		체크스타일 수정 및 메서드 분리
  */
 @Configuration
 public class MybatisEnumConfig {

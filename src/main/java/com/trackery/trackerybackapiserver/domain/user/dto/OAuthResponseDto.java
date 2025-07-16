@@ -6,16 +6,19 @@ import lombok.Getter;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.dto
  * fileName       : OAuthResponseDto
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 2. 25.
  * description    : 간편 로그인 처리 결과를 담는 응답 DTO 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 25.        inari       최초 생성
- * 25. 2. 26.        inari       JWT 인증 헤더 삭제
- * 25. 3. 14.        inari       이메일 추가
- * 25. 7. 2.         inari       회원가입 유무 추가
+ * 25. 2. 25.		Nari-Lee		최초 생성
+ * 25. 2. 28.		Nari-Lee		구현중
+ * 25. 3. 14.		Nari-Lee		프론트연동을 위한 추가 및 코드스멜 수정
+ * 25. 3. 17.		Nari-Lee		주석추가
+ * 25. 3. 17.		Nari-Lee		프론트연결을 위한 수정
+ * 25. 7. 1.		Nari-Lee		신규가입 구분할 isNewUser 파라미터 추가
+ * 25. 7. 2.		Nari-Lee		주석 추가
  */
 @Getter
 @Builder

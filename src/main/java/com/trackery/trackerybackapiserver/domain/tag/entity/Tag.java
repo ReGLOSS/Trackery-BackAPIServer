@@ -12,13 +12,17 @@ import lombok.NoArgsConstructor;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.tag.entity
  * fileName       : Tag
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 7. 3.
  * description    : 태그의 기본 정보를 나타내는 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 3.        inari           최초 생성
+ * 25. 7. 3.		Nari-Lee		최초 생성
+ * 25. 7. 3.		Nari-Lee		매퍼와 엔티티 추가
+ * 25. 7. 7.		Nari-Lee		tagtype enum으로 관리하도록 설정(DB에서는 숫자로 들어감)
+ * 25. 7. 8.		Nari-Lee		태그 도메인 구현
+ * 25. 7. 11.		Nari-Lee		수정
  */
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

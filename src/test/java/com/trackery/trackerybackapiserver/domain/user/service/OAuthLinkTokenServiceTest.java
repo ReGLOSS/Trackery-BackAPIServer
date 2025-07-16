@@ -25,19 +25,21 @@ import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiEx
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
-
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.service
- * fileName       : OAuthLinkServiceTest
- * author         : inari
+ * fileName       : OAuthLinkTokenServiceTest
+ * author         : Nari-Lee
  * date           : 25. 3. 26.
- * description    :
+ * description    : OAuthLinkServiceTest 단위 테스트
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 3. 26.        inari       최초 생성
- * 25. 3. 26.        inari       프로바이더, 이메일 필수 사항으로 전환
- * 25. 6. 24.        inari		 기존 유저에 간편 로그인 연동 테스트 추가
+ * 25. 3. 26.		Nari-Lee		최초 생성
+ * 25. 3. 26.		Nari-Lee		연동유무를 세션에서 토큰으로 이전
+ * 25. 3. 26.		Nari-Lee		토큰 생성시 검증부분 테스트 추가
+ * 25. 4. 10.		durururuk		이메일 토큰 기반 비밀번호 변경 url 변경, 인증 기반 비밀번호 변경 기능 구현
+ * 25. 6. 24.		Nari-Lee		기능 개선 및 테스트코드 수정 및 추가
+ * 25. 6. 24.		Nari-Lee		OAuthLinkTokenService로 OAuthLinkService 변경
  */
 @ExtendWith(MockitoExtension.class)
 class OAuthLinkTokenServiceTest {

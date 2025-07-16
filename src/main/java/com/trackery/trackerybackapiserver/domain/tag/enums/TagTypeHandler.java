@@ -12,13 +12,14 @@ import org.apache.ibatis.type.MappedTypes;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.tag.enums
  * fileName       : TagTypeHandler
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 7. 7.
  * description    : TagType 열거형과 데이터베이스 정수 값 간의 변환을 담당하는 MyBatis 타입 핸들러입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 7. 7.        inari           최초 생성
+ * 25. 7. 7.		Nari-Lee		최초 생성
+ * 25. 7. 7.		Nari-Lee		tagtype enum으로 관리하도록 설정(DB에서는 숫자로 들어감)
  */
 @MappedTypes(TagType.class)
 public class TagTypeHandler extends BaseTypeHandler<TagType> {

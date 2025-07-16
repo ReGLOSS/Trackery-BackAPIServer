@@ -13,8 +13,9 @@ import lombok.NoArgsConstructor;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 19.        durururuk       최초 생성
- * 25. 2. 24.        inari           상세 주석 추가
+ * 25. 2. 19.		durururuk		최초 생성
+ * 25. 2. 19.		durururuk		Role, UserRole 엔티티 추가, User 클래스 생성 정보 추가
+ * 25. 2. 24.		Nari-Lee		자바독 주석 추가
  */
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 7. 7.		durururuk		최초 생성
+ * 25. 7. 7.		durururuk		PageUtil로 페이징 정보를 처리하는 로직 이관
+ * 25. 7. 10.		durururuk		PageUtil convert 메서드 null 체크 추가
  */
 @Slf4j
 public class PageUtil {

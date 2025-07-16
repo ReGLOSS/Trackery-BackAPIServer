@@ -15,6 +15,7 @@ import lombok.Setter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 6. 14.		inari		최초 생성
+ * 25. 6. 16.		inari		전국 지도용 통계 추가
  */
 @Getter
 @Setter

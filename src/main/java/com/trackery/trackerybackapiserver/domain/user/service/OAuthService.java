@@ -37,23 +37,34 @@ import lombok.extern.slf4j.Slf4j;
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.user.service
  * fileName       : OAuthService
- * author         : inari
+ * author         : Nari-Lee
  * date           : 25. 2. 26.
  * description    : 간편 로그인 관련 비즈니스 로직을 처리하는 서비스 클래스입니다.
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 2. 26.        inari       최초 생성
+ * 25. 2. 26.		Nari-Lee		최초 생성
  * 25. 2. 27.        inari       userRoleMapper 추가
- * 25. 2. 28.        inari       리프레시 토큰 제거
- * 25. 3. 14.        inari       주석 추가
- * 25. 3. 27.        inari		 provider를 enum으로 변경
- * 25. 6. 23.        inari		 기존 유저에 간편 로그인 연동 추가
- * 25. 6. 24.        inari		 linkToken을 이용하는 방식으로 변경 및 안쓰는 코드 제거
- * 25. 6. 25.        inari		 리프레시 토큰 발급 추가
- * 25. 6. 26.        inari		 "state=" 상수화로 코드 스멜 제거
- * 25. 6. 27.		 inari	   	 로그인시 lastlogin 갱신 추가 및 이미 연동된 계정 타유저 접근 차단
- * 25. 6. 27.		 inari	   	 코드 복잡도 해결을 위해 메서드 분리
+ * 25. 3. 5.		Nari-Lee		간편로그인시 프로필사진 제거
+ * 25. 3. 5.		durururuk		dev와 병합하면서 생긴 오류 수정
+ * 25. 3. 5.		Nari-Lee		커버리지 리팩터링
+ * 25. 3. 14.		Nari-Lee		프론트연동을 위한 추가 및 코드스멜 수정
+ * 25. 3. 17.		Nari-Lee		주석추가
+ * 25. 3. 27.		Nari-Lee		provider enum 적용
+ * 25. 3. 28.		durururuk		리프레시 토큰 레디스 저장 기능 구현
+ * 25. 3. 28.		durururuk		import 순서 수정
+ * 25. 3. 31.		Durururuk		User Entity에 잘못 설정돼있던 타입 timeStamp를 dateTime으로 수정
+ * 25. 6. 23.		Nari-Lee		연동 서비스 및 컨트롤러 추가
+ * 25. 6. 24.		Nari-Lee		기능 개선 및 테스트코드 수정 및 추가
+ * 25. 6. 24.		Nari-Lee		URL만 생성 -> 직접 연동 에서 토큰 포함 URL 생성 -> 통합 로그인에서 연동 처리로 방식변경후 안쓰는 코드 삭제
+ * 25. 6. 24.		Nari-Lee		주석추가
+ * 25. 6. 25.		Nari-Lee		액세스토큰만 발급하여 쿠키에 담던 문제를 해결
+ * 25. 6. 25.		Nari-Lee		주석 추가
+ * 25. 6. 26.		Nari-Lee		탈퇴시 코드 스멜 제거
+ * 25. 6. 27.		Nari-Lee		로그인시 마지막 로그인 갱신되도록 수정
+ * 25. 6. 27.		Nari-Lee		이미 연동된 간편로그인 타유저 접근 차단
+ * 25. 6. 28.		Nari-Lee		코드 복잡도 15이하로 메서드 리팩터링 테스트코드 수정
+ * 25. 7. 1.		Nari-Lee		신규가입 구분할 isNewUser 파라미터 추가
  */
 @Slf4j
 @Service
