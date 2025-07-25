@@ -70,7 +70,7 @@ public class UpdateUserInfoController {
 	 *
 	 * @param userDetails 기존 인증정보
 	 * @param dto 새 유저명을 담은 DTO
- 	 * @return 성공 시 새 유저명으로 업데이트된 인증 토큰, OK 공통 응답
+	 * @return 성공 시 새 유저명으로 업데이트된 인증 토큰, OK 공통 응답
 	 */
 	@PatchMapping("/username")
 	public ResponseEntity<ApiResponse<Void>> updateUserName(
@@ -141,5 +141,14 @@ public class UpdateUserInfoController {
 		return ResponseEntity.ok()
 			.header(HttpHeaders.SET_COOKIE, cookie.toString())
 			.body(ApiResponse.success(SuccessCode.OK));
+	}
+
+	@PatchMapping("/profile-image")
+	public ResponseEntity<ApiResponse<Void>> updateProfileImage(
+		@AuthenticationPrincipal CustomUserDetails userDetails,
+		@Valid @RequestBody String imageName
+	) {
+		updateUserInfoService.updateUserProfileImage(userDetails.getUserId(), imageName);
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 }

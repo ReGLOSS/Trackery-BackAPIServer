@@ -105,4 +105,10 @@
             user_profile = NULL
         WHERE user_id = #{userId}
     </update>
+    <!-- 유저 프로필 사진 업데이트 -->
+    <update id="updateUserProfileImage">
+        UPDATE user
+        SET user_profile = #{imageName}
+        WHERE user_id = #{userId}
+    </update>
 </mapper>

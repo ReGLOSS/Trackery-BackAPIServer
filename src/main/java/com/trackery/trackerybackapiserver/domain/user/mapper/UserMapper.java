@@ -68,7 +68,6 @@ public interface UserMapper {
 	 */
 	Optional<User> findByUserId(Long userId);
 
-
 	/**
 	 * 사용자 이메일로 사용자 정보를 조회합니다.
 	 *
@@ -76,7 +75,6 @@ public interface UserMapper {
 	 * @return 조회된 사용자 정보
 	 */
 	Optional<User> findByEmail(String email);
-
 
 	/**
 	 * 유저명으로 User를 찾아서 반환합니다.
@@ -148,4 +146,6 @@ public interface UserMapper {
 	void deleteUserByUserId(@Param("userId") Long userId, @Param("email") String email,
 		@Param("userName") String userName, @Param("nickname") String nickname,
 		@Param("password") String password, @Param("salt") String salt);
+
+	void updateUserProfileImage(@Param("userId") Long userId, @Param("imageName") String imageName);
 }

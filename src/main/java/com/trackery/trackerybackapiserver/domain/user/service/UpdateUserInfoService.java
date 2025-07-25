@@ -138,4 +138,8 @@ public class UpdateUserInfoService {
 		return userMapper.findByUserId(userId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_USER));
 	}
+
+	public void updateUserProfileImage(Long userId, String imageName) {
+		userMapper.updateUserProfileImage(userId, imageName);
+	}
 }
