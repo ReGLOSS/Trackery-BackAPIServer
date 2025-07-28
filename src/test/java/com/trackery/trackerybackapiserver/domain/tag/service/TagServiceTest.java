@@ -50,6 +50,7 @@ import com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper;
  * 25. 7. 14.		inari		테스트코드 수정 및 adoc 변경
  * 25. 7. 15.		inari		단일 테스트로 변경하여 코드스멜 해결
  * 25. 7. 15.		inari		테스트 코드 작성 및 문서 수정
+ * 25. 7. 28.		inari		태그 삭제 기능 제거
  */
 @ExtendWith(MockitoExtension.class)
 class TagServiceTest {
@@ -449,7 +450,6 @@ class TagServiceTest {
 			doNothing().when(tagMapper).insertImageTag(any());
 			doNothing().when(tagMapper).decrementTagUseCount(tagId);
 			doNothing().when(tagMapper).incrementTagUseCount(any());
-			when(tagMapper.deleteUnusedTag(tagId)).thenReturn(1);
 			when(tagMapper.findTagById(2L)).thenReturn(newTag);
 
 			// when
