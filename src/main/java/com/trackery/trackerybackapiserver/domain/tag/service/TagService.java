@@ -52,6 +52,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 14.		inari		TagType enum에 추가하고 locationName 파라미터대신 sidoName, sigunguName으로 분리
  * 25. 7. 14.		inari		TagType에 따른 태그 정렬 추가
  * 25. 7. 15.		inari		ImageService에 있던 updateImageLocation, processTagRemoval, processTagAddition 각 도메인으로 이동
+ * 25. 7. 28.		inari		태그 카운트가 0일떄 자동 삭제 기능 제거
  */
 @Slf4j
 @Service
