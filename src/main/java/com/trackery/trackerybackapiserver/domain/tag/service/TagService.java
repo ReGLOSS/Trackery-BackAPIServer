@@ -465,13 +465,6 @@ public class TagService {
 		tagMapper.decrementTagUseCount(tagId);
 		tagMapper.incrementTagUseCount(targetTag.getTagId());
 
-		// 기존 태그가 더 이상 사용되지 않으면 삭제 (CUSTOM 타입만)
-		Tag updatedOldTag = tagMapper.findTagById(tagId);
-		if (updatedOldTag != null && updatedOldTag.getTagUseCount() == 0
-			&& updatedOldTag.getTagType().equals(TagType.CUSTOM)) {
-			tagMapper.deleteUnusedTag(tagId);
-		}
-
 		// 업데이트된 새 태그 정보 반환
 		Tag finalTag = tagMapper.findTagById(targetTag.getTagId());
 		return convertToResponseDto(finalTag);
