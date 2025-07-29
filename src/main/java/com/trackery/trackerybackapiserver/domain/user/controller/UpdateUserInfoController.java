@@ -41,6 +41,8 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 4. 14.		durururuk		UpdateUserInfo Controller, Serivce 단위테스트 작성
  * 25. 6. 25.		inari		쿠키 삭제시 sameSite에 넣을 파라미터 추가
  * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
+ * 25. 7. 25.		durururuk		updateProfileImage 컨트롤러 코드 추가
+ * 25. 7. 29.		durururuk		javaDoc 주석 작성
  */
 @Slf4j
 @RestController
@@ -143,6 +145,12 @@ public class UpdateUserInfoController {
 			.body(ApiResponse.success(SuccessCode.OK));
 	}
 
+	/**
+	 * 프로필 이미지를 업데이트하는 API
+	 * @param userDetails 인증 정보
+	 * @param imageName 업데이트할 이미지명
+	 * @return 공통 OK 포맷
+	 */
 	@PatchMapping("/profile-image")
 	public ResponseEntity<ApiResponse<Void>> updateProfileImage(
 		@AuthenticationPrincipal CustomUserDetails userDetails,

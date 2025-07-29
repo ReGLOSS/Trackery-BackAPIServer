@@ -28,6 +28,8 @@ import lombok.RequiredArgsConstructor;
  * 25. 4. 12.		durururuk		유저명 변경 기능 구현
  * 25. 4. 14.		durururuk		이메일 수정 API 추가, 주석 작성
  * 25. 4. 14.		durururuk		UpdateUserInfo Controller, Serivce 단위테스트 작성
+ * 25. 7. 25.		durururuk		updateUserProfileImage 메서드 추가
+ * 25. 7. 29.		durururuk		자바독 주석 추가
  */
 @Service
 @Transactional
@@ -139,6 +141,11 @@ public class UpdateUserInfoService {
 			() -> new ApiException(ErrorCode.NOT_FOUND_USER));
 	}
 
+	/**
+	 * 유저 mapper에서 유저 프로필 이미지를 업데이트 합니다.
+	 * @param userId 유저 ID
+	 * @param imageName 업데이트 할 이미지명
+	 */
 	public void updateUserProfileImage(Long userId, String imageName) {
 		userMapper.updateUserProfileImage(userId, imageName);
 	}
