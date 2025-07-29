@@ -38,6 +38,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
  * 25. 4. 14.		durururuk		UpdateUserInfo Controller, Serivce 단위테스트 작성
  * 25. 4. 14.		durururuk		유저 찾지 못한 경우 테스트 작성
  * 25. 4. 14.		durururuk		사용되지 않는 변수 삭제
+ * 25. 7. 29.		durururuk		updateUserProfileImage 서비스 테스트 코드 작성
  */
 @ExtendWith(MockitoExtension.class)
 class UpdateUserInfoServiceTest {
@@ -92,7 +93,8 @@ class UpdateUserInfoServiceTest {
 
 			when(userMapper.findByEmail(anyString())).thenThrow(new ApiException(ErrorCode.NOT_FOUND_USER));
 
-			assertThrows(ApiException.class, () -> updateUserInfoService.updatePasswordByEmailToken("emailToken", "<PASSWORD>"));
+			assertThrows(ApiException.class,
+				() -> updateUserInfoService.updatePasswordByEmailToken("emailToken", "<PASSWORD>"));
 		}
 	}
 
@@ -108,19 +110,19 @@ class UpdateUserInfoServiceTest {
 			String salt = "SALT123";
 			String hashedOldPassword = PasswordUtil.hashPassword(oldPassword, salt);
 
-			User user = User.builder()
+			User exampleUser = User.builder()
 				.userName("테스트유저")
-				.email("user@example.com")
+				.email("exampleUser@example.com")
 				.password(hashedOldPassword)
 				.salt(salt)
 				.build();
-			ReflectionTestUtils.setField(user, "userId", 1L);
+			ReflectionTestUtils.setField(exampleUser, "userId", 1L);
 
 			UpdatePasswordDto dto = new UpdatePasswordDto();
 			ReflectionTestUtils.setField(dto, "oldPassword", oldPassword);
 			ReflectionTestUtils.setField(dto, "newPassword", newPassword);
 
-			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(exampleUser));
 
 			updateUserInfoService.updatePasswordByAuthentication(1L, dto);
 
@@ -135,19 +137,19 @@ class UpdateUserInfoServiceTest {
 			String salt = "SALT";
 			String hashedActual = PasswordUtil.hashPassword(actualOldPassword, salt);
 
-			User user = User.builder()
+			User updateProfileImage = User.builder()
 				.userName("테스트유저")
-				.email("user@example.com")
+				.email("updateProfileImage@example.com")
 				.password(hashedActual)
 				.salt(salt)
 				.build();
-			ReflectionTestUtils.setField(user, "userId", 1L);
+			ReflectionTestUtils.setField(updateProfileImage, "userId", 1L);
 
 			UpdatePasswordDto dto = new UpdatePasswordDto();
 			ReflectionTestUtils.setField(dto, "oldPassword", wrongOldPassword);
 			ReflectionTestUtils.setField(dto, "newPassword", "newPass123!");
 
-			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(updateProfileImage));
 
 			ApiException e = assertThrows(ApiException.class, () ->
 				updateUserInfoService.updatePasswordByAuthentication(1L, dto)
@@ -182,9 +184,9 @@ class UpdateUserInfoServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
-			User user = User.builder().nickname("oldNickname").build();
-			ReflectionTestUtils.setField(user, "userId", 1L);
-			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			User exampleUser = User.builder().nickname("oldNickname").build();
+			ReflectionTestUtils.setField(exampleUser, "userId", 1L);
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(exampleUser));
 
 			updateUserInfoService.updateUserNickname(1L, "newNickname");
 
@@ -194,9 +196,9 @@ class UpdateUserInfoServiceTest {
 		@Test
 		@DisplayName("실패 - 기존 닉네임과 같을 경우")
 		void fail_1() {
-			User user = User.builder().nickname("sameNickname").build();
-			ReflectionTestUtils.setField(user, "userId", 1L);
-			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			User exampleUser = User.builder().nickname("sameNickname").build();
+			ReflectionTestUtils.setField(exampleUser, "userId", 1L);
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(exampleUser));
 
 			ApiException e = assertThrows(ApiException.class, () ->
 				updateUserInfoService.updateUserNickname(1L, "sameNickname"));
@@ -213,13 +215,13 @@ class UpdateUserInfoServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
-			User user = User.builder()
+			User exampleUser = User.builder()
 				.userName("oldName")
 				.roleId(1L)
 				.build();
-			ReflectionTestUtils.setField(user, "userId", 1L);
+			ReflectionTestUtils.setField(exampleUser, "userId", 1L);
 
-			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(exampleUser));
 			when(jwtService.generateAccessTokenAndRefreshToken(1L, "newName", 1L))
 				.thenReturn(new AuthTokenDto("access", "refresh"));
 
@@ -233,12 +235,12 @@ class UpdateUserInfoServiceTest {
 		@Test
 		@DisplayName("실패 - 기존 유저명과 같을 경우")
 		void fail_1() {
-			User user = User.builder()
+			User exampleUser = User.builder()
 				.userName("sameName")
 				.build();
-			ReflectionTestUtils.setField(user, "userId", 1L);
+			ReflectionTestUtils.setField(exampleUser, "userId", 1L);
 
-			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(exampleUser));
 
 			ApiException e = assertThrows(ApiException.class, () ->
 				updateUserInfoService.updateUserName(1L, "sameName"));
@@ -255,12 +257,12 @@ class UpdateUserInfoServiceTest {
 		@Test
 		@DisplayName("성공")
 		void success() {
-			User user = User.builder()
+			User exampleUser = User.builder()
 				.email("old@mail.com")
 				.build();
-			ReflectionTestUtils.setField(user, "userId", 1L);
+			ReflectionTestUtils.setField(exampleUser, "userId", 1L);
 
-			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(exampleUser));
 
 			DecodedJWT mockJwt = mock(DecodedJWT.class);
 			when(jwtService.verifyJwt("token")).thenReturn(mockJwt);
@@ -274,12 +276,12 @@ class UpdateUserInfoServiceTest {
 		@Test
 		@DisplayName("실패 - 기존 이메일과 같을 경우")
 		void fail_1() {
-			User user = User.builder()
+			User exampleUser = User.builder()
 				.email("same@mail.com")
 				.build();
-			ReflectionTestUtils.setField(user, "userId", 1L);
+			ReflectionTestUtils.setField(exampleUser, "userId", 1L);
 
-			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
+			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(exampleUser));
 
 			DecodedJWT mockJwt = mock(DecodedJWT.class);
 			when(jwtService.verifyJwt("token")).thenReturn(mockJwt);
@@ -291,5 +293,14 @@ class UpdateUserInfoServiceTest {
 			assertEquals(ErrorCode.BAD_REQUEST_SAME_UPDATE, e.getErrorCode());
 			verify(userMapper, never()).updateEmailByUserId(anyLong(), any());
 		}
+	}
+
+	@Test
+	void updateUserProfileImage_success() {
+		doNothing().when(userMapper).updateUserProfileImage(anyLong(), anyString());
+
+		updateUserInfoService.updateUserProfileImage(1L, "aaaa-bbbb");
+
+		verify(userMapper, times(1)).updateUserProfileImage(1L, "aaaa-bbbb");
 	}
 }

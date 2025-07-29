@@ -18,6 +18,7 @@ import com.trackery.trackerybackapiserver.domain.common.util.CookieUtil;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdateNicknameDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdatePasswordDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdateProfileImageDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdateUserNameDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.service.UpdateUserInfoService;
@@ -43,6 +44,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
  * 25. 7. 25.		durururuk		updateProfileImage 컨트롤러 코드 추가
  * 25. 7. 29.		durururuk		javaDoc 주석 작성
+ * 25. 7. 29.		durururuk		String으로 이미지명을 바로 받지 않고 DTO로 받게 수정
  */
 @Slf4j
 @RestController
@@ -148,15 +150,15 @@ public class UpdateUserInfoController {
 	/**
 	 * 프로필 이미지를 업데이트하는 API
 	 * @param userDetails 인증 정보
-	 * @param imageName 업데이트할 이미지명
+	 * @param updateProfileImageDto 업데이트할 이미지명을 담은 DTO
 	 * @return 공통 OK 포맷
 	 */
 	@PatchMapping("/profile-image")
 	public ResponseEntity<ApiResponse<Void>> updateProfileImage(
 		@AuthenticationPrincipal CustomUserDetails userDetails,
-		@Valid @RequestBody String imageName
+		@Valid @RequestBody UpdateProfileImageDto updateProfileImageDto
 	) {
-		updateUserInfoService.updateUserProfileImage(userDetails.getUserId(), imageName);
+		updateUserInfoService.updateUserProfileImage(userDetails.getUserId(), updateProfileImageDto.getImageName());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK));
 	}
 }
