@@ -52,6 +52,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 14.		inari		TagType enum에 추가하고 locationName 파라미터대신 sidoName, sigunguName으로 분리
  * 25. 7. 14.		inari		TagType에 따른 태그 정렬 추가
  * 25. 7. 15.		inari		ImageService에 있던 updateImageLocation, processTagRemoval, processTagAddition 각 도메인으로 이동
+ * 25. 7. 28.		inari		태그 카운트가 0일떄 자동 삭제 기능 제거
  */
 @Slf4j
 @Service
@@ -464,13 +465,6 @@ public class TagService {
 		// 태그 사용횟수 업데이트
 		tagMapper.decrementTagUseCount(tagId);
 		tagMapper.incrementTagUseCount(targetTag.getTagId());
-
-		// 기존 태그가 더 이상 사용되지 않으면 삭제 (CUSTOM 타입만)
-		Tag updatedOldTag = tagMapper.findTagById(tagId);
-		if (updatedOldTag != null && updatedOldTag.getTagUseCount() == 0
-			&& updatedOldTag.getTagType().equals(TagType.CUSTOM)) {
-			tagMapper.deleteUnusedTag(tagId);
-		}
 
 		// 업데이트된 새 태그 정보 반환
 		Tag finalTag = tagMapper.findTagById(targetTag.getTagId());
