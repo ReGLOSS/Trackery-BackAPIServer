@@ -74,6 +74,7 @@ import jakarta.servlet.http.Cookie;
  * 25. 6. 25.		inari		테스트 코드 추가
  * 25. 6. 26.		inari		탈퇴시 테스트코드 작성 및 문서화
  * 25. 6. 26.		inari		탈퇴시 서비스에서 컨트롤러로 쿠키삭제 처리 피드백 반영
+ * 25. 7. 30.		durururuk		프로필 이미지 관련 테스트 코드 수정
  */
 @WebMvcTest(UserController.class)
 class UserControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -217,7 +218,7 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 				.userId(1L).roleId(1L).build();
 
 			DetailedUserInfoDto dto = new DetailedUserInfoDto(1L, 1L,
-				"abcdefg", "김커피", "a@a.com", List.of(oAuth));
+				"abcdefg", "김커피", "a@a.com", null, List.of(oAuth));
 
 			when(userService.getDetailedUserInfoByUserId(1L)).thenReturn(dto);
 
@@ -245,6 +246,7 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 						fieldWithPath("data.userName").description("사용자명"),
 						fieldWithPath("data.nickname").description("닉네임"),
 						fieldWithPath("data.email").description("이메일"),
+						fieldWithPath("data.profileImageUrl").description("프로필 이미지 URL"),
 						fieldWithPath("data.OAuthList[].oauthId").description("OAuth ID"),
 						fieldWithPath("data.OAuthList[].userId").description("연결된 사용자 ID"),
 						fieldWithPath("data.OAuthList[].provider").description("OAuth 제공자"),

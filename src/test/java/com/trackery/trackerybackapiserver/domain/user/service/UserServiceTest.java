@@ -92,6 +92,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  * 25. 6. 26.		inari		탈퇴시 서비스에서 컨트롤러로 쿠키삭제 처리 피드백 반영
  * 25. 6. 27.		inari		테스트에 마지막 로그인 시간 추가
  * 25. 7. 1.		durururuk		변경된 서비스 로직에 맞게 테스트코드 수정
+ * 25. 7. 30.		durururuk		프로필 이미지 관련 테스트 코드 수정
  */
 @ExtendWith(MockitoExtension.class)
 class UserServiceTest {
@@ -269,7 +270,7 @@ class UserServiceTest {
 			when(oAuthMapper.findByUserId(1L)).thenReturn(List.of(oAuth));
 
 			DetailedUserInfoDto expect = new DetailedUserInfoDto(1L, 1L,
-				"abcdefg", "김커피", "a@a.com", List.of(oAuth));
+				"abcdefg", "김커피", "a@a.com", null, List.of(oAuth));
 
 			DetailedUserInfoDto result = userService.getDetailedUserInfoByUserId(1L);
 
@@ -301,7 +302,7 @@ class UserServiceTest {
 		@DisplayName("성공 - 프로필 사진이 업로드 돼있던 경우")
 		void success_1() {
 			when(userMapper.findByUserId(1L)).thenReturn(Optional.of(user));
-			when(imageS3Service.generatePreSignedGetUrl("profilePic-object-key", 1L, "original")).thenReturn("profilePic-Presigned-url");
+			when(imageS3Service.generatePreSignedGetUrl("profilePic-object-key", 1L, "thumbnail")).thenReturn("profilePic-Presigned-url");
 
 			UserProfileDto expect = new UserProfileDto(
 				1L,
@@ -318,7 +319,7 @@ class UserServiceTest {
 			assertEquals(expect.getUserProfilePic(), result.getUserProfilePic());
 
 			verify(userMapper, times(1)).findByUserId(1L);
-			verify(imageS3Service, times(1)).generatePreSignedGetUrl("profilePic-object-key", 1L, "original");
+			verify(imageS3Service, times(1)).generatePreSignedGetUrl("profilePic-object-key", 1L, "thumbnail");
 		}
 
 		@Test
