@@ -233,6 +233,20 @@ include::{snippets}/update-user-info-success/http-response.adoc[]
 include::{snippets}/update-user-info-success/response-fields.adoc[]
 '''
 
+=== 사용자 프로필 이미지 수정 API
+==== PATCH /api/users/me/profile-image
+
+사용자의 프로필 이미지를 업데이트 합니다.
+
+===== 요청
+include::{snippets}/update-profile-image/http-request.adoc[]
+include::{snippets}/update-profile-image/request-fields.adoc[]
+
+===== 응답
+include::{snippets}/update-profile-image/http-response.adoc[]
+include::{snippets}/update-profile-image/response-fields.adoc[]
+'''
+
 === 회원 탈퇴 API
 ==== DELETE /api/users/delete
 

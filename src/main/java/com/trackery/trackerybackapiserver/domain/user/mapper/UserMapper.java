@@ -42,6 +42,8 @@ import com.trackery.trackerybackapiserver.domain.user.entity.User;
  * 25. 6. 27.		inari		로그인시 마지막 로그인 갱신되도록 수정
  * 25. 7. 11.		inari		user 도메인의 자바독 누락 및 체크스타일 해결
  * 25. 7. 11.		inari		자바독 오류 해결 및 자바독 주입
+ * 25. 7. 25.		durururuk		updateUserProfileImage 메서드 추가
+ * 25. 7. 29.		durururuk		자바독 주석 추가
  */
 @Mapper
 public interface UserMapper {
@@ -68,7 +70,6 @@ public interface UserMapper {
 	 */
 	Optional<User> findByUserId(Long userId);
 
-
 	/**
 	 * 사용자 이메일로 사용자 정보를 조회합니다.
 	 *
@@ -76,7 +77,6 @@ public interface UserMapper {
 	 * @return 조회된 사용자 정보
 	 */
 	Optional<User> findByEmail(String email);
-
 
 	/**
 	 * 유저명으로 User를 찾아서 반환합니다.
@@ -148,4 +148,11 @@ public interface UserMapper {
 	void deleteUserByUserId(@Param("userId") Long userId, @Param("email") String email,
 		@Param("userName") String userName, @Param("nickname") String nickname,
 		@Param("password") String password, @Param("salt") String salt);
+
+	/**
+	 * 유저 프로필 이미지를 업데이트합니다.
+	 * @param userId 사용자 ID
+	 * @param imageName 새 이미지명
+	 */
+	void updateUserProfileImage(@Param("userId") Long userId, @Param("imageName") String imageName);
 }

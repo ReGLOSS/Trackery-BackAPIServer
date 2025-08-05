@@ -22,6 +22,7 @@ import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerT
 import com.trackery.trackerybackapiserver.domain.jwt.dto.AuthTokenDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdateNicknameDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdatePasswordDto;
+import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdateProfileImageDto;
 import com.trackery.trackerybackapiserver.domain.user.dto.update.UpdateUserNameDto;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.service.UpdateUserInfoService;
@@ -42,6 +43,7 @@ import jakarta.servlet.http.Cookie;
  * 25. 4. 14.		durururuk		사용되지 않는 변수 삭제
  * 25. 6. 17.		inari		user 도메인 테스트를 Spring-Rest-Docs에 맞게 리팩터링 및 문서 추가하였습니다.
  * 25. 6. 25.		inari		문서화 추가
+ * 25. 7. 29.		durururuk		updateProfileImage 컨트롤러 테스트 코드 작성
  */
 @WebMvcTest(UpdateUserInfoController.class)
 class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -230,7 +232,7 @@ class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
 				.updateEmail(1L, "test-email-token");
 		}
 	}
-	
+
 	@Nested
 	@DisplayName("사용자 정보 수정 API MockMvc 테스트")
 	class UpdateUserInfoTest {
@@ -261,5 +263,31 @@ class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			verify(updateUserInfoService, times(1)).updateUserNickname(anyLong(), any());
 		}
+	}
+
+	@Test
+	void updateProfileImageTest() throws Exception {
+		doNothing().when(updateUserInfoService).updateUserProfileImage(1L, "aaaa-bbbb");
+		UpdateProfileImageDto updateProfileImageDto = new UpdateProfileImageDto();
+		ReflectionTestUtils.setField(updateProfileImageDto, "imageName", "aaaa-bbbb");
+
+		ResultActions result = mockMvc.perform(patch("/api/users/me/profile-image")
+			.contentType(MediaType.APPLICATION_JSON)
+			.content(objectMapper.writeValueAsString(updateProfileImageDto))
+			.with(user(customUserDetails)));
+
+		result
+			.andExpect(status().isOk());
+
+		result.andDo(document("update-profile-image",
+			requestFields(
+				fieldWithPath("imageName").description("업데이트 할 이미지명")
+			),
+			responseFields(
+				fieldWithPath("code").description("상태 코드"),
+				fieldWithPath("message").description("응답 메시지")
+			)));
+
+		verify(updateUserInfoService, times(1)).updateUserProfileImage(1L, "aaaa-bbbb");
 	}
 }
