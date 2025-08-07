@@ -51,13 +51,13 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 2. 17.		durururuk		userName -> username 오타 수정
  * 25. 2. 17.		durururuk		username 중복 체크 SQL count(*) -> EXISTS()로 수정
  * 25. 2. 17.		durururuk		Java 컨벤션에 맞게 username -> userName 수정
- * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 18.		inari			dev 병합후 랜딩페이지 엔드포인트 수정
  * 25. 2. 19.		durururuk		회원가입 시 UserRole에 기본값 인서트되게 기능 추가
  * 25. 2. 20.		durururuk		회원가입 시 JWT를 담은 헤더를 같이 반환하도록 추가
  * 25. 2. 21.		durururuk		사용자명 중복체크 메서드명 더 명확하게 수정, 반대로 작동하던 로직 수정
  * 25. 2. 21.		durururuk		사용자명 중복체크 예외 처리 추가
  * 25. 2. 21.		durururuk		중복체크 실패 시 예외처리 -> data : false로 다시 변경
- * 25. 2. 24.		inari		자바독 주석 추가
+ * 25. 2. 24.		inari			자바독 주석 추가
  * 25. 2. 24.		durururuk		회원가입 시 인증 헤더 -> http-only 쿠키 방식으로 변경
  * 25. 2. 25.		durururuk		로그인 서비스, 컨트롤러 추가
  * 25. 2. 26.		durururuk		로그인 서비스 단위테스트 작성
@@ -89,16 +89,18 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 4. 10.		durururuk		이메일 기반 비밀번호 변경 변경된 로직에 맞게 테스트 코드 수정
  * 25. 4. 12.		durururuk		닉네임 변경 기능 구현
  * 25. 4. 12.		durururuk		유저명 변경 기능 구현
- * 25. 4. 28.		inari		완성
+ * 25. 4. 28.		inari			완성
  * 25. 4. 29.		durururuk		유저 프로필 조회 기능에서 프로필사진 객체명이 아닌 s3 presigned url을 요청해서 반환합니다.
  * 25. 6. 19.		durururuk		기존 액세스 토큰의 시간 1시간을 그대로 가져오던 이메일 인증 토큰, 유저명 중복 확인 토큰을 각각 처리하게 수정
- * 25. 6. 25.		inari		로그아웃 기능 추가
- * 25. 6. 26.		inari		회원 탈퇴 기능 작성
- * 25. 6. 26.		inari		탈퇴시 간편로그인 삭제
- * 25. 6. 26.		inari		탈퇴시 서비스에서 컨트롤러로 쿠키삭제 처리 피드백 반영
- * 25. 6. 27.		inari		로그인시 마지막 로그인 갱신되도록 수정
+ * 25. 6. 25.		inari			로그아웃 기능 추가
+ * 25. 6. 26.		inari			회원 탈퇴 기능 작성
+ * 25. 6. 26.		inari			탈퇴시 간편로그인 삭제
+ * 25. 6. 26.		inari			탈퇴시 서비스에서 컨트롤러로 쿠키삭제 처리 피드백 반영
+ * 25. 6. 27.		inari			로그인시 마지막 로그인 갱신되도록 수정
  * 25. 7. 1.		durururuk		다른 서비스 클래스에서도 변경된 로직에 맞게끔 수정
  * 25. 7. 30.		durururuk		프로필 이미지 관련 null 체크 추가
+ * 25. 8. 7.		inari			아이디 유효성 체크 추가
+ * 25. 8. 7.		inari			중복 코드 제거
  */
 @Slf4j
 @Service
@@ -285,12 +287,6 @@ public class UserService {
 
 		oAuthMapper.deleteByUserId(userId);
 
-		DecodedJWT decodedAccessToken = jwtService.verifyJwt(accessToken);
-		String jti = decodedAccessToken.getId();
-		long expirationTime = decodedAccessToken.getExpiresAt().getTime() / 1000 - System.currentTimeMillis() / 1000;
-		if (expirationTime > 0) {
-			jwtRedisService.addAccessTokenToBlacklist(jti, expirationTime);
-		}
-		jwtRedisService.deleteRefreshToken(refreshToken);
+		logout(accessToken, refreshToken);
 	}
 }

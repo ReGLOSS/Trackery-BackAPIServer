@@ -58,6 +58,10 @@ public enum ErrorCode {
 	 */
 	BAD_REQUEST(HttpStatus.BAD_REQUEST, 400, "Bad Request"),
 	/**
+	 * 유효하지 않은 입력값 (HttpStatus.BAD_REQUEST, 400, "유저명은 4~15자 길이에 영문 대소문자, 숫자, 밑줄(_)로 작성해주세요.")
+	 */
+	INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, 400, "유저명은 4~15자 길이에 영문 대소문자, 숫자, 밑줄(_)로 작성해주세요."),
+	/**
 	 * 인증되지 않은 요청 (HttpStatus.UNAUTHORIZED, 401, "Unauthorized")
 	 */
 	UNAUTHORIZED(HttpStatus.UNAUTHORIZED, 401, "Unauthorized"),
