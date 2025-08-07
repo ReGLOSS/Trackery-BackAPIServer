@@ -99,6 +99,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 27.		inari			로그인시 마지막 로그인 갱신되도록 수정
  * 25. 7. 1.		durururuk		다른 서비스 클래스에서도 변경된 로직에 맞게끔 수정
  * 25. 8. 7.		inari			아이디 유효성 체크 추가
+ * 25. 8. 7.		inari			중복 코드 제거
  */
 @Slf4j
 @Service
@@ -287,12 +288,6 @@ public class UserService {
 
 		oAuthMapper.deleteByUserId(userId);
 
-		DecodedJWT decodedAccessToken = jwtService.verifyJwt(accessToken);
-		String jti = decodedAccessToken.getId();
-		long expirationTime = decodedAccessToken.getExpiresAt().getTime() / 1000 - System.currentTimeMillis() / 1000;
-		if (expirationTime > 0) {
-			jwtRedisService.addAccessTokenToBlacklist(jti, expirationTime);
-		}
-		jwtRedisService.deleteRefreshToken(refreshToken);
+		logout(accessToken, refreshToken);
 	}
 }
