@@ -48,7 +48,7 @@ import jakarta.servlet.http.Cookie;
  * 25. 2. 14.		durururuk		UserController 성공 케이스 테스트 코드 작성
  * 25. 2. 17.		durururuk		Java 컨벤션에 맞게 username -> userName 수정
  * 25. 2. 17.		durururuk		클래스 JavaDoc 설명 추가
- * 25. 2. 18.		inari		dev 병합후 랜딩페이지 엔드포인트 수정
+ * 25. 2. 18.		inari			dev 병합후 랜딩페이지 엔드포인트 수정
  * 25. 2. 19.		durururuk		MockMvc 테스트코드 작성을 도와주는 추상 클래스 추가
  * 25. 2. 19.		durururuk		코딩 컨벤션에 맞게 정리
  * 25. 2. 19.		durururuk		테스트 하고자 하는 컨트롤러만 로드하게 수정
@@ -70,10 +70,11 @@ import jakarta.servlet.http.Cookie;
  * 25. 4. 10.		durururuk		final이 될 수 있는 변수 final화, 로직 수정으로 사용되지 않는 메서드 삭제
  * 25. 4. 12.		durururuk		유저명 변경 기능 구현
  * 25. 4. 14.		durururuk		UpdateUserInfo Controller, Serivce 단위테스트 작성
- * 25. 6. 17.		inari		user 도메인 테스트를 Spring-Rest-Docs에 맞게 리팩터링 및 문서 추가하였습니다.
- * 25. 6. 25.		inari		테스트 코드 추가
- * 25. 6. 26.		inari		탈퇴시 테스트코드 작성 및 문서화
- * 25. 6. 26.		inari		탈퇴시 서비스에서 컨트롤러로 쿠키삭제 처리 피드백 반영
+ * 25. 6. 17.		inari			user 도메인 테스트를 Spring-Rest-Docs에 맞게 리팩터링 및 문서 추가하였습니다.
+ * 25. 6. 25.		inari			테스트 코드 추가
+ * 25. 6. 26.		inari			탈퇴시 테스트코드 작성 및 문서화
+ * 25. 6. 26.		inari			탈퇴시 서비스에서 컨트롤러로 쿠키삭제 처리 피드백 반영
+ * 25. 8. 7.		inari			중복체크 실패 테스트 코드 추가
  */
 @WebMvcTest(UserController.class)
 class UserControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -147,6 +148,30 @@ class UserControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(cookie().value("userNameToken", "jwt"))
 			.andExpect(jsonPath("$.data").value(true))
 			.andDo(document("check-username-availability-success",
+				queryParameters(
+					parameterWithName("value").description("확인할 사용자명")
+				),
+				responseFields(
+					fieldWithPath("code").description("상태 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("사용자명 사용 가능 여부")
+				)
+			));
+	}
+
+	@Test
+	void 유저명_중복체크_실패() throws Exception {
+		UserNameAvailabilityResponseDto dto = new UserNameAvailabilityResponseDto(false, null);
+		when(userService.checkUsernameAvailability(anyString())).thenReturn(dto);
+
+		ResultActions result = mockMvc
+			.perform(get("/api/users/exists/username")
+				.queryParam("value", "existinguser"));
+
+		result.andExpect(status().isOk())
+			.andExpect(cookie().doesNotExist("userNameToken"))
+			.andExpect(jsonPath("$.data").value(false))
+			.andDo(document("check-username-availability-failure",
 				queryParameters(
 					parameterWithName("value").description("확인할 사용자명")
 				),
