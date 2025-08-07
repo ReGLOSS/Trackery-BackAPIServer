@@ -181,33 +181,6 @@ class UserServiceTest {
 	}
 
 	@Test
-	void 유저명_유효성_검사_실패_너무_짧음() {
-		ApiException exception = assertThrows(ApiException.class, () -> {
-			userService.checkUsernameAvailability("ab");
-		});
-		assertEquals(ErrorCode.INVALID_INPUT_VALUE, exception.getErrorCode());
-		verify(userMapper, never()).isExistsUserName(anyString());
-	}
-
-	@Test
-	void 유저명_유효성_검사_실패_너무_김() {
-		ApiException exception = assertThrows(ApiException.class, () -> {
-			userService.checkUsernameAvailability("abcdefghijklmnop");
-		});
-		assertEquals(ErrorCode.INVALID_INPUT_VALUE, exception.getErrorCode());
-		verify(userMapper, never()).isExistsUserName(anyString());
-	}
-
-	@Test
-	void 유저명_유효성_검사_실패_특수문자_포함() {
-		ApiException exception = assertThrows(ApiException.class, () -> {
-			userService.checkUsernameAvailability("abcd@");
-		});
-		assertEquals(ErrorCode.INVALID_INPUT_VALUE, exception.getErrorCode());
-		verify(userMapper, never()).isExistsUserName(anyString());
-	}
-
-	@Test
 	void 로그인_테스트() {
 		ReflectionTestUtils.setField(loginDto, "userName", "abcdfg");
 		ReflectionTestUtils.setField(loginDto, "password", "Qwerasdf1234!");

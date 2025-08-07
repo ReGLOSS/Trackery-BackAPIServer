@@ -182,10 +182,6 @@ public class UserService {
 	 * @return : boolean, jwt 토큰을 담은 DTO
 	 */
 	public UserNameAvailabilityResponseDto checkUsernameAvailability(String userName) {
-		if (!userName.matches("^\\w{4,15}$")) {
-			throw new ApiException(ErrorCode.INVALID_INPUT_VALUE);
-		}
-		
 		if (!userMapper.isExistsUserName(userName)) {
 			String jwt = jwtService.generateTokenWithSubject(userName, JwtExpirationTime.USER_NAME_VERIFICATION_TOKEN);
 			return new UserNameAvailabilityResponseDto(true, jwt);
