@@ -7,10 +7,8 @@
     <resultMap id="ImageMap" type="com.trackery.trackerybackapiserver.domain.image.entity.Image">
         <id property="imageId" column="image_id"/>
         <result property="imageName" column="image_name"/>
-        <result property="imageFile" column="image_file"/>
         <result property="isPublic" column="is_public"/>
         <result property="isDeleted" column="is_deleted"/>
-        <result property="imageType" column="image_type"/>
         <result property="imageContent" column="image_contents"/>
         <result property="imageDate" column="image_date"/>
         <result property="imageRegDate" column="image_reg_date"/>
@@ -36,7 +34,7 @@
 
     <!-- 랜딩페이지에서 쓸 공개되어있고 삭제되지 않은 이미지 주소를 무작위로 30개 가져오는 쿼리 -->
     <select id="selectPublicImageFiles" resultType="string">
-        SELECT image_file
+        SELECT image_name
         FROM image
         WHERE is_deleted = 0
           AND is_public = 1
@@ -47,20 +45,16 @@
     <insert id="insertImage" parameterType="com.trackery.trackerybackapiserver.domain.image.entity.Image"
             useGeneratedKeys="true" keyProperty="imageId">
         INSERT INTO image (image_name,
-                           image_file,
                            is_public,
                            is_deleted,
-                           image_type,
                            image_contents,
                            image_date,
                            image_reg_date,
                            coord_point_id,
                            user_id)
         VALUES (#{imageName},
-                #{imageFile},
                 #{isPublic},
                 #{isDeleted},
-                #{imageType},
                 #{imageContent},
                 #{imageDate},
                 #{imageRegDate},
@@ -109,10 +103,8 @@
         SELECT 
             i.image_id,
             i.image_name,
-            i.image_file,
             i.is_public,
             i.is_deleted,
-            i.image_type,
             i.image_contents,
             i.image_date,
             i.image_reg_date,
@@ -142,10 +134,8 @@
         SELECT 
             i.image_id,
             i.image_name,
-            i.image_file,
             i.is_public,
             i.is_deleted,
-            i.image_type,
             i.image_contents,
             i.image_date,
             i.image_reg_date,
@@ -191,6 +181,14 @@
         SET is_deleted = 1
         WHERE image_id = #{imageId}
           AND is_deleted = 0
+    </update>
+
+    <!-- 이미지 처리 상태 변경 -->
+    <update id="changeImageProcessingStatus">
+        UPDATE image
+        SET processing_status = #{processingStatus}
+        WHERE image_name = #{imageName}
+        AND is_deleted = 0
     </update>
 
 </mapper>

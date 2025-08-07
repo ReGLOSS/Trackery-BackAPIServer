@@ -369,4 +369,8 @@ public class ImageService {
 			throw e;
 		}
 	}
+
+	public void changeImageProcessingStatus(String imageName, int processingStatus) {
+		imageMapper.changeImageProcessingStatus(imageName, processingStatus);
+	}
 }

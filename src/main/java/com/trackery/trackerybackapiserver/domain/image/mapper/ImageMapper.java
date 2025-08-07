@@ -102,4 +102,13 @@ public interface ImageMapper {
 	 * @return 삭제된 행의 수
 	 */
 	int deleteImage(@Param("imageId") Long imageId);
+
+	/**
+	 * 이미지 변환 처리 상태를 변경합니다. (0 : 처리중, 1 : 처리 완료)
+	 * @param imageName 이미지 이름(확장자를 제거한 UUID)
+	 * @param processingStatus 변경될 이미지 변환 처리 상태
+	 * @return 성공 시 1, 실패 시 0
+	 */
+	int changeImageProcessingStatus(@Param("imageName") String imageName,
+		@Param("processingStatus") int processingStatus);
 }
