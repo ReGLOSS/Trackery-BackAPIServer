@@ -30,6 +30,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 
 /**
@@ -153,7 +154,10 @@ public class UserController {
 	 * @return : 유저명 토큰과 boolean 값을 담은 응답
 	 */
 	@GetMapping("/exists/username")
-	public ResponseEntity<ApiResponse<Boolean>> checkUsernameAvailability(@RequestParam String value) {
+	public ResponseEntity<ApiResponse<Boolean>> checkUsernameAvailability(
+		@RequestParam
+		@Pattern(regexp = "^\\w{4,15}$",
+			message = "유저명은 4~15자 길이에 영문 대소문자, 숫자, 밑줄(_)로 작성해주세요.") String value) {
 		UserNameAvailabilityResponseDto result = userService.checkUsernameAvailability(value);
 
 		if (result.available()) {

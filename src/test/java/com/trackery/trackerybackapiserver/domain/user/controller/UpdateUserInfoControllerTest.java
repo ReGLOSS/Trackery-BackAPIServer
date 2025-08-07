@@ -2,8 +2,8 @@ package com.trackery.trackerybackapiserver.domain.user.controller;
 
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
+import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.*;
-import static org.springframework.restdocs.mockmvc.MockMvcRestDocumentation.document;
 import static org.springframework.restdocs.payload.PayloadDocumentation.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -41,9 +41,10 @@ import jakarta.servlet.http.Cookie;
  * 25. 4. 14.		durururuk		최초 생성
  * 25. 4. 14.		durururuk		UpdateUserInfo Controller, Serivce 단위테스트 작성
  * 25. 4. 14.		durururuk		사용되지 않는 변수 삭제
- * 25. 6. 17.		inari		user 도메인 테스트를 Spring-Rest-Docs에 맞게 리팩터링 및 문서 추가하였습니다.
- * 25. 6. 25.		inari		문서화 추가
+ * 25. 6. 17.		inari			user 도메인 테스트를 Spring-Rest-Docs에 맞게 리팩터링 및 문서 추가하였습니다.
+ * 25. 6. 25.		inari			문서화 추가
  * 25. 7. 29.		durururuk		updateProfileImage 컨트롤러 테스트 코드 작성
+ * 25. 8. 7.		inari			아이디 조건 테스트코드 수정
  */
 @WebMvcTest(UpdateUserInfoController.class)
 class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -101,7 +102,7 @@ class UpdateUserInfoControllerTest extends CommonMockMvcControllerTestSetUp {
 		@Test
 		@DisplayName("성공")
 		void success() throws Exception {
-			String newUserName = "새 유저명";
+			String newUserName = "newusername";
 			UpdateUserNameDto dto = new UpdateUserNameDto();
 			ReflectionTestUtils.setField(dto, "userName", newUserName);
 

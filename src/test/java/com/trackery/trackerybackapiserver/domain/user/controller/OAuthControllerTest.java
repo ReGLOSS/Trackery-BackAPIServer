@@ -533,4 +533,43 @@ class OAuthControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(jsonPath("$.data.existingEmail").value(false))
 			.andExpect(jsonPath("$.data.newUser").value(true));
 	}
+
+	@Test
+	@DisplayName("네이버 직접 linkToken 파라미터로 연동 성공")
+	void 네이버_직접_linkToken_파라미터로_연동_성공() throws Exception {
+		// given
+		final String AUTH_CODE = "auth_code";
+		final String LINK_TOKEN = "valid-link-token";
+		final Long USER_ID = 1L;
+		final String JWT = "jwt_token";
+
+		OAuthResponseDto responseDto = OAuthResponseDto.builder()
+			.isExistingEmail(false)
+			.isNewUser(false)
+			.build();
+
+		AuthTokenDto authTokenDto = new AuthTokenDto(JWT, "refresh_token");
+		OAuthService.OAuthLoginResult result = new OAuthService.OAuthLoginResult(responseDto, JWT, authTokenDto);
+
+		when(oAuthLinkTokenService.validateToken(LINK_TOKEN)).thenReturn(USER_ID);
+		when(oAuthService.processOAuthLogin(any(OAuthLoginDto.class))).thenReturn(result);
+
+		// when
+		ResultActions resultActions = mockMvc
+			.perform(get("/api/users/oauth/login/naver")
+				.queryParam("code", AUTH_CODE)
+				.queryParam("linkToken", LINK_TOKEN)
+				.contentType(MediaType.APPLICATION_JSON));
+
+		// then
+		resultActions
+			.andExpect(status().isOk())
+			.andExpect(cookie().exists("accessToken"))
+			.andExpect(cookie().value("accessToken", JWT))
+			.andExpect(jsonPath("$.data.existingEmail").value(false))
+			.andExpect(jsonPath("$.data.newUser").value(false));
+
+		verify(oAuthLinkTokenService).validateToken(LINK_TOKEN);
+		verify(oAuthLinkTokenService).deleteToken(LINK_TOKEN);
+	}
 }
