@@ -44,6 +44,7 @@ public class SqsMessageConsumer {
 
 	@Async
 	@EventListener(ApplicationReadyEvent.class)
+	@SuppressWarnings("BusyWait")
 	public void consumeMessage() throws InterruptedException {
 		log.info("SQS 메시지 컨슈머 시작");
 
