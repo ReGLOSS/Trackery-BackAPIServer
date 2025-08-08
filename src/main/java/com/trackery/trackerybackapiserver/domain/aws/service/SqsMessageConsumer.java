@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trackery.trackerybackapiserver.domain.aws.dto.ImageProcessedMessage;
+import com.trackery.trackerybackapiserver.domain.common.service.SseService;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 
 import lombok.RequiredArgsConstructor;
@@ -38,6 +39,7 @@ public class SqsMessageConsumer {
 	private final SqsClient sqsClient;
 	private final ObjectMapper objectMapper;
 	private final ImageService imageService;
+	private final SseService sseService;
 
 	@Value("${aws.sqs.queue-url}")
 	private String queueUrl;
@@ -82,8 +84,11 @@ public class SqsMessageConsumer {
 				processedMessage.getOriginalKey(), processedMessage.getProcessedKey(),
 				processedMessage.getThumbnailKey(), processedMessage.getImageName());
 
-			//DB 업데이트, 클라이언트에 전달
+			//DB 업데이트
 			imageService.changeImageProcessingStatus(processedMessage.getImageName(), 1);
+
+			//SSE로 클라이언트에 실시간 알림 전송
+			sseService.sendImageProcessedEvent(processedMessage.getUserId(), processedMessage);
 
 		} catch (Exception e) {
 			log.error("SQS 메시지 처리 실패: {}", message.messageId(), e);

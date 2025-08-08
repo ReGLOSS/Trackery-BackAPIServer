@@ -23,7 +23,7 @@ import lombok.NoArgsConstructor;
 public class ImageProcessedMessage {
 	private MessageType type;
 	private String batchId;
-	private String userId;
+	private Long userId;
 	private String originalKey;
 	private String processedKey;
 	private String thumbnailKey;
