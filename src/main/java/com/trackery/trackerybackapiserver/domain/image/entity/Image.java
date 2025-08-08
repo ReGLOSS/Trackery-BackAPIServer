@@ -46,11 +46,6 @@ public class Image {
 	private String imageName;
 
 	/**
-	 * 이미지의 S3 버킷 Key입니다.
-	 */
-	private String imageFile;
-
-	/**
 	 * 이미지의 공개여부입니다. (1: 공개, 0: 비공개)
 	 */
 	private Integer isPublic;
@@ -59,11 +54,6 @@ public class Image {
 	 * 이미지의 삭제여부입니다. (true: 공개, false: 비공개)
 	 */
 	private Boolean isDeleted;
-
-	/**
-	 * 이미지의 확장자입니다.
-	 */
-	private String imageType;
 
 	/**
 	 * 이미지의 설명입니다.
@@ -87,14 +77,12 @@ public class Image {
 
 	@Builder
 	@SuppressWarnings("java:S107")
-	public Image(CoordinatePoint coordPoint, String imageName, String imageFile, Integer isPublic, Boolean isDeleted,
-		String imageType, String imageContent, LocalDateTime imageDate, LocalDateTime imageRegDate, Long userId) {
+	public Image(CoordinatePoint coordPoint, String imageName, Integer isPublic, Boolean isDeleted, String imageContent,
+		LocalDateTime imageDate, LocalDateTime imageRegDate, Long userId) {
 		this.coordPoint = coordPoint;
 		this.imageName = imageName;
-		this.imageFile = imageFile;
 		this.isPublic = isPublic;
 		this.isDeleted = isDeleted;
-		this.imageType = imageType;
 		this.imageContent = imageContent;
 		this.imageDate = imageDate;
 		this.imageRegDate = imageRegDate;

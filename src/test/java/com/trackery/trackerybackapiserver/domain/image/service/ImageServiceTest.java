@@ -178,10 +178,8 @@ class ImageServiceTest {
 			testImage1 = Image.builder()
 				.coordPoint(coordPoint)
 				.imageName("테스트 이미지")
-				.imageFile("images/test.jpg")
 				.isPublic(1)
 				.isDeleted(false)
-				.imageType("jpg")
 				.imageContent("테스트 이미지 설명")
 				.imageDate(LocalDateTime.now())
 				.imageRegDate(LocalDateTime.now())
@@ -291,7 +289,6 @@ class ImageServiceTest {
 		void getOriginalImageByImageId_forbidden() {
 			Image privateImage = Image.builder()
 				.imageName("비공개 이미지")
-				.imageFile("images/private.jpg")
 				.isPublic(0)
 				.userId(2L) // 다른 사용자
 				.build();
@@ -313,7 +310,6 @@ class ImageServiceTest {
 			Image publicImage = Image.builder()
 				.coordPoint(testImage1.getCoordPoint())
 				.imageName("공개 이미지")
-				.imageFile("images/public.jpg")
 				.isPublic(1)
 				.userId(2L) // 다른 사용자
 				.imageContent("공개 이미지 설명")
@@ -349,7 +345,6 @@ class ImageServiceTest {
 			Long sidoId = 11L;
 			Image testImage = Image.builder()
 				.imageName("테스트 이미지")
-				.imageFile("images/test.jpg")
 				.userId(testUserId)
 				.build();
 			Long testImageId = 5L;
@@ -396,7 +391,6 @@ class ImageServiceTest {
 			Long sigunguId = 11200L;
 			Image testImage = Image.builder()
 				.imageName("테스트 이미지")
-				.imageFile("images/test.jpg")
 				.userId(testUserId)
 				.build();
 			Long testImageId = 5L;
@@ -506,7 +500,6 @@ class ImageServiceTest {
 			existingImage = Image.builder()
 				.coordPoint(coordPoint)
 				.imageName("기존 이미지")
-				.imageFile("images/test.jpg")
 				.imageContent("기존 설명")
 				.isPublic(0)
 				.userId(userId)
