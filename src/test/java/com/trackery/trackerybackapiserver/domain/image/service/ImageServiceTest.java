@@ -93,19 +93,14 @@ class ImageServiceTest {
 	@DisplayName("공개 이미지 URL 목록을 정상적으로 조회하는지 테스트")
 	void getPublicImageUrls_ShouldReturnImageUrls() {
 		// Given
-		List<String> expectedUrls = Arrays.asList(
-			"http://example.com/image1.jpg",
-			"http://example.com/image2.jpg"
-		);
+		List<String> expectedUrls = Arrays.asList("http://example.com/image1.jpg", "http://example.com/image2.jpg");
 		when(imageMapper.selectPublicImageFiles()).thenReturn(expectedUrls);
 
 		// When
 		List<String> actualUrls = imageService.getPublicImageUrls();
 
 		// Then
-		assertThat(actualUrls).isNotNull()
-			.hasSize(2)
-			.containsExactlyElementsOf(expectedUrls);
+		assertThat(actualUrls).isNotNull().hasSize(2).containsExactlyElementsOf(expectedUrls);
 		verify(imageMapper).selectPublicImageFiles();
 	}
 
@@ -116,8 +111,7 @@ class ImageServiceTest {
 		when(imageMapper.selectPublicImageFiles()).thenReturn(null);
 
 		// When & Then
-		assertThatThrownBy(() -> imageService.getPublicImageUrls())
-			.isInstanceOf(ApiException.class)
+		assertThatThrownBy(() -> imageService.getPublicImageUrls()).isInstanceOf(ApiException.class)
 			.hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_IMAGE);
 
 		verify(imageMapper).selectPublicImageFiles();
@@ -165,7 +159,8 @@ class ImageServiceTest {
 
 			Coordinate coordinate = new Coordinate(127.0495556, 37.5398056);
 			PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
-			org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory(precisionModel, 4326);
+			org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory(
+				precisionModel, 4326);
 			Point testPoint = geometryFactory.createPoint(coordinate);
 
 			CoordinatePoint coordPoint = new CoordinatePoint();
@@ -193,7 +188,7 @@ class ImageServiceTest {
 		@Test
 		@DisplayName("이미지 ID로 단건 조회 테스트 - 성공")
 		void getOriginalImageByImageId_success() {
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "original")).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("original"))).thenReturn(
 				testPresignedUrl);
 			when(imageMapper.findImageByImageId(5L)).thenReturn(Optional.of(testImage1));
 
@@ -247,7 +242,7 @@ class ImageServiceTest {
 				ReflectionTestUtils.setField(thumbnailDto, "imageName", testImage1.getImageName());
 
 				when(imageMapper.findImageThumbnailsByUserId(searchDto)).thenReturn(List.of(thumbnailDto));
-				when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "thumbnail")).thenReturn(
+				when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("thumbnail"))).thenReturn(
 					testPresignedUrl);
 
 				PageInfo<ImageThumbnailDto> pageInfo = imageService.getImageListByUserId(searchDto);
@@ -287,18 +282,14 @@ class ImageServiceTest {
 		@Test
 		@DisplayName("실패 - 권한 없음 (비공개 이미지)")
 		void getOriginalImageByImageId_forbidden() {
-			Image privateImage = Image.builder()
-				.imageName("비공개 이미지")
-				.isPublic(0)
-				.userId(2L) // 다른 사용자
+			Image privateImage = Image.builder().imageName("비공개 이미지").isPublic(0).userId(2L) // 다른 사용자
 				.build();
 			ReflectionTestUtils.setField(privateImage, "imageId", testImageId);
 
 			when(imageMapper.findImageByImageId(testImageId)).thenReturn(Optional.of(privateImage));
 
-			assertThatThrownBy(() -> imageService.getOriginalImageByImageId(testUserId, testImageId))
-				.isInstanceOf(ApiException.class)
-				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN);
+			assertThatThrownBy(() -> imageService.getOriginalImageByImageId(testUserId, testImageId)).isInstanceOf(
+				ApiException.class).hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN);
 
 			verify(imageMapper).findImageByImageId(testImageId);
 			verify(imageS3Service, never()).generatePreSignedGetUrl(anyString(), any(), anyString());
@@ -319,7 +310,7 @@ class ImageServiceTest {
 			ReflectionTestUtils.setField(publicImage, "imageId", testImageId);
 
 			when(imageMapper.findImageByImageId(testImageId)).thenReturn(Optional.of(publicImage));
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "original")).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("original"))).thenReturn(
 				testPresignedUrl);
 
 			ImageDto result = imageService.getOriginalImageByImageId(testUserId, testImageId);
@@ -343,16 +334,13 @@ class ImageServiceTest {
 		@DisplayName("성공 - 시도별 이미지 목록 반환")
 		void getImagesBySido_success() {
 			Long sidoId = 11L;
-			Image testImage = Image.builder()
-				.imageName("테스트 이미지")
-				.userId(testUserId)
-				.build();
+			Image testImage = Image.builder().imageName("테스트 이미지").userId(testUserId).build();
 			Long testImageId = 5L;
 			ReflectionTestUtils.setField(testImage, "imageId", testImageId);
 
 			when(imageMapper.findImagesBySidoIdAndUserId(sidoId, testUserId)).thenReturn(List.of(testImage));
 			String testPresignedUrl = "testPresignedUrl";
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "thumbnail")).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("thumbnail"))).thenReturn(
 				testPresignedUrl);
 
 			List<ImageThumbnailDto> result = imageService.getImagesBySido(sidoId, testUserId);
@@ -389,16 +377,13 @@ class ImageServiceTest {
 		@DisplayName("성공 - 시군구별 이미지 목록 반환")
 		void getImagesBySigungu_success() {
 			Long sigunguId = 11200L;
-			Image testImage = Image.builder()
-				.imageName("테스트 이미지")
-				.userId(testUserId)
-				.build();
+			Image testImage = Image.builder().imageName("테스트 이미지").userId(testUserId).build();
 			Long testImageId = 5L;
 			ReflectionTestUtils.setField(testImage, "imageId", testImageId);
 
 			when(imageMapper.findImagesBySigunguIdAndUserId(sigunguId, testUserId)).thenReturn(List.of(testImage));
 			String testPresignedUrl = "testPresignedUrl";
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "thumbnail")).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("thumbnail"))).thenReturn(
 				testPresignedUrl);
 
 			List<ImageThumbnailDto> result = imageService.getImagesBySigungu(sigunguId, testUserId);
@@ -435,15 +420,12 @@ class ImageServiceTest {
 		@DisplayName("성공 - S3 Presigned URL 반환")
 		void fetchS3PresignedUrlByImageId_success() {
 			Long testUserId = 1L;
-			Image testImage = Image.builder()
-				.imageName("테스트 이미지")
-				.userId(testUserId)
-				.build();
+			Image testImage = Image.builder().imageName("테스트 이미지").userId(testUserId).build();
 			ReflectionTestUtils.setField(testImage, "imageId", testImageId);
 
 			when(imageMapper.findImageByImageId(testImageId)).thenReturn(Optional.of(testImage));
 			String testPresignedUrl = "testPresignedUrl";
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "original")).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("original"))).thenReturn(
 				testPresignedUrl);
 
 			String result = imageService.fetchS3PresignedUrlByImageId(testImageId);
@@ -458,9 +440,8 @@ class ImageServiceTest {
 		void fetchS3PresignedUrlByImageId_imageNotFound() {
 			when(imageMapper.findImageByImageId(testImageId)).thenReturn(Optional.empty());
 
-			assertThatThrownBy(() -> imageService.fetchS3PresignedUrlByImageId(testImageId))
-				.isInstanceOf(ApiException.class)
-				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_IMAGE);
+			assertThatThrownBy(() -> imageService.fetchS3PresignedUrlByImageId(testImageId)).isInstanceOf(
+				ApiException.class).hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_IMAGE);
 
 			verify(imageMapper).findImageByImageId(testImageId);
 			verify(imageS3Service, never()).generatePreSignedGetUrl(anyString(), any(), anyString());
@@ -488,7 +469,8 @@ class ImageServiceTest {
 
 			Coordinate coordinate = new Coordinate(127.0495556, 37.5398056);
 			PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
-			org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory(precisionModel, 4326);
+			org.locationtech.jts.geom.GeometryFactory geometryFactory = new org.locationtech.jts.geom.GeometryFactory(
+				precisionModel, 4326);
 			Point testPoint = geometryFactory.createPoint(coordinate);
 
 			CoordinatePoint coordPoint = new CoordinatePoint();
@@ -517,13 +499,12 @@ class ImageServiceTest {
 				.build();
 
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
-			when(imageMapper.updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", null, 1))
-				.thenReturn(1);
-			doNothing().when(locationService).updateImageLocation(1L, null, null, imageId);
+			when(imageMapper.updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", null, 1)).thenReturn(1);
+			doNothing().when(locationService).updateImageLocation(1L, null, null, (imageId));
 			doNothing().when(tagService).processTagRemoval(imageId, updateRequest);
 			doNothing().when(tagService).processTagAddition(imageId, updateRequest);
 			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), userId, "original")).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
 				"test-url");
 
 			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
@@ -539,15 +520,12 @@ class ImageServiceTest {
 		@Test
 		@DisplayName("실패 - 이미지 존재하지 않음")
 		void updateImageMetadata_imageNotFound() {
-			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
-				.imageName("수정된 이미지")
-				.build();
+			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder().imageName("수정된 이미지").build();
 
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.empty());
 
-			assertThatThrownBy(() -> imageService.updateImageMetadata(imageId, userId, updateRequest))
-				.isInstanceOf(ApiException.class)
-				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_IMAGE);
+			assertThatThrownBy(() -> imageService.updateImageMetadata(imageId, userId, updateRequest)).isInstanceOf(
+				ApiException.class).hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_IMAGE);
 
 			verify(imageMapper).findImageByImageId(imageId);
 			verify(imageMapper, never()).updateImageMetadata(any(), any(), any(), any(), any());
@@ -556,15 +534,13 @@ class ImageServiceTest {
 		@Test
 		@DisplayName("실패 - 권한 없음 (다른 사용자)")
 		void updateImageMetadata_forbidden() {
-			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
-				.imageName("수정된 이미지")
-				.build();
+			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder().imageName("수정된 이미지").build();
 
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
 
-			assertThatThrownBy(() -> imageService.updateImageMetadata(imageId, otherUserId, updateRequest))
-				.isInstanceOf(ApiException.class)
-				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN);
+			assertThatThrownBy(
+				() -> imageService.updateImageMetadata(imageId, otherUserId, updateRequest)).isInstanceOf(
+				ApiException.class).hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN);
 
 			verify(imageMapper).findImageByImageId(imageId);
 			verify(imageMapper, never()).updateImageMetadata(any(), any(), any(), any(), any());
@@ -582,13 +558,12 @@ class ImageServiceTest {
 				.build();
 
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
-			when(imageMapper.updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", null, 1))
-				.thenReturn(1);
+			when(imageMapper.updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", null, 1)).thenReturn(1);
 			doNothing().when(locationService).updateImageLocation(1L, 37.5665, 126.978, imageId);
 			doNothing().when(tagService).processTagRemoval(imageId, updateRequest);
 			doNothing().when(tagService).processTagAddition(imageId, updateRequest);
 			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), userId, "original")).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
 				"test-url");
 
 			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
@@ -614,13 +589,12 @@ class ImageServiceTest {
 				.build();
 
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
-			when(imageMapper.updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", newDate, 1))
-				.thenReturn(1);
+			when(imageMapper.updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", newDate, 1)).thenReturn(1);
 			doNothing().when(locationService).updateImageLocation(1L, null, null, imageId);
 			doNothing().when(tagService).processTagRemoval(imageId, updateRequest);
 			doNothing().when(tagService).processTagAddition(imageId, updateRequest);
 			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), userId, "original")).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
 				"test-url");
 
 			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
@@ -645,10 +619,7 @@ class ImageServiceTest {
 
 		@BeforeEach
 		void setUp() {
-			existingImage = Image.builder()
-				.imageName("삭제할 이미지")
-				.userId(userId)
-				.build();
+			existingImage = Image.builder().imageName("삭제할 이미지").userId(userId).build();
 			ReflectionTestUtils.setField(existingImage, "imageId", imageId);
 		}
 
@@ -669,8 +640,7 @@ class ImageServiceTest {
 		void deleteImage_imageNotFound() {
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.empty());
 
-			assertThatThrownBy(() -> imageService.deleteImage(imageId, userId))
-				.isInstanceOf(ApiException.class)
+			assertThatThrownBy(() -> imageService.deleteImage(imageId, userId)).isInstanceOf(ApiException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.NOT_FOUND_IMAGE);
 
 			verify(imageMapper).findImageByImageId(imageId);
@@ -682,8 +652,7 @@ class ImageServiceTest {
 		void deleteImage_forbidden() {
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
 
-			assertThatThrownBy(() -> imageService.deleteImage(imageId, otherUserId))
-				.isInstanceOf(ApiException.class)
+			assertThatThrownBy(() -> imageService.deleteImage(imageId, otherUserId)).isInstanceOf(ApiException.class)
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.FORBIDDEN);
 
 			verify(imageMapper).findImageByImageId(imageId);
@@ -727,7 +696,7 @@ class ImageServiceTest {
 
 			Coordinate coordinate = new Coordinate(127.0495556, 37.5398056);
 			PrecisionModel precisionModel = new PrecisionModel(PrecisionModel.FLOATING);
-		GeometryFactory geometryFactory = new GeometryFactory(precisionModel, 4326);
+			GeometryFactory geometryFactory = new GeometryFactory(precisionModel, 4326);
 			Point testPoint = geometryFactory.createPoint(coordinate);
 
 			CoordinatePoint coordPoint = new CoordinatePoint();
@@ -735,7 +704,7 @@ class ImageServiceTest {
 			ReflectionTestUtils.setField(coordPoint, "coordinatePointName", "테스트 좌표");
 			ReflectionTestUtils.setField(coordPoint, "coordinatePointPoint", testPoint);
 			ReflectionTestUtils.setField(coordPoint, "sigungu", sigungu);
-			
+
 			LocalDateTime testDate = LocalDateTime.now();
 			Long userId = 2L;
 			Image image = Image.builder()
@@ -749,9 +718,10 @@ class ImageServiceTest {
 				.build();
 			Long imageId = 1L;
 			ReflectionTestUtils.setField(image, "imageId", imageId);
-			
+
 			String testPresignedUrl = "http://test.url";
-			when(imageS3Service.generatePreSignedGetUrl(image.getImageName(), userId, "original")).thenReturn(testPresignedUrl);
+			when(imageS3Service.generatePreSignedGetUrl(image.getImageName(), userId, "original")).thenReturn(
+				testPresignedUrl);
 			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
 
 			// when
@@ -772,19 +742,18 @@ class ImageServiceTest {
 			assertEquals(127.0495556, result.getLatitude());
 			assertEquals(37.5398056, result.getLongitude());
 			assertNotNull(result.getTags());
-			
+
 			verify(imageS3Service).generatePreSignedGetUrl(image.getImageName(), userId, "original");
 			verify(tagService).getTagsForImageDisplay(imageId);
 		}
 	}
-
 
 	@Nested
 	@DisplayName("이미지 태그 관련 테스트")
 	class ImageTagTest {
 		private final Long imageId = 1L;
 		private final Long userId = 2L;
-		
+
 		@Test
 		@DisplayName("성공 - 이미지 단건 조회 시 태그 포함")
 		void getOriginalImageByImageId_WithTags() {
@@ -808,14 +777,10 @@ class ImageServiceTest {
 			ReflectionTestUtils.setField(coordPoint, "coordinatePointName", "테스트 좌표");
 			ReflectionTestUtils.setField(coordPoint, "coordinatePointPoint", testPoint);
 			ReflectionTestUtils.setField(coordPoint, "sigungu", sigungu);
-			
-			Image image = Image.builder()
-				.imageName("테스트 이미지")
-				.userId(userId)
-				.coordPoint(coordPoint)
-				.build();
+
+			Image image = Image.builder().imageName("테스트 이미지").userId(userId).coordPoint(coordPoint).build();
 			ReflectionTestUtils.setField(image, "imageId", imageId);
-			
+
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(image));
 			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
 			when(imageS3Service.generatePreSignedGetUrl(any(), any(), any())).thenReturn("http://test.url");
@@ -829,23 +794,21 @@ class ImageServiceTest {
 			assertNotNull(result.getTags());
 			verify(tagService).getTagsForImageDisplay(imageId);
 		}
-		
+
 		@Test
 		@DisplayName("성공 - 이미지 목록 조회 시 태그 포함")
 		void getImageListByUserId_WithTags() {
 			// given
-			ImageSearchByUserIdDto searchDto = ImageSearchByUserIdDto.builder()
-				.userId(userId)
-				.build();
-			
+			ImageSearchByUserIdDto searchDto = ImageSearchByUserIdDto.builder().userId(userId).build();
+
 			ImageInfoForThumbnailDto thumbnailDto = new ImageInfoForThumbnailDto();
 			ReflectionTestUtils.setField(thumbnailDto, "imageId", 1L);
 			ReflectionTestUtils.setField(thumbnailDto, "userId", userId);
 			ReflectionTestUtils.setField(thumbnailDto, "imageName", "테스트 이미지");
-			
+
 			when(imageMapper.findImageThumbnailsByUserId(any())).thenReturn(List.of(thumbnailDto));
 			when(imageS3Service.generatePreSignedGetUrl(any(), any(), any())).thenReturn("http://test.url");
-			
+
 			// when
 			PageInfo<ImageThumbnailDto> result = imageService.getImageListByUserId(searchDto);
 
@@ -879,19 +842,15 @@ class ImageServiceTest {
 			ReflectionTestUtils.setField(coordPoint, "coordinatePointPoint", testPoint);
 			ReflectionTestUtils.setField(coordPoint, "sigungu", sigungu);
 
-			Image existingImage = Image.builder()
-				.imageName("기존 이미지")
-				.userId(userId)
-				.coordPoint(coordPoint)
-				.build();
+			Image existingImage = Image.builder().imageName("기존 이미지").userId(userId).coordPoint(coordPoint).build();
 			ReflectionTestUtils.setField(existingImage, "imageId", imageId);
-			
+
 			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
 				.imageName("수정된 이미지")
 				.tagsToAdd(List.of("새태그1", "새태그2"))
 				.tagsToRemove(List.of(1L, 2L))
 				.build();
-			
+
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
 			when(imageMapper.updateImageMetadata(any(), any(), any(), any(), any())).thenReturn(1);
 			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
@@ -931,19 +890,15 @@ class ImageServiceTest {
 			ReflectionTestUtils.setField(coordPoint, "coordinatePointName", "테스트 좌표");
 			ReflectionTestUtils.setField(coordPoint, "coordinatePointPoint", testPoint);
 			ReflectionTestUtils.setField(coordPoint, "sigungu", sigungu);
-			
-			Image existingImage = Image.builder()
-				.imageName("기존 이미지")
-				.userId(userId)
-				.coordPoint(coordPoint)
-				.build();
+
+			Image existingImage = Image.builder().imageName("기존 이미지").userId(userId).coordPoint(coordPoint).build();
 			ReflectionTestUtils.setField(existingImage, "imageId", imageId);
-			
+
 			ImageUpdateRequestDto updateRequest = ImageUpdateRequestDto.builder()
 				.latitude(37.5665)
 				.longitude(126.978)
 				.build();
-			
+
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
 			when(imageMapper.updateImageMetadata(any(), any(), any(), any(), any())).thenReturn(1);
 			doNothing().when(locationService).updateImageLocation(1L, 37.5665, 126.978, imageId);
