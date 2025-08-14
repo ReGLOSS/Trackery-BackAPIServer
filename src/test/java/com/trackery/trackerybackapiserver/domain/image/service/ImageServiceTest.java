@@ -193,7 +193,7 @@ class ImageServiceTest {
 		@Test
 		@DisplayName("이미지 ID로 단건 조회 테스트 - 성공")
 		void getOriginalImageByImageId_success() {
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("original"))).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "original")).thenReturn(
 				testPresignedUrl);
 			when(imageMapper.findImageByImageId(5L)).thenReturn(Optional.of(testImage1));
 
@@ -209,7 +209,7 @@ class ImageServiceTest {
 			assertEquals("강남구", result.getSggName());
 
 			verify(imageMapper).findImageByImageId(testImageId);
-			verify(imageS3Service).generatePreSignedGetUrl(eq(testImage1.getImageName()), eq(testUserId), eq("original"));
+			verify(imageS3Service).generatePreSignedGetUrl(testImage1.getImageName(), testUserId, "original");
 		}
 
 		@Test
@@ -247,7 +247,7 @@ class ImageServiceTest {
 				ReflectionTestUtils.setField(thumbnailDto, "imageName", testImage1.getImageName());
 
 				when(imageMapper.findImageThumbnailsByUserId(searchDto)).thenReturn(List.of(thumbnailDto));
-				when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("thumbnail"))).thenReturn(
+				when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "thumbnail")).thenReturn(
 					testPresignedUrl);
 
 				PageInfo<ImageThumbnailDto> pageInfo = imageService.getImageListByUserId(searchDto);
@@ -260,7 +260,7 @@ class ImageServiceTest {
 				assertEquals(testPresignedUrl, result.getThumbnailUrl());
 
 				verify(imageMapper).findImageThumbnailsByUserId(searchDto);
-				verify(imageS3Service).generatePreSignedGetUrl((testImage1.getImageName()), testUserId, ("thumbnail"));
+				verify(imageS3Service).generatePreSignedGetUrl(testImage1.getImageName(), testUserId, "thumbnail");
 			}
 
 			@Test
@@ -319,7 +319,7 @@ class ImageServiceTest {
 			ReflectionTestUtils.setField(publicImage, "imageId", testImageId);
 
 			when(imageMapper.findImageByImageId(testImageId)).thenReturn(Optional.of(publicImage));
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("original"))).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "original")).thenReturn(
 				testPresignedUrl);
 
 			ImageDto result = imageService.getOriginalImageByImageId(testUserId, testImageId);
@@ -330,7 +330,7 @@ class ImageServiceTest {
 			assertEquals("공개 이미지", result.getImageName());
 
 			verify(imageMapper).findImageByImageId(testImageId);
-			verify(imageS3Service).generatePreSignedGetUrl((publicImage.getImageName()), testUserId, ("original"));
+			verify(imageS3Service).generatePreSignedGetUrl(publicImage.getImageName(), testUserId, "original");
 		}
 	}
 
@@ -352,7 +352,7 @@ class ImageServiceTest {
 
 			when(imageMapper.findImagesBySidoIdAndUserId(sidoId, testUserId)).thenReturn(List.of(testImage));
 			String testPresignedUrl = "testPresignedUrl";
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("thumbnail"))).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "thumbnail")).thenReturn(
 				testPresignedUrl);
 
 			List<ImageThumbnailDto> result = imageService.getImagesBySido(sidoId, testUserId);
@@ -363,7 +363,7 @@ class ImageServiceTest {
 			assertEquals(testPresignedUrl, result.get(0).getThumbnailUrl());
 
 			verify(imageMapper).findImagesBySidoIdAndUserId(sidoId, testUserId);
-			verify(imageS3Service).generatePreSignedGetUrl((testImage.getImageName()), testUserId, ("thumbnail"));
+			verify(imageS3Service).generatePreSignedGetUrl(testImage.getImageName(), testUserId, "thumbnail");
 		}
 
 		@Test
@@ -398,7 +398,7 @@ class ImageServiceTest {
 
 			when(imageMapper.findImagesBySigunguIdAndUserId(sigunguId, testUserId)).thenReturn(List.of(testImage));
 			String testPresignedUrl = "testPresignedUrl";
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("thumbnail"))).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "thumbnail")).thenReturn(
 				testPresignedUrl);
 
 			List<ImageThumbnailDto> result = imageService.getImagesBySigungu(sigunguId, testUserId);
@@ -409,7 +409,7 @@ class ImageServiceTest {
 			assertEquals(testPresignedUrl, result.get(0).getThumbnailUrl());
 
 			verify(imageMapper).findImagesBySigunguIdAndUserId(sigunguId, testUserId);
-			verify(imageS3Service).generatePreSignedGetUrl((testImage.getImageName()), testUserId, ("thumbnail"));
+			verify(imageS3Service).generatePreSignedGetUrl(testImage.getImageName(), testUserId, "thumbnail");
 		}
 
 		@Test
@@ -443,14 +443,14 @@ class ImageServiceTest {
 
 			when(imageMapper.findImageByImageId(testImageId)).thenReturn(Optional.of(testImage));
 			String testPresignedUrl = "testPresignedUrl";
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(testUserId), eq("original"))).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), testUserId, "original")).thenReturn(
 				testPresignedUrl);
 
 			String result = imageService.fetchS3PresignedUrlByImageId(testImageId);
 
 			assertEquals(testPresignedUrl, result);
 			verify(imageMapper).findImageByImageId(testImageId);
-			verify(imageS3Service).generatePreSignedGetUrl((testImage.getImageName()), testUserId, ("original"));
+			verify(imageS3Service).generatePreSignedGetUrl(testImage.getImageName(), testUserId, "original");
 		}
 
 		@Test
@@ -517,23 +517,23 @@ class ImageServiceTest {
 				.build();
 
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
-			when(imageMapper.updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1)))
+			when(imageMapper.updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", null, 1))
 				.thenReturn(1);
-			doNothing().when(locationService).updateImageLocation(eq(1L), isNull(), isNull(), eq(imageId));
-			doNothing().when(tagService).processTagRemoval(imageId, (updateRequest));
-			doNothing().when(tagService).processTagAddition(imageId, (updateRequest));
+			doNothing().when(locationService).updateImageLocation(1L, null, null, imageId);
+			doNothing().when(tagService).processTagRemoval(imageId, updateRequest);
+			doNothing().when(tagService).processTagAddition(imageId, updateRequest);
 			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), userId, "original")).thenReturn(
 				"test-url");
 
 			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
 
 			assertNotNull(result);
 			verify(imageMapper, times(2)).findImageByImageId(imageId);
-			verify(imageMapper).updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1));
-			verify(locationService).updateImageLocation(eq(1L), isNull(), isNull(), eq(imageId));
-			verify(tagService).processTagRemoval(imageId, (updateRequest));
-			verify(tagService).processTagAddition(imageId, (updateRequest));
+			verify(imageMapper).updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", null, 1);
+			verify(locationService).updateImageLocation(1L, null, null, imageId);
+			verify(tagService).processTagRemoval(imageId, updateRequest);
+			verify(tagService).processTagAddition(imageId, updateRequest);
 		}
 
 		@Test
@@ -582,23 +582,23 @@ class ImageServiceTest {
 				.build();
 
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
-			when(imageMapper.updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1)))
+			when(imageMapper.updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", null, 1))
 				.thenReturn(1);
-			doNothing().when(locationService).updateImageLocation((1L), (37.5665), (126.978), imageId);
-			doNothing().when(tagService).processTagRemoval(imageId, (updateRequest));
-			doNothing().when(tagService).processTagAddition(imageId, (updateRequest));
+			doNothing().when(locationService).updateImageLocation(1L, 37.5665, 126.978, imageId);
+			doNothing().when(tagService).processTagRemoval(imageId, updateRequest);
+			doNothing().when(tagService).processTagAddition(imageId, updateRequest);
 			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), userId, "original")).thenReturn(
 				"test-url");
 
 			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
 
 			assertNotNull(result);
 			verify(imageMapper, times(2)).findImageByImageId(imageId);
-			verify(imageMapper).updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), isNull(), eq(1));
-			verify(locationService).updateImageLocation((1L), (37.5665), (126.978), (imageId));
-			verify(tagService).processTagRemoval(imageId, (updateRequest));
-			verify(tagService).processTagAddition(imageId, (updateRequest));
+			verify(imageMapper).updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", null, 1);
+			verify(locationService).updateImageLocation(1L, 37.5665, 126.978, imageId);
+			verify(tagService).processTagRemoval(imageId, updateRequest);
+			verify(tagService).processTagAddition(imageId, updateRequest);
 			verify(tagService, times(1)).getTagsForImageDisplay(imageId);
 		}
 
@@ -614,23 +614,23 @@ class ImageServiceTest {
 				.build();
 
 			when(imageMapper.findImageByImageId(imageId)).thenReturn(Optional.of(existingImage));
-			when(imageMapper.updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), eq(newDate), eq(1)))
+			when(imageMapper.updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", newDate, 1))
 				.thenReturn(1);
-			doNothing().when(locationService).updateImageLocation(eq(1L), isNull(), isNull(), eq(imageId));
-			doNothing().when(tagService).processTagRemoval(imageId, (updateRequest));
-			doNothing().when(tagService).processTagAddition(imageId, (updateRequest));
+			doNothing().when(locationService).updateImageLocation(1L, null, null, imageId);
+			doNothing().when(tagService).processTagRemoval(imageId, updateRequest);
+			doNothing().when(tagService).processTagAddition(imageId, updateRequest);
 			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
-			when(imageS3Service.generatePreSignedGetUrl(anyString(), eq(userId), eq("original"))).thenReturn(
+			when(imageS3Service.generatePreSignedGetUrl(anyString(), userId, "original")).thenReturn(
 				"test-url");
 
 			ImageDto result = imageService.updateImageMetadata(imageId, userId, updateRequest);
 
 			assertNotNull(result);
 			verify(imageMapper, times(2)).findImageByImageId(imageId);
-			verify(imageMapper).updateImageMetadata(eq(imageId), eq("수정된 이미지"), eq("수정된 설명"), eq(newDate), eq(1));
-			verify(locationService).updateImageLocation(eq(1L), isNull(), isNull(), eq(imageId));
-			verify(tagService).processTagRemoval(imageId, (updateRequest));
-			verify(tagService).processTagAddition(imageId, (updateRequest));
+			verify(imageMapper).updateImageMetadata(imageId, "수정된 이미지", "수정된 설명", newDate, 1);
+			verify(locationService).updateImageLocation(1L, null, null, imageId);
+			verify(tagService).processTagRemoval(imageId, updateRequest);
+			verify(tagService).processTagAddition(imageId, updateRequest);
 			verify(tagService, times(1)).getTagsForImageDisplay(imageId);
 		}
 	}
@@ -711,9 +711,7 @@ class ImageServiceTest {
 	@Nested
 	@DisplayName("convertImageToImageDto 메서드 테스트")
 	class ConvertImageToImageDtoTest {
-		private final Long imageId = 1L;
-		private final Long userId = 2L;
-		
+
 		@Test
 		@DisplayName("성공 - 이미지 엔티티를 ImageDto로 변환")
 		void convertImageToImageDto_success() {
@@ -739,6 +737,7 @@ class ImageServiceTest {
 			ReflectionTestUtils.setField(coordPoint, "sigungu", sigungu);
 			
 			LocalDateTime testDate = LocalDateTime.now();
+			Long userId = 2L;
 			Image image = Image.builder()
 				.imageName("테스트 이미지")
 				.imageContent("테스트 내용")
@@ -748,10 +747,11 @@ class ImageServiceTest {
 				.userId(userId)
 				.coordPoint(coordPoint)
 				.build();
+			Long imageId = 1L;
 			ReflectionTestUtils.setField(image, "imageId", imageId);
 			
 			String testPresignedUrl = "http://test.url";
-			when(imageS3Service.generatePreSignedGetUrl((image.getImageName()), userId, ("original"))).thenReturn(testPresignedUrl);
+			when(imageS3Service.generatePreSignedGetUrl(image.getImageName(), userId, "original")).thenReturn(testPresignedUrl);
 			when(tagService.getTagsForImageDisplay(imageId)).thenReturn(List.of());
 
 			// when
@@ -773,7 +773,7 @@ class ImageServiceTest {
 			assertEquals(37.5398056, result.getLongitude());
 			assertNotNull(result.getTags());
 			
-			verify(imageS3Service).generatePreSignedGetUrl((image.getImageName()), userId, ("original"));
+			verify(imageS3Service).generatePreSignedGetUrl(image.getImageName(), userId, "original");
 			verify(tagService).getTagsForImageDisplay(imageId);
 		}
 	}
@@ -904,8 +904,8 @@ class ImageServiceTest {
 
 			// then
 			assertNotNull(result);
-			verify(tagService).processTagRemoval(imageId, (updateRequest));
-			verify(tagService).processTagAddition(imageId, (updateRequest));
+			verify(tagService).processTagRemoval(imageId, updateRequest);
+			verify(tagService).processTagAddition(imageId, updateRequest);
 		}
 
 		@Test
@@ -958,8 +958,8 @@ class ImageServiceTest {
 			// then
 			assertNotNull(result);
 			verify(locationService).updateImageLocation(1L, 37.5665, 126.978, imageId);
-			verify(tagService).processTagRemoval(imageId, (updateRequest));
-			verify(tagService).processTagAddition(imageId, (updateRequest));
+			verify(tagService).processTagRemoval(imageId, updateRequest);
+			verify(tagService).processTagAddition(imageId, updateRequest);
 		}
 	}
 }
