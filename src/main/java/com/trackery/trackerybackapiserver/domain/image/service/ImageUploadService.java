@@ -46,6 +46,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 8.		inari		이미지 업로드시 일반 태그 추가
  * 25. 7. 9.		inari		regionalTags를 Tags로 수정 및 관련 메서드 및 변수 변경
  * 25. 7. 11.		inari		image 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 8. 8.		durururuk	사용되지 않는 imageFile, imageType 필드 제거
  */
 @Slf4j
 @Service

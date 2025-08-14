@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
  * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
  * 25. 4. 21.		durururuk		이미지 업로드 DTO 작성
  * 25. 4. 21.		durururuk		AWS Config 작성
+ * 25. 8. 8.		durururuk		더 이상 사용되지 않는 imageFile, imageName 필드 제거
  */
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
