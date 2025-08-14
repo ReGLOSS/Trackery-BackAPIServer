@@ -83,6 +83,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 15.		durururuk		이미지 삭제 시 이벤트 발행하게 수정
  * 25. 7. 15.		durururuk		ImageService @Transactional 어노테이션 추가
  * 25. 7. 15.		inari		ImageService에 있던 updateImageLocation, processTagRemoval, processTagAddition 각 도메인으로 이동
+ * 25. 8. 14.		durururuk		changeImageProcessingStatus javadoc 주석 보충
  */
 @Slf4j
 @Service
@@ -368,5 +369,15 @@ public class ImageService {
 			}
 			throw e;
 		}
+	}
+
+	/**
+	 * 이미지 처리 상태 변경 메서드
+	 * @param imageName 이미지 이름
+	 * @param processingStatus 처리 상태 (0 : 처리중, 1 : 처리 완료)
+	 */
+	//TODO 처리 실패시 처리 보완
+	public void changeImageProcessingStatus(String imageName, int processingStatus) {
+		imageMapper.changeImageProcessingStatus(imageName, processingStatus);
 	}
 }

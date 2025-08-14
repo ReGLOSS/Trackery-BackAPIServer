@@ -98,6 +98,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 6. 26.		inari			탈퇴시 서비스에서 컨트롤러로 쿠키삭제 처리 피드백 반영
  * 25. 6. 27.		inari			로그인시 마지막 로그인 갱신되도록 수정
  * 25. 7. 1.		durururuk		다른 서비스 클래스에서도 변경된 로직에 맞게끔 수정
+ * 25. 7. 30.		durururuk		프로필 이미지 관련 null 체크 추가
  * 25. 8. 7.		inari			아이디 유효성 체크 추가
  * 25. 8. 7.		inari			중복 코드 제거
  */
@@ -207,14 +208,16 @@ public class UserService {
 	 * @param userId : 찾을 userId
 	 * @return DTO
 	 */
-	//TODO 앨범 기능 구현 후 공개 앨범 정보도 조회할 수 있게 수정
 	public DetailedUserInfoDto getDetailedUserInfoByUserId(Long userId) {
 		User user = userMapper.findByUserId(userId).orElseThrow(
 			() -> new ApiException(ErrorCode.NOT_FOUND_USER));
 		List<OAuth> oAuthList = oAuthMapper.findByUserId(userId);
-
+		String profileImageUrl = null;
+		if (user.getUserProfile() != null) {
+			profileImageUrl = imageS3Service.generatePreSignedGetUrl(user.getUserProfile(), userId, "thumbnail");
+		}
 		return new DetailedUserInfoDto(user.getUserId(), user.getRoleId(), user.getUserName(), user.getNickname(),
-			user.getEmail(), oAuthList);
+			user.getEmail(), profileImageUrl, oAuthList);
 	}
 
 	/**
@@ -232,7 +235,7 @@ public class UserService {
 
 		if (user.getUserProfile() != null) {
 			userProfilePicPresignedUrl = imageS3Service.generatePreSignedGetUrl(user.getUserProfile(), userId,
-				"original");
+				"thumbnail");
 		}
 
 		return new UserProfileDto(

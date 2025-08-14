@@ -14,6 +14,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.OAuth;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 4. 9.		durururuk		최초 생성
+ * 25. 7. 30.		durururuk		프로필 이미지 링크 필드 추가
  */
 public record DetailedUserInfoDto(
 	Long userId,
@@ -21,5 +22,6 @@ public record DetailedUserInfoDto(
 	String userName,
 	String nickname,
 	String email,
+	String profileImageUrl,
 	List<OAuth> OAuthList) {
 }

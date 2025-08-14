@@ -25,6 +25,7 @@ import lombok.NoArgsConstructor;
  * 25. 4. 18.		durururuk		이미지 업로드 기능 구현 전 공간 관련 기능 정리
  * 25. 4. 21.		durururuk		이미지 업로드 DTO 작성
  * 25. 4. 21.		durururuk		AWS Config 작성
+ * 25. 8. 8.		durururuk		더 이상 사용되지 않는 imageFile, imageName 필드 제거
  */
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -46,11 +47,6 @@ public class Image {
 	private String imageName;
 
 	/**
-	 * 이미지의 S3 버킷 Key입니다.
-	 */
-	private String imageFile;
-
-	/**
 	 * 이미지의 공개여부입니다. (1: 공개, 0: 비공개)
 	 */
 	private Integer isPublic;
@@ -59,11 +55,6 @@ public class Image {
 	 * 이미지의 삭제여부입니다. (true: 공개, false: 비공개)
 	 */
 	private Boolean isDeleted;
-
-	/**
-	 * 이미지의 확장자입니다.
-	 */
-	private String imageType;
 
 	/**
 	 * 이미지의 설명입니다.
@@ -87,14 +78,12 @@ public class Image {
 
 	@Builder
 	@SuppressWarnings("java:S107")
-	public Image(CoordinatePoint coordPoint, String imageName, String imageFile, Integer isPublic, Boolean isDeleted,
-		String imageType, String imageContent, LocalDateTime imageDate, LocalDateTime imageRegDate, Long userId) {
+	public Image(CoordinatePoint coordPoint, String imageName, Integer isPublic, Boolean isDeleted, String imageContent,
+		LocalDateTime imageDate, LocalDateTime imageRegDate, Long userId) {
 		this.coordPoint = coordPoint;
 		this.imageName = imageName;
-		this.imageFile = imageFile;
 		this.isPublic = isPublic;
 		this.isDeleted = isDeleted;
-		this.imageType = imageType;
 		this.imageContent = imageContent;
 		this.imageDate = imageDate;
 		this.imageRegDate = imageRegDate;
