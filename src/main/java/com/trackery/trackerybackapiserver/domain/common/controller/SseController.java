@@ -23,7 +23,8 @@ import lombok.extern.slf4j.Slf4j;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 8. 8.      durururuk       최초 생성
+ * 25. 8. 8.		durururuk       최초 생성
+ * 25. 8. 8.		durururuk		sse api 작성
  */
 @Slf4j
 @RestController
