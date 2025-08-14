@@ -5,7 +5,7 @@ package com.trackery.trackerybackapiserver.domain.aws.enums;
  * fileName       : MessageType
  * author         : durururuk
  * date           : 25. 8. 6.
- * description    : 메시지 타입
+ * description    : 메시지 타입 Enum
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
