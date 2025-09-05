@@ -19,6 +19,7 @@ import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
@@ -57,6 +58,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 7. 9.		inari		태그 컨트롤러에 있던 일부 매핑을 이미지로 이전함으로써 RESTful한 URL 구조로 변경
  * 25. 7. 10.		durururuk		PageSize 파라미터 검증 추가
  * 25. 7. 10.		inari		이미지 단건 조회시 태그 추가
+ * 25. 9. 5.		durururuk		이미지 시도 커버리지 조회 API 작성
  */
 @RestController
 @RequiredArgsConstructor
@@ -212,6 +214,17 @@ public class ImageController {
 		// 이미지 소유자 확인
 		imageService.getOriginalImageByImageId(userDetails.getUserId(), imageId);
 		TagResponseDto response = tagService.updateImageTag(imageId, tagId, request.getNewTagName());
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
+	}
+
+	/**
+	 * 인증된 유저의 시도 이미지 커버리지를 조회합니다.
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 시도별 커버리지 정보 DTO (PARTIAL/COMPLETE)
+	 */
+	@GetMapping("/me/coverage/sido")
+	public ResponseEntity<ApiResponse<ImageSidoCoverageResponseDto>> getImageSidoCoverage(@AuthenticationPrincipal CustomUserDetails userDetails) {
+		ImageSidoCoverageResponseDto response = imageService.getImageSidoCoverageData(userDetails.getUserId());
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 }
