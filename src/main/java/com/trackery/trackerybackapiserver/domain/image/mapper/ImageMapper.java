@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
@@ -110,4 +111,6 @@ public interface ImageMapper {
 	 */
 	void changeImageProcessingStatus(@Param("imageName") String imageName,
 		@Param("processingStatus") int processingStatus);
+
+	ImageSidoCoverageResponseDto selectSidoCoverage(@Param("userId") Long userId);
 }
