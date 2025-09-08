@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
@@ -35,6 +36,9 @@ import com.trackery.trackerybackapiserver.domain.image.entity.Image;
  * 25. 7. 8.		durururuk		내 이미지 조회 시 조회 결과에서 제외될 앨범 ID 파라미터 추가
  * 25. 7. 8.		durururuk		사용되지 않는 메서드 정리
  * 25. 7. 11.		inari		사용되지 않는 매퍼 삭제
+ * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 추가
+ * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 옵셔널로 수정
+ * 25. 9. 5.		durururuk		Javadoc 주석 작성
  */
 @Mapper
 public interface ImageMapper {
@@ -110,4 +114,12 @@ public interface ImageMapper {
 	 */
 	void changeImageProcessingStatus(@Param("imageName") String imageName,
 		@Param("processingStatus") int processingStatus);
+
+	/**
+	 * 사용자별 시도 이미지 커버리지를 조회합니다.
+	 * 각 시도를 COMPLETE(모든 시군구에 이미지 존재) 또는 PARTIAL(일부 시군구에만 이미지 존재)로 분류합니다.
+	 * @param userId 사용자 ID
+	 * @return 시도별 이미지 커버리지 정보를 담은 DTO (Optional)
+	 */
+	Optional<ImageSidoCoverageResponseDto> selectSidoCoverage(@Param("userId") Long userId);
 }

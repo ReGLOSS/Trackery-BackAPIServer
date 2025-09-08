@@ -191,4 +191,56 @@
         AND is_deleted = 0
     </update>
 
+    <!-- 유저의 시도 이미지 커버리지 조회 -->
+    <resultMap id="SidoCoverageResultMap" type="com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto">
+        <collection property="partialSidoIdSet" ofType="Long" 
+                    column="userId" select="selectPartialSidoIds"/>
+        <collection property="completeSidoIdSet" ofType="Long" 
+                    column="userId" select="selectCompleteSidoIds"/>
+    </resultMap>
+
+    <!-- 메인 쿼리 - userId 파라미터를 하위 쿼리로 전달 -->
+    <select id="selectSidoCoverage" resultMap="SidoCoverageResultMap">
+        SELECT #{userId} as userId
+    </select>
+
+    <!-- 일부 시군구에만 이미지가 있는 시도 조회 (PARTIAL) -->
+    <select id="selectPartialSidoIds" resultType="Long">
+        WITH sido_coverage AS (
+            SELECT 
+                sd.sd_id,
+                COUNT(DISTINCT sgg.sgg_id) as total_sgg_count,
+                COUNT(DISTINCT CASE WHEN i.image_id IS NOT NULL THEN sgg.sgg_id END) as image_sgg_count
+            FROM juso_sido sd
+            JOIN juso_sigungu sgg ON sd.sd_id = sgg.sd_id
+            LEFT JOIN coord_poi c ON sgg.sgg_id = c.sgg_id
+            LEFT JOIN image i ON c.coord_point_id = i.coord_point_id 
+                AND i.user_id = #{userId}
+                AND i.is_deleted = 0
+            GROUP BY sd.sd_id
+        )
+        SELECT sd_id 
+        FROM sido_coverage 
+        WHERE image_sgg_count > 0 AND image_sgg_count &lt; total_sgg_count
+    </select>
+
+    <!-- 모든 시군구에 이미지가 있는 시도 조회 (COMPLETE) -->
+    <select id="selectCompleteSidoIds" resultType="Long">
+        WITH sido_coverage AS (
+            SELECT 
+                sd.sd_id,
+                COUNT(DISTINCT sgg.sgg_id) as total_sgg_count,
+                COUNT(DISTINCT CASE WHEN i.image_id IS NOT NULL THEN sgg.sgg_id END) as image_sgg_count
+            FROM juso_sido sd
+            JOIN juso_sigungu sgg ON sd.sd_id = sgg.sd_id
+            LEFT JOIN coord_poi c ON sgg.sgg_id = c.sgg_id
+            LEFT JOIN image i ON c.coord_point_id = i.coord_point_id 
+                AND i.user_id = #{userId}
+                AND i.is_deleted = 0
+            GROUP BY sd.sd_id
+        )
+        SELECT sd_id 
+        FROM sido_coverage 
+        WHERE image_sgg_count = total_sgg_count AND total_sgg_count > 0
+    </select>
 </mapper>

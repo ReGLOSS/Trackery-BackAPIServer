@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -28,6 +29,7 @@ import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
@@ -72,6 +74,7 @@ import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
  * 25. 7. 15.		inari		필요없는 eq 삭제
  * 25. 7. 15.		durururuk		이벤트 publish 관련 모킹 추가
  * 25. 7. 15.		inari		ImageServiceTest 테스트 코드 작성
+ * 25. 9. 5.		durururuk		시도 커버리지 메서드 테스트 코드 작성
  */
 @ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
@@ -915,6 +918,110 @@ class ImageServiceTest {
 			verify(locationService).updateImageLocation(1L, 37.5665, 126.978, imageId);
 			verify(tagService).processTagRemoval(imageId, updateRequest);
 			verify(tagService).processTagAddition(imageId, updateRequest);
+		}
+	}
+
+	@Nested
+	@DisplayName("시도 이미지 커버리지 조회 테스트")
+	class GetImageSidoCoverageDataTest {
+		private final Long testUserId = 1L;
+
+		@Test
+		@DisplayName("성공 - 정상 커버리지 데이터 반환")
+		void getImageSidoCoverageData_success() {
+			// Given
+			Set<Long> partialSidoIds = Set.of(1L, 2L);
+			Set<Long> completeSidoIds = Set.of(3L, 4L, 5L);
+			ImageSidoCoverageResponseDto expectedDto = new ImageSidoCoverageResponseDto(partialSidoIds, completeSidoIds);
+			
+			when(imageMapper.selectSidoCoverage(testUserId)).thenReturn(Optional.of(expectedDto));
+
+			// When
+			ImageSidoCoverageResponseDto result = imageService.getImageSidoCoverageData(testUserId);
+
+			// Then
+			assertThat(result).isNotNull();
+			assertThat(result.getPartialSidoIdSet()).isEqualTo(partialSidoIds);
+			assertThat(result.getCompleteSidoIdSet()).isEqualTo(completeSidoIds);
+			verify(imageMapper).selectSidoCoverage(testUserId);
+		}
+
+		@Test
+		@DisplayName("성공 - 빈 커버리지 데이터 반환")
+		void getImageSidoCoverageData_emptyResult() {
+			// Given
+			Set<Long> emptySidoIds = Set.of();
+			ImageSidoCoverageResponseDto expectedDto = new ImageSidoCoverageResponseDto(emptySidoIds, emptySidoIds);
+			
+			when(imageMapper.selectSidoCoverage(testUserId)).thenReturn(Optional.of(expectedDto));
+
+			// When
+			ImageSidoCoverageResponseDto result = imageService.getImageSidoCoverageData(testUserId);
+
+			// Then
+			assertThat(result).isNotNull();
+			assertThat(result.getPartialSidoIdSet()).isEmpty();
+			assertThat(result.getCompleteSidoIdSet()).isEmpty();
+			verify(imageMapper).selectSidoCoverage(testUserId);
+		}
+
+		@Test
+		@DisplayName("실패 - Mapper가 Optional.empty() 반환")
+		void getImageSidoCoverageData_mapperReturnsEmpty() {
+			// Given
+			when(imageMapper.selectSidoCoverage(testUserId)).thenReturn(Optional.empty());
+
+			// When & Then
+			assertThatThrownBy(() -> imageService.getImageSidoCoverageData(testUserId))
+				.isInstanceOf(ApiException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.INTERNAL_SERVER_ERROR);
+
+			verify(imageMapper).selectSidoCoverage(testUserId);
+		}
+
+		@Test
+		@DisplayName("실패 - PARTIAL Set이 null")
+		void getImageSidoCoverageData_partialSetIsNull() {
+			// Given
+			ImageSidoCoverageResponseDto dtoWithNullPartial = new ImageSidoCoverageResponseDto(null, Set.of(1L, 2L));
+			when(imageMapper.selectSidoCoverage(testUserId)).thenReturn(Optional.of(dtoWithNullPartial));
+
+			// When & Then
+			assertThatThrownBy(() -> imageService.getImageSidoCoverageData(testUserId))
+				.isInstanceOf(ApiException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.INTERNAL_SERVER_ERROR);
+
+			verify(imageMapper).selectSidoCoverage(testUserId);
+		}
+
+		@Test
+		@DisplayName("실패 - COMPLETE Set이 null")
+		void getImageSidoCoverageData_completeSetIsNull() {
+			// Given
+			ImageSidoCoverageResponseDto dtoWithNullComplete = new ImageSidoCoverageResponseDto(Set.of(1L, 2L), null);
+			when(imageMapper.selectSidoCoverage(testUserId)).thenReturn(Optional.of(dtoWithNullComplete));
+
+			// When & Then
+			assertThatThrownBy(() -> imageService.getImageSidoCoverageData(testUserId))
+				.isInstanceOf(ApiException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.INTERNAL_SERVER_ERROR);
+
+			verify(imageMapper).selectSidoCoverage(testUserId);
+		}
+
+		@Test
+		@DisplayName("실패 - 양쪽 Set이 모두 null")
+		void getImageSidoCoverageData_bothSetsAreNull() {
+			// Given
+			ImageSidoCoverageResponseDto dtoWithBothNull = new ImageSidoCoverageResponseDto(null, null);
+			when(imageMapper.selectSidoCoverage(testUserId)).thenReturn(Optional.of(dtoWithBothNull));
+
+			// When & Then
+			assertThatThrownBy(() -> imageService.getImageSidoCoverageData(testUserId))
+				.isInstanceOf(ApiException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.INTERNAL_SERVER_ERROR);
+
+			verify(imageMapper).selectSidoCoverage(testUserId);
 		}
 	}
 }

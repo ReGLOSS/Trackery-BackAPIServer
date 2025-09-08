@@ -16,6 +16,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.common.util.PageUtil;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
@@ -84,6 +85,10 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 15.		durururuk		ImageService @Transactional 어노테이션 추가
  * 25. 7. 15.		inari		ImageService에 있던 updateImageLocation, processTagRemoval, processTagAddition 각 도메인으로 이동
  * 25. 8. 14.		durururuk		changeImageProcessingStatus javadoc 주석 보충
+ * 25. 9. 5.		durururuk		이미지 시도 커버리지 조회 서비스 메서드 작성
+ * 25. 9. 5.		durururuk		Javadoc 주석 작성
+ * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 Optional처리로 null 처리 강화
+ * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 Set null 예외 처리 강화
  */
 @Slf4j
 @Service
@@ -379,5 +384,29 @@ public class ImageService {
 	//TODO 처리 실패시 처리 보완
 	public void changeImageProcessingStatus(String imageName, int processingStatus) {
 		imageMapper.changeImageProcessingStatus(imageName, processingStatus);
+	}
+
+	/**
+	 * 사용자별 시도 이미지 커버리지 데이터를 조회합니다.
+	 * 각 시도별로 모든 시군구에 이미지가 있으면 COMPLETE, 일부만 있으면 PARTIAL로 분류합니다.
+	 * @param userId 사용자 ID
+	 * @return 시도별 이미지 커버리지 정보 (PARTIAL/COMPLETE 시도 ID 목록)
+	 */
+	@Transactional(readOnly = true)
+	public ImageSidoCoverageResponseDto getImageSidoCoverageData(Long userId) {
+		log.debug("사용자 ID {}의 시도 이미지 커버리지 조회 시작", userId);
+
+		ImageSidoCoverageResponseDto result = imageMapper.selectSidoCoverage(userId).orElseThrow(
+			() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR)
+		);
+
+		if (result.getPartialSidoIdSet() == null || result.getCompleteSidoIdSet() == null) {
+			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
+		}
+
+		log.debug("사용자 ID {} 커버리지 조회 완료 - PARTIAL: {}개, COMPLETE: {}개",
+			userId, result.getPartialSidoIdSet().size(), result.getCompleteSidoIdSet().size());
+
+		return result;
 	}
 }
