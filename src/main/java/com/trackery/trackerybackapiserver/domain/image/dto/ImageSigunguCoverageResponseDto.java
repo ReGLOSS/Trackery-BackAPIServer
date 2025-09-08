@@ -1,6 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.image.dto;
 
-import java.util.Set;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -25,5 +25,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ImageSigunguCoverageResponseDto {
 	@JsonProperty("SIGUNGU-IDS")
-	private Set<Long> havingImagesSigunguIdSet;
+	private List<Long> havingImagesSigunguIdSet;
 }

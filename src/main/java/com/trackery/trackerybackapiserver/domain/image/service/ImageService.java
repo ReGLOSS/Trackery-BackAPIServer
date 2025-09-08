@@ -383,7 +383,6 @@ public class ImageService {
 	 * @param imageName 이미지 이름
 	 * @param processingStatus 처리 상태 (0 : 처리중, 1 : 처리 완료)
 	 */
-	//TODO 처리 실패시 처리 보완
 	public void changeImageProcessingStatus(String imageName, int processingStatus) {
 		imageMapper.changeImageProcessingStatus(imageName, processingStatus);
 	}

@@ -1,16 +1,12 @@
 package com.trackery.trackerybackapiserver.domain.image.integration;
 
-import static org.hibernate.validator.internal.util.Contracts.*;
-
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import com.trackery.trackerybackapiserver.domain.aws.service.SqsMessageConsumer;
-import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageSigunguCoverageResponseDto;
 import com.trackery.trackerybackapiserver.domain.image.service.ImageService;
 
 import lombok.extern.slf4j.Slf4j;
@@ -36,10 +32,13 @@ class ImageIntegrationTest {
 	private SqsMessageConsumer sqsMessageConsumer;
 
 	@Test
-	void contextLoads() {
-		List<ImageThumbnailDto> images = imageService.getImagesBySido(31L, 2L);
+	void sggCoverageLoad() {
+		log.info("ImageIntegrationTest sggCoverageLoad");
 
-		assertNotNull(images);
-		log.info(images.toString());
+		ImageSigunguCoverageResponseDto result = imageService.getImageSigunguCoverageData(2L, 31L);
+
+		log.info("result : {}", result);
+		log.info("result set Size : {}", result.getHavingImagesSigunguIdSet().size());
+		log.info("result set : {}", result.getHavingImagesSigunguIdSet());
 	}
 }
