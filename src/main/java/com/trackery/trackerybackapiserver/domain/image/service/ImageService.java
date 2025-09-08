@@ -91,6 +91,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 Optional처리로 null 처리 강화
  * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 Set null 예외 처리 강화
  * 25. 9. 8.		durururuk		사용자의 시도별 시군구 이미지 커버리지 데이터를 조회 메서드 추가
+ * 25. 9. 9.		durururuk		시도 커버리지 조회 메서드 필드명 수정
  */
 @Slf4j
 @Service
@@ -399,7 +400,7 @@ public class ImageService {
 			() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR)
 		);
 
-		if (result.getPartialSidoIdSet() == null || result.getCompleteSidoIdSet() == null) {
+		if (result.getPartialSidoIdList() == null || result.getCompleteSidoIdList() == null) {
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 

@@ -8,7 +8,6 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -75,6 +74,7 @@ import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
  * 25. 7. 15.		durururuk		이벤트 publish 관련 모킹 추가
  * 25. 7. 15.		inari		ImageServiceTest 테스트 코드 작성
  * 25. 9. 5.		durururuk		시도 커버리지 메서드 테스트 코드 작성
+ * 25. 9. 9.		durururuk		시도 커버리지 테스트 자료형 List로 수정
  */
 @ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
@@ -930,8 +930,8 @@ class ImageServiceTest {
 		@DisplayName("성공 - 정상 커버리지 데이터 반환")
 		void getImageSidoCoverageData_success() {
 			// Given
-			Set<Long> partialSidoIds = Set.of(1L, 2L);
-			Set<Long> completeSidoIds = Set.of(3L, 4L, 5L);
+			List<Long> partialSidoIds = List.of(1L, 2L);
+			List<Long> completeSidoIds = List.of(3L, 4L, 5L);
 			ImageSidoCoverageResponseDto expectedDto = new ImageSidoCoverageResponseDto(partialSidoIds, completeSidoIds);
 			
 			when(imageMapper.selectSidoCoverage(testUserId)).thenReturn(Optional.of(expectedDto));
@@ -941,8 +941,8 @@ class ImageServiceTest {
 
 			// Then
 			assertThat(result).isNotNull();
-			assertThat(result.getPartialSidoIdSet()).isEqualTo(partialSidoIds);
-			assertThat(result.getCompleteSidoIdSet()).isEqualTo(completeSidoIds);
+			assertThat(result.getPartialSidoIdList()).isEqualTo(partialSidoIds);
+			assertThat(result.getCompleteSidoIdList()).isEqualTo(completeSidoIds);
 			verify(imageMapper).selectSidoCoverage(testUserId);
 		}
 
@@ -950,7 +950,7 @@ class ImageServiceTest {
 		@DisplayName("성공 - 빈 커버리지 데이터 반환")
 		void getImageSidoCoverageData_emptyResult() {
 			// Given
-			Set<Long> emptySidoIds = Set.of();
+			List<Long> emptySidoIds = List.of();
 			ImageSidoCoverageResponseDto expectedDto = new ImageSidoCoverageResponseDto(emptySidoIds, emptySidoIds);
 			
 			when(imageMapper.selectSidoCoverage(testUserId)).thenReturn(Optional.of(expectedDto));
@@ -960,8 +960,8 @@ class ImageServiceTest {
 
 			// Then
 			assertThat(result).isNotNull();
-			assertThat(result.getPartialSidoIdSet()).isEmpty();
-			assertThat(result.getCompleteSidoIdSet()).isEmpty();
+			assertThat(result.getPartialSidoIdList()).isEmpty();
+			assertThat(result.getCompleteSidoIdList()).isEmpty();
 			verify(imageMapper).selectSidoCoverage(testUserId);
 		}
 
@@ -983,7 +983,7 @@ class ImageServiceTest {
 		@DisplayName("실패 - PARTIAL Set이 null")
 		void getImageSidoCoverageData_partialSetIsNull() {
 			// Given
-			ImageSidoCoverageResponseDto dtoWithNullPartial = new ImageSidoCoverageResponseDto(null, Set.of(1L, 2L));
+			ImageSidoCoverageResponseDto dtoWithNullPartial = new ImageSidoCoverageResponseDto(null, List.of(1L, 2L));
 			when(imageMapper.selectSidoCoverage(testUserId)).thenReturn(Optional.of(dtoWithNullPartial));
 
 			// When & Then
@@ -998,7 +998,7 @@ class ImageServiceTest {
 		@DisplayName("실패 - COMPLETE Set이 null")
 		void getImageSidoCoverageData_completeSetIsNull() {
 			// Given
-			ImageSidoCoverageResponseDto dtoWithNullComplete = new ImageSidoCoverageResponseDto(Set.of(1L, 2L), null);
+			ImageSidoCoverageResponseDto dtoWithNullComplete = new ImageSidoCoverageResponseDto(List.of(1L, 2L), null);
 			when(imageMapper.selectSidoCoverage(testUserId)).thenReturn(Optional.of(dtoWithNullComplete));
 
 			// When & Then

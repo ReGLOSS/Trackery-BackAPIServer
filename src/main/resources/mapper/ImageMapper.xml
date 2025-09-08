@@ -193,9 +193,9 @@
 
     <!-- 유저의 시도 이미지 커버리지 조회 -->
     <resultMap id="SidoCoverageResultMap" type="com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto">
-        <collection property="partialSidoIdSet" ofType="Long" 
+        <collection property="partialSidoIdList" ofType="Long" 
                     column="userId" select="selectPartialSidoIds"/>
-        <collection property="completeSidoIdSet" ofType="Long" 
+        <collection property="completeSidoIdList" ofType="Long" 
                     column="userId" select="selectCompleteSidoIds"/>
     </resultMap>
 

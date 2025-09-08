@@ -13,7 +13,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -64,6 +63,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * 25. 7. 10.		durururuk		변경된 로직에 맞게 테스트 코드 수정
  * 25. 7. 14.		inari		테스트코드 수정 및 adoc 변경
  * 25. 9. 5.		durururuk		이미지 시도 커버리지 조회 API 테스트코드, 문서화 코드 작성
+ * 25. 9. 9.		durururuk		시도 커버리지 테스트 자료형 List로 수정
  */
 @WebMvcTest(ImageController.class)
 class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -556,8 +556,8 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 	@DisplayName("시도별 이미지 커버리지 조회 성공")
 	void getImageSidoCoverageSuccess() throws Exception {
 		// Given
-		Set<Long> partialSidoIds = Set.of(11L, 26L, 31L);
-		Set<Long> completeSidoIds = Set.of(41L, 28L);
+		List<Long> partialSidoIds = List.of(11L, 26L, 31L);
+		List<Long> completeSidoIds = List.of(41L, 28L);
 		ImageSidoCoverageResponseDto coverageData = new ImageSidoCoverageResponseDto(partialSidoIds, completeSidoIds);
 		
 		when(imageService.getImageSidoCoverageData(USER_ID)).thenReturn(coverageData);
