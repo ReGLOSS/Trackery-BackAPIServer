@@ -17,12 +17,13 @@ import lombok.NoArgsConstructor;
  * ===========================================================
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
- * 25. 9. 8.      durururuk       최초 생성
+ * 25. 9. 8.		durururuk       최초 생성
+ * 25. 9. 9.		durururuk		필드명 더 직관적으로 변경
  */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageSigunguCoverageResponseDto {
 	@JsonProperty("SIGUNGU-IDS")
-	private Set<Long> havingImagesSigunguId;
+	private Set<Long> havingImagesSigunguIdSet;
 }
