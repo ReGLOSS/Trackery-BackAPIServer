@@ -571,19 +571,19 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("Ok"))
-			.andExpect(jsonPath("$.data.PARTIAL").isArray())
-			.andExpect(jsonPath("$.data.PARTIAL.length()").value(3))
-			.andExpect(jsonPath("$.data.COMPLETE").isArray())
-			.andExpect(jsonPath("$.data.COMPLETE.length()").value(2))
+			.andExpect(jsonPath("$.data.partiallyCoveredSidoIds").isArray())
+			.andExpect(jsonPath("$.data.partiallyCoveredSidoIds.length()").value(3))
+			.andExpect(jsonPath("$.data.completelyCoveredSidoIds").isArray())
+			.andExpect(jsonPath("$.data.completelyCoveredSidoIds.length()").value(2))
 			.andDo(document("get-image-sido-coverage-success",
 				responseFields(
 					fieldWithPath("code").description("응답 코드"),
 					fieldWithPath("message").description("응답 메시지"),
 					fieldWithPath("data").description("시도별 이미지 커버리지 데이터"),
-					fieldWithPath("data.PARTIAL").description("일부 시군구에만 이미지가 있는 시도 ID 배열"),
-					fieldWithPath("data.PARTIAL[]").description("PARTIAL 시도 ID"),
-					fieldWithPath("data.COMPLETE").description("모든 시군구에 이미지가 있는 시도 ID 배열"),
-					fieldWithPath("data.COMPLETE[]").description("COMPLETE 시도 ID")
+					fieldWithPath("data.partiallyCoveredSidoIds").description("일부 시군구에만 이미지가 있는 시도 ID 배열"),
+					fieldWithPath("data.partiallyCoveredSidoIds[]").description("PARTIAL 시도 ID"),
+					fieldWithPath("data.completelyCoveredSidoIds").description("모든 시군구에 이미지가 있는 시도 ID 배열"),
+					fieldWithPath("data.completelyCoveredSidoIds[]").description("COMPLETE 시도 ID")
 				)
 			));
 

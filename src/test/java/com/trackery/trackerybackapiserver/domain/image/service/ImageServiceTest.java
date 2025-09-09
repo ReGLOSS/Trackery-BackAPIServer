@@ -1047,7 +1047,7 @@ class ImageServiceTest {
 
 			// Then
 			assertThat(result).isNotNull();
-			assertThat(result.getHavingImagesSigunguIdSet()).isEqualTo(sigunguIds);
+			assertThat(result.getHavingImagesSigunguIdList()).isEqualTo(sigunguIds);
 			verify(imageMapper).selectSigunguCoverage(testUserId, testSidoId);
 		}
 
@@ -1065,7 +1065,7 @@ class ImageServiceTest {
 
 			// Then
 			assertThat(result).isNotNull();
-			assertThat(result.getHavingImagesSigunguIdSet()).isEmpty();
+			assertThat(result.getHavingImagesSigunguIdList()).isEmpty();
 			verify(imageMapper).selectSigunguCoverage(testUserId, testSidoId);
 		}
 

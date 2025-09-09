@@ -246,7 +246,7 @@
 
     <!-- 유저의 시군구 이미지 커버리지 조회 -->
     <resultMap id="SigunguCoverageResultMap" type="com.trackery.trackerybackapiserver.domain.image.dto.ImageSigunguCoverageResponseDto">
-        <collection property="havingImagesSigunguIdSet" ofType="Long"
+        <collection property="havingImagesSigunguIdList" ofType="Long"
                     column="{userId=userId, sidoId=sidoId}" select="selectSigunguIds"/>
     </resultMap>
 

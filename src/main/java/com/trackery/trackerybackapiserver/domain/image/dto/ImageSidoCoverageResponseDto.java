@@ -24,6 +24,7 @@ import lombok.NoArgsConstructor;
  * 25. 9. 5.		durururuk		필드 구성
  * 25. 9. 5.		durururuk		javadoc 주석 작성
  * 25. 9. 9.		durururuk		Set에서 List로 자료형 변경
+ * 25. 9. 9.		durururuk		컨벤션에 맞게 응답 필드 수정
  */
 @Getter
 @NoArgsConstructor
@@ -32,12 +33,12 @@ public class ImageSidoCoverageResponseDto {
 	/**
 	 * 일부 시군구에만 이미지가 있는 시도 ID List
 	 */
-	@JsonProperty("PARTIAL")
+	@JsonProperty("partiallyCoveredSidoIds")
 	private List<Long> partialSidoIdList;
 	
 	/**
 	 * 모든 시군구에 이미지가 있는 시도 ID List
 	 */
-	@JsonProperty("COMPLETE")
+	@JsonProperty("completelyCoveredSidoIds")
 	private List<Long> completeSidoIdList;
 }

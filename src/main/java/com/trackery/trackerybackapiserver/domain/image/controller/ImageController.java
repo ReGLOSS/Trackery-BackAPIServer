@@ -20,6 +20,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageSigunguCoverageResponseDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
@@ -225,6 +226,15 @@ public class ImageController {
 	@GetMapping("/me/coverage/sido")
 	public ResponseEntity<ApiResponse<ImageSidoCoverageResponseDto>> getImageSidoCoverage(@AuthenticationPrincipal CustomUserDetails userDetails) {
 		ImageSidoCoverageResponseDto response = imageService.getImageSidoCoverageData(userDetails.getUserId());
+		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
+	}
+
+	@GetMapping("/me/coverage/sido/{sidoId}/sigungu")
+	public ResponseEntity<ApiResponse<ImageSigunguCoverageResponseDto>> getImageSigunguCoverage(
+		@PathVariable Long sidoId,
+		@AuthenticationPrincipal CustomUserDetails userDetails
+	) {
+		ImageSigunguCoverageResponseDto response = imageService.getImageSigunguCoverageData(userDetails.getUserId(), sidoId);
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 }

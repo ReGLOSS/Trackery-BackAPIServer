@@ -420,7 +420,7 @@ public class ImageService {
 			() -> new ApiException(ErrorCode.INTERNAL_SERVER_ERROR)
 		);
 
-		if (result.getHavingImagesSigunguIdSet() == null) {
+		if (result.getHavingImagesSigunguIdList() == null) {
 			throw new ApiException(ErrorCode.INTERNAL_SERVER_ERROR);
 		}
 

@@ -24,6 +24,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageSigunguCoverageResponseDto {
-	@JsonProperty("SIGUNGU-IDS")
-	private List<Long> havingImagesSigunguIdSet;
+	@JsonProperty("coveredSigunguIds")
+	private List<Long> havingImagesSigunguIdList;
 }
