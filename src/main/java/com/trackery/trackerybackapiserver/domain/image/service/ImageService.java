@@ -409,7 +409,7 @@ public class ImageService {
 
 	/**
 	 * 사용자의 시도별 시군구 이미지 커버리지 데이터를 조회합니다.
-	 * 이미지가 존재하는 시군구 ID를 Set<Long>으로 반환합니다.
+	 * 이미지가 존재하는 시군구 ID를 List<Long>이 담긴 DTO로 반환합니다.
 	 * @param userId 사용자 ID
 	 * @param sidoId 시도 ID
 	 * @return 시도별 시군구 이미지 커버리지 정보 ()

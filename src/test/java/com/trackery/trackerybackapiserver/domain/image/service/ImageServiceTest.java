@@ -29,6 +29,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageSigunguCoverageResponseDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
@@ -75,6 +76,7 @@ import com.trackery.trackerybackapiserver.domain.tag.service.TagService;
  * 25. 7. 15.		inari		ImageServiceTest 테스트 코드 작성
  * 25. 9. 5.		durururuk		시도 커버리지 메서드 테스트 코드 작성
  * 25. 9. 9.		durururuk		시도 커버리지 테스트 자료형 List로 수정
+ * 25. 9. 9.		durururuk		시군구 커버리지 서비스 테스트 코드 작성
  */
 @ExtendWith(MockitoExtension.class)
 class ImageServiceTest {
@@ -1022,6 +1024,78 @@ class ImageServiceTest {
 				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.INTERNAL_SERVER_ERROR);
 
 			verify(imageMapper).selectSidoCoverage(testUserId);
+		}
+	}
+
+	@Nested
+	@DisplayName("시군구 이미지 커버리지 조회 테스트")
+	class GetImageSigunguCoverageDataTest {
+		private final Long testUserId = 1L;
+		private final Long testSidoId = 11L;
+
+		@Test
+		@DisplayName("성공 - 정상 시군구 커버리지 데이터 반환")
+		void getImageSigunguCoverageData_success() {
+			// Given
+			List<Long> sigunguIds = List.of(11001L, 11002L, 11003L);
+			ImageSigunguCoverageResponseDto expectedDto = new ImageSigunguCoverageResponseDto(sigunguIds);
+			
+			when(imageMapper.selectSigunguCoverage(testUserId, testSidoId)).thenReturn(Optional.of(expectedDto));
+
+			// When
+			ImageSigunguCoverageResponseDto result = imageService.getImageSigunguCoverageData(testUserId, testSidoId);
+
+			// Then
+			assertThat(result).isNotNull();
+			assertThat(result.getHavingImagesSigunguIdSet()).isEqualTo(sigunguIds);
+			verify(imageMapper).selectSigunguCoverage(testUserId, testSidoId);
+		}
+
+		@Test
+		@DisplayName("성공 - 빈 시군구 커버리지 데이터 반환")
+		void getImageSigunguCoverageData_emptyResult() {
+			// Given
+			List<Long> emptySigunguIds = List.of();
+			ImageSigunguCoverageResponseDto expectedDto = new ImageSigunguCoverageResponseDto(emptySigunguIds);
+			
+			when(imageMapper.selectSigunguCoverage(testUserId, testSidoId)).thenReturn(Optional.of(expectedDto));
+
+			// When
+			ImageSigunguCoverageResponseDto result = imageService.getImageSigunguCoverageData(testUserId, testSidoId);
+
+			// Then
+			assertThat(result).isNotNull();
+			assertThat(result.getHavingImagesSigunguIdSet()).isEmpty();
+			verify(imageMapper).selectSigunguCoverage(testUserId, testSidoId);
+		}
+
+		@Test
+		@DisplayName("실패 - Mapper가 Optional.empty() 반환")
+		void getImageSigunguCoverageData_mapperReturnsEmpty() {
+			// Given
+			when(imageMapper.selectSigunguCoverage(testUserId, testSidoId)).thenReturn(Optional.empty());
+
+			// When & Then
+			assertThatThrownBy(() -> imageService.getImageSigunguCoverageData(testUserId, testSidoId))
+				.isInstanceOf(ApiException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.INTERNAL_SERVER_ERROR);
+
+			verify(imageMapper).selectSigunguCoverage(testUserId, testSidoId);
+		}
+
+		@Test
+		@DisplayName("실패 - havingImagesSigunguIdSet이 null")
+		void getImageSigunguCoverageData_sigunguSetIsNull() {
+			// Given
+			ImageSigunguCoverageResponseDto dtoWithNull = new ImageSigunguCoverageResponseDto(null);
+			when(imageMapper.selectSigunguCoverage(testUserId, testSidoId)).thenReturn(Optional.of(dtoWithNull));
+
+			// When & Then
+			assertThatThrownBy(() -> imageService.getImageSigunguCoverageData(testUserId, testSidoId))
+				.isInstanceOf(ApiException.class)
+				.hasFieldOrPropertyWithValue("errorCode", ErrorCode.INTERNAL_SERVER_ERROR);
+
+			verify(imageMapper).selectSigunguCoverage(testUserId, testSidoId);
 		}
 	}
 }
