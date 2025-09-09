@@ -60,6 +60,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 7. 10.		durururuk		PageSize 파라미터 검증 추가
  * 25. 7. 10.		inari		이미지 단건 조회시 태그 추가
  * 25. 9. 5.		durururuk		이미지 시도 커버리지 조회 API 작성
+ * 25.
  */
 @RestController
 @RequiredArgsConstructor
@@ -221,7 +222,7 @@ public class ImageController {
 	/**
 	 * 인증된 유저의 시도 이미지 커버리지를 조회합니다.
 	 * @param userDetails 인증된 사용자 정보
-	 * @return 시도별 커버리지 정보 DTO (PARTIAL/COMPLETE)
+	 * @return 시도별 커버리지 정보 DTO (partiallyCoveredSidoIds/completelyCoveredSidoIds)
 	 */
 	@GetMapping("/me/coverage/sido")
 	public ResponseEntity<ApiResponse<ImageSidoCoverageResponseDto>> getImageSidoCoverage(@AuthenticationPrincipal CustomUserDetails userDetails) {
@@ -229,6 +230,12 @@ public class ImageController {
 		return ResponseEntity.ok(ApiResponse.success(SuccessCode.OK, response));
 	}
 
+	/**
+	 * 인증된 유저의 특정 시도 내 시군구별 이미지 커버리지를 조회합니다.
+	 * @param sidoId 조회할 시도 ID
+	 * @param userDetails 인증된 사용자 정보
+	 * @return 해당 시도 내에서 사용자가 이미지를 업로드한 시군구 ID 목록
+	 */
 	@GetMapping("/me/coverage/sido/{sidoId}/sigungu")
 	public ResponseEntity<ApiResponse<ImageSigunguCoverageResponseDto>> getImageSigunguCoverage(
 		@PathVariable Long sidoId,
