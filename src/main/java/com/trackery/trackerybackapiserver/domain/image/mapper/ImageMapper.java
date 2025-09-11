@@ -8,6 +8,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageSigunguCoverageResponseDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoForThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
 import com.trackery.trackerybackapiserver.domain.image.entity.Image;
@@ -39,6 +40,7 @@ import com.trackery.trackerybackapiserver.domain.image.entity.Image;
  * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 추가
  * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 옵셔널로 수정
  * 25. 9. 5.		durururuk		Javadoc 주석 작성
+ * 25. 9. 8.		durururuk		시군구 커버리지 매퍼 메서드 추가
  */
 @Mapper
 public interface ImageMapper {
@@ -94,10 +96,8 @@ public interface ImageMapper {
 	 * @param isPublic 공개 여부
 	 * @return 수정된 행의 수
 	 */
-	int updateImageMetadata(@Param("imageId") Long imageId,
-		@Param("imageName") String imageName,
-		@Param("imageContent") String imageContent,
-		@Param("imageDate") LocalDateTime imageDate,
+	int updateImageMetadata(@Param("imageId") Long imageId, @Param("imageName") String imageName,
+		@Param("imageContent") String imageContent, @Param("imageDate") LocalDateTime imageDate,
 		@Param("isPublic") Integer isPublic);
 
 	/**
@@ -122,4 +122,8 @@ public interface ImageMapper {
 	 * @return 시도별 이미지 커버리지 정보를 담은 DTO (Optional)
 	 */
 	Optional<ImageSidoCoverageResponseDto> selectSidoCoverage(@Param("userId") Long userId);
+
+	Optional<ImageSigunguCoverageResponseDto> selectSigunguCoverage(@Param("userId") Long userId,
+		@Param("sidoId") Long sidoId);
+
 }

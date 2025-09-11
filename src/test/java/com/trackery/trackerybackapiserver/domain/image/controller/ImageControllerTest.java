@@ -13,7 +13,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +26,7 @@ import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto;
+import com.trackery.trackerybackapiserver.domain.image.dto.ImageSigunguCoverageResponseDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageThumbnailDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.ImageUpdateRequestDto;
 import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageSearchByUserIdDto;
@@ -64,6 +64,8 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * 25. 7. 10.		durururuk		변경된 로직에 맞게 테스트 코드 수정
  * 25. 7. 14.		inari		테스트코드 수정 및 adoc 변경
  * 25. 9. 5.		durururuk		이미지 시도 커버리지 조회 API 테스트코드, 문서화 코드 작성
+ * 25. 9. 9.		durururuk		시도 커버리지 테스트 자료형 List로 수정
+ * 25. 9. 9.		durururuk		시군구 커버리지 조회 API 테스트코드, 문서화 코드 작성
  */
 @WebMvcTest(ImageController.class)
 class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
@@ -556,8 +558,8 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 	@DisplayName("시도별 이미지 커버리지 조회 성공")
 	void getImageSidoCoverageSuccess() throws Exception {
 		// Given
-		Set<Long> partialSidoIds = Set.of(11L, 26L, 31L);
-		Set<Long> completeSidoIds = Set.of(41L, 28L);
+		List<Long> partialSidoIds = List.of(11L, 26L, 31L);
+		List<Long> completeSidoIds = List.of(41L, 28L);
 		ImageSidoCoverageResponseDto coverageData = new ImageSidoCoverageResponseDto(partialSidoIds, completeSidoIds);
 		
 		when(imageService.getImageSidoCoverageData(USER_ID)).thenReturn(coverageData);
@@ -571,22 +573,61 @@ class ImageControllerTest extends CommonMockMvcControllerTestSetUp {
 			.andExpect(status().isOk())
 			.andExpect(jsonPath("$.code").value(200))
 			.andExpect(jsonPath("$.message").value("Ok"))
-			.andExpect(jsonPath("$.data.PARTIAL").isArray())
-			.andExpect(jsonPath("$.data.PARTIAL.length()").value(3))
-			.andExpect(jsonPath("$.data.COMPLETE").isArray())
-			.andExpect(jsonPath("$.data.COMPLETE.length()").value(2))
+			.andExpect(jsonPath("$.data.partiallyCoveredSidoIds").isArray())
+			.andExpect(jsonPath("$.data.partiallyCoveredSidoIds.length()").value(3))
+			.andExpect(jsonPath("$.data.completelyCoveredSidoIds").isArray())
+			.andExpect(jsonPath("$.data.completelyCoveredSidoIds.length()").value(2))
 			.andDo(document("get-image-sido-coverage-success",
 				responseFields(
 					fieldWithPath("code").description("응답 코드"),
 					fieldWithPath("message").description("응답 메시지"),
 					fieldWithPath("data").description("시도별 이미지 커버리지 데이터"),
-					fieldWithPath("data.PARTIAL").description("일부 시군구에만 이미지가 있는 시도 ID 배열"),
-					fieldWithPath("data.PARTIAL[]").description("PARTIAL 시도 ID"),
-					fieldWithPath("data.COMPLETE").description("모든 시군구에 이미지가 있는 시도 ID 배열"),
-					fieldWithPath("data.COMPLETE[]").description("COMPLETE 시도 ID")
+					fieldWithPath("data.partiallyCoveredSidoIds").description("일부 시군구에만 이미지가 있는 시도 ID 배열"),
+					fieldWithPath("data.partiallyCoveredSidoIds[]").description("PARTIAL 시도 ID"),
+					fieldWithPath("data.completelyCoveredSidoIds").description("모든 시군구에 이미지가 있는 시도 ID 배열"),
+					fieldWithPath("data.completelyCoveredSidoIds[]").description("COMPLETE 시도 ID")
 				)
 			));
 
 		verify(imageService, times(1)).getImageSidoCoverageData(USER_ID);
+	}
+
+	@Test
+	@DisplayName("특정 시도의 시군구별 이미지 커버리지 조회 성공")
+	void getImageSigunguCoverageSuccess() throws Exception {
+		// Given
+		Long sidoId = 31L;
+		List<Long> sigunguIds = List.of(31150L, 31180L);
+		ImageSigunguCoverageResponseDto coverageData = new ImageSigunguCoverageResponseDto(sigunguIds);
+		
+		when(imageService.getImageSigunguCoverageData(USER_ID, sidoId)).thenReturn(coverageData);
+
+		// When
+		ResultActions result = mockMvc.perform(get("/api/images/me/coverage/sido/{sidoId}/sigungu", sidoId)
+			.with(user(userDetails)));
+
+		// Then
+		result
+			.andExpect(status().isOk())
+			.andExpect(jsonPath("$.code").value(200))
+			.andExpect(jsonPath("$.message").value("Ok"))
+			.andExpect(jsonPath("$.data.coveredSigunguIds").isArray())
+			.andExpect(jsonPath("$.data.coveredSigunguIds.length()").value(2))
+			.andExpect(jsonPath("$.data.coveredSigunguIds[0]").value(31150L))
+			.andExpect(jsonPath("$.data.coveredSigunguIds[1]").value(31180L))
+			.andDo(document("get-image-sigungu-coverage-success",
+				pathParameters(
+					parameterWithName("sidoId").description("조회할 시도 ID")
+				),
+				responseFields(
+					fieldWithPath("code").description("응답 코드"),
+					fieldWithPath("message").description("응답 메시지"),
+					fieldWithPath("data").description("시군구별 이미지 커버리지 데이터"),
+					fieldWithPath("data.coveredSigunguIds").description("해당 시도 내에서 사용자가 이미지를 업로드한 시군구 ID 배열"),
+					fieldWithPath("data.coveredSigunguIds[]").description("이미지가 업로드된 시군구 ID")
+				)
+			));
+
+		verify(imageService, times(1)).getImageSigunguCoverageData(USER_ID, sidoId);
 	}
 }

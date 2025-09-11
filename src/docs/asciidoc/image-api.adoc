@@ -32,18 +32,32 @@ include::{snippets}/get-my-images-success/response-fields.adoc[]
 === 내 이미지 시도 커버리지 조회 API
 ==== GET `/api/images/me/coverage/sido`
 
-인증된 사용자가 업로드한 이미지의 시도 커버리지를 조회하는 API입니다.
+사용자가 업로드한 이미지의 시도 커버리지를 조회하는 API입니다.
 모든 시군구에 각각 한 장이라도 이미지가 있으면 COMPLETE,
 어떤 시군구라도 적어도 한 장 이미지가 있으면 PARTIAL 배열에
 시도 ID를 넣어서 반환합니다.
 아무런 이미지도 없는 경우는 반환하지 않습니다.
 
 ===== 요청
-include::{snippets}/get-image-sido-coverage-success/httpie-request.adoc[]
+include::{snippets}/get-image-sido-coverage-success/http-request.adoc[]
 
 ===== 응답
 include::{snippets}/get-image-sido-coverage-success/http-response.adoc[]
 include::{snippets}/get-image-sido-coverage-success/response-fields.adoc[]
+'''
+
+=== 내 이미지 시도별 시군구 커버리지 조회 API
+==== GET `/api/images/me/coverage/sido/+{sidoId}+`
+
+사용자가 업로드한 이미지의 시도별 시군구 커버리지를 조회하는 API입니다.
+시도의 포함된 시군구 중 이미지가 한 장이라도 업로드 된 시군구 ID를 배열로 반환합니다.
+
+===== 요청
+include::{snippets}/get-image-sigungu-coverage-success/http-request.adoc[]
+
+===== 응답
+include::{snippets}/get-image-sigungu-coverage-success/http-response.adoc[]
+include::{snippets}/get-image-sigungu-coverage-success/response-fields.adoc[]
 '''
 
 === S3 업로드 URL 요청 API
