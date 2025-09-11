@@ -60,7 +60,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 7. 10.		durururuk		PageSize 파라미터 검증 추가
  * 25. 7. 10.		inari		이미지 단건 조회시 태그 추가
  * 25. 9. 5.		durururuk		이미지 시도 커버리지 조회 API 작성
- * 25.
+ * 25. 9. 9.		durururuk		시군구 커버리지 조회 API 작성
  */
 @RestController
 @RequiredArgsConstructor
