@@ -92,6 +92,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 Set null 예외 처리 강화
  * 25. 9. 8.		durururuk		사용자의 시도별 시군구 이미지 커버리지 데이터를 조회 메서드 추가
  * 25. 9. 9.		durururuk		시도 커버리지 조회 메서드 필드명 수정
+ * 25. 9. 12.		inari		이미지 업데이트 순환 참조 문제 해결
  */
 @Slf4j
 @Service
@@ -285,7 +286,11 @@ public class ImageService {
 		tagService.processTagRemoval(imageId, updateRequest);
 		tagService.processTagAddition(imageId, updateRequest);
 
-		return getOriginalImageByImageId(userId, imageId);
+		// 수정된 이미지 정보를 다시 조회하여 반환
+		Image updatedImage = imageMapper.findImageByImageId(imageId)
+			.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
+
+		return convertImageToImageDto(updatedImage, userId);
 	}
 
 	/**
