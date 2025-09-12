@@ -193,9 +193,9 @@
 
     <!-- 유저의 시도 이미지 커버리지 조회 -->
     <resultMap id="SidoCoverageResultMap" type="com.trackery.trackerybackapiserver.domain.image.dto.ImageSidoCoverageResponseDto">
-        <collection property="partialSidoIdSet" ofType="Long" 
+        <collection property="partialSidoIdList" ofType="Long" 
                     column="userId" select="selectPartialSidoIds"/>
-        <collection property="completeSidoIdSet" ofType="Long" 
+        <collection property="completeSidoIdList" ofType="Long" 
                     column="userId" select="selectCompleteSidoIds"/>
     </resultMap>
 
@@ -242,5 +242,23 @@
         SELECT sd_id 
         FROM sido_coverage 
         WHERE image_sgg_count = total_sgg_count AND total_sgg_count > 0
+    </select>
+
+    <!-- 유저의 시군구 이미지 커버리지 조회 -->
+    <resultMap id="SigunguCoverageResultMap" type="com.trackery.trackerybackapiserver.domain.image.dto.ImageSigunguCoverageResponseDto">
+        <collection property="havingImagesSigunguIdList" ofType="Long"
+                    column="{userId=userId, sidoId=sidoId}" select="selectSigunguIds"/>
+    </resultMap>
+
+    <select id="selectSigunguCoverage" resultMap="SigunguCoverageResultMap">
+        SELECT #{userId} as userId, #{sidoId} as sidoId
+    </select>
+
+    <select id="selectSigunguIds" resultType="Long">
+        SELECT DISTINCT sgg.sgg_id
+        FROM image i
+                 JOIN coord_poi cp ON i.coord_point_id = cp.coord_point_id
+                 JOIN juso_sigungu sgg ON cp.sgg_id = sgg.sgg_id
+        WHERE i.user_id = #{userId} AND i.is_deleted = 0 AND sgg.sd_id = #{sidoId}
     </select>
 </mapper>

@@ -1,6 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.image.dto;
 
-import java.util.Set;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -23,20 +23,22 @@ import lombok.NoArgsConstructor;
  * 25. 9. 5.		durururuk		최초 생성
  * 25. 9. 5.		durururuk		필드 구성
  * 25. 9. 5.		durururuk		javadoc 주석 작성
+ * 25. 9. 9.		durururuk		Set에서 List로 자료형 변경
+ * 25. 9. 9.		durururuk		컨벤션에 맞게 응답 필드 수정
  */
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
 public class ImageSidoCoverageResponseDto {
 	/**
-	 * 일부 시군구에만 이미지가 있는 시도 ID Set
+	 * 일부 시군구에만 이미지가 있는 시도 ID List
 	 */
-	@JsonProperty("PARTIAL")
-	private Set<Long> partialSidoIdSet;
+	@JsonProperty("partiallyCoveredSidoIds")
+	private List<Long> partialSidoIdList;
 	
 	/**
-	 * 모든 시군구에 이미지가 있는 시도 ID Set
+	 * 모든 시군구에 이미지가 있는 시도 ID List
 	 */
-	@JsonProperty("COMPLETE")
-	private Set<Long> completeSidoIdSet;
+	@JsonProperty("completelyCoveredSidoIds")
+	private List<Long> completeSidoIdList;
 }
