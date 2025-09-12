@@ -89,6 +89,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 9. 5.		durururuk		Javadoc 주석 작성
  * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 Optional처리로 null 처리 강화
  * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 Set null 예외 처리 강화
+ * 25. 9. 12.		inari		이미지 업데이트 순환 참조 문제 해결
  */
 @Slf4j
 @Service
