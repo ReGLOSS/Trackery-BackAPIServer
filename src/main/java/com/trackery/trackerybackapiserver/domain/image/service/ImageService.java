@@ -282,7 +282,11 @@ public class ImageService {
 		tagService.processTagRemoval(imageId, updateRequest);
 		tagService.processTagAddition(imageId, updateRequest);
 
-		return getOriginalImageByImageId(userId, imageId);
+		// 수정된 이미지 정보를 다시 조회하여 반환
+		Image updatedImage = imageMapper.findImageByImageId(imageId)
+			.orElseThrow(() -> new ApiException(ErrorCode.NOT_FOUND_IMAGE));
+
+		return convertImageToImageDto(updatedImage, userId);
 	}
 
 	/**
