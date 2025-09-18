@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.trackery.trackerybackapiserver.domain.admin.mapper.UserSuspensionMapper">
+
+    <!-- UserSuspension 엔티티 결과 매핑 -->
+    <resultMap id="UserSuspensionResultMap" type="com.trackery.trackerybackapiserver.domain.admin.entity.UserSuspension">
+        <id property="suspensionId" column="suspension_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="suspensionType" column="suspension_type"/>
+        <result property="startDate" column="start_date"/>
+        <result property="endDate" column="end_date"/>
+        <result property="reason" column="reason"/>
+        <result property="adminId" column="admin_id"/>
+        <result property="actionType" column="action_type"/>
+        <result property="isActive" column="is_active"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <!-- 정지 이력 삽입 -->
+    <insert id="insertSuspension" parameterType="com.trackery.trackerybackapiserver.domain.admin.entity.UserSuspension"
+            useGeneratedKeys="true" keyProperty="suspensionId">
+        INSERT INTO user_suspension (
+            user_id,
+            suspension_type,
+            start_date,
+            end_date,
+            reason,
+            admin_id,
+            action_type,
+            is_active
+        )
+        VALUES (
+            #{userId},
+            #{suspensionType},
+            #{startDate},
+            #{endDate},
+            #{reason},
+            #{adminId},
+            #{actionType},
+            #{isActive}
+        )
+    </insert>
+
+    <!-- 만료된 임시정지 조회 (배치 처리용) -->
+    <select id="findExpiredTemporarySuspensions" resultMap="UserSuspensionResultMap">
+        SELECT * FROM user_suspension
+        WHERE suspension_type = 2
+        AND is_active = 1
+        AND end_date &lt;= #{currentDate}
+    </select>
+
+    <!-- 사용자의 현재 활성 정지 정보 조회 -->
+    <select id="findActiveSuspensionByUserId" resultMap="UserSuspensionResultMap">
+        SELECT * FROM user_suspension
+        WHERE user_id = #{userId}
+        AND is_active = 1
+        AND action_type = 'SUSPEND'
+        ORDER BY created_at DESC
+        LIMIT 1
+    </select>
+
+    <!-- 정지 이력 비활성화 -->
+    <update id="deactivateSuspension">
+        UPDATE user_suspension
+        SET is_active = 0,
+            updated_at = CONVERT_TZ(NOW(), 'UTC', 'Asia/Seoul')
+        WHERE suspension_id = #{suspensionId}
+    </update>
+
+    <!-- 사용자별 정지 이력 조회 -->
+    <select id="findSuspensionHistoryByUserId" resultMap="UserSuspensionResultMap">
+        SELECT * FROM user_suspension
+        WHERE user_id = #{userId}
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 관리자별 작업 로그 조회 -->
+    <select id="findActionLogsByAdminId" resultMap="UserSuspensionResultMap">
+        SELECT * FROM user_suspension
+        <where>
+            <if test="adminId != null">
+                AND admin_id = #{adminId}
+            </if>
+        </where>
+        ORDER BY created_at DESC
+    </select>
+
+    <!-- 사용자ID로 모든 활성 정지 비활성화 -->
+    <update id="deactivateAllSuspensionsByUserId">
+        UPDATE user_suspension
+        SET is_active = 0,
+            updated_at = CONVERT_TZ(NOW(), 'UTC', 'Asia/Seoul')
+        WHERE user_id = #{userId}
+        AND is_active = 1
+        AND action_type = 'SUSPEND'
+    </update>
+
+    <!-- 정지 이력 통계 조회 -->
+    <select id="countTotalSuspensions" resultType="Long">
+        SELECT COUNT(*) FROM user_suspension
+        WHERE action_type = 'SUSPEND'
+    </select>
+
+    <!-- 현재 정지 중인 사용자 수 조회 -->
+    <select id="countCurrentSuspendedUsers" resultType="Long">
+        SELECT COUNT(DISTINCT user_id) FROM user_suspension
+        WHERE is_active = 1
+        AND action_type = 'SUSPEND'
+    </select>
+
+</mapper>
