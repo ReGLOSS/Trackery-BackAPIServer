@@ -13,6 +13,7 @@ import com.trackery.trackerybackapiserver.domain.common.enums.CookieName;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.jwt.dto.JwtUserInfoDto;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
@@ -41,11 +42,13 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 3. 28.		durururuk		리프레쉬 토큰으로 액세스 토큰 재발급 시, 쿠키에 다시 추가되게 수정
  * 25. 3. 29.		durururuk		주석 작성
  * 25. 6. 27.		inari		쿠키 이름 및 정책 enum으로 수정
+ * 25. 9. 18.		inari		사용자 정지 기능 추가
  */
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 	private final JwtService jwtService;
+	private final JwtRedisService jwtRedisService;
 
 	/**
 	 * 필터 흐름
@@ -64,6 +67,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		}
 
 		JwtUserInfoDto userInfo = verifyAndParseJwt(accessToken);
+		checkUserSuspension(userInfo.userId());
 		setAuthentication(userInfo);
 
 		filterChain.doFilter(request, response);
@@ -86,6 +90,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 		} catch (JWTVerificationException e) {
 			log.error("JWT 검증 실패: {}", e.getMessage());
 			throw new ApiException(ErrorCode.UNAUTHORIZED_JWT_VERIFY_FAILED);
+		}
+	}
+
+	/**
+	 * 사용자 정지 상태를 확인하는 메서드
+	 * @param userId : 확인할 사용자 ID
+	 */
+	private void checkUserSuspension(Long userId) {
+		if (jwtRedisService.isUserSuspended(userId)) {
+			String suspensionInfo = jwtRedisService.getUserSuspensionInfo(userId);
+			if (suspensionInfo != null) {
+				String[] parts = suspensionInfo.split(":");
+				Integer suspensionType = Integer.valueOf(parts[0]);
+
+				if (suspensionType == 2) {
+					String endDate = parts.length > 1 ? parts[1] : "";
+					log.warn("임시정지된 사용자 접근 시도: userId={}, endDate={}", userId, endDate);
+					throw new ApiException(ErrorCode.FORBIDDEN_ACCOUNT_TEMPORARILY_SUSPENDED);
+				} else if (suspensionType == 3) {
+					log.warn("영구정지된 사용자 접근 시도: userId={}", userId);
+					throw new ApiException(ErrorCode.FORBIDDEN_ACCOUNT_PERMANENTLY_SUSPENDED);
+				}
+			}
 		}
 	}
 

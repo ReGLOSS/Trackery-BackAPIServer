@@ -38,6 +38,7 @@ import lombok.extern.slf4j.Slf4j;
  * 25. 7. 9.		durururuk		리프레시 토큰으로 액세스토큰 재발급시 예외처리 강화 및 로깅 추가
  * 25. 7. 14.		durururuk		로그에서 민감정보 삭제
  * 25. 7. 14.		durururuk		테스트코드 수정
+ * 25. 9. 18.		inari		유저 정지 기능 추가
  */
 @Slf4j
 @Service
@@ -48,6 +49,7 @@ public class JwtRedisService {
 
 	private static final String REFRESH_TOKEN_KEY_PREFIX = "jwtRefreshToken:";
 	private static final String ACCESS_TOKEN_BLACKLIST_KEY_PREFIX = "jwtBlacklist:";
+	private static final String USER_SUSPENSION_KEY_PREFIX = "userSuspension:";
 
 	/**
 	 * 리프레시 토큰 정보를 Redis에 저장합니다.
@@ -170,6 +172,71 @@ public class JwtRedisService {
 		String redisKey = ACCESS_TOKEN_BLACKLIST_KEY_PREFIX + jti;
 
 		return redisTemplate.hasKey(redisKey);
+	}
+
+	/**
+	 * 사용자를 정지 상태로 설정합니다.
+	 * @param userId 정지할 사용자 ID
+	 * @param suspensionType 정지 유형 (2: 임시정지, 3: 영구정지)
+	 * @param endDate 정지 해제 예정일 (임시정지인 경우만, YYYY-MM-DD 형식)
+	 */
+	public void suspendUser(Long userId, Integer suspensionType, String endDate) {
+		if (userId == null) {
+			log.error("사용자 ID null");
+			throw new ApiException(ErrorCode.BAD_REQUEST);
+		}
+
+		String redisKey = USER_SUSPENSION_KEY_PREFIX + userId;
+		String suspensionInfo = suspensionType + ":" + (endDate != null ? endDate : "");
+
+		// 영구정지는 10년, 임시정지는 필요에 따라 더 길게 설정 (최대 1년)
+		Duration ttl = suspensionType == 3 ? Duration.ofDays(3650) : Duration.ofDays(365);
+
+		redisTemplate.opsForValue().set(redisKey, suspensionInfo, ttl);
+		log.info("사용자 정지 설정: userId={}, type={}, endDate={}", userId, suspensionType, endDate);
+	}
+
+	/**
+	 * 사용자 정지를 해제합니다.
+	 * @param userId 정지 해제할 사용자 ID
+	 */
+	public void unsuspendUser(Long userId) {
+		if (userId == null) {
+			log.error("사용자 ID null");
+			throw new ApiException(ErrorCode.BAD_REQUEST);
+		}
+
+		String redisKey = USER_SUSPENSION_KEY_PREFIX + userId;
+		Boolean deleted = redisTemplate.unlink(redisKey);
+		log.info("사용자 정지 해제: userId={}, deleted={}", userId, deleted);
+	}
+
+	/**
+	 * 사용자가 정지 상태인지 확인합니다.
+	 * @param userId 확인할 사용자 ID
+	 * @return 정지 상태이면 true, 아니면 false
+	 */
+	public boolean isUserSuspended(Long userId) {
+		if (userId == null) {
+			return false;
+		}
+
+		String redisKey = USER_SUSPENSION_KEY_PREFIX + userId;
+		return redisTemplate.hasKey(redisKey);
+	}
+
+	/**
+	 * 사용자의 정지 정보를 가져옵니다.
+	 * @param userId 사용자 ID
+	 * @return 정지 정보 (형식: "suspensionType:endDate")
+	 */
+	public String getUserSuspensionInfo(Long userId) {
+		if (userId == null) {
+			return null;
+		}
+
+		String redisKey = USER_SUSPENSION_KEY_PREFIX + userId;
+		return redisTemplate.opsForValue().get(redisKey);
 	}
 
 	/**

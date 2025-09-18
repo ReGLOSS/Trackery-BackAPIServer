@@ -43,6 +43,7 @@ import lombok.Getter;
  * 25. 6. 27.		inari		이미 연동된 간편로그인 타유저 접근 차단
  * 25. 7. 7.		inari		프로퍼티 에러코드 추가
  * 25. 7. 10.		durururuk		PageUtil convert 메서드 null 체크 추가
+ * 25. 9. 18.		inari		계정 정지 관련 에러코드 추가
  */
 @Getter
 @AllArgsConstructor
@@ -302,7 +303,21 @@ public enum ErrorCode {
 	/**
 	 * 유틸리티 클래스의 객체가 생성됨 (HttpStatus.INTERNAL_SERVER_ERROR, 500, "유틸리티 클래스 객체가 생성되었습니다.")
 	 */
-	INTERNAL_SERVER_ERROR_UTIL_CLASS_INSTANTIATED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "유틸리티 클래스 객체가 생성되었습니다.");
+	INTERNAL_SERVER_ERROR_UTIL_CLASS_INSTANTIATED(HttpStatus.INTERNAL_SERVER_ERROR, 500, "유틸리티 클래스 객체가 생성되었습니다."),
+
+	/*
+	 * =================================================================================================================
+	 * 관리자 기능 관련 오류 (Admin Function Errors)
+	 * =================================================================================================================
+	 */
+	/**
+	 * 계정이 임시정지됨 (HttpStatus.FORBIDDEN, 403, "계정이 임시정지되었습니다.")
+	 */
+	FORBIDDEN_ACCOUNT_TEMPORARILY_SUSPENDED(HttpStatus.FORBIDDEN, 403, "계정이 임시정지되었습니다."),
+	/**
+	 * 계정이 영구정지됨 (HttpStatus.FORBIDDEN, 403, "계정이 영구정지되었습니다.")
+	 */
+	FORBIDDEN_ACCOUNT_PERMANENTLY_SUSPENDED(HttpStatus.FORBIDDEN, 403, "계정이 영구정지되었습니다.");
 
 	/**
 	 * HTTP 상태 코드
