@@ -189,8 +189,8 @@ public class JwtRedisService {
 		String redisKey = USER_SUSPENSION_KEY_PREFIX + userId;
 		String suspensionInfo = suspensionType + ":" + (endDate != null ? endDate : "");
 
-		// 영구정지는 10년, 임시정지는 필요에 따라 더 길게 설정 (최대 1년)
-		Duration ttl = suspensionType == 3 ? Duration.ofDays(3650) : Duration.ofDays(365);
+		// 영구정지는 100년, 임시정지는 필요에 따라 더 길게 설정 (최대 1년)
+		Duration ttl = suspensionType == 3 ? Duration.ofDays(36500) : Duration.ofDays(365);
 
 		redisTemplate.opsForValue().set(redisKey, suspensionInfo, ttl);
 		log.info("사용자 정지 설정: userId={}, type={}, endDate={}", userId, suspensionType, endDate);
