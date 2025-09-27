@@ -1,6 +1,5 @@
 package com.trackery.trackerybackapiserver.domain.admin.mapper;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -18,6 +17,7 @@ import com.trackery.trackerybackapiserver.domain.admin.entity.UserSuspension;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 18.		inari		최초 생성
+ * 25. 9. 27.		inari		배치용 매퍼 삭제
  */
 @Mapper
 public interface UserSuspensionMapper {
@@ -29,24 +29,11 @@ public interface UserSuspensionMapper {
 	void insertSuspension(UserSuspension suspension);
 
 	/**
-	 * 만료된 임시정지 목록을 조회 (배치 처리용)
-	 * @param currentDate 현재 날짜
-	 * @return 만료된 임시정지 목록
-	 */
-	List<UserSuspension> findExpiredTemporarySuspensions(@Param("currentDate") LocalDate currentDate);
-
-	/**
 	 * 사용자의 현재 활성 정지 정보를 조회
 	 * @param userId 사용자 ID
 	 * @return 활성 정지 정보 (없으면 null)
 	 */
 	UserSuspension findActiveSuspensionByUserId(@Param("userId") Long userId);
-
-	/**
-	 * 정지 이력을 비활성화 (is_active = 0)
-	 * @param suspensionId 정지 이력 ID
-	 */
-	void deactivateSuspension(@Param("suspensionId") Long suspensionId);
 
 	/**
 	 * 사용자별 정지 이력을 조회 (최신순)

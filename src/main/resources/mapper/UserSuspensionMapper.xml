@@ -45,14 +45,6 @@
         )
     </insert>
 
-    <!-- 만료된 임시정지 조회 (배치 처리용) -->
-    <select id="findExpiredTemporarySuspensions" resultMap="UserSuspensionResultMap">
-        SELECT * FROM user_suspension
-        WHERE suspension_type = 2
-        AND is_active = 1
-        AND end_date &lt;= #{currentDate}
-    </select>
-
     <!-- 사용자의 현재 활성 정지 정보 조회 -->
     <select id="findActiveSuspensionByUserId" resultMap="UserSuspensionResultMap">
         SELECT * FROM user_suspension
@@ -61,21 +53,6 @@
         AND action_type = 'SUSPEND'
         ORDER BY created_at DESC
         LIMIT 1
-    </select>
-
-    <!-- 정지 이력 비활성화 -->
-    <update id="deactivateSuspension">
-        UPDATE user_suspension
-        SET is_active = 0,
-            updated_at = CONVERT_TZ(NOW(), 'UTC', 'Asia/Seoul')
-        WHERE suspension_id = #{suspensionId}
-    </update>
-
-    <!-- 사용자별 정지 이력 조회 -->
-    <select id="findSuspensionHistoryByUserId" resultMap="UserSuspensionResultMap">
-        SELECT * FROM user_suspension
-        WHERE user_id = #{userId}
-        ORDER BY created_at DESC
     </select>
 
     <!-- 관리자별 작업 로그 조회 -->
