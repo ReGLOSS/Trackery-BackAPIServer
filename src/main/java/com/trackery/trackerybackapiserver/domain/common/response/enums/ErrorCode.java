@@ -289,6 +289,18 @@ public enum ErrorCode {
 	 * 사용자가 사용하지 않는 태그 (HttpStatus.BAD_REQUEST, 400, "사용자가 사용하지 않는 태그입니다.")
 	 */
 	BAD_REQUEST_TAG_NOT_USED_BY_USER(HttpStatus.BAD_REQUEST, 400, "사용자가 사용하지 않는 태그입니다."),
+	/**
+	 * 유효하지 않은 태그 타입 (HttpStatus.BAD_REQUEST, 400, "유효하지 않은 태그 타입입니다.")
+	 */
+	BAD_REQUEST_INVALID_TAG_TYPE(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 태그 타입입니다."),
+	/**
+	 * 이미 존재하는 태그 (HttpStatus.CONFLICT, 409, "이미 존재하는 태그입니다.")
+	 */
+	BAD_REQUEST_TAG_ALREADY_EXISTS(HttpStatus.CONFLICT, 409, "이미 존재하는 태그입니다."),
+	/**
+	 * 사용 중인 태그 (HttpStatus.BAD_REQUEST, 400, "사용 중인 태그는 삭제할 수 없습니다.")
+	 */
+	BAD_REQUEST_TAG_IN_USE(HttpStatus.BAD_REQUEST, 400, "사용 중인 태그는 삭제할 수 없습니다."),
 
 
 	/*
@@ -317,7 +329,43 @@ public enum ErrorCode {
 	/**
 	 * 계정이 영구정지됨 (HttpStatus.FORBIDDEN, 403, "계정이 영구정지되었습니다.")
 	 */
-	FORBIDDEN_ACCOUNT_PERMANENTLY_SUSPENDED(HttpStatus.FORBIDDEN, 403, "계정이 영구정지되었습니다.");
+	FORBIDDEN_ACCOUNT_PERMANENTLY_SUSPENDED(HttpStatus.FORBIDDEN, 403, "계정이 영구정지되었습니다."),
+	/**
+	 * 관리자 권한 부족 (HttpStatus.FORBIDDEN, 403, "관리자 권한이 부족합니다.")
+	 */
+	FORBIDDEN_INSUFFICIENT_ADMIN_PRIVILEGES(HttpStatus.FORBIDDEN, 403, "관리자 권한이 부족합니다."),
+	/**
+	 * MANAGER가 상위 관리자 관리 시도 (HttpStatus.FORBIDDEN, 403, "상위 관리자는 처리 할 수 없습니다.")
+	 */
+	FORBIDDEN_CANNOT_MANAGE_HIGHER_ROLE(HttpStatus.FORBIDDEN, 403, "상위 관리자는 처리 할 수 없습니다."),
+	/**
+	 * 액세스 토큰을 찾을 수 없음 (HttpStatus.UNAUTHORIZED, 401, "액세스 토큰을 찾을 수 없습니다.")
+	 */
+	UNAUTHORIZED_ACCESS_TOKEN_NOT_FOUND(HttpStatus.UNAUTHORIZED, 401, "액세스 토큰을 찾을 수 없습니다."),
+	/**
+	 * 이미 정지된 사용자 (HttpStatus.BAD_REQUEST, 400, "이미 정지된 사용자입니다.")
+	 */
+	BAD_REQUEST_ALREADY_SUSPENDED(HttpStatus.BAD_REQUEST, 400, "이미 정지된 사용자입니다."),
+	/**
+	 * 이미 정상 상태인 사용자 (HttpStatus.BAD_REQUEST, 400, "이미 활성 상태인 사용자입니다.")
+	 */
+	BAD_REQUEST_ALREADY_ACTIVE(HttpStatus.BAD_REQUEST, 400, "이미 활성 상태인 사용자입니다."),
+	/**
+	 * 자기 자신을 관리할 수 없음 (HttpStatus.BAD_REQUEST, 400, "자기 자신은 처리 할 수 없습니다.")
+	 */
+	BAD_REQUEST_CANNOT_MANAGE_SELF(HttpStatus.BAD_REQUEST, 400, "자기 자신은 처리 할 수 없습니다."),
+	/**
+	 * 유효하지 않은 역할 ID (HttpStatus.BAD_REQUEST, 400, "유효하지 않은 권한입니다.")
+	 */
+	BAD_REQUEST_INVALID_ROLE(HttpStatus.BAD_REQUEST, 400, "유효하지 않은 권한입니다."),
+	/**
+	 * 임시정지 시 종료일 필수 (HttpStatus.BAD_REQUEST, 400, "임시정지 시 종료일은 필수입니다.")
+	 */
+	BAD_REQUEST_SUSPENSION_END_DATE_REQUIRED(HttpStatus.BAD_REQUEST, 400, "임시정지 시 종료일은 필수입니다."),
+	/**
+	 * 자기 자신의 역할을 변경할 수 없음 (HttpStatus.BAD_REQUEST, 400, "자기 자신의 권한은 변경할 수 없습니다.")
+	 */
+	BAD_REQUEST_CANNOT_CHANGE_OWN_ROLE(HttpStatus.BAD_REQUEST, 400, "자기 자신의 권한은 변경할 수 없습니다.");
 
 	/**
 	 * HTTP 상태 코드
