@@ -3,6 +3,7 @@ package com.trackery.trackerybackapiserver.domain.user.mapper;
 import java.util.Optional;
 
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
 
@@ -18,6 +19,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.UserRole;
  * 25. 2. 25.		durururuk		최초 생성
  * 25. 2. 25.		durururuk		userRole 매퍼 추가, userMapper에 있던 userRoleInsert 이동
  * 25. 7. 11.		inari		user 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 9. 20.		inari		관리자용 매퍼 추가
  */
 @Mapper
 public interface UserRoleMapper {
@@ -35,4 +37,12 @@ public interface UserRoleMapper {
 	 * @return 조회된 사용자 권한 정보
 	 */
 	Optional<UserRole> findByUserId(Long userId);
+
+	/**
+	 * 사용자의 역할을 업데이트합니다.
+	 *
+	 * @param userId 사용자 ID
+	 * @param roleId 새로운 역할 ID
+	 */
+	void updateUserRole(@Param("userId") Long userId, @Param("roleId") Long roleId);
 }

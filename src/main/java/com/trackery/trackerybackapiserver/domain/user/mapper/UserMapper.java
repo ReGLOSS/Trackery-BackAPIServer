@@ -44,6 +44,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.User;
  * 25. 7. 11.		inari		자바독 오류 해결 및 자바독 주입
  * 25. 7. 25.		durururuk		updateUserProfileImage 메서드 추가
  * 25. 7. 29.		durururuk		자바독 주석 추가
+ * 25. 9. 20.		inari		관리자용 매퍼 추가
  */
 @Mapper
 public interface UserMapper {
@@ -155,4 +156,45 @@ public interface UserMapper {
 	 * @param imageName 새 이미지명
 	 */
 	void updateUserProfileImage(@Param("userId") Long userId, @Param("imageName") String imageName);
+
+	/**
+	 * 사용자 상태를 업데이트합니다.
+	 * @param userId 사용자 ID
+	 * @param status 새로운 상태 (0: 탈퇴, 1: 정상, 2: 임시정지, 3: 영구정지)
+	 */
+	void updateUserStatus(@Param("userId") Long userId, @Param("status") Integer status);
+
+	/**
+	 * 관리자용 사용자 목록을 조회합니다 (페이지네이션 지원)
+	 * @param roleIds 조회할 역할 ID 목록 (MANAGER는 roleId=1만, ADMIN은 전체)
+	 * @return 사용자 목록
+	 */
+	java.util.List<User> findUsersForAdmin(@Param("roleIds") java.util.List<Long> roleIds);
+
+	/**
+	 * 전체 사용자 수를 조회합니다.
+	 * @return 전체 사용자 수
+	 */
+	Long countAllUsers();
+
+	/**
+	 * 역할별 사용자 수를 조회합니다.
+	 * @param roleId 역할 ID
+	 * @return 해당 역할의 사용자 수
+	 */
+	Long countUsersByRole(@Param("roleId") Long roleId);
+
+	/**
+	 * 상태별 사용자 수를 조회합니다.
+	 * @param status 사용자 상태
+	 * @return 해당 상태의 사용자 수
+	 */
+	Long countUsersByStatus(@Param("status") Integer status);
+
+	/**
+	 * 사용자의 roleId를 업데이트합니다.
+	 * @param userId 사용자 ID
+	 * @param roleId 새로운 역할 ID
+	 */
+	void updateUserRoleId(@Param("userId") Long userId, @Param("roleId") Long roleId);
 }

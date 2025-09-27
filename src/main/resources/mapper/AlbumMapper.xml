@@ -120,4 +120,11 @@
         DELETE FROM album_image
         WHERE image_id = #{imageId}
     </delete>
+
+    <!-- 전체 앨범 수 조회 (관리자용) -->
+    <select id="countAllAlbums" resultType="Long">
+        SELECT COUNT(*)
+        FROM album
+        WHERE is_deleted = 0
+    </select>
 </mapper>

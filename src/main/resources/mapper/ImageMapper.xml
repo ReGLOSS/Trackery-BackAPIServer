@@ -261,4 +261,11 @@
                  JOIN juso_sigungu sgg ON cp.sgg_id = sgg.sgg_id
         WHERE i.user_id = #{userId} AND i.is_deleted = 0 AND sgg.sd_id = #{sidoId}
     </select>
+
+    <!-- 전체 이미지 수 조회 (관리자용) -->
+    <select id="countAllImages" resultType="Long">
+        SELECT COUNT(*)
+        FROM image
+        WHERE is_deleted = 0
+    </select>
 </mapper>

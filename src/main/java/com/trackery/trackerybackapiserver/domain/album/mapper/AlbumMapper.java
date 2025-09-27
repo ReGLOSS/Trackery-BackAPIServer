@@ -41,6 +41,7 @@ import com.trackery.trackerybackapiserver.domain.image.dto.internal.ImageInfoFor
  * 25. 7. 11.		inari		album 도메인의 자바독 누락 및 체크스타일 해결
  * 25. 7. 15.		durururuk		앨범_이미지 테이블에서 이미지 삭제 메서드 추가
  * 25. 7. 15.		durururuk		앨범 이미지 삭제 전 영향을 받는 앨범 ID 조회 쿼리 추가
+ * 25. 9. 20.		inari		관리자용 매퍼 추가
  */
 @Mapper
 public interface AlbumMapper {
@@ -127,4 +128,10 @@ public interface AlbumMapper {
 
 	//모든 앨범에서 어떤 이미지 삭제
 	void deleteAllAlbumImagesByImageId(@Param("imageId") Long imageId);
+
+	/**
+	 * 전체 앨범 수를 조회합니다.
+	 * @return 전체 앨범 수
+	 */
+	Long countAllAlbums();
 }

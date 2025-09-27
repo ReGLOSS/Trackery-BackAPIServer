@@ -1,5 +1,6 @@
 package com.trackery.trackerybackapiserver.domain.tag.mapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.ibatis.annotations.Mapper;
@@ -24,6 +25,7 @@ import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
  * 25. 7. 11.		inari		기존 매퍼에 존재하던 이미지 삭제시 태그 일괄 삭제 기능 적용하여 N+1 문제 해결
  * 25. 7. 11.		inari		주석 추가
  * 25. 7. 15.		inari		사용하지 않는 매퍼 삭제
+ * 25. 9. 20.		inari		관리자용 매퍼 추가
  */
 @Mapper
 public interface TagMapper {
@@ -134,4 +136,34 @@ public interface TagMapper {
 	 */
 	boolean isImageTagConnected(@Param("imageId") Long imageId, @Param("tagId") Long tagId);
 
+	/**
+	 * 태그 통계 정보를 조회합니다 (관리자용)
+	 * @return 태그별 사용 통계 목록
+	 */
+	List<TagStatistics> findTagStatistics();
+
+	/**
+	 * 전체 태그 수를 조회합니다.
+	 * @return 전체 태그 수
+	 */
+	Long countAllTags();
+
+	/**
+	 * 태그 타입별 태그 수를 조회합니다.
+	 * @param tagType 태그 타입
+	 * @return 해당 타입의 태그 수
+	 */
+	Long countTagsByType(@Param("tagType") TagType tagType);
+
+	/**
+	 * 태그 통계 정보를 담는 레코드
+	 */
+	record TagStatistics(
+		Long tagId,
+		String tagName,
+		TagType tagType,
+		Long tagUseCount,
+		Long connectedImageCount,
+		LocalDateTime createdAt
+	) { }
 }

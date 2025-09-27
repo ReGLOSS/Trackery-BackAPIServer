@@ -142,4 +142,32 @@
         WHERE image_id = #{imageId} AND tag_id = #{tagId}
     </select>
 
+    <!-- 태그 통계 정보 조회 (관리자용) -->
+    <select id="findTagStatistics" resultType="com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper$TagStatistics">
+        SELECT
+            t.tag_id,
+            t.tag_name,
+            t.tag_type,
+            t.tag_use_count,
+            COUNT(it.image_id) as connected_image_count,
+            t.created_at
+        FROM tag t
+        LEFT JOIN image_tag it ON t.tag_id = it.tag_id
+        GROUP BY t.tag_id, t.tag_name, t.tag_type, t.tag_use_count, t.created_at
+        ORDER BY t.tag_use_count DESC, t.created_at DESC
+    </select>
+
+    <!-- 전체 태그 수 조회 -->
+    <select id="countAllTags" resultType="Long">
+        SELECT COUNT(*)
+        FROM tag
+    </select>
+
+    <!-- 태그 타입별 태그 수 조회 -->
+    <select id="countTagsByType" resultType="Long">
+        SELECT COUNT(*)
+        FROM tag
+        WHERE tag_type = #{tagType}
+    </select>
+
 </mapper>

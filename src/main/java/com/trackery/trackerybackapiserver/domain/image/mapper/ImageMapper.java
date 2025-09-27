@@ -41,6 +41,7 @@ import com.trackery.trackerybackapiserver.domain.image.entity.Image;
  * 25. 9. 5.		durururuk		시도 커버리지 조회 메서드 옵셔널로 수정
  * 25. 9. 5.		durururuk		Javadoc 주석 작성
  * 25. 9. 8.		durururuk		시군구 커버리지 매퍼 메서드 추가
+ * 25. 9. 20.		inari		관리자용 매퍼 추가
  */
 @Mapper
 public interface ImageMapper {
@@ -125,5 +126,11 @@ public interface ImageMapper {
 
 	Optional<ImageSigunguCoverageResponseDto> selectSigunguCoverage(@Param("userId") Long userId,
 		@Param("sidoId") Long sidoId);
+
+	/**
+	 * 전체 이미지 수를 조회합니다.
+	 * @return 전체 이미지 수
+	 */
+	Long countAllImages();
 
 }
