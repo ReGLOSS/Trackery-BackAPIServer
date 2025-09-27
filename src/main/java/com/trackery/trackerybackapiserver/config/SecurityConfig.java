@@ -20,6 +20,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import com.trackery.trackerybackapiserver.config.filter.ExceptionHandlerFilter;
 import com.trackery.trackerybackapiserver.config.filter.JwtAuthenticationFilter;
 import com.trackery.trackerybackapiserver.config.filter.JwtResolverFilter;
+import com.trackery.trackerybackapiserver.domain.jwt.service.JwtRedisService;
 import com.trackery.trackerybackapiserver.domain.jwt.service.JwtService;
 import com.trackery.trackerybackapiserver.domain.user.service.UserService;
 
@@ -66,6 +67,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 4. 1.		durururuk		Bean 순환 문제 해결
  * 25. 4. 10.		durururuk		이메일 토큰 기반 비밀번호 변경 url 변경, 인증 기반 비밀번호 변경 기능 구현
  * 25. 6. 24.		inari		SecurityConfig publicUri에 docs 경로 추가
+ * 25. 9. 19.		inari		jwtRedisService; 매개변수 추가
  */
 @Configuration
 @EnableWebSecurity
@@ -76,6 +78,7 @@ public class SecurityConfig {
 	 * JWT 토큰을 검증하는 유틸리티 클래스
 	 */
 	private final JwtService jwtService;
+	private final JwtRedisService jwtRedisService;
 	private final UserService userService;
 
 	/**
@@ -142,7 +145,7 @@ public class SecurityConfig {
 			.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 			.authorizeHttpRequests(auth -> auth
 				.requestMatchers("/error").permitAll().anyRequest().authenticated())
-			.addFilterBefore(new JwtAuthenticationFilter(jwtService),
+			.addFilterBefore(new JwtAuthenticationFilter(jwtService, jwtRedisService),
 				UsernamePasswordAuthenticationFilter.class)
 			.addFilterBefore(new JwtResolverFilter(jwtService, userService),
 				JwtAuthenticationFilter.class)

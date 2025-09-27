@@ -12,6 +12,7 @@ import lombok.Getter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 19.		inari		최초 생성
+ * 25. 9. 28.		inari		사용하지 않는 코드 삭제
  */
 @Getter
 public enum SuspensionActionType {
@@ -39,17 +40,4 @@ public enum SuspensionActionType {
 		throw new IllegalArgumentException("유효하지 않은 정지 작업 유형: " + actionType);
 	}
 
-	/**
-	 * 정지 작업인지 확인하는 메서드
-	 */
-	public boolean isSuspend() {
-		return this == SUSPEND;
-	}
-
-	/**
-	 * 정지 해제 작업인지 확인하는 메서드
-	 */
-	public boolean isUnsuspend() {
-		return this == UNSUSPEND;
-	}
 }

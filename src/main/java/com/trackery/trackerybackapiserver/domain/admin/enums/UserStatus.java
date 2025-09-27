@@ -12,6 +12,7 @@ import lombok.Getter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 19.		inari		최초 생성
+ * 25. 9. 28.		inari		사용하지 않는 코드 삭제
  */
 @Getter
 public enum UserStatus {
@@ -41,17 +42,4 @@ public enum UserStatus {
 		throw new IllegalArgumentException("유효하지 않은 사용자 상태 코드: " + code);
 	}
 
-	/**
-	 * 정지 상태인지 확인하는 메서드
-	 */
-	public boolean isSuspended() {
-		return this == TEMPORARILY_SUSPENDED || this == PERMANENTLY_SUSPENDED;
-	}
-
-	/**
-	 * 활성 상태인지 확인하는 메서드
-	 */
-	public boolean isActive() {
-		return this == ACTIVE;
-	}
 }

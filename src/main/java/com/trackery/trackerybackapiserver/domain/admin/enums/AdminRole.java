@@ -12,6 +12,7 @@ import lombok.Getter;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 19.		inari		최초 생성
+ * 25. 9. 28.		inari		사용하지 않는 코드 삭제
  */
 @Getter
 public enum AdminRole {
@@ -45,25 +46,6 @@ public enum AdminRole {
 	 * ADMIN 권한이 있는지 확인하는 메서드
 	 */
 	public boolean isAdmin() {
-		return this == ADMIN;
-	}
-
-	/**
-	 * MANAGER 이상 권한이 있는지 확인하는 메서드
-	 */
-	public boolean isManagerOrAbove() {
-		return this.roleId >= MANAGER.roleId;
-	}
-
-	/**
-	 * 다른 역할을 관리할 수 있는지 확인하는 메서드
-	 */
-	public boolean canManage(AdminRole targetRole) {
-		if (this == MANAGER) {
-			// MANAGER는 일반 사용자(roleId=1)만 관리 가능, 다른 관리자는 관리 불가
-			return false;
-		}
-		// ADMIN은 모든 역할 관리 가능
 		return this == ADMIN;
 	}
 
