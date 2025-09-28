@@ -2,6 +2,8 @@
 :toc: left
 :toclevels: 2
 
+include::admin-api.adoc[]
+
 include::album-api.adoc[]
 
 include::auth-api.adoc[]
