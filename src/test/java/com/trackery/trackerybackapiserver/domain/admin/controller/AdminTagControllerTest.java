@@ -29,7 +29,6 @@ import com.trackery.trackerybackapiserver.domain.tag.dto.TagCreateRequestDto;
 import com.trackery.trackerybackapiserver.domain.tag.entity.Tag;
 import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
 import com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper;
-import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.admin.controller
@@ -41,6 +40,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 28.		inari		최초 생성
+ * 25. 9. 29.		inari		테스트 코드 추가
  */
 @WebMvcTest(AdminTagController.class)
 @DisplayName("AdminTagController 테스트")
@@ -77,7 +77,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			// When & Then
 			mockMvc.perform(get("/api/admin/tags")
-					.with(user(createSuperAdminUserDetails())))
+					.with(user(createAdminUserDetails())))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").value("Ok"))
 				.andExpect(jsonPath("$.data").isArray())
@@ -106,7 +106,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 		void getTagsForbiddenForManager() throws Exception {
 			// When & Then
 			mockMvc.perform(get("/api/admin/tags")
-					.with(user(createAdminUserDetails())))
+					.with(user(createManagerUserDetails())))
 				.andExpect(status().isForbidden());
 
 			verify(adminTagService, never()).getTagStatistics(anyLong());
@@ -131,7 +131,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			// When & Then
 			mockMvc.perform(post("/api/admin/tags")
-					.with(user(createSuperAdminUserDetails()))
+					.with(user(createAdminUserDetails()))
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(requestDto)))
 				.andExpect(status().isOk())
@@ -166,7 +166,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			// When & Then
 			mockMvc.perform(post("/api/admin/tags")
-					.with(user(createSuperAdminUserDetails()))
+					.with(user(createAdminUserDetails()))
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(requestDto)))
 				.andExpect(status().isInternalServerError()); // 500 오류
@@ -188,7 +188,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			// When & Then
 			mockMvc.perform(post("/api/admin/tags")
-					.with(user(createSuperAdminUserDetails()))
+					.with(user(createAdminUserDetails()))
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(requestDto)))
 				.andExpect(status().isInternalServerError()); // 500 오류
@@ -210,7 +210,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			// When & Then
 			mockMvc.perform(delete("/api/admin/tags/{tagId}", tagId)
-					.with(user(createSuperAdminUserDetails())))
+					.with(user(createAdminUserDetails())))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").value("Ok"))
 				.andDo(document("admin-tag-delete",
@@ -234,7 +234,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			// When & Then
 			mockMvc.perform(delete("/api/admin/tags/{tagId}", tagId)
-					.with(user(createAdminUserDetails())))
+					.with(user(createManagerUserDetails())))
 				.andExpect(status().isForbidden());
 
 			verify(adminTagService, never()).deleteTag(anyLong(), anyLong());
@@ -259,13 +259,5 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 			.tagUseCount(0L)
 			.createdAt(LocalDateTime.now())
 			.build();
-	}
-
-	private CustomUserDetails createSuperAdminUserDetails() {
-		return new CustomUserDetails(3L, "superadmin", 3L);
-	}
-
-	private CustomUserDetails createAdminUserDetails() {
-		return new CustomUserDetails(2L, "admin", 2L);
 	}
 }

@@ -31,7 +31,6 @@ import com.trackery.trackerybackapiserver.domain.admin.entity.UserSuspension;
 import com.trackery.trackerybackapiserver.domain.admin.service.AdminUserService;
 import com.trackery.trackerybackapiserver.domain.admin.service.UserSuspensionService;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
-import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
 
 /**
@@ -79,7 +78,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 		void getUsersSuccess() throws Exception {
 			// Given
 			PageInfo<User> pageInfo = new PageInfo<>(List.of(testUser));
-			when(adminUserService.getUserList(eq(2L), eq(1), eq(10))).thenReturn(pageInfo);
+			when(adminUserService.getUserList(eq(3L), eq(1), eq(10))).thenReturn(pageInfo);
 			when(userSuspensionService.findActiveSuspensionByUserId(anyLong())).thenReturn(null);
 
 			// When & Then
@@ -128,7 +127,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 					)
 				));
 
-			verify(adminUserService).getUserList(2L, 1, 10);
+			verify(adminUserService).getUserList(3L, 1, 10);
 		}
 
 		@Test
@@ -136,7 +135,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 		void getUsersWithLimitedPageSize() throws Exception {
 			// Given
 			PageInfo<User> pageInfo = new PageInfo<>(List.of(testUser));
-			when(adminUserService.getUserList(eq(2L), eq(1), eq(100))).thenReturn(pageInfo);
+			when(adminUserService.getUserList(eq(3L), eq(1), eq(100))).thenReturn(pageInfo);
 
 			// When & Then
 			mockMvc.perform(get("/api/admin/users")
@@ -145,7 +144,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 					.param("pageSize", "150"))
 				.andExpect(status().isOk());
 
-			verify(adminUserService).getUserList(2L, 1, 100);
+			verify(adminUserService).getUserList(3L, 1, 100);
 		}
 	}
 
@@ -158,7 +157,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 		void getUserDetailSuccess() throws Exception {
 			// Given
 			Long userId = 1L;
-			when(adminUserService.getUserDetail(eq(2L), eq(userId))).thenReturn(testUser);
+			when(adminUserService.getUserDetail(eq(3L), eq(userId))).thenReturn(testUser);
 			when(userSuspensionService.findActiveSuspensionByUserId(eq(userId))).thenReturn(testSuspension);
 
 			// When & Then
@@ -193,7 +192,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 					)
 				));
 
-			verify(adminUserService).getUserDetail(2L, userId);
+			verify(adminUserService).getUserDetail(3L, userId);
 			verify(userSuspensionService).findActiveSuspensionByUserId(userId);
 		}
 	}
@@ -213,7 +212,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 			requestDto.setReason("부적절한 행동");
 
 			doNothing().when(userSuspensionService).suspendUser(
-				eq(userId), eq(2), any(LocalDate.class), eq("부적절한 행동"), eq(2L)
+				eq(userId), eq(2), any(LocalDate.class), eq("부적절한 행동"), eq(3L)
 			);
 
 			// When & Then
@@ -239,7 +238,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 				));
 
 			verify(userSuspensionService).suspendUser(
-				eq(userId), eq(2), any(LocalDate.class), eq("부적절한 행동"), eq(2L)
+				eq(userId), eq(2), any(LocalDate.class), eq("부적절한 행동"), eq(3L)
 			);
 		}
 
@@ -247,7 +246,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 		@DisplayName("자기 자신을 정지시키려 하면 실패한다")
 		void suspendSelfFails() throws Exception {
 			// Given
-			Long userId = 2L; // 관리자 자신의 ID
+			Long userId = 3L; // 관리자 자신의 ID
 			UserSuspensionRequestDto requestDto = new UserSuspensionRequestDto();
 			requestDto.setSuspensionType(2);
 			requestDto.setEndDate(LocalDate.now().plusDays(7));
@@ -271,7 +270,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 		void unsuspendUserSuccess() throws Exception {
 			// Given
 			Long userId = 1L;
-			doNothing().when(userSuspensionService).unsuspendUser(eq(userId), eq(2L));
+			doNothing().when(userSuspensionService).unsuspendUser(eq(userId), eq(3L));
 
 			// When & Then
 			mockMvc.perform(post("/api/admin/users/{userId}/unsuspend", userId)
@@ -288,7 +287,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 					)
 				));
 
-			verify(userSuspensionService).unsuspendUser(userId, 2L);
+			verify(userSuspensionService).unsuspendUser(userId, 3L);
 		}
 	}
 
@@ -308,7 +307,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			// When & Then
 			mockMvc.perform(put("/api/admin/users/{userId}/role", userId)
-					.with(user(createSuperAdminUserDetails()))
+					.with(user(createAdminUserDetails()))
 					.contentType(MediaType.APPLICATION_JSON)
 					.content(objectMapper.writeValueAsString(requestDto)))
 				.andExpect(status().isOk())
@@ -553,7 +552,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 				.build();
 
 			PageInfo<User> pageInfo = new PageInfo<>(List.of(regularUser, managerUser, adminUser));
-			when(adminUserService.getUserList(eq(2L), eq(1), eq(10))).thenReturn(pageInfo);
+			when(adminUserService.getUserList(eq(3L), eq(1), eq(10))).thenReturn(pageInfo);
 			when(userSuspensionService.findActiveSuspensionByUserId(anyLong())).thenReturn(null);
 
 			// When & Then
@@ -562,11 +561,11 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 					.param("pageNum", "1")
 					.param("pageSize", "10"))
 				.andExpect(status().isOk())
-				.andExpect(jsonPath("$.data.list[0].role").isEmpty()) // 일반 사용자는 role이 null
+				.andExpect(jsonPath("$.data.list[0].role").value("USER"))
 				.andExpect(jsonPath("$.data.list[1].role").value("MANAGER"))
 				.andExpect(jsonPath("$.data.list[2].role").value("ADMIN"));
 
-			verify(adminUserService).getUserList(2L, 1, 10);
+			verify(adminUserService).getUserList(3L, 1, 10);
 		}
 
 		@Test
@@ -585,7 +584,7 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 				.userProfile("http://example.com/manager.jpg")
 				.build();
 
-			when(adminUserService.getUserDetail(eq(2L), eq(userId))).thenReturn(managerUser);
+			when(adminUserService.getUserDetail(eq(3L), eq(userId))).thenReturn(managerUser);
 			when(userSuspensionService.findActiveSuspensionByUserId(eq(userId))).thenReturn(testSuspension);
 
 			// When & Then
@@ -594,21 +593,9 @@ class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.data.role").value("MANAGER"));
 
-			verify(adminUserService).getUserDetail(2L, userId);
+			verify(adminUserService).getUserDetail(3L, userId);
 			verify(userSuspensionService).findActiveSuspensionByUserId(userId);
 		}
-	}
-
-	private CustomUserDetails createAdminUserDetails() {
-		return new CustomUserDetails(2L, "admin", 2L);
-	}
-
-	private CustomUserDetails createSuperAdminUserDetails() {
-		return new CustomUserDetails(3L, "superadmin", 3L);
-	}
-
-	private CustomUserDetails createUserUserDetails() {
-		return new CustomUserDetails(1L, "user", 1L);
 	}
 
 	private User createTestUser() {

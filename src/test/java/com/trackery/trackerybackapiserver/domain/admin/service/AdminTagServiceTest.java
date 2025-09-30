@@ -33,6 +33,7 @@ import com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 28.		inari		최초 생성
+ * 25. 9. 29.		inari		테스트 코드 추가
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminTagService 테스트")
@@ -97,8 +98,12 @@ class AdminTagServiceTest {
 			Long userRoleId = 1L;
 
 			// When & Then
-			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+			ApiException exception = assertThrows(ApiException.class, () ->
 				adminTagService.getTagStatistics(userRoleId));
+
+			assertNotNull(exception.getMessage());
+			assertEquals(ErrorCode.FORBIDDEN_INSUFFICIENT_ADMIN_PRIVILEGES, exception.getErrorCode());
+			verify(tagMapper, never()).findTagStatistics();
 		}
 	}
 

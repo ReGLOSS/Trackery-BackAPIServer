@@ -13,7 +13,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.trackery.trackerybackapiserver.domain.admin.enums.UserStatus;
-import com.trackery.trackerybackapiserver.domain.admin.mapper.UserSuspensionMapper;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
@@ -31,6 +30,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 28.		inari		최초 생성
+ * 25. 9. 29.		inari		테스트 코드 추가
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminDashboardService 테스트")
@@ -47,9 +47,6 @@ class AdminDashboardServiceTest {
 
 	@Mock
 	private TagMapper tagMapper;
-
-	@Mock
-	private UserSuspensionMapper userSuspensionMapper;
 
 	@InjectMocks
 	private AdminDashboardService adminDashboardService;
@@ -145,8 +142,17 @@ class AdminDashboardServiceTest {
 			Long userRoleId = 1L;
 
 			// When & Then
-			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () ->
+			ApiException exception = assertThrows(ApiException.class, () ->
 				adminDashboardService.getDashboardStatistics(userRoleId));
+
+			assertNotNull(exception.getMessage());
+			assertEquals(ErrorCode.FORBIDDEN_INSUFFICIENT_ADMIN_PRIVILEGES, exception.getErrorCode());
+
+			// 어떤 매퍼도 호출되지 않아야 함
+			verify(userMapper, never()).countAllUsers();
+			verify(imageMapper, never()).countAllImages();
+			verify(albumMapper, never()).countAllAlbums();
+			verify(tagMapper, never()).countAllTags();
 		}
 
 		@Test

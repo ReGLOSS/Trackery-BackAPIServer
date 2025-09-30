@@ -35,6 +35,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 28.		inari		최초 생성
+ * 25. 9. 29.		inari		테스트 코드 추가
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminUserService 테스트")
@@ -119,8 +120,12 @@ class AdminUserServiceTest {
 			Long invalidRoleId = 1L; // 일반 사용자 역할
 
 			// When & Then
-			IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
+			ApiException exception = assertThrows(ApiException.class,
 				() -> adminUserService.getUserList(invalidRoleId, 1, 10));
+
+			assertNotNull(exception.getMessage());
+			assertEquals(ErrorCode.FORBIDDEN_INSUFFICIENT_ADMIN_PRIVILEGES, exception.getErrorCode());
+			verify(userMapper, never()).findUsersForAdmin(anyList());
 		}
 	}
 

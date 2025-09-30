@@ -19,7 +19,6 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import com.trackery.trackerybackapiserver.domain.admin.service.AdminDashboardService;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
-import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.admin.controller
@@ -31,6 +30,7 @@ import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 28.		inari		최초 생성
+ * 25. 9. 29.		inari		테스트 코드 추가
  */
 @WebMvcTest(AdminDashboardController.class)
 @DisplayName("AdminDashboardController 테스트")
@@ -61,7 +61,7 @@ class AdminDashboardControllerTest extends CommonMockMvcControllerTestSetUp {
 
 			// When & Then
 			mockMvc.perform(get("/api/admin/dashboard")
-					.with(user(createSuperAdminUserDetails())))
+					.with(user(createAdminUserDetails())))
 				.andExpect(status().isOk())
 				.andExpect(jsonPath("$.message").value("Ok"))
 				.andExpect(jsonPath("$.data.totalUsers").value(1000))
@@ -100,7 +100,7 @@ class AdminDashboardControllerTest extends CommonMockMvcControllerTestSetUp {
 		void getDashboardForbiddenForManager() throws Exception {
 			// When & Then
 			mockMvc.perform(get("/api/admin/dashboard")
-					.with(user(createAdminUserDetails())))
+					.with(user(createManagerUserDetails())))
 				.andExpect(status().isForbidden());
 
 			verify(adminDashboardService, never()).getDashboardStatistics(anyLong());
@@ -139,17 +139,5 @@ class AdminDashboardControllerTest extends CommonMockMvcControllerTestSetUp {
 			userStatusStats,
 			roleStats
 		);
-	}
-
-	private CustomUserDetails createSuperAdminUserDetails() {
-		return new CustomUserDetails(3L, "superadmin", 3L);
-	}
-
-	private CustomUserDetails createAdminUserDetails() {
-		return new CustomUserDetails(2L, "admin", 2L);
-	}
-
-	private CustomUserDetails createUserUserDetails() {
-		return new CustomUserDetails(1L, "user", 1L);
 	}
 }
