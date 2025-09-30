@@ -7,6 +7,8 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import com.trackery.trackerybackapiserver.domain.user.enums.UserRole;
+
 import lombok.Builder;
 import lombok.Getter;
 
@@ -27,6 +29,7 @@ import lombok.Getter;
  * 25. 3. 26.		durururuk		api/auth/me 테스트 코드 작성
  * 25. 3. 27.		durururuk		CustomUserDetails에서 userName도 함께 담도록 수정
  * 25. 7. 11.		inari		user 도메인의 자바독 누락 및 체크스타일 해결
+ * 25. 9. 30.		inari		UserRole enum 통합 및 getUserRole() 메서드 추가
  */
 @Getter
 public class CustomUserDetails implements UserDetails {
@@ -47,6 +50,15 @@ public class CustomUserDetails implements UserDetails {
 		this.userId = userId;
 		this.userName = userName;
 		this.roleId = roleId;
+	}
+
+	/**
+	 * 사용자의 역할을 UserRole enum으로 반환합니다.
+	 *
+	 * @return 사용자 역할
+	 */
+	public UserRole getUserRole() {
+		return UserRole.fromRoleId(roleId);
 	}
 
 	/**

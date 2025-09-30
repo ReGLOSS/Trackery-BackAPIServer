@@ -9,6 +9,8 @@ import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
+import com.trackery.trackerybackapiserver.domain.user.enums.UserRole;
 
 /**
  * packageName    : com.trackery.trackerybackapiserver.domain.config
@@ -28,6 +30,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * 25. 3. 27.		durururuk		사용되지 않는 spy 임포트 삭제
  * 25. 3. 29.		durururuk		mockMvc 단위 테스트용 필터 없는 테스트 컨픽 작성
  * 25. 6. 13.		durururuk		앨범 생성, 앨범에 이미지 추가 API 문서화 코드 작성
+ * 25. 9. 29.		inari		공통 CustomUserDetails 생성 메서드 추가
+ * 25. 9. 30.		inari		UserRole enum 통합 및 상수 추가
  */
 @AutoConfigureMockMvc
 @AutoConfigureRestDocs
@@ -38,4 +42,16 @@ public abstract class CommonMockMvcControllerTestSetUp {
 	protected MockMvc mockMvc;
 
 	protected ObjectMapper objectMapper = new ObjectMapper();
+
+	protected CustomUserDetails createUserUserDetails() {
+		return new CustomUserDetails(UserRole.USER.getRoleId(), "user", UserRole.USER.getRoleId());
+	}
+
+	protected CustomUserDetails createManagerUserDetails() {
+		return new CustomUserDetails(UserRole.MANAGER.getRoleId(), "manager", UserRole.MANAGER.getRoleId());
+	}
+
+	protected CustomUserDetails createAdminUserDetails() {
+		return new CustomUserDetails(UserRole.ADMIN.getRoleId(), "admin", UserRole.ADMIN.getRoleId());
+	}
 }
