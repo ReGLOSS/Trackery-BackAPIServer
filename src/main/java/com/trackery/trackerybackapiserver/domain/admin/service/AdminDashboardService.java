@@ -3,7 +3,6 @@ package com.trackery.trackerybackapiserver.domain.admin.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trackery.trackerybackapiserver.domain.admin.enums.AdminRole;
 import com.trackery.trackerybackapiserver.domain.admin.enums.UserStatus;
 import com.trackery.trackerybackapiserver.domain.admin.mapper.UserSuspensionMapper;
 import com.trackery.trackerybackapiserver.domain.album.mapper.AlbumMapper;
@@ -11,6 +10,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.image.mapper.ImageMapper;
 import com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper;
+import com.trackery.trackerybackapiserver.domain.user.enums.UserRole;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 
 import lombok.RequiredArgsConstructor;
@@ -25,6 +25,7 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 27.		inari		최초 생성
+ * 25. 9. 30.		inari		UserRole enum 통합
  */
 @Service
 @RequiredArgsConstructor
@@ -46,7 +47,7 @@ public class AdminDashboardService {
 	 */
 	public DashboardStatistics getDashboardStatistics(Long adminRoleId) {
 		// ADMIN 권한 확인
-		AdminRole adminRole = AdminRole.fromRoleId(adminRoleId.intValue());
+		UserRole adminRole = UserRole.fromRoleId(adminRoleId);
 		if (!adminRole.isAdmin()) {
 			throw new ApiException(ErrorCode.FORBIDDEN_INSUFFICIENT_ADMIN_PRIVILEGES);
 		}

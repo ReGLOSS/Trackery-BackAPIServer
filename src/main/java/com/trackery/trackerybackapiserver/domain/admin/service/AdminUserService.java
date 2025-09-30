@@ -8,11 +8,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.trackery.trackerybackapiserver.domain.admin.enums.AdminRole;
 import com.trackery.trackerybackapiserver.domain.admin.enums.UserStatus;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
+import com.trackery.trackerybackapiserver.domain.user.enums.UserRole;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
 import com.trackery.trackerybackapiserver.domain.user.mapper.UserRoleMapper;
 
@@ -28,6 +28,8 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 27.		inari		최초 생성
+ * 25. 9. 30.		inari		상수 제거
+ * 25. 9. 30.		inari		UserRole enum 통합
  */
 @Service
 @RequiredArgsConstructor
@@ -37,11 +39,6 @@ public class AdminUserService {
 	// 페이지 크기 제한
 	private static final int MIN_PAGE_SIZE = 1;
 	private static final int MAX_PAGE_SIZE = 100;
-
-	// 역할 ID 상수
-	private static final Long USER_ROLE_ID = 1L;
-	private static final Long MANAGER_ROLE_ID = 2L;
-	private static final Long ADMIN_ROLE_ID = 3L;
 
 	private final UserMapper userMapper;
 	private final UserRoleMapper userRoleMapper;
@@ -54,6 +51,7 @@ public class AdminUserService {
 	 * @param pageSize 페이지 크기
 	 * @return 사용자 목록 (페이지네이션)
 	 */
+	@SuppressWarnings("squid:S3252")
 	public PageInfo<User> getUserList(Long adminRoleId, int pageNum, int pageSize) {
 		// 페이지 크기 제한
 		pageSize = Math.max(MIN_PAGE_SIZE, Math.min(MAX_PAGE_SIZE, pageSize));
@@ -127,9 +125,9 @@ public class AdminUserService {
 	 */
 	public UserStatistics getUserStatistics() {
 		Long totalUsers = userMapper.countAllUsers();
-		Long regularUsers = userMapper.countUsersByRole(USER_ROLE_ID);
-		Long managers = userMapper.countUsersByRole(MANAGER_ROLE_ID);
-		Long admins = userMapper.countUsersByRole(ADMIN_ROLE_ID);
+		Long regularUsers = userMapper.countUsersByRole(UserRole.USER.getRoleId());
+		Long managers = userMapper.countUsersByRole(UserRole.MANAGER.getRoleId());
+		Long admins = userMapper.countUsersByRole(UserRole.ADMIN.getRoleId());
 
 		Long activeUsers = userMapper.countUsersByStatus(UserStatus.ACTIVE.getCode());
 		Long suspendedUsers = calculateSuspendedUsers();
@@ -146,14 +144,14 @@ public class AdminUserService {
 	 * @return 조회 가능한 역할 ID 목록
 	 */
 	private List<Long> determineAllowedRoleIds(Long adminRoleId) {
-		AdminRole adminRole = AdminRole.fromRoleId(adminRoleId.intValue());
+		UserRole adminRole = UserRole.fromRoleId(adminRoleId);
 
-		if (adminRole == AdminRole.MANAGER) {
+		if (adminRole == UserRole.MANAGER) {
 			// MANAGER는 일반 사용자만 조회 가능
-			return List.of(USER_ROLE_ID);
-		} else if (adminRole == AdminRole.ADMIN) {
+			return List.of(UserRole.USER.getRoleId());
+		} else if (adminRole == UserRole.ADMIN) {
 			// ADMIN은 모든 사용자 조회 가능
-			return List.of(USER_ROLE_ID, MANAGER_ROLE_ID, ADMIN_ROLE_ID);
+			return List.of(UserRole.USER.getRoleId(), UserRole.MANAGER.getRoleId(), UserRole.ADMIN.getRoleId());
 		}
 
 		throw new ApiException(ErrorCode.FORBIDDEN_INSUFFICIENT_ADMIN_PRIVILEGES);
@@ -167,8 +165,9 @@ public class AdminUserService {
 	 * @throws ApiException 권한이 없는 경우
 	 */
 	private void validateUserAccessPermission(Long adminRoleId, User user) {
-		AdminRole adminRole = AdminRole.fromRoleId(adminRoleId.intValue());
-		if (!adminRole.canManageUser(user.getRoleId().intValue())) {
+		UserRole adminRole = UserRole.fromRoleId(adminRoleId);
+		UserRole targetUserRole = UserRole.fromRoleId(user.getRoleId());
+		if (!adminRole.canManageUser(targetUserRole)) {
 			throw new ApiException(ErrorCode.FORBIDDEN_CANNOT_MANAGE_HIGHER_ROLE);
 		}
 	}
@@ -180,7 +179,7 @@ public class AdminUserService {
 	 * @throws ApiException ADMIN 권한이 없는 경우
 	 */
 	private void validateAdminPermission(Long adminRoleId) {
-		AdminRole adminRole = AdminRole.fromRoleId(adminRoleId.intValue());
+		UserRole adminRole = UserRole.fromRoleId(adminRoleId);
 		if (!adminRole.isAdmin()) {
 			throw new ApiException(ErrorCode.FORBIDDEN_INSUFFICIENT_ADMIN_PRIVILEGES);
 		}
@@ -230,7 +229,7 @@ public class AdminUserService {
 	 * @return 유효한 역할인 경우 true
 	 */
 	private boolean isValidUserRole(Long roleId) {
-		return USER_ROLE_ID.equals(roleId) || MANAGER_ROLE_ID.equals(roleId);
+		return UserRole.USER.getRoleId().equals(roleId) || UserRole.MANAGER.getRoleId().equals(roleId);
 	}
 
 	/**

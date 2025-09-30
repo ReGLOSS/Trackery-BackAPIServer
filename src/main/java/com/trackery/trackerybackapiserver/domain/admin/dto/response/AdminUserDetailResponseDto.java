@@ -2,8 +2,8 @@ package com.trackery.trackerybackapiserver.domain.admin.dto.response;
 
 import java.time.LocalDateTime;
 
-import com.trackery.trackerybackapiserver.domain.admin.enums.AdminRole;
 import com.trackery.trackerybackapiserver.domain.admin.enums.UserStatus;
+import com.trackery.trackerybackapiserver.domain.user.enums.UserRole;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -21,6 +21,7 @@ import lombok.NoArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 24.		inari		최초 생성
+ * 25. 9. 30.		inari		UserRole enum 통합
  */
 @Getter
 @NoArgsConstructor
@@ -54,9 +55,9 @@ public class AdminUserDetailResponseDto {
 	private UserStatus status;
 
 	/**
-	 * 사용자 역할 (roleId가 1인 경우 null, 2 이상인 경우 AdminRole)
+	 * 사용자 역할
 	 */
-	private AdminRole role;
+	private UserRole role;
 
 	/**
 	 * 마지막 로그인 시간

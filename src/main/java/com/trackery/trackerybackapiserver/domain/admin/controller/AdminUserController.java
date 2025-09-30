@@ -21,7 +21,6 @@ import com.trackery.trackerybackapiserver.domain.admin.dto.response.AdminUserLis
 import com.trackery.trackerybackapiserver.domain.admin.dto.response.UserSuspensionHistoryResponseDto;
 import com.trackery.trackerybackapiserver.domain.admin.dto.response.UserSuspensionInfo;
 import com.trackery.trackerybackapiserver.domain.admin.entity.UserSuspension;
-import com.trackery.trackerybackapiserver.domain.admin.enums.AdminRole;
 import com.trackery.trackerybackapiserver.domain.admin.enums.SuspensionActionType;
 import com.trackery.trackerybackapiserver.domain.admin.enums.UserStatus;
 import com.trackery.trackerybackapiserver.domain.admin.service.AdminUserService;
@@ -31,6 +30,7 @@ import com.trackery.trackerybackapiserver.domain.common.response.ApiResponse;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.SuccessCode;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.entity.User;
+import com.trackery.trackerybackapiserver.domain.user.enums.UserRole;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -49,6 +49,7 @@ import lombok.RequiredArgsConstructor;
  * 25. 9. 24.		inari		사용자 목록 조회 API 구현
  * 25. 9. 25.		inari		정지 이력 조회 API 구현
  * 25. 9. 26.		inari		관리자 작업 로그 조회 API 구현
+ * 25. 9. 30.		inari		UserRole enum 통합
  */
 @RestController
 @RequestMapping("/api/admin/users")
@@ -404,16 +405,13 @@ public class AdminUserController {
 	}
 
 	/**
-	 * 역할 ID를 AdminRole enum으로 변환합니다.
+	 * 역할 ID를 UserRole enum으로 변환합니다.
 	 *
 	 * @param roleId 역할 ID
-	 * @return AdminRole enum (일반 사용자인 경우 null)
+	 * @return UserRole enum
 	 */
-	private AdminRole convertToAdminRole(Long roleId) {
-		if (roleId == 1L) {
-			return null; // 일반 사용자는 null
-		}
-		return AdminRole.fromRoleId(roleId.intValue());
+	private UserRole convertToAdminRole(Long roleId) {
+		return UserRole.fromRoleId(roleId);
 	}
 
 	/**

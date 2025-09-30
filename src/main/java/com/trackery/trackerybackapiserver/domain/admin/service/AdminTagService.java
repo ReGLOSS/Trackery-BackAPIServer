@@ -5,12 +5,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.trackery.trackerybackapiserver.domain.admin.enums.AdminRole;
 import com.trackery.trackerybackapiserver.domain.common.response.enums.ErrorCode;
 import com.trackery.trackerybackapiserver.domain.common.response.exception.ApiException;
 import com.trackery.trackerybackapiserver.domain.tag.entity.Tag;
 import com.trackery.trackerybackapiserver.domain.tag.enums.TagType;
 import com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper;
+import com.trackery.trackerybackapiserver.domain.user.enums.UserRole;
 
 import lombok.RequiredArgsConstructor;
 
@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 27.		inari		최초 생성
+ * 25. 9. 30.		inari		UserRole enum 통합
  */
 @Service
 @RequiredArgsConstructor
@@ -41,7 +42,7 @@ public class AdminTagService {
 	 */
 	public List<TagMapper.TagStatistics> getTagStatistics(Long adminRoleId) {
 		// ADMIN 권한 확인
-		AdminRole adminRole = AdminRole.fromRoleId(adminRoleId.intValue());
+		UserRole adminRole = UserRole.fromRoleId(adminRoleId);
 		if (!adminRole.isAdmin()) {
 			throw new ApiException(ErrorCode.FORBIDDEN_INSUFFICIENT_ADMIN_PRIVILEGES);
 		}
@@ -60,7 +61,7 @@ public class AdminTagService {
 	@Transactional
 	public Tag createSystemTag(Long adminRoleId, String tagName, TagType tagType) {
 		// ADMIN 권한 확인
-		AdminRole adminRole = AdminRole.fromRoleId(adminRoleId.intValue());
+		UserRole adminRole = UserRole.fromRoleId(adminRoleId);
 		if (!adminRole.isAdmin()) {
 			throw new ApiException(ErrorCode.FORBIDDEN_INSUFFICIENT_ADMIN_PRIVILEGES);
 		}
@@ -97,7 +98,7 @@ public class AdminTagService {
 	@Transactional
 	public void deleteTag(Long adminRoleId, Long tagId) {
 		// ADMIN 권한 확인
-		AdminRole adminRole = AdminRole.fromRoleId(adminRoleId.intValue());
+		UserRole adminRole = UserRole.fromRoleId(adminRoleId);
 		if (!adminRole.isAdmin()) {
 			throw new ApiException(ErrorCode.FORBIDDEN_INSUFFICIENT_ADMIN_PRIVILEGES);
 		}
@@ -129,7 +130,7 @@ public class AdminTagService {
 	 */
 	public TagOverallStatistics getTagOverallStatistics(Long adminRoleId) {
 		// ADMIN 권한 확인
-		AdminRole adminRole = AdminRole.fromRoleId(adminRoleId.intValue());
+		UserRole adminRole = UserRole.fromRoleId(adminRoleId);
 		if (!adminRole.isAdmin()) {
 			throw new ApiException(ErrorCode.FORBIDDEN_INSUFFICIENT_ADMIN_PRIVILEGES);
 		}
