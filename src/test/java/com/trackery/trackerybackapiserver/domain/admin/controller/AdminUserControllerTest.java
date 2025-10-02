@@ -17,13 +17,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.pagehelper.PageInfo;
 import com.trackery.trackerybackapiserver.domain.admin.dto.request.UserRoleChangeRequestDto;
 import com.trackery.trackerybackapiserver.domain.admin.dto.request.UserSuspensionRequestDto;
@@ -43,16 +40,11 @@ import com.trackery.trackerybackapiserver.domain.user.entity.User;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 28.		inari		최초 생성
+ * 25. 9. 30.		inari		코드스멜 수정
  */
 @WebMvcTest(AdminUserController.class)
 @DisplayName("AdminUserController 테스트")
 class AdminUserControllerTest extends CommonMockMvcControllerTestSetUp {
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
 
 	@MockitoBean
 	private AdminUserService adminUserService;

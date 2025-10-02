@@ -9,6 +9,7 @@ import org.springframework.restdocs.RestDocumentationExtension;
 import org.springframework.test.web.servlet.MockMvc;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.trackery.trackerybackapiserver.domain.user.entity.CustomUserDetails;
 import com.trackery.trackerybackapiserver.domain.user.enums.UserRole;
 
@@ -41,7 +42,7 @@ public abstract class CommonMockMvcControllerTestSetUp {
 	@Autowired
 	protected MockMvc mockMvc;
 
-	protected ObjectMapper objectMapper = new ObjectMapper();
+	protected ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
 	protected CustomUserDetails createUserUserDetails() {
 		return new CustomUserDetails(UserRole.USER.getRoleId(), "user", UserRole.USER.getRoleId());

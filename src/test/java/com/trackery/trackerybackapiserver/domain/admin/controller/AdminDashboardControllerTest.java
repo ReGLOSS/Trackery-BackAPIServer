@@ -12,10 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
 import com.trackery.trackerybackapiserver.domain.admin.service.AdminDashboardService;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
@@ -31,13 +29,11 @@ import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerT
  * -----------------------------------------------------------
  * 25. 9. 28.		inari		최초 생성
  * 25. 9. 29.		inari		테스트 코드 추가
+ * 25. 9. 30.		inari		코드스멜 수정
  */
 @WebMvcTest(AdminDashboardController.class)
 @DisplayName("AdminDashboardController 테스트")
 class AdminDashboardControllerTest extends CommonMockMvcControllerTestSetUp {
-
-	@Autowired
-	private MockMvc mockMvc;
 
 	@MockitoBean
 	private AdminDashboardService adminDashboardService;
@@ -57,7 +53,7 @@ class AdminDashboardControllerTest extends CommonMockMvcControllerTestSetUp {
 		@DisplayName("ADMIN이 대시보드 통계를 성공적으로 조회한다")
 		void getDashboardSuccess() throws Exception {
 			// Given
-			when(adminDashboardService.getDashboardStatistics(eq(3L))).thenReturn(testDashboardStatistics);
+			when(adminDashboardService.getDashboardStatistics(3L)).thenReturn(testDashboardStatistics);
 
 			// When & Then
 			mockMvc.perform(get("/api/admin/dashboard")

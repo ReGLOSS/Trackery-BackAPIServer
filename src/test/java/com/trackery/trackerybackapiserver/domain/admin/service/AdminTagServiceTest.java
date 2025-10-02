@@ -34,6 +34,7 @@ import com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper;
  * -----------------------------------------------------------
  * 25. 9. 28.		inari		최초 생성
  * 25. 9. 29.		inari		테스트 코드 추가
+ * 25. 9. 30.		inari		코드스멜 수정
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("AdminTagService 테스트")

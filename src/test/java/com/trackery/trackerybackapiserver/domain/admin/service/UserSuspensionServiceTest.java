@@ -35,6 +35,7 @@ import com.trackery.trackerybackapiserver.domain.user.mapper.UserMapper;
  * DATE              AUTHOR             NOTE
  * -----------------------------------------------------------
  * 25. 9. 28.		inari		최초 생성
+ * 25. 9. 30.		inari		코드스멜 수정
  */
 @ExtendWith(MockitoExtension.class)
 @DisplayName("UserSuspensionService 테스트")
@@ -137,8 +138,8 @@ class UserSuspensionServiceTest {
 		void suspendAlreadySuspendedUserFails() {
 			// Given
 			Long userId = 1L;
-			when(userMapper.existsByUserId(eq(userId))).thenReturn(true);
-			when(userSuspensionMapper.findActiveSuspensionByUserId(eq(userId))).thenReturn(testSuspension);
+			when(userMapper.existsByUserId(userId)).thenReturn(true);
+			when(userSuspensionMapper.findActiveSuspensionByUserId(userId)).thenReturn(testSuspension);
 
 			// When & Then
 			ApiException exception = assertThrows(ApiException.class, () ->
@@ -153,8 +154,8 @@ class UserSuspensionServiceTest {
 			// Given
 			Long userId = 1L;
 			Integer suspensionType = UserStatus.TEMPORARILY_SUSPENDED.getCode();
-			when(userMapper.existsByUserId(eq(userId))).thenReturn(true);
-			when(userSuspensionMapper.findActiveSuspensionByUserId(eq(userId))).thenReturn(null);
+			when(userMapper.existsByUserId(userId)).thenReturn(true);
+			when(userSuspensionMapper.findActiveSuspensionByUserId(userId)).thenReturn(null);
 
 			// When & Then
 			ApiException exception = assertThrows(ApiException.class, () ->
@@ -175,11 +176,11 @@ class UserSuspensionServiceTest {
 			Long userId = 1L;
 			Long adminId = 2L;
 
-			when(userMapper.existsByUserId(eq(userId))).thenReturn(true);
-			when(userSuspensionMapper.findActiveSuspensionByUserId(eq(userId))).thenReturn(testSuspension);
-			doNothing().when(userSuspensionMapper).deactivateAllSuspensionsByUserId(eq(userId));
+			when(userMapper.existsByUserId(userId)).thenReturn(true);
+			when(userSuspensionMapper.findActiveSuspensionByUserId(userId)).thenReturn(testSuspension);
+			doNothing().when(userSuspensionMapper).deactivateAllSuspensionsByUserId(userId);
 			doNothing().when(userSuspensionMapper).insertSuspension(any(UserSuspension.class));
-			doNothing().when(userMapper).updateUserStatus(eq(userId), eq(UserStatus.ACTIVE.getCode()));
+			doNothing().when(userMapper).updateUserStatus(userId, UserStatus.ACTIVE.getCode());
 
 			// When
 			userSuspensionService.unsuspendUser(userId, adminId);
@@ -217,8 +218,8 @@ class UserSuspensionServiceTest {
 		void unsuspendActiveUserFails() {
 			// Given
 			Long userId = 1L;
-			when(userMapper.existsByUserId(eq(userId))).thenReturn(true);
-			when(userSuspensionMapper.findActiveSuspensionByUserId(eq(userId))).thenReturn(null);
+			when(userMapper.existsByUserId(userId)).thenReturn(true);
+			when(userSuspensionMapper.findActiveSuspensionByUserId(userId)).thenReturn(null);
 
 			// When & Then
 			ApiException exception = assertThrows(ApiException.class, () ->
@@ -237,7 +238,7 @@ class UserSuspensionServiceTest {
 		void findActiveSuspensionSuccess() {
 			// Given
 			Long userId = 1L;
-			when(userSuspensionMapper.findActiveSuspensionByUserId(eq(userId))).thenReturn(testSuspension);
+			when(userSuspensionMapper.findActiveSuspensionByUserId(userId)).thenReturn(testSuspension);
 
 			// When
 			UserSuspension result = userSuspensionService.findActiveSuspensionByUserId(userId);
@@ -254,7 +255,7 @@ class UserSuspensionServiceTest {
 			// Given
 			Long userId = 1L;
 			List<UserSuspension> history = List.of(testSuspension);
-			when(userSuspensionMapper.findSuspensionHistoryByUserId(eq(userId))).thenReturn(history);
+			when(userSuspensionMapper.findSuspensionHistoryByUserId(userId)).thenReturn(history);
 
 			// When
 			List<UserSuspension> result = userSuspensionService.findSuspensionHistoryByUserId(userId);
@@ -272,7 +273,7 @@ class UserSuspensionServiceTest {
 			// Given
 			Long adminId = 2L;
 			List<UserSuspension> logs = List.of(testSuspension);
-			when(userSuspensionMapper.findActionLogsByAdminId(eq(adminId))).thenReturn(logs);
+			when(userSuspensionMapper.findActionLogsByAdminId(adminId)).thenReturn(logs);
 
 			// When
 			List<UserSuspension> result = userSuspensionService.findActionLogsByAdminId(adminId);

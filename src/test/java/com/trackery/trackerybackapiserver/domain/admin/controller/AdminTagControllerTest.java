@@ -16,13 +16,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.trackery.trackerybackapiserver.domain.admin.service.AdminTagService;
 import com.trackery.trackerybackapiserver.domain.config.CommonMockMvcControllerTestSetUp;
 import com.trackery.trackerybackapiserver.domain.tag.dto.TagCreateRequestDto;
@@ -41,16 +38,11 @@ import com.trackery.trackerybackapiserver.domain.tag.mapper.TagMapper;
  * -----------------------------------------------------------
  * 25. 9. 28.		inari		최초 생성
  * 25. 9. 29.		inari		테스트 코드 추가
+ * 25. 9. 30.		inari		코드스멜 수정
  */
 @WebMvcTest(AdminTagController.class)
 @DisplayName("AdminTagController 테스트")
 class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
-
-	@Autowired
-	private MockMvc mockMvc;
-
-	@Autowired
-	private ObjectMapper objectMapper;
 
 	@MockitoBean
 	private AdminTagService adminTagService;
@@ -73,7 +65,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 		void getTagsSuccess() throws Exception {
 			// Given
 			List<TagMapper.TagStatistics> tagStatistics = List.of(testTagStatistics);
-			when(adminTagService.getTagStatistics(eq(3L))).thenReturn(tagStatistics);
+			when(adminTagService.getTagStatistics(3L)).thenReturn(tagStatistics);
 
 			// When & Then
 			mockMvc.perform(get("/api/admin/tags")
@@ -126,7 +118,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 				.tagType(TagType.CUSTOM.getCode())
 				.build();
 
-			when(adminTagService.createSystemTag(eq(3L), eq("새로운태그"), any(TagType.class)))
+			when(adminTagService.createSystemTag(anyLong(), anyString(), any(TagType.class)))
 				.thenReturn(testTag);
 
 			// When & Then
@@ -152,7 +144,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 					)
 				));
 
-			verify(adminTagService).createSystemTag(eq(3L), eq("새로운태그"), any(TagType.class));
+			verify(adminTagService).createSystemTag(anyLong(), eq("새로운태그"), any(TagType.class));
 		}
 
 		@Test
@@ -183,7 +175,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 				.tagType(TagType.CUSTOM.getCode())
 				.build();
 
-			when(adminTagService.createSystemTag(eq(3L), eq(""), eq(TagType.CUSTOM)))
+			when(adminTagService.createSystemTag(anyLong(), eq(""), any(TagType.class)))
 				.thenThrow(new IllegalArgumentException("태그명은 필수입니다"));
 
 			// When & Then
@@ -193,7 +185,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 					.content(objectMapper.writeValueAsString(requestDto)))
 				.andExpect(status().isInternalServerError()); // 500 오류
 
-			verify(adminTagService).createSystemTag(eq(3L), eq(""), eq(TagType.CUSTOM));
+			verify(adminTagService).createSystemTag(anyLong(), eq(""), any(TagType.class));
 		}
 	}
 
@@ -206,7 +198,7 @@ class AdminTagControllerTest extends CommonMockMvcControllerTestSetUp {
 		void deleteTagSuccess() throws Exception {
 			// Given
 			Long tagId = 1L;
-			doNothing().when(adminTagService).deleteTag(eq(3L), eq(tagId));
+			doNothing().when(adminTagService).deleteTag(anyLong(), anyLong());
 
 			// When & Then
 			mockMvc.perform(delete("/api/admin/tags/{tagId}", tagId)
